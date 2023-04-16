@@ -288,8 +288,8 @@ struct Vdp2Regs {
         static constexpr auto hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
 
         static constexpr auto byte_mask = 0xFF;
-        GENERATE_MASKED_RANGE("Vd2Regs::Exten", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
-        GENERATE_MASKED_RANGE("Vd2Regs::Exten", HI_BYTE, hiByte, byte_mask, hi_byte_pos, byte_mask);
+        GENERATE_MASKED_RANGE("Vdp2Regs::Exten", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
+        GENERATE_MASKED_RANGE("Vdp2Regs::Exten", HI_BYTE, hiByte, byte_mask, hi_byte_pos, byte_mask);
     };
     using ExtenType = Reg<u16, Exten>;
     ExtenType exten;
@@ -383,8 +383,8 @@ struct Vdp2Regs {
         static constexpr auto hi_byte_pos = PosType(8);              ///< Defines the range of the lower 8 bits of the register.
 
         static constexpr auto byte_mask = 0xFF;
-        GENERATE_MASKED_RANGE("Vd2Regs::Exten", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
-        GENERATE_MASKED_RANGE("Vd2Regs::Exten", HI_BYTE, hiByte, byte_mask, hi_byte_pos, byte_mask);
+        GENERATE_MASKED_RANGE("Vdp2Regs::Exten", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
+        GENERATE_MASKED_RANGE("Vdp2Regs::Exten", HI_BYTE, hiByte, byte_mask, hi_byte_pos, byte_mask);
     };
     using TvstatType = Reg<u16, Tvstat>;
     TvstatType tvstat;
@@ -420,8 +420,8 @@ struct Vdp2Regs {
         static constexpr auto hi_byte_pos = PosType(8);    ///< Defines the range of the lower 8 bits of the register.
 
         static constexpr auto byte_mask = 0xFF;
-        GENERATE_MASKED_RANGE("Vd2Regs::Vrsize", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
-        GENERATE_MASKED_RANGE("Vd2Regs::Vrsize", HI_BYTE, hiByte, byte_mask, hi_byte_pos, byte_mask);
+        GENERATE_MASKED_RANGE("Vdp2Regs::Vrsize", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
+        GENERATE_MASKED_RANGE("Vdp2Regs::Vrsize", HI_BYTE, hiByte, byte_mask, hi_byte_pos, byte_mask);
     };
     using VrsizeType = Reg<u16, Vrsize>;
     VrsizeType vrsize;
@@ -442,8 +442,8 @@ struct Vdp2Regs {
         static constexpr auto hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
 
         static constexpr auto byte_mask = 0xFF;
-        GENERATE_MASKED_RANGE("Vd2Regs::Hcnt", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
-        GENERATE_MASKED_RANGE("Vd2Regs::Hcnt", HI_BYTE, hiByte, byte_mask, hi_byte_pos, byte_mask);
+        GENERATE_MASKED_RANGE("Vdp2Regs::Hcnt", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
+        GENERATE_MASKED_RANGE("Vdp2Regs::Hcnt", HI_BYTE, hiByte, byte_mask, hi_byte_pos, byte_mask);
     };
     using HcntType = Reg<u16, Hcnt>;
     HcntType hcnt;
@@ -464,8 +464,8 @@ struct Vdp2Regs {
         static constexpr auto hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
 
         static constexpr auto byte_mask = 0xFF;
-        GENERATE_MASKED_RANGE("Vd2Regs::Vcnt", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
-        GENERATE_MASKED_RANGE("Vd2Regs::Vcnt", HI_BYTE, hiByte, byte_mask, hi_byte_pos, byte_mask);
+        GENERATE_MASKED_RANGE("Vdp2Regs::Vcnt", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
+        GENERATE_MASKED_RANGE("Vdp2Regs::Vcnt", HI_BYTE, hiByte, byte_mask, hi_byte_pos, byte_mask);
     };
     using VcntType = Reg<u16, Vcnt>;
     VcntType vcnt;
@@ -486,8 +486,8 @@ struct Vdp2Regs {
         static constexpr auto hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
 
         static constexpr auto byte_mask = 0xFF;
-        GENERATE_MASKED_RANGE("Vd2Regs::Reserve", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
-        GENERATE_MASKED_RANGE("Vd2Regs::Reserve", HI_BYTE, hiByte, byte_mask, hi_byte_pos, byte_mask);
+        GENERATE_MASKED_RANGE("Vdp2Regs::Reserve", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
+        GENERATE_MASKED_RANGE("Vdp2Regs::Reserve", HI_BYTE, hiByte, byte_mask, hi_byte_pos, byte_mask);
     };
     using ReserveType = Reg<u16, Reserve>;
     ReserveType rsv1;
@@ -561,8 +561,8 @@ struct Vdp2Regs {
         static constexpr auto hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
 
         static constexpr auto byte_mask = 0xFF;
-        GENERATE_MASKED_RANGE("Vd2Regs::Ramctl", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
-        GENERATE_MASKED_RANGE("Vd2Regs::Ramctl", HI_BYTE, hiByte, byte_mask, hi_byte_pos, byte_mask);
+        GENERATE_MASKED_RANGE("Vdp2Regs::Ramctl", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
+        GENERATE_MASKED_RANGE("Vdp2Regs::Ramctl", HI_BYTE, hiByte, byte_mask, hi_byte_pos, byte_mask);
     };
     using RamctlType = Reg<u16, Ramctl>;
     RamctlType ramctl;
@@ -612,8 +612,8 @@ struct Vdp2Regs {
         static constexpr auto hi_byte_pos = PosType(8);            ///< Defines the range of the lower 8 bits of the register.
 
         static constexpr auto byte_mask = 0xFF;
-        GENERATE_MASKED_RANGE("Vd2Regs::Cycxxl", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
-        GENERATE_MASKED_RANGE("Vd2Regs::Cycxxl", HI_BYTE, hiByte, byte_mask, hi_byte_pos, byte_mask);
+        GENERATE_MASKED_RANGE("Vdp2Regs::Cycxxl", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
+        GENERATE_MASKED_RANGE("Vdp2Regs::Cycxxl", HI_BYTE, hiByte, byte_mask, hi_byte_pos, byte_mask);
     };
     using CycxxlType = Reg<u16, Cycxxl>;
     CycxxlType cyca0l;
@@ -642,8 +642,8 @@ struct Vdp2Regs {
         static constexpr auto hi_byte_pos = PosType(8);            ///< Defines the range of the lower 8 bits of the register.
 
         static constexpr auto byte_mask = 0xFF;
-        GENERATE_MASKED_RANGE("Vd2Regs::Cycxxu", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
-        GENERATE_MASKED_RANGE("Vd2Regs::Cycxxu", HI_BYTE, hiByte, byte_mask, hi_byte_pos, byte_mask);
+        GENERATE_MASKED_RANGE("Vdp2Regs::Cycxxu", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
+        GENERATE_MASKED_RANGE("Vdp2Regs::Cycxxu", HI_BYTE, hiByte, byte_mask, hi_byte_pos, byte_mask);
     };
     using CycxxuType = Reg<u16, Cycxxu>;
     CycxxuType cyca0u;
@@ -702,8 +702,8 @@ struct Vdp2Regs {
         static constexpr auto hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
 
         static constexpr auto byte_mask = 0xFF;
-        GENERATE_MASKED_RANGE("Vd2Regs::Bgon", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
-        GENERATE_MASKED_RANGE("Vd2Regs::Bgon", HI_BYTE, hiByte, byte_mask, hi_byte_pos, byte_mask);
+        GENERATE_MASKED_RANGE("Vdp2Regs::Bgon", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
+        GENERATE_MASKED_RANGE("Vdp2Regs::Bgon", HI_BYTE, hiByte, byte_mask, hi_byte_pos, byte_mask);
     };
     using BgonType = Reg<u16, Bgon>;
     BgonType bgon;
@@ -724,8 +724,8 @@ struct Vdp2Regs {
         static constexpr auto hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
 
         static constexpr auto byte_mask = 0xFF;
-        GENERATE_MASKED_RANGE("Vd2Regs::Mzctl", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
-        GENERATE_MASKED_RANGE("Vd2Regs::Mzctl", HI_BYTE, hiByte, byte_mask, hi_byte_pos, byte_mask);
+        GENERATE_MASKED_RANGE("Vdp2Regs::Mzctl", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
+        GENERATE_MASKED_RANGE("Vdp2Regs::Mzctl", HI_BYTE, hiByte, byte_mask, hi_byte_pos, byte_mask);
     };
     using MzctlType = Reg<u16, Mzctl>;
     MzctlType mzctl;
@@ -746,8 +746,8 @@ struct Vdp2Regs {
         static constexpr auto hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
 
         static constexpr auto byte_mask = 0xFF;
-        GENERATE_MASKED_RANGE("Vd2Regs::Sfsel", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
-        GENERATE_MASKED_RANGE("Vd2Regs::Sfsel", HI_BYTE, hiByte, byte_mask, hi_byte_pos, byte_mask);
+        GENERATE_MASKED_RANGE("Vdp2Regs::Sfsel", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
+        GENERATE_MASKED_RANGE("Vdp2Regs::Sfsel", HI_BYTE, hiByte, byte_mask, hi_byte_pos, byte_mask);
     };
     using SfselType = Reg<u16, Sfsel>;
     SfselType sfsel;
@@ -768,8 +768,8 @@ struct Vdp2Regs {
         static constexpr auto hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
 
         static constexpr auto byte_mask = 0xFF;
-        GENERATE_MASKED_RANGE("Vd2Regs::Sfsel", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
-        GENERATE_MASKED_RANGE("Vd2Regs::Sfsel", HI_BYTE, hiByte, byte_mask, hi_byte_pos, byte_mask);
+        GENERATE_MASKED_RANGE("Vdp2Regs::Sfsel", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
+        GENERATE_MASKED_RANGE("Vdp2Regs::Sfsel", HI_BYTE, hiByte, byte_mask, hi_byte_pos, byte_mask);
     };
     using SfcodeType = Reg<u16, Sfcode>;
     SfcodeType sfcode;
@@ -884,8 +884,8 @@ struct Vdp2Regs {
         static constexpr auto hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
 
         static constexpr auto byte_mask = 0xFF;
-        GENERATE_MASKED_RANGE("Vd2Regs::Chctla", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
-        GENERATE_MASKED_RANGE("Vd2Regs::Chctla", HI_BYTE, hiByte, byte_mask, hi_byte_pos, byte_mask);
+        GENERATE_MASKED_RANGE("Vdp2Regs::Chctla", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
+        GENERATE_MASKED_RANGE("Vdp2Regs::Chctla", HI_BYTE, hiByte, byte_mask, hi_byte_pos, byte_mask);
     };
     using ChctlaType = Reg<u16, Chctla>;
     ChctlaType chctla;
@@ -915,8 +915,8 @@ struct Vdp2Regs {
         static constexpr auto hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
 
         static constexpr auto byte_mask = 0xFF;
-        GENERATE_MASKED_RANGE("Vd2Regs::Chctlb", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
-        GENERATE_MASKED_RANGE("Vd2Regs::Chctlb", HI_BYTE, hiByte, byte_mask, hi_byte_pos, byte_mask);
+        GENERATE_MASKED_RANGE("Vdp2Regs::Chctlb", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
+        GENERATE_MASKED_RANGE("Vdp2Regs::Chctlb", HI_BYTE, hiByte, byte_mask, hi_byte_pos, byte_mask);
     };
     using ChctlbType = Reg<u16, Chctlb>;
     ChctlbType chctlb;
@@ -944,8 +944,8 @@ struct Vdp2Regs {
         static constexpr auto hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
 
         static constexpr auto byte_mask = 0xFF;
-        GENERATE_MASKED_RANGE("Vd2Regs::Bmpna", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
-        GENERATE_MASKED_RANGE("Vd2Regs::Bmpna", HI_BYTE, hiByte, byte_mask, hi_byte_pos, byte_mask);
+        GENERATE_MASKED_RANGE("Vdp2Regs::Bmpna", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
+        GENERATE_MASKED_RANGE("Vdp2Regs::Bmpna", HI_BYTE, hiByte, byte_mask, hi_byte_pos, byte_mask);
     };
     using BmpnaType = Reg<u16, Bmpna>;
     BmpnaType bmpna;
@@ -970,8 +970,8 @@ struct Vdp2Regs {
         static constexpr auto hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
 
         static constexpr auto byte_mask = 0xFF;
-        GENERATE_MASKED_RANGE("Vd2Regs::Bmpnb", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
-        GENERATE_MASKED_RANGE("Vd2Regs::Bmpnb", HI_BYTE, hiByte, byte_mask, hi_byte_pos, byte_mask);
+        GENERATE_MASKED_RANGE("Vdp2Regs::Bmpnb", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
+        GENERATE_MASKED_RANGE("Vdp2Regs::Bmpnb", HI_BYTE, hiByte, byte_mask, hi_byte_pos, byte_mask);
     };
     using BmpnbType = Reg<u16, Bmpnb>;
     BmpnbType bmpnb;
@@ -1022,8 +1022,8 @@ struct Vdp2Regs {
         static constexpr auto hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
 
         static constexpr auto byte_mask = 0xFF;
-        GENERATE_MASKED_RANGE("Vd2Regs::Pcnxx", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
-        GENERATE_MASKED_RANGE("Vd2Regs::Pcnxx", HI_BYTE, hiByte, byte_mask, hi_byte_pos, byte_mask);
+        GENERATE_MASKED_RANGE("Vdp2Regs::Pcnxx", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
+        GENERATE_MASKED_RANGE("Vdp2Regs::Pcnxx", HI_BYTE, hiByte, byte_mask, hi_byte_pos, byte_mask);
     };
     using PcnxxType = Reg<u16, Pcnxx>;
     PcnxxType pncn0;
@@ -1087,8 +1087,8 @@ struct Vdp2Regs {
         static constexpr auto hi_byte_pos = PosType(8);             ///< Defines the range of the lower 8 bits of the register.
 
         static constexpr auto byte_mask = 0xFF;
-        GENERATE_MASKED_RANGE("Vd2Regs::Plsz", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
-        GENERATE_MASKED_RANGE("Vd2Regs::Plsz", HI_BYTE, hiByte, byte_mask, hi_byte_pos, byte_mask);
+        GENERATE_MASKED_RANGE("Vdp2Regs::Plsz", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
+        GENERATE_MASKED_RANGE("Vdp2Regs::Plsz", HI_BYTE, hiByte, byte_mask, hi_byte_pos, byte_mask);
     };
     using PlszType = Reg<u16, Plsz>;
     PlszType plsz;
@@ -1105,7 +1105,7 @@ struct Vdp2Regs {
     struct Mpofn {
         GENERATE_USING(Mpofn, u16);
 
-        GENERATE_BIT_WITHOUT_ENUM(n3mp, 12, 0b111);      ///< NBG3 map offset.
+        GENERATE_BIT_WITHOUT_ENUM(n3mp, 12, 0b111);     ///< NBG3 map offset.
         GENERATE_BIT_WITHOUT_ENUM(n2mp, 8, 0b111);      ///< NBG2 map offset.
         GENERATE_BIT_WITHOUT_ENUM(n1mp, 4, 0b111);      ///< NBG1 map offset.
         GENERATE_BIT_WITHOUT_ENUM(n0mp, 0, 0b111);      ///< NBG0 map offset.
@@ -1114,8 +1114,8 @@ struct Vdp2Regs {
         static constexpr auto hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
 
         static constexpr auto byte_mask = 0xFF;
-        GENERATE_MASKED_RANGE("Vd2Regs::Bmpnb", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
-        GENERATE_MASKED_RANGE("Vd2Regs::Bmpnb", HI_BYTE, hiByte, byte_mask, hi_byte_pos, byte_mask);
+        GENERATE_MASKED_RANGE("Vdp2Regs::Bmpnb", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
+        GENERATE_MASKED_RANGE("Vdp2Regs::Bmpnb", HI_BYTE, hiByte, byte_mask, hi_byte_pos, byte_mask);
     };
     using MpofnType = Reg<u16, Mpofn>;
     MpofnType mpofn;
@@ -1139,183 +1139,227 @@ struct Vdp2Regs {
         static constexpr auto hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
 
         static constexpr auto byte_mask = 0xFF;
-        GENERATE_MASKED_RANGE("Vd2Regs::Bmpnb", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
-        GENERATE_MASKED_RANGE("Vd2Regs::Bmpnb", HI_BYTE, hiByte, byte_mask, hi_byte_pos, byte_mask);
+        GENERATE_MASKED_RANGE("Vdp2Regs::Bmpnb", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
+        GENERATE_MASKED_RANGE("Vdp2Regs::Bmpnb", HI_BYTE, hiByte, byte_mask, hi_byte_pos, byte_mask);
     };
     using MpofrType = Reg<u16, Mpofr>;
     MpofrType mpofr;
-};
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	MapOffsetNbg
-///
-/// \brief	Map Offset (NBG0 - NBG3) register (MPOFN).
-///
-/// \author	Runik
-/// \date	25/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \struct	Mpab
+    ///
+    /// \brief	Map (NBGx, RBGx, Plane A,B) register (MPABxx).
+    ///
+    /// \author	Runik
+    /// \date	16/04/2023
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-// union MapOffsetNbg {
-//     u16             raw;             ///< Raw representation.
-//     BitField<12, 3> map_offset_nbg3; ///< Defines N3MPx bits.
-//     BitField<8, 3>  map_offset_nbg2; ///< Defines N2MPx bits.
-//     BitField<4, 3>  map_offset_nbg1; ///< Defines N1MPx bits.
-//     BitField<0, 3>  map_offset_nbg0; ///< Defines N0MPx bits.
-//     BitField<8, 8>  upper_8_bits;    ///< Defines the range of the upper 8 bits of the register.
-//     BitField<0, 8>  lower_8_bits;    ///< Defines the range of the lower 8 bits of the register.
-// };
+    struct Mpab {
+        GENERATE_USING(Mpab, u16);
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	MapOffsetRbg
-///
-/// \brief	Map Offset (Rotation Parameter A,B) register (MPOFR).
-///
-/// \author	Runik
-/// \date	25/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
+        GENERATE_BIT_WITHOUT_ENUM(mpa, 0, 0b111111);    ///< Plane A.
+        GENERATE_BIT_WITHOUT_ENUM(mpb, 0, 0b111111);    ///< Plane B.
 
-// union MapOffsetRbg {
-//     u16            raw;            ///< Raw representation.
-//     BitField<4, 3> map_offset_rpb; ///< Defines RBMPx bits.
-//     BitField<0, 3> map_offset_rpa; ///< Defines RAMPx bits.
-//     BitField<8, 8> upper_8_bits;   ///< Defines the range of the upper 8 bits of the register.
-//     BitField<0, 8> lower_8_bits;   ///< Defines the range of the lower 8 bits of the register.
-// };
+        static constexpr auto lo_byte_pos = PosType(0); ///< Defines the range of the upper 8 bits of the register.
+        static constexpr auto hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	MapPlaneAB
-///
-/// \brief	Map (NBGx, RBGx, Plane A,B) register (MPABxx).
-///
-/// \author	Runik
-/// \date	25/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
+        static constexpr auto byte_mask = 0xFF;
+        GENERATE_MASKED_RANGE("Vdp2Regs::Mpab", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
+        GENERATE_MASKED_RANGE("Vd2pRegs::Mpab", HI_BYTE, hiByte, byte_mask, hi_byte_pos, byte_mask);
+    };
+    using MpabType = Reg<u16, Mpab>;
+    MpabType mpabn0;
+    MpabType mpabn1;
+    MpabType mpabn2;
+    MpabType mpabn3;
+    MpabType mpabra;
+    MpabType mpabrb;
 
-union MapPlaneAB {
-    u16            raw;          ///< Raw representation.
-    BitField<0, 6> plane_a;      ///< Defines N0MPAx bits.
-    BitField<8, 6> plane_b;      ///< Defines N0MPBx bits.
-    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
-    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
-};
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \struct	Mpcd
+    ///
+    /// \brief	Map (NBGx, RBGx, Plane C,D) register (MPCDxx).
+    ///
+    /// \author	Runik
+    /// \date	16/04/2023
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	MapPlaneCD
-///
-/// \brief	Map (NBGx, RBGx, Plane C,D) register (MPCDxx).
-///
-/// \author	Runik
-/// \date	25/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
+    struct Mpcd {
+        GENERATE_USING(Mpcd, u16);
 
-union MapPlaneCD {
-    u16            raw;          ///< Raw representation.
-    BitField<0, 6> plane_c;      ///< Defines N0MPAx bits.
-    BitField<8, 6> plane_d;      ///< Defines N0MPBx bits.
-    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
-    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
-};
+        GENERATE_BIT_WITHOUT_ENUM(mpc, 0, 0b111111);    ///< Plane C.
+        GENERATE_BIT_WITHOUT_ENUM(mpd, 0, 0b111111);    ///< Plane D.
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	MapPlaneEF
-///
-/// \brief	Map (Rotation Parameter x, Plane E,F) register (MPEFRx).
-///
-/// \author	Runik
-/// \date	25/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
+        static constexpr auto lo_byte_pos = PosType(0); ///< Defines the range of the upper 8 bits of the register.
+        static constexpr auto hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
 
-union MapPlaneEF {
-    u16            raw;          ///< Raw representation.
-    BitField<0, 6> plane_e;      ///< Defines RxMPEx bits.
-    BitField<8, 6> plane_f;      ///< Defines RxMPFx bits.
-    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
-    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
-};
+        static constexpr auto byte_mask = 0xFF;
+        GENERATE_MASKED_RANGE("Vdp2Regs::Mpcd", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
+        GENERATE_MASKED_RANGE("Vd2pRegs::Mpcd", HI_BYTE, hiByte, byte_mask, hi_byte_pos, byte_mask);
+    };
+    using MpcdType = Reg<u16, Mpcd>;
+    MpcdType mpcdn0;
+    MpcdType mpcdn1;
+    MpcdType mpcdn2;
+    MpcdType mpcdn3;
+    MpcdType mpcdra;
+    MpcdType mpcdrb;
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	MapPlaneGH
-///
-/// \brief	Map (Rotation Parameter x, Plane G,H) register (MPGHRx).
-///
-/// \author	Runik
-/// \date	25/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \struct	Mpef
+    ///
+    /// \brief	Map (Rotation Parameter x, Plane E,F) register (MPEFRx).
+    ///
+    /// \author	Runik
+    /// \date	16/04/2023
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-union MapPlaneGH {
-    u16            raw;          ///< Raw representation.
-    BitField<0, 6> plane_g;      ///< Defines RxMPGx bits.
-    BitField<8, 6> plane_h;      ///< Defines RxMPHx bits.
-    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
-    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
-};
+    struct Mpef {
+        GENERATE_USING(Mpef, u16);
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	MapPlaneIJ
-///
-/// \brief	Map (Rotation Parameter x, Plane I,J) register (MPIJRx).
-///
-/// \author	Runik
-/// \date	25/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
+        GENERATE_BIT_WITHOUT_ENUM(mpe, 0, 0b111111);    ///< Plane E.
+        GENERATE_BIT_WITHOUT_ENUM(mpf, 0, 0b111111);    ///< Plane F.
 
-union MapPlaneIJ {
-    u16            raw;          ///< Raw representation.
-    BitField<0, 6> plane_i;      ///< Defines RxMPIx bits.
-    BitField<8, 6> plane_j;      ///< Defines RxMPJx bits.
-    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
-    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
-};
+        static constexpr auto lo_byte_pos = PosType(0); ///< Defines the range of the upper 8 bits of the register.
+        static constexpr auto hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	MapPlaneKL
-///
-/// \brief	Map (Rotation Parameter x, Plane K,L) register (MPKLRx).
-///
-/// \author	Runik
-/// \date	25/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
+        static constexpr auto byte_mask = 0xFF;
+        GENERATE_MASKED_RANGE("Vdp2Regs::Mpef", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
+        GENERATE_MASKED_RANGE("Vd2pRegs::Mpef", HI_BYTE, hiByte, byte_mask, hi_byte_pos, byte_mask);
+    };
+    using MpefType = Reg<u16, Mpef>;
+    MpefType mpefra;
+    MpefType mpefrb;
 
-union MapPlaneKL {
-    u16            raw;          ///< Raw representation.
-    BitField<0, 6> plane_k;      ///< Defines RxMPIx bits.
-    BitField<8, 6> plane_l;      ///< Defines RxMPJx bits.
-    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
-    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
-};
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \struct	Mpgh
+    ///
+    /// \brief	Map (Rotation Parameter x, Plane G,H) register (MPGHRx).
+    ///
+    /// \author	Runik
+    /// \date	16/04/2023
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	MapPlaneMN
-///
-/// \brief	Map (Rotation Parameter x, Plane M,N) register (MPMNRx).
-///
-/// \author	Runik
-/// \date	25/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
+    struct Mpgh {
+        GENERATE_USING(Mpgh, u16);
 
-union MapPlaneMN {
-    u16            raw;          ///< Raw representation.
-    BitField<0, 6> plane_m;      ///< Defines RxMPIx bits.
-    BitField<8, 6> plane_n;      ///< Defines RxMPJx bits.
-    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
-    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
-};
+        GENERATE_BIT_WITHOUT_ENUM(mpg, 0, 0b111111);    ///< Plane G.
+        GENERATE_BIT_WITHOUT_ENUM(mph, 0, 0b111111);    ///< Plane H.
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	MapPlaneOP
-///
-/// \brief	Map (Rotation Parameter x, Plane O,P) register (MPOPRx).
-///
-/// \author	Runik
-/// \date	25/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
+        static constexpr auto lo_byte_pos = PosType(0); ///< Defines the range of the upper 8 bits of the register.
+        static constexpr auto hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
 
-union MapPlaneOP {
-    u16            raw;          ///< Raw representation.
-    BitField<0, 6> plane_o;      ///< Defines RxMPIx bits.
-    BitField<8, 6> plane_p;      ///< Defines RxMPJx bits.
-    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
-    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
+        static constexpr auto byte_mask = 0xFF;
+        GENERATE_MASKED_RANGE("Vdp2Regs::Mpgh", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
+        GENERATE_MASKED_RANGE("Vd2pRegs::Mpgh", HI_BYTE, hiByte, byte_mask, hi_byte_pos, byte_mask);
+    };
+    using MpghType = Reg<u16, Mpgh>;
+    MpghType mpghra;
+    MpghType mpghrb;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \struct	Mpij
+    ///
+    /// \brief	Map (Rotation Parameter x, Plane I,J) register (MPIJRx).
+    ///
+    /// \author	Runik
+    /// \date	16/04/2023
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    struct Mpij {
+        GENERATE_USING(Mpij, u16);
+
+        GENERATE_BIT_WITHOUT_ENUM(mpi, 0, 0b111111);    ///< Plane I.
+        GENERATE_BIT_WITHOUT_ENUM(mpj, 0, 0b111111);    ///< Plane J.
+
+        static constexpr auto lo_byte_pos = PosType(0); ///< Defines the range of the upper 8 bits of the register.
+        static constexpr auto hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
+
+        static constexpr auto byte_mask = 0xFF;
+        GENERATE_MASKED_RANGE("Vdp2Regs::Mpij", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
+        GENERATE_MASKED_RANGE("Vd2pRegs::Mpij", HI_BYTE, hiByte, byte_mask, hi_byte_pos, byte_mask);
+    };
+    using MpijType = Reg<u16, Mpij>;
+    MpijType mpijra;
+    MpijType mpijrb;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \struct	Mpkl
+    ///
+    /// \brief	Map (Rotation Parameter x, Plane K,L) register (MPKLRx).
+    ///
+    /// \author	Runik
+    /// \date	16/04/2023
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    struct Mpkl {
+        GENERATE_USING(Mpkl, u16);
+
+        GENERATE_BIT_WITHOUT_ENUM(mpk, 0, 0b111111);    ///< Plane K.
+        GENERATE_BIT_WITHOUT_ENUM(mpl, 0, 0b111111);    ///< Plane L.
+
+        static constexpr auto lo_byte_pos = PosType(0); ///< Defines the range of the upper 8 bits of the register.
+        static constexpr auto hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
+
+        static constexpr auto byte_mask = 0xFF;
+        GENERATE_MASKED_RANGE("Vdp2Regs::Mpij", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
+        GENERATE_MASKED_RANGE("Vd2pRegs::Mpij", HI_BYTE, hiByte, byte_mask, hi_byte_pos, byte_mask);
+    };
+    using MpklType = Reg<u16, Mpkl>;
+    MpklType mpklra;
+    MpklType mpklrb;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \struct	Mpmn
+    ///
+    /// \brief	Map (Rotation Parameter x, Plane M,N) register (MPMNRx).
+    ///
+    /// \author	Runik
+    /// \date	16/04/2023
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    struct Mpmn {
+        GENERATE_USING(Mpmn, u16);
+
+        GENERATE_BIT_WITHOUT_ENUM(mpm, 0, 0b111111);    ///< Plane M.
+        GENERATE_BIT_WITHOUT_ENUM(mpn, 0, 0b111111);    ///< Plane N.
+
+        static constexpr auto lo_byte_pos = PosType(0); ///< Defines the range of the upper 8 bits of the register.
+        static constexpr auto hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
+
+        static constexpr auto byte_mask = 0xFF;
+        GENERATE_MASKED_RANGE("Vdp2Regs::Mpmn", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
+        GENERATE_MASKED_RANGE("Vd2pRegs::Mpmn", HI_BYTE, hiByte, byte_mask, hi_byte_pos, byte_mask);
+    };
+    using MpmnType = Reg<u16, Mpmn>;
+    MpmnType mpmnra;
+    MpmnType mpmnrb;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \struct	Mpop
+    ///
+    /// \brief	Map (Rotation Parameter x, Plane O,P) register (MPOPRx).
+    ///
+    /// \author	Runik
+    /// \date	16/04/2023
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    struct Mpop {
+        GENERATE_USING(Mpop, u16);
+
+        GENERATE_BIT_WITHOUT_ENUM(mpo, 0, 0b111111);    ///< Plane O.
+        GENERATE_BIT_WITHOUT_ENUM(mpp, 0, 0b111111);    ///< Plane P.
+
+        static constexpr auto lo_byte_pos = PosType(0); ///< Defines the range of the upper 8 bits of the register.
+        static constexpr auto hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
+
+        static constexpr auto byte_mask = 0xFF;
+        GENERATE_MASKED_RANGE("Vdp2Regs::Mpmn", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
+        GENERATE_MASKED_RANGE("Vd2pRegs::Mpmn", HI_BYTE, hiByte, byte_mask, hi_byte_pos, byte_mask);
+    };
+    using MpopType = Reg<u16, Mpop>;
+    MpopType mpopra;
+    MpopType mpoprb;
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

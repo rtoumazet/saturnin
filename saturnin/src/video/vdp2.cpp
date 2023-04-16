@@ -383,30 +383,30 @@ auto Vdp2::read16(const u32 addr) const -> u16 {
         case plane_size: return regs_.plsz.data();
         case map_offset_n: return regs_.mpofn.data();
         case map_offset_r: return regs_.mpofr.data();
-        case map_nbg0_plane_a_b: return mpabn0_.raw;
-        case map_nbg0_plane_c_d: return mpcdn0_.raw;
-        case map_nbg1_plane_a_b: return mpabn1_.raw;
-        case map_nbg1_plane_c_d: return mpcdn1_.raw;
-        case map_nbg2_plane_a_b: return mpabn2_.raw;
-        case map_nbg2_plane_c_d: return mpcdn2_.raw;
-        case map_nbg3_plane_a_b: return mpabn3_.raw;
-        case map_nbg3_plane_c_d: return mpcdn3_.raw;
-        case map_rotation_parameter_a_plane_a_b: return mpabra_.raw;
-        case map_rotation_parameter_a_plane_c_d: return mpcdra_.raw;
-        case map_rotation_parameter_a_plane_e_f: return mpefra_.raw;
-        case map_rotation_parameter_a_plane_g_h: return mpghra_.raw;
-        case map_rotation_parameter_a_plane_i_j: return mpijra_.raw;
-        case map_rotation_parameter_a_plane_k_l: return mpklra_.raw;
-        case map_rotation_parameter_a_plane_m_n: return mpmnra_.raw;
-        case map_rotation_parameter_a_plane_o_p: return mpopra_.raw;
-        case map_rotation_parameter_b_plane_a_b: return mpabrb_.raw;
-        case map_rotation_parameter_b_plane_c_d: return mpcdrb_.raw;
-        case map_rotation_parameter_b_plane_e_f: return mpefrb_.raw;
-        case map_rotation_parameter_b_plane_g_h: return mpghrb_.raw;
-        case map_rotation_parameter_b_plane_i_j: return mpijrb_.raw;
-        case map_rotation_parameter_b_plane_k_l: return mpklrb_.raw;
-        case map_rotation_parameter_b_plane_m_n: return mpmnrb_.raw;
-        case map_rotation_parameter_b_plane_o_p: return mpoprb_.raw;
+        case map_nbg0_plane_a_b: return regs_.mpabn0.data();
+        case map_nbg0_plane_c_d: return regs_.mpcdn0.data();
+        case map_nbg1_plane_a_b: return regs_.mpabn1.data();
+        case map_nbg1_plane_c_d: return regs_.mpcdn1.data();
+        case map_nbg2_plane_a_b: return regs_.mpabn2.data();
+        case map_nbg2_plane_c_d: return regs_.mpcdn2.data();
+        case map_nbg3_plane_a_b: return regs_.mpabn3.data();
+        case map_nbg3_plane_c_d: return regs_.mpcdn3.data();
+        case map_rotation_parameter_a_plane_a_b: return regs_.mpabra.data();
+        case map_rotation_parameter_a_plane_c_d: return regs_.mpcdra.data();
+        case map_rotation_parameter_a_plane_e_f: return regs_.mpefra.data();
+        case map_rotation_parameter_a_plane_g_h: return regs_.mpghra.data();
+        case map_rotation_parameter_a_plane_i_j: return regs_.mpijra.data();
+        case map_rotation_parameter_a_plane_k_l: return regs_.mpklra.data();
+        case map_rotation_parameter_a_plane_m_n: return regs_.mpmnra.data();
+        case map_rotation_parameter_a_plane_o_p: return regs_.mpopra.data();
+        case map_rotation_parameter_b_plane_a_b: return regs_.mpabrb.data();
+        case map_rotation_parameter_b_plane_c_d: return regs_.mpcdrb.data();
+        case map_rotation_parameter_b_plane_e_f: return regs_.mpefrb.data();
+        case map_rotation_parameter_b_plane_g_h: return regs_.mpghrb.data();
+        case map_rotation_parameter_b_plane_i_j: return regs_.mpijrb.data();
+        case map_rotation_parameter_b_plane_k_l: return regs_.mpklrb.data();
+        case map_rotation_parameter_b_plane_m_n: return regs_.mpmnrb.data();
+        case map_rotation_parameter_b_plane_o_p: return regs_.mpoprb.data();
         case screen_scroll_value_nbg0_h_int_part: return scxin0_.raw;
         case screen_scroll_value_nbg0_h_fract_part: return scxdn0_.raw;
         case screen_scroll_value_nbg0_v_int_part: return scyin0_.raw;
@@ -570,54 +570,54 @@ void Vdp2::write8(const u32 addr, const u8 data) {
         case map_offset_n + 1: regs_.mpofn.upd(Vdp2Regs::Mpofn::loByte(data)); break;
         case map_offset_r: regs_.mpofr.upd(Vdp2Regs::Mpofr::hiByte(data)); break;
         case map_offset_r + 1: regs_.mpofr.upd(Vdp2Regs::Mpofr::loByte(data)); break;
-        case map_nbg0_plane_a_b: mpabn0_.upper_8_bits = data; break;
-        case map_nbg0_plane_a_b + 1: mpabn0_.lower_8_bits = data; break;
-        case map_nbg0_plane_c_d: mpcdn0_.upper_8_bits = data; break;
-        case map_nbg0_plane_c_d + 1: mpcdn0_.lower_8_bits = data; break;
-        case map_nbg1_plane_a_b: mpabn1_.upper_8_bits = data; break;
-        case map_nbg1_plane_a_b + 1: mpabn1_.lower_8_bits = data; break;
-        case map_nbg1_plane_c_d: mpcdn1_.upper_8_bits = data; break;
-        case map_nbg1_plane_c_d + 1: mpcdn1_.lower_8_bits = data; break;
-        case map_nbg2_plane_a_b: mpabn2_.upper_8_bits = data; break;
-        case map_nbg2_plane_a_b + 1: mpabn2_.lower_8_bits = data; break;
-        case map_nbg2_plane_c_d: mpcdn2_.upper_8_bits = data; break;
-        case map_nbg2_plane_c_d + 1: mpcdn2_.lower_8_bits = data; break;
-        case map_nbg3_plane_a_b: mpabn3_.upper_8_bits = data; break;
-        case map_nbg3_plane_a_b + 1: mpabn3_.lower_8_bits = data; break;
-        case map_nbg3_plane_c_d: mpcdn3_.upper_8_bits = data; break;
-        case map_nbg3_plane_c_d + 1: mpcdn3_.lower_8_bits = data; break;
-        case map_rotation_parameter_a_plane_a_b: mpabra_.upper_8_bits = data; break;
-        case map_rotation_parameter_a_plane_a_b + 1: mpabra_.lower_8_bits = data; break;
-        case map_rotation_parameter_a_plane_c_d: mpcdra_.upper_8_bits = data; break;
-        case map_rotation_parameter_a_plane_c_d + 1: mpcdra_.lower_8_bits = data; break;
-        case map_rotation_parameter_a_plane_e_f: mpefra_.upper_8_bits = data; break;
-        case map_rotation_parameter_a_plane_e_f + 1: mpefra_.lower_8_bits = data; break;
-        case map_rotation_parameter_a_plane_g_h: mpghra_.upper_8_bits = data; break;
-        case map_rotation_parameter_a_plane_g_h + 1: mpghra_.lower_8_bits = data; break;
-        case map_rotation_parameter_a_plane_i_j: mpijra_.upper_8_bits = data; break;
-        case map_rotation_parameter_a_plane_i_j + 1: mpijra_.lower_8_bits = data; break;
-        case map_rotation_parameter_a_plane_k_l: mpklra_.upper_8_bits = data; break;
-        case map_rotation_parameter_a_plane_k_l + 1: mpklra_.lower_8_bits = data; break;
-        case map_rotation_parameter_a_plane_m_n: mpmnra_.upper_8_bits = data; break;
-        case map_rotation_parameter_a_plane_m_n + 1: mpmnra_.lower_8_bits = data; break;
-        case map_rotation_parameter_a_plane_o_p: mpopra_.upper_8_bits = data; break;
-        case map_rotation_parameter_a_plane_o_p + 1: mpopra_.lower_8_bits = data; break;
-        case map_rotation_parameter_b_plane_a_b: mpabrb_.upper_8_bits = data; break;
-        case map_rotation_parameter_b_plane_a_b + 1: mpabrb_.lower_8_bits = data; break;
-        case map_rotation_parameter_b_plane_c_d: mpcdrb_.upper_8_bits = data; break;
-        case map_rotation_parameter_b_plane_c_d + 1: mpcdrb_.lower_8_bits = data; break;
-        case map_rotation_parameter_b_plane_e_f: mpefrb_.upper_8_bits = data; break;
-        case map_rotation_parameter_b_plane_e_f + 1: mpefrb_.lower_8_bits = data; break;
-        case map_rotation_parameter_b_plane_g_h: mpghrb_.upper_8_bits = data; break;
-        case map_rotation_parameter_b_plane_g_h + 1: mpghrb_.lower_8_bits = data; break;
-        case map_rotation_parameter_b_plane_i_j: mpijrb_.upper_8_bits = data; break;
-        case map_rotation_parameter_b_plane_i_j + 1: mpijrb_.lower_8_bits = data; break;
-        case map_rotation_parameter_b_plane_k_l: mpklrb_.upper_8_bits = data; break;
-        case map_rotation_parameter_b_plane_k_l + 1: mpklrb_.lower_8_bits = data; break;
-        case map_rotation_parameter_b_plane_m_n: mpmnrb_.upper_8_bits = data; break;
-        case map_rotation_parameter_b_plane_m_n + 1: mpmnrb_.lower_8_bits = data; break;
-        case map_rotation_parameter_b_plane_o_p: mpoprb_.upper_8_bits = data; break;
-        case map_rotation_parameter_b_plane_o_p + 1: mpoprb_.lower_8_bits = data; break;
+        case map_nbg0_plane_a_b: regs_.mpabn0.upd(Vdp2Regs::Mpab::hiByte(data)); break;
+        case map_nbg0_plane_a_b + 1: regs_.mpabn0.upd(Vdp2Regs::Mpab::loByte(data)); break;
+        case map_nbg0_plane_c_d: regs_.mpcdn0.upd(Vdp2Regs::Mpcd::hiByte(data)); break;
+        case map_nbg0_plane_c_d + 1: regs_.mpcdn0.upd(Vdp2Regs::Mpcd::loByte(data)); break;
+        case map_nbg1_plane_a_b: regs_.mpabn1.upd(Vdp2Regs::Mpab::hiByte(data)); break;
+        case map_nbg1_plane_a_b + 1: regs_.mpabn1.upd(Vdp2Regs::Mpab::loByte(data)); break;
+        case map_nbg1_plane_c_d: regs_.mpcdn1.upd(Vdp2Regs::Mpcd::hiByte(data)); break;
+        case map_nbg1_plane_c_d + 1: regs_.mpcdn1.upd(Vdp2Regs::Mpcd::loByte(data)); break;
+        case map_nbg2_plane_a_b: regs_.mpabn2.upd(Vdp2Regs::Mpab::hiByte(data)); break;
+        case map_nbg2_plane_a_b + 1: regs_.mpabn2.upd(Vdp2Regs::Mpab::loByte(data)); break;
+        case map_nbg2_plane_c_d: regs_.mpcdn2.upd(Vdp2Regs::Mpcd::hiByte(data)); break;
+        case map_nbg2_plane_c_d + 1: regs_.mpcdn2.upd(Vdp2Regs::Mpcd::loByte(data)); break;
+        case map_nbg3_plane_a_b: regs_.mpabn3.upd(Vdp2Regs::Mpab::hiByte(data)); break;
+        case map_nbg3_plane_a_b + 1: regs_.mpabn3.upd(Vdp2Regs::Mpab::loByte(data)); break;
+        case map_nbg3_plane_c_d: regs_.mpcdn3.upd(Vdp2Regs::Mpcd::hiByte(data)); break;
+        case map_nbg3_plane_c_d + 1: regs_.mpcdn3.upd(Vdp2Regs::Mpcd::loByte(data)); break;
+        case map_rotation_parameter_a_plane_a_b: regs_.mpabra.upd(Vdp2Regs::Mpab::hiByte(data)); break;
+        case map_rotation_parameter_a_plane_a_b + 1: regs_.mpabra.upd(Vdp2Regs::Mpab::loByte(data)); break;
+        case map_rotation_parameter_a_plane_c_d: regs_.mpcdra.upd(Vdp2Regs::Mpcd::hiByte(data)); break;
+        case map_rotation_parameter_a_plane_c_d + 1: regs_.mpcdra.upd(Vdp2Regs::Mpcd::loByte(data)); break;
+        case map_rotation_parameter_a_plane_e_f: regs_.mpefra.upd(Vdp2Regs::Mpef::hiByte(data)); break;
+        case map_rotation_parameter_a_plane_e_f + 1: regs_.mpefra.upd(Vdp2Regs::Mpef::loByte(data)); break;
+        case map_rotation_parameter_a_plane_g_h: regs_.mpghra.upd(Vdp2Regs::Mpgh::hiByte(data)); break;
+        case map_rotation_parameter_a_plane_g_h + 1: regs_.mpghra.upd(Vdp2Regs::Mpgh::loByte(data)); break;
+        case map_rotation_parameter_a_plane_i_j: regs_.mpijra.upd(Vdp2Regs::Mpij::hiByte(data)); break;
+        case map_rotation_parameter_a_plane_i_j + 1: regs_.mpijra.upd(Vdp2Regs::Mpij::loByte(data)); break;
+        case map_rotation_parameter_a_plane_k_l: regs_.mpklra.upd(Vdp2Regs::Mpkl::hiByte(data)); break;
+        case map_rotation_parameter_a_plane_k_l + 1: regs_.mpklra.upd(Vdp2Regs::Mpkl::loByte(data)); break;
+        case map_rotation_parameter_a_plane_m_n: regs_.mpmnra.upd(Vdp2Regs::Mpmn::hiByte(data)); break;
+        case map_rotation_parameter_a_plane_m_n + 1: regs_.mpmnra.upd(Vdp2Regs::Mpmn::loByte(data)); break;
+        case map_rotation_parameter_a_plane_o_p: regs_.mpopra.upd(Vdp2Regs::Mpop::hiByte(data)); break;
+        case map_rotation_parameter_a_plane_o_p + 1: regs_.mpopra.upd(Vdp2Regs::Mpop::loByte(data)); break;
+        case map_rotation_parameter_b_plane_a_b: regs_.mpabrb.upd(Vdp2Regs::Mpab::hiByte(data)); break;
+        case map_rotation_parameter_b_plane_a_b + 1: regs_.mpabrb.upd(Vdp2Regs::Mpab::loByte(data)); break;
+        case map_rotation_parameter_b_plane_c_d: regs_.mpcdrb.upd(Vdp2Regs::Mpcd::hiByte(data)); break;
+        case map_rotation_parameter_b_plane_c_d + 1: regs_.mpcdrb.upd(Vdp2Regs::Mpcd::loByte(data)); break;
+        case map_rotation_parameter_b_plane_e_f: regs_.mpefrb.upd(Vdp2Regs::Mpef::hiByte(data)); break;
+        case map_rotation_parameter_b_plane_e_f + 1: regs_.mpefrb.upd(Vdp2Regs::Mpef::loByte(data)); break;
+        case map_rotation_parameter_b_plane_g_h: regs_.mpghrb.upd(Vdp2Regs::Mpgh::hiByte(data)); break;
+        case map_rotation_parameter_b_plane_g_h + 1: regs_.mpghrb.upd(Vdp2Regs::Mpgh::loByte(data)); break;
+        case map_rotation_parameter_b_plane_i_j: regs_.mpijrb.upd(Vdp2Regs::Mpij::hiByte(data)); break;
+        case map_rotation_parameter_b_plane_i_j + 1: regs_.mpijrb.upd(Vdp2Regs::Mpij::loByte(data)); break;
+        case map_rotation_parameter_b_plane_k_l: regs_.mpklrb.upd(Vdp2Regs::Mpkl::hiByte(data)); break;
+        case map_rotation_parameter_b_plane_k_l + 1: regs_.mpklrb.upd(Vdp2Regs::Mpkl::loByte(data)); break;
+        case map_rotation_parameter_b_plane_m_n: regs_.mpmnrb.upd(Vdp2Regs::Mpmn::hiByte(data)); break;
+        case map_rotation_parameter_b_plane_m_n + 1: regs_.mpmnrb.upd(Vdp2Regs::Mpmn::loByte(data)); break;
+        case map_rotation_parameter_b_plane_o_p: regs_.mpoprb.upd(Vdp2Regs::Mpop::hiByte(data)); break;
+        case map_rotation_parameter_b_plane_o_p + 1: regs_.mpoprb.upd(Vdp2Regs::Mpop::loByte(data)); break;
         case screen_scroll_value_nbg0_h_int_part: scxin0_.upper_8_bits = data; break;
         case screen_scroll_value_nbg0_h_int_part + 1: scxin0_.lower_8_bits = data; break;
         case screen_scroll_value_nbg0_h_fract_part: scxdn0_.upper_8_bits = data; break;
@@ -833,30 +833,30 @@ void Vdp2::write16(const u32 addr, const u16 data) {
         case plane_size: regs_.plsz = data; break;
         case map_offset_n: regs_.mpofn = data; break;
         case map_offset_r: regs_.mpofr = data; break;
-        case map_nbg0_plane_a_b: mpabn0_.raw = data; break;
-        case map_nbg0_plane_c_d: mpcdn0_.raw = data; break;
-        case map_nbg1_plane_a_b: mpabn1_.raw = data; break;
-        case map_nbg1_plane_c_d: mpcdn1_.raw = data; break;
-        case map_nbg2_plane_a_b: mpabn2_.raw = data; break;
-        case map_nbg2_plane_c_d: mpcdn2_.raw = data; break;
-        case map_nbg3_plane_a_b: mpabn3_.raw = data; break;
-        case map_nbg3_plane_c_d: mpcdn3_.raw = data; break;
-        case map_rotation_parameter_a_plane_a_b: mpabra_.raw = data; break;
-        case map_rotation_parameter_a_plane_c_d: mpcdra_.raw = data; break;
-        case map_rotation_parameter_a_plane_e_f: mpefra_.raw = data; break;
-        case map_rotation_parameter_a_plane_g_h: mpghra_.raw = data; break;
-        case map_rotation_parameter_a_plane_i_j: mpijra_.raw = data; break;
-        case map_rotation_parameter_a_plane_k_l: mpklra_.raw = data; break;
-        case map_rotation_parameter_a_plane_m_n: mpmnra_.raw = data; break;
-        case map_rotation_parameter_a_plane_o_p: mpopra_.raw = data; break;
-        case map_rotation_parameter_b_plane_a_b: mpabrb_.raw = data; break;
-        case map_rotation_parameter_b_plane_c_d: mpcdrb_.raw = data; break;
-        case map_rotation_parameter_b_plane_e_f: mpefrb_.raw = data; break;
-        case map_rotation_parameter_b_plane_g_h: mpghrb_.raw = data; break;
-        case map_rotation_parameter_b_plane_i_j: mpijrb_.raw = data; break;
-        case map_rotation_parameter_b_plane_k_l: mpklrb_.raw = data; break;
-        case map_rotation_parameter_b_plane_m_n: mpmnrb_.raw = data; break;
-        case map_rotation_parameter_b_plane_o_p: mpoprb_.raw = data; break;
+        case map_nbg0_plane_a_b: regs_.mpabn0 = data; break;
+        case map_nbg0_plane_c_d: regs_.mpcdn0 = data; break;
+        case map_nbg1_plane_a_b: regs_.mpabn1 = data; break;
+        case map_nbg1_plane_c_d: regs_.mpcdn1 = data; break;
+        case map_nbg2_plane_a_b: regs_.mpabn2 = data; break;
+        case map_nbg2_plane_c_d: regs_.mpcdn2 = data; break;
+        case map_nbg3_plane_a_b: regs_.mpabn3 = data; break;
+        case map_nbg3_plane_c_d: regs_.mpcdn3 = data; break;
+        case map_rotation_parameter_a_plane_a_b: regs_.mpabra = data; break;
+        case map_rotation_parameter_a_plane_c_d: regs_.mpcdra = data; break;
+        case map_rotation_parameter_a_plane_e_f: regs_.mpefra = data; break;
+        case map_rotation_parameter_a_plane_g_h: regs_.mpghra = data; break;
+        case map_rotation_parameter_a_plane_i_j: regs_.mpijra = data; break;
+        case map_rotation_parameter_a_plane_k_l: regs_.mpklra = data; break;
+        case map_rotation_parameter_a_plane_m_n: regs_.mpmnra = data; break;
+        case map_rotation_parameter_a_plane_o_p: regs_.mpopra = data; break;
+        case map_rotation_parameter_b_plane_a_b: regs_.mpabrb = data; break;
+        case map_rotation_parameter_b_plane_c_d: regs_.mpcdrb = data; break;
+        case map_rotation_parameter_b_plane_e_f: regs_.mpefrb = data; break;
+        case map_rotation_parameter_b_plane_g_h: regs_.mpghrb = data; break;
+        case map_rotation_parameter_b_plane_i_j: regs_.mpijrb = data; break;
+        case map_rotation_parameter_b_plane_k_l: regs_.mpklrb = data; break;
+        case map_rotation_parameter_b_plane_m_n: regs_.mpmnrb = data; break;
+        case map_rotation_parameter_b_plane_o_p: regs_.mpoprb = data; break;
         case screen_scroll_value_nbg0_h_int_part: scxin0_.raw = data; break;
         case screen_scroll_value_nbg0_h_fract_part: scxdn0_.raw = data; break;
         case screen_scroll_value_nbg0_v_int_part: scyin0_.raw = data; break;
@@ -1003,52 +1003,52 @@ void Vdp2::write32(const u32 addr, const u32 data) {
             regs_.mpofr = l;
             break;
         case map_nbg0_plane_a_b:
-            mpabn0_.raw = h;
-            mpcdn0_.raw = l;
+            regs_.mpabn0 = h;
+            regs_.mpcdn0 = l;
             break;
         case map_nbg1_plane_a_b:
-            mpabn1_.raw = h;
-            mpcdn1_.raw = l;
+            regs_.mpabn1 = h;
+            regs_.mpcdn1 = l;
             break;
         case map_nbg2_plane_a_b:
-            mpabn2_.raw = h;
-            mpcdn2_.raw = l;
+            regs_.mpabn2 = h;
+            regs_.mpcdn2 = l;
             break;
         case map_nbg3_plane_a_b:
-            mpabn3_.raw = h;
-            mpcdn3_.raw = l;
+            regs_.mpabn3 = h;
+            regs_.mpcdn3 = l;
             break;
         case map_rotation_parameter_a_plane_a_b:
-            mpabra_.raw = h;
-            mpcdra_.raw = l;
+            regs_.mpabra = h;
+            regs_.mpcdra = l;
             break;
         case map_rotation_parameter_a_plane_e_f:
-            mpefra_.raw = h;
-            mpghra_.raw = l;
+            regs_.mpefra = h;
+            regs_.mpghra = l;
             break;
         case map_rotation_parameter_a_plane_i_j:
-            mpijra_.raw = h;
-            mpklra_.raw = l;
+            regs_.mpijra = h;
+            regs_.mpklra = l;
             break;
         case map_rotation_parameter_a_plane_m_n:
-            mpmnra_.raw = h;
-            mpopra_.raw = l;
+            regs_.mpmnra = h;
+            regs_.mpopra = l;
             break;
         case map_rotation_parameter_b_plane_a_b:
-            mpabrb_.raw = h;
-            mpcdrb_.raw = l;
+            regs_.mpabrb = h;
+            regs_.mpcdrb = l;
             break;
         case map_rotation_parameter_b_plane_e_f:
-            mpefrb_.raw = h;
-            mpghrb_.raw = l;
+            regs_.mpefrb = h;
+            regs_.mpghrb = l;
             break;
         case map_rotation_parameter_b_plane_i_j:
-            mpijrb_.raw = h;
-            mpklrb_.raw = l;
+            regs_.mpijrb = h;
+            regs_.mpklrb = l;
             break;
         case map_rotation_parameter_b_plane_m_n:
-            mpmnrb_.raw = h;
-            mpoprb_.raw = l;
+            regs_.mpmnrb = h;
+            regs_.mpoprb = l;
             break;
         case screen_scroll_value_nbg0_h_int_part:
             scxin0_.raw = h;
@@ -2548,6 +2548,14 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
     using Bmpnb  = Vdp2Regs::Bmpnb;
     using Mpofn  = Vdp2Regs::Mpofn;
     using Mpofr  = Vdp2Regs::Mpofr;
+    using Mpab   = Vdp2Regs::Mpab;
+    using Mpcd   = Vdp2Regs::Mpcd;
+    using Mpef   = Vdp2Regs::Mpef;
+    using Mpgh   = Vdp2Regs::Mpgh;
+    using Mpij   = Vdp2Regs::Mpij;
+    using Mpkl   = Vdp2Regs::Mpkl;
+    using Mpmn   = Vdp2Regs::Mpmn;
+    using Mpop   = Vdp2Regs::Mpop;
 
     switch (s) {
         using enum ScrollScreen;
@@ -2568,10 +2576,10 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
 
             // Plane
             screen.plane_size            = regs_.plsz >> Vdp2Regs::Plsz::n0plsz_enum;
-            screen.plane_a_start_address = calculatePlaneStartAddress(s, mpabn0_.plane_a);
-            screen.plane_b_start_address = calculatePlaneStartAddress(s, mpabn0_.plane_b);
-            screen.plane_c_start_address = calculatePlaneStartAddress(s, mpcdn0_.plane_c);
-            screen.plane_d_start_address = calculatePlaneStartAddress(s, mpcdn0_.plane_d);
+            screen.plane_a_start_address = calculatePlaneStartAddress(s, regs_.mpabn0 >> Mpab::mpa_shft);
+            screen.plane_b_start_address = calculatePlaneStartAddress(s, regs_.mpabn0 >> Mpab::mpb_shft);
+            screen.plane_c_start_address = calculatePlaneStartAddress(s, regs_.mpcdn0 >> Mpcd::mpc_shft);
+            screen.plane_d_start_address = calculatePlaneStartAddress(s, regs_.mpcdn0 >> Mpcd::mpd_shft);
 
             // Page
             screen.page_size = getPageSize(regs_.pncn0 >> Pcnxx::pnb_enum, regs_.chctla >> Chctla::n0chsz_enum);
@@ -2626,10 +2634,10 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
 
             // Plane
             screen.plane_size            = regs_.plsz >> Vdp2Regs::Plsz::n1plsz_enum;
-            screen.plane_a_start_address = calculatePlaneStartAddress(s, mpabn1_.plane_a);
-            screen.plane_b_start_address = calculatePlaneStartAddress(s, mpabn1_.plane_b);
-            screen.plane_c_start_address = calculatePlaneStartAddress(s, mpcdn1_.plane_c);
-            screen.plane_d_start_address = calculatePlaneStartAddress(s, mpcdn1_.plane_d);
+            screen.plane_a_start_address = calculatePlaneStartAddress(s, regs_.mpabn1 >> Mpab::mpa_shft);
+            screen.plane_b_start_address = calculatePlaneStartAddress(s, regs_.mpabn1 >> Mpab::mpb_shft);
+            screen.plane_c_start_address = calculatePlaneStartAddress(s, regs_.mpcdn1 >> Mpcd::mpc_shft);
+            screen.plane_d_start_address = calculatePlaneStartAddress(s, regs_.mpcdn1 >> Mpcd::mpd_shft);
 
             // Page
             screen.page_size = getPageSize(regs_.pncn1 >> Pcnxx::pnb_enum, regs_.chctla >> Chctla::n1chsz_enum);
@@ -2684,10 +2692,10 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
 
             // Plane
             screen.plane_size            = regs_.plsz >> Vdp2Regs::Plsz::n2plsz_enum;
-            screen.plane_a_start_address = calculatePlaneStartAddress(s, mpabn2_.plane_a);
-            screen.plane_b_start_address = calculatePlaneStartAddress(s, mpabn2_.plane_b);
-            screen.plane_c_start_address = calculatePlaneStartAddress(s, mpcdn2_.plane_c);
-            screen.plane_d_start_address = calculatePlaneStartAddress(s, mpcdn2_.plane_d);
+            screen.plane_a_start_address = calculatePlaneStartAddress(s, regs_.mpabn2 >> Mpab::mpa_shft);
+            screen.plane_b_start_address = calculatePlaneStartAddress(s, regs_.mpabn2 >> Mpab::mpb_shft);
+            screen.plane_c_start_address = calculatePlaneStartAddress(s, regs_.mpcdn2 >> Mpcd::mpc_shft);
+            screen.plane_d_start_address = calculatePlaneStartAddress(s, regs_.mpcdn2 >> Mpcd::mpd_shft);
 
             // Page
             screen.page_size = getPageSize(regs_.pncn2 >> Pcnxx::pnb_enum, regs_.chctlb >> Chctlb::n2chsz_enum);
@@ -2736,10 +2744,10 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
 
             // Plane
             screen.plane_size            = regs_.plsz >> Vdp2Regs::Plsz::n3plsz_enum;
-            screen.plane_a_start_address = calculatePlaneStartAddress(s, mpabn3_.plane_a);
-            screen.plane_b_start_address = calculatePlaneStartAddress(s, mpabn3_.plane_b);
-            screen.plane_c_start_address = calculatePlaneStartAddress(s, mpcdn3_.plane_c);
-            screen.plane_d_start_address = calculatePlaneStartAddress(s, mpcdn3_.plane_d);
+            screen.plane_a_start_address = calculatePlaneStartAddress(s, regs_.mpabn3 >> Mpab::mpa_shft);
+            screen.plane_b_start_address = calculatePlaneStartAddress(s, regs_.mpabn3 >> Mpab::mpb_shft);
+            screen.plane_c_start_address = calculatePlaneStartAddress(s, regs_.mpcdn3 >> Mpcd::mpc_shft);
+            screen.plane_d_start_address = calculatePlaneStartAddress(s, regs_.mpcdn3 >> Mpcd::mpd_shft);
 
             // Page
             screen.page_size = getPageSize(regs_.pncn3 >> Pcnxx::pnb_enum, regs_.chctlb >> Chctlb::n3chsz_enum);
@@ -2786,22 +2794,22 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
 
             // Plane
             screen.plane_size            = regs_.plsz >> Vdp2Regs::Plsz::raplsz_enum;
-            screen.plane_a_start_address = calculatePlaneStartAddress(s, mpabra_.plane_a);
-            screen.plane_b_start_address = calculatePlaneStartAddress(s, mpabra_.plane_b);
-            screen.plane_c_start_address = calculatePlaneStartAddress(s, mpcdra_.plane_c);
-            screen.plane_d_start_address = calculatePlaneStartAddress(s, mpcdra_.plane_d);
-            screen.plane_e_start_address = calculatePlaneStartAddress(s, mpefra_.plane_e);
-            screen.plane_f_start_address = calculatePlaneStartAddress(s, mpefra_.plane_f);
-            screen.plane_g_start_address = calculatePlaneStartAddress(s, mpghra_.plane_g);
-            screen.plane_h_start_address = calculatePlaneStartAddress(s, mpghra_.plane_h);
-            screen.plane_i_start_address = calculatePlaneStartAddress(s, mpijra_.plane_i);
-            screen.plane_j_start_address = calculatePlaneStartAddress(s, mpijra_.plane_j);
-            screen.plane_k_start_address = calculatePlaneStartAddress(s, mpklra_.plane_k);
-            screen.plane_l_start_address = calculatePlaneStartAddress(s, mpklra_.plane_l);
-            screen.plane_m_start_address = calculatePlaneStartAddress(s, mpmnra_.plane_m);
-            screen.plane_n_start_address = calculatePlaneStartAddress(s, mpmnra_.plane_n);
-            screen.plane_o_start_address = calculatePlaneStartAddress(s, mpopra_.plane_o);
-            screen.plane_p_start_address = calculatePlaneStartAddress(s, mpopra_.plane_p);
+            screen.plane_a_start_address = calculatePlaneStartAddress(s, regs_.mpabra >> Mpab::mpa_shft);
+            screen.plane_b_start_address = calculatePlaneStartAddress(s, regs_.mpabra >> Mpab::mpb_shft);
+            screen.plane_c_start_address = calculatePlaneStartAddress(s, regs_.mpcdra >> Mpcd::mpc_shft);
+            screen.plane_d_start_address = calculatePlaneStartAddress(s, regs_.mpcdra >> Mpcd::mpd_shft);
+            screen.plane_e_start_address = calculatePlaneStartAddress(s, regs_.mpefra >> Mpef::mpe_shft);
+            screen.plane_f_start_address = calculatePlaneStartAddress(s, regs_.mpefra >> Mpef::mpf_shft);
+            screen.plane_g_start_address = calculatePlaneStartAddress(s, regs_.mpghra >> Mpgh::mpg_shft);
+            screen.plane_h_start_address = calculatePlaneStartAddress(s, regs_.mpghra >> Mpgh::mph_shft);
+            screen.plane_i_start_address = calculatePlaneStartAddress(s, regs_.mpijra >> Mpij::mpi_shft);
+            screen.plane_j_start_address = calculatePlaneStartAddress(s, regs_.mpijra >> Mpij::mpj_shft);
+            screen.plane_k_start_address = calculatePlaneStartAddress(s, regs_.mpklra >> Mpkl::mpk_shft);
+            screen.plane_l_start_address = calculatePlaneStartAddress(s, regs_.mpklra >> Mpkl::mpl_shft);
+            screen.plane_m_start_address = calculatePlaneStartAddress(s, regs_.mpmnra >> Mpmn::mpm_shft);
+            screen.plane_n_start_address = calculatePlaneStartAddress(s, regs_.mpmnra >> Mpmn::mpn_shft);
+            screen.plane_o_start_address = calculatePlaneStartAddress(s, regs_.mpopra >> Mpop::mpo_shft);
+            screen.plane_p_start_address = calculatePlaneStartAddress(s, regs_.mpopra >> Mpop::mpp_shft);
 
             // Page
             screen.page_size = getPageSize(regs_.pncr >> Pcnxx::pnb_enum, regs_.chctlb >> Chctlb::r0chsz_enum);
@@ -2852,22 +2860,22 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
 
             // Plane
             screen.plane_size            = regs_.plsz >> Vdp2Regs::Plsz::rbplsz_enum;
-            screen.plane_a_start_address = calculatePlaneStartAddress(s, mpabrb_.plane_a);
-            screen.plane_b_start_address = calculatePlaneStartAddress(s, mpabrb_.plane_b);
-            screen.plane_c_start_address = calculatePlaneStartAddress(s, mpcdrb_.plane_c);
-            screen.plane_d_start_address = calculatePlaneStartAddress(s, mpcdrb_.plane_d);
-            screen.plane_e_start_address = calculatePlaneStartAddress(s, mpefrb_.plane_e);
-            screen.plane_f_start_address = calculatePlaneStartAddress(s, mpefrb_.plane_f);
-            screen.plane_g_start_address = calculatePlaneStartAddress(s, mpghrb_.plane_g);
-            screen.plane_h_start_address = calculatePlaneStartAddress(s, mpghrb_.plane_h);
-            screen.plane_i_start_address = calculatePlaneStartAddress(s, mpijrb_.plane_i);
-            screen.plane_j_start_address = calculatePlaneStartAddress(s, mpijrb_.plane_j);
-            screen.plane_k_start_address = calculatePlaneStartAddress(s, mpklrb_.plane_k);
-            screen.plane_l_start_address = calculatePlaneStartAddress(s, mpklrb_.plane_l);
-            screen.plane_m_start_address = calculatePlaneStartAddress(s, mpmnrb_.plane_m);
-            screen.plane_n_start_address = calculatePlaneStartAddress(s, mpmnrb_.plane_n);
-            screen.plane_o_start_address = calculatePlaneStartAddress(s, mpoprb_.plane_o);
-            screen.plane_p_start_address = calculatePlaneStartAddress(s, mpoprb_.plane_p);
+            screen.plane_a_start_address = calculatePlaneStartAddress(s, regs_.mpabrb >> Mpab::mpa_shft);
+            screen.plane_b_start_address = calculatePlaneStartAddress(s, regs_.mpabrb >> Mpab::mpb_shft);
+            screen.plane_c_start_address = calculatePlaneStartAddress(s, regs_.mpcdrb >> Mpcd::mpc_shft);
+            screen.plane_d_start_address = calculatePlaneStartAddress(s, regs_.mpcdrb >> Mpcd::mpd_shft);
+            screen.plane_e_start_address = calculatePlaneStartAddress(s, regs_.mpefrb >> Mpef::mpe_shft);
+            screen.plane_f_start_address = calculatePlaneStartAddress(s, regs_.mpefrb >> Mpef::mpf_shft);
+            screen.plane_g_start_address = calculatePlaneStartAddress(s, regs_.mpghrb >> Mpgh::mpg_shft);
+            screen.plane_h_start_address = calculatePlaneStartAddress(s, regs_.mpghrb >> Mpgh::mph_shft);
+            screen.plane_i_start_address = calculatePlaneStartAddress(s, regs_.mpijrb >> Mpij::mpi_shft);
+            screen.plane_j_start_address = calculatePlaneStartAddress(s, regs_.mpijrb >> Mpij::mpj_shft);
+            screen.plane_k_start_address = calculatePlaneStartAddress(s, regs_.mpklrb >> Mpkl::mpk_shft);
+            screen.plane_l_start_address = calculatePlaneStartAddress(s, regs_.mpklrb >> Mpkl::mpl_shft);
+            screen.plane_m_start_address = calculatePlaneStartAddress(s, regs_.mpmnrb >> Mpmn::mpm_shft);
+            screen.plane_n_start_address = calculatePlaneStartAddress(s, regs_.mpmnrb >> Mpmn::mpn_shft);
+            screen.plane_o_start_address = calculatePlaneStartAddress(s, regs_.mpoprb >> Mpop::mpo_shft);
+            screen.plane_p_start_address = calculatePlaneStartAddress(s, regs_.mpoprb >> Mpop::mpp_shft);
 
             // Page
             screen.page_size = getPageSize(regs_.pncn0 >> Pcnxx::pnb_enum, regs_.chctla >> Chctla::n0chsz_enum);
