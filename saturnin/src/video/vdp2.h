@@ -1891,9 +1891,9 @@ class Vdp2 {
     // LineColorScreenTableAddressLower   lctal_;
     // BackScreenTableAddressUpper        bktau_;
     // BackScreenTableAddressLower        bktal_;
-    RotationParameterMode              rpmd_;
-    RotationParameterReadControl       rprctl_;
-    CoefficientTableControl            ktctl_;
+    // RotationParameterMode              rpmd_;
+    // RotationParameterReadControl       rprctl_;
+    // CoefficientTableControl            ktctl_;
     CoefficientTableAddressOffset      ktaof_;
     ScreenOverPatternNameA             ovpnra_;
     ScreenOverPatternNameB             ovpnrb_;

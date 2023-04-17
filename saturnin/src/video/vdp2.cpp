@@ -439,9 +439,9 @@ auto Vdp2::read16(const u32 addr) const -> u16 {
         case line_color_screen_table_address_lower: return regs_.lctal.data();
         case back_screen_table_address_upper: return regs_.bktau.data();
         case back_screen_table_address_lower: return regs_.bktal.data();
-        case rotation_parameter_mode: return rpmd_.raw;
-        case rotation_parameter_read_control: return rprctl_.raw;
-        case coefficient_table_control: return ktctl_.raw;
+        case rotation_parameter_mode: return regs_.rpmd.data();
+        case rotation_parameter_read_control: return regs_.rprctl.data();
+        case coefficient_table_control: return regs_.ktctl.data();
         case coefficient_table_address_offset: return ktaof_.raw;
         case screen_over_pattern_name_a: return ovpnra_.raw;
         case screen_over_pattern_name_b: return ovpnrb_.raw;
@@ -682,12 +682,12 @@ void Vdp2::write8(const u32 addr, const u8 data) {
         case back_screen_table_address_upper + 1: regs_.bktau.upd(Vdp2Regs::Bktau::loByte(data)); break;
         case back_screen_table_address_lower: regs_.bktal.upd(Vdp2Regs::Bktal::hiByte(data)); break;
         case back_screen_table_address_lower + 1: regs_.bktal.upd(Vdp2Regs::Bktal::loByte(data)); break;
-        case rotation_parameter_mode: rpmd_.upper_8_bits = data; break;
-        case rotation_parameter_mode + 1: rpmd_.lower_8_bits = data; break;
-        case rotation_parameter_read_control: rprctl_.upper_8_bits = data; break;
-        case rotation_parameter_read_control + 1: rprctl_.lower_8_bits = data; break;
-        case coefficient_table_control: ktctl_.upper_8_bits = data; break;
-        case coefficient_table_control + 1: ktctl_.lower_8_bits = data; break;
+        case rotation_parameter_mode: regs_.rpmd.upd(Vdp2Regs::Rpmd::hiByte(data)); break;
+        case rotation_parameter_mode + 1: regs_.rpmd.upd(Vdp2Regs::Rpmd::loByte(data)); break;
+        case rotation_parameter_read_control: regs_.rprctl.upd(Vdp2Regs::Rprctl::hiByte(data)); break;
+        case rotation_parameter_read_control + 1: regs_.rprctl.upd(Vdp2Regs::Rprctl::loByte(data)); break;
+        case coefficient_table_control: regs_.ktctl.upd(Vdp2Regs::Ktctl::hiByte(data)); break;
+        case coefficient_table_control + 1: regs_.ktctl.upd(Vdp2Regs::Ktctl::loByte(data)); break;
         case coefficient_table_address_offset: ktaof_.upper_8_bits = data; break;
         case coefficient_table_address_offset + 1: ktaof_.lower_8_bits = data; break;
         case screen_over_pattern_name_a: ovpnra_.upper_8_bits = data; break;
@@ -889,9 +889,9 @@ void Vdp2::write16(const u32 addr, const u16 data) {
         case line_color_screen_table_address_lower: regs_.lctal = data; break;
         case back_screen_table_address_upper: regs_.bktau = data; break;
         case back_screen_table_address_lower: regs_.bktal = data; break;
-        case rotation_parameter_mode: rpmd_.raw = data; break;
-        case rotation_parameter_read_control: rprctl_.raw = data; break;
-        case coefficient_table_control: ktctl_.raw = data; break;
+        case rotation_parameter_mode: regs_.rpmd = data; break;
+        case rotation_parameter_read_control: regs_.rprctl = data; break;
+        case coefficient_table_control: regs_.ktctl = data; break;
         case coefficient_table_address_offset: ktaof_.raw = data; break;
         case screen_over_pattern_name_a: ovpnra_.raw = data; break;
         case screen_over_pattern_name_b: ovpnrb_.raw = data; break;
@@ -1115,12 +1115,12 @@ void Vdp2::write32(const u32 addr, const u32 data) {
             regs_.bktal = l;
             break;
         case rotation_parameter_mode:
-            rpmd_.raw   = h;
-            rprctl_.raw = l;
+            regs_.rpmd   = h;
+            regs_.rprctl = l;
             break;
         case coefficient_table_control:
-            ktctl_.raw = h;
-            ktaof_.raw = l;
+            regs_.ktctl = h;
+            ktaof_.raw  = l;
             break;
         case screen_over_pattern_name_a:
             ovpnra_.raw = h;

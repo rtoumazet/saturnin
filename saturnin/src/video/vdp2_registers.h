@@ -1802,36 +1802,162 @@ struct Vdp2Regs {
     };
     using BktalType = Reg<u16, Bktal>;
     BktalType bktal;
-};
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	RotationParameterMode
-///
-/// \brief	Rotation Parameter Mode (RPMD).
-///
-/// \author	Runik
-/// \date	23/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \struct	Rpmd
+    ///
+    /// \brief	Rotation Parameter Mode (RPMD).
+    ///
+    /// \author	Runik
+    /// \date	17/04/2023
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-union RotationParameterMode {
-    u16            raw;          ///< Raw representation.
-    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
-    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
-};
+    struct Rpmd {
+        GENERATE_USING(Rpmd, u16);
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	RotationParameterReadControl
-///
-/// \brief	Rotation Parameter Read Control (RPRCTL).
-///
-/// \author	Runik
-/// \date	23/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \enum	RotationParametersMode
+        ///
+        /// \brief	Rotation parameters mode bits values (RPMDx)
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-union RotationParameterReadControl {
-    u16            raw;          ///< Raw representation.
-    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
-    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
+        enum class RotationParametersMode : u8 {
+            rotation_parameter_a                       = 0b00,
+            rotation_parameter_b                       = 0b01,
+            screens_are_switched_via_coefficient_table = 0b10,
+            screens_are_switched_via_window            = 0b11
+        };
+
+        GENERATE_BIT_WITH_ENUM(rpmd, 0, 0b11, RotationParametersMode); ///< Rotation parameters mode (RPMDx).
+
+        static constexpr auto lo_byte_pos = PosType(0);                ///< Defines the range of the upper 8 bits of the register.
+        static constexpr auto hi_byte_pos = PosType(8);                ///< Defines the range of the lower 8 bits of the register.
+
+        static constexpr auto byte_mask = 0xFF;
+        GENERATE_MASKED_RANGE("Vdp2Regs::Rpmd", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
+        GENERATE_MASKED_RANGE("Vd2pRegs::Rpmd", HI_BYTE, hiByte, byte_mask, hi_byte_pos, byte_mask);
+    };
+    using RpmdType = Reg<u16, Rpmd>;
+    RpmdType rpmd;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \struct	Rprctl
+    ///
+    /// \brief	Rotation Parameter Read Control (RPRCTL).
+    ///
+    /// \author	Runik
+    /// \date	17/04/2023
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    struct Rprctl {
+        GENERATE_USING(Rprctl, u16);
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \enum	ParameterReadEnable
+        ///
+        /// \brief	Parameter read enable bit values (RxSTRE)
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        enum class ParameterReadEnable : bool { rotation_parameter_a = false, rotation_parameter_b = true };
+
+        GENERATE_BIT_WITH_ENUM(raxstre, 0, 0b1, ParameterReadEnable);   ///< For Xst of Rotation Parameter A (RAXSTRE).
+        GENERATE_BIT_WITH_ENUM(raystre, 1, 0b1, ParameterReadEnable);   ///< For Yst of Rotation Parameter A (RAYSTRE).
+        GENERATE_BIT_WITH_ENUM(rakastre, 2, 0b1, ParameterReadEnable);  ///< For KAst of Rotation Parameter A (RAKASTRE).
+        GENERATE_BIT_WITH_ENUM(rbxstre, 8, 0b1, ParameterReadEnable);   ///< For Xst of Rotation Parameter B (RBXSTRE).
+        GENERATE_BIT_WITH_ENUM(rbystre, 9, 0b1, ParameterReadEnable);   ///< For Yst of Rotation Parameter B (RBYSTRE).
+        GENERATE_BIT_WITH_ENUM(rbkastre, 10, 0b1, ParameterReadEnable); ///< For KAst of Rotation Parameter B (RBKASTRE).
+
+        static constexpr auto lo_byte_pos = PosType(0); ///< Defines the range of the upper 8 bits of the register.
+        static constexpr auto hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
+
+        static constexpr auto byte_mask = 0xFF;
+        GENERATE_MASKED_RANGE("Vdp2Regs::Rprctl", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
+        GENERATE_MASKED_RANGE("Vd2pRegs::Rprctl", HI_BYTE, hiByte, byte_mask, hi_byte_pos, byte_mask);
+    };
+    using RprctlType = Reg<u16, Rprctl>;
+    RprctlType rprctl;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \struct	Ktctl
+    ///
+    /// \brief	Coefficient Table Control (KTCTL).
+    ///
+    /// \author	Runik
+    /// \date	17/04/2023
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    struct Ktctl {
+        GENERATE_USING(Ktctl, u16);
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \enum	ParameterReadEnable
+        ///
+        /// \brief	Parameter read enable bit values (RxKLCE)
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        enum class CoefficientLineColorEnable : bool {
+            line_color_screen_data_is_not_used = false, ///< Line color screen data within coefficient data is not used.
+            line_color_screen_data_is_used     = true   ///< Line color screen data within coefficient data is used.
+        };
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \enum	Coefficient mode
+        ///
+        /// \brief	Designates what parameters the coefficient data is used as (RxKMD)
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        enum class CoefficientMode : u8 {
+            use_as_scale_coeff_kx_ky                      = 0b00, ///< Use as scale coefficient kx, ky.
+            use_as_scale_coeff_kx                         = 0b01, ///< Use as scale coefficient kx.
+            use_as_scale_coeff_ky                         = 0b10, ///< Use as scale coefficient ky.
+            use_as_viewpoint_xp_after_rotation_conversion = 0b11  ///< Use as viewpoint Xp after rotation conversion.
+        };
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \enum	CoefficientDataSize
+        ///
+        /// \brief	Designates the size of the coefficient data (RxKDBS).
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        enum class CoefficientDataSize : bool {
+            two_words = false, ///< 2 words.
+            one_word  = true   ///< 1 word.
+        };
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \enum	CoefficientTableEnable
+        ///
+        /// \brief	Designates whether the coefficient table is used (RxKTE).
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        enum class CoefficientTableEnable : bool {
+            do_not_use_coeff_table = false,                            ///< Do not use coefficient table.
+            use_coeff_table        = true                              ///< Use coefficient table.
+        };
+        GENERATE_BIT_WITH_ENUM(rakte, 0, 0b1, CoefficientTableEnable); /**< Coefficient table enable for rotation parameter A.
+                                                                          (RAKTE).*/
+        GENERATE_BIT_WITH_ENUM(rakdbs, 1, 0b1, CoefficientDataSize);   /**< Coefficient data size for rotation parameter A.
+                                                                            (RAKDBS).*/
+        GENERATE_BIT_WITH_ENUM(rakmd, 2, 0b11, CoefficientMode); /**< Coefficient data mode for rotation parameter A.(RAKMD).*/
+        GENERATE_BIT_WITH_ENUM(raklce, 4, 0b1, CoefficientLineColorEnable); /**< Coefficient line color enable for rotation
+                                                                                 parameter A (RAKLCE).*/
+        GENERATE_BIT_WITH_ENUM(rbkte, 0, 0b1, CoefficientTableEnable); /**< Coefficient table enable for rotation parameter B.
+                                                                          (RBKTE).*/
+        GENERATE_BIT_WITH_ENUM(rbkdbs, 9, 0b1, CoefficientDataSize);   /**< Coefficient data size for rotation parameter B.
+                                                                            (RBKDBS).*/
+        GENERATE_BIT_WITH_ENUM(rbkmd, 10, 0b11, CoefficientMode); /**< Coefficient data mode for rotation parameter B.(RBKMD).*/
+        GENERATE_BIT_WITH_ENUM(rbklce, 12, 0b1, CoefficientLineColorEnable); /**< Coefficient line color enable for rotation
+                                                                                  parameter B (RBKLCE).*/
+
+        static constexpr auto lo_byte_pos = PosType(0); ///< Defines the range of the upper 8 bits of the register.
+        static constexpr auto hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
+
+        static constexpr auto byte_mask = 0xFF;
+        GENERATE_MASKED_RANGE("Vdp2Regs::Ktctl", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
+        GENERATE_MASKED_RANGE("Vd2pRegs::Ktctl", HI_BYTE, hiByte, byte_mask, hi_byte_pos, byte_mask);
+    };
+    using KtctlType = Reg<u16, Ktctl>;
+    KtctlType ktctl;
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1843,11 +1969,11 @@ union RotationParameterReadControl {
 /// \date	23/01/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-union CoefficientTableControl {
-    u16            raw;          ///< Raw representation.
-    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
-    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
-};
+// union CoefficientTableControl {
+//     u16            raw;          ///< Raw representation.
+//     BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
+//     BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
+// };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \union	CoefficientTableAddressOffset
