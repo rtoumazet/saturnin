@@ -1889,8 +1889,8 @@ class Vdp2 {
     // LineScrollTableAddressNbg1Lower    lsta1l_;
     // LineColorScreenTableAddressUpper   lctau_;
     // LineColorScreenTableAddressLower   lctal_;
-    BackScreenTableAddressUpper        bktau_;
-    BackScreenTableAddressLower        bktal_;
+    // BackScreenTableAddressUpper        bktau_;
+    // BackScreenTableAddressLower        bktal_;
     RotationParameterMode              rpmd_;
     RotationParameterReadControl       rprctl_;
     CoefficientTableControl            ktctl_;

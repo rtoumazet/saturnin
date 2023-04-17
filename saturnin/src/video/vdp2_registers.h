@@ -1747,36 +1747,61 @@ struct Vdp2Regs {
     };
     using LctalType = Reg<u16, Lctal>;
     LctalType lctal;
-};
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	BackScreenTableAddressUpper
-///
-/// \brief	Back Screen Table Address Upper (BKTAU).
-///
-/// \author	Runik
-/// \date	23/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \struct	Bktau
+    ///
+    /// \brief	Back Screen Table Address Upper (BKTAU).
+    ///
+    /// \author	Runik
+    /// \date	17/04/2023
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-union BackScreenTableAddressUpper {
-    u16            raw;          ///< Raw representation.
-    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
-    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
-};
+    struct Bktau {
+        GENERATE_USING(Bktau, u16);
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	BackScreenTableAddressLower
-///
-/// \brief	Back Screen Table Address Lower (BKTAL).
-///
-/// \author	Runik
-/// \date	23/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \enum	BackScreenColorMode
+        ///
+        /// \brief	BACK color mode bit (BKCLMD)
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-union BackScreenTableAddressLower {
-    u16            raw;          ///< Raw representation.
-    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
-    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
+        enum class BackScreenColorMode : bool { single_color = false, select_per_line = true };
+
+        GENERATE_BIT_WITH_ENUM(bkclmd, 15, 0b1, BackScreenColorMode); ///< Back screen color mode (BKCLMD).
+        GENERATE_BIT_WITHOUT_ENUM(bktau, 0, 0b111);                   ///< Line color screen table address (upper part).
+
+        static constexpr auto lo_byte_pos = PosType(0);               ///< Defines the range of the upper 8 bits of the register.
+        static constexpr auto hi_byte_pos = PosType(8);               ///< Defines the range of the lower 8 bits of the register.
+
+        static constexpr auto byte_mask = 0xFF;
+        GENERATE_MASKED_RANGE("Vdp2Regs::Bktau", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
+        GENERATE_MASKED_RANGE("Vd2pRegs::Bktau", HI_BYTE, hiByte, byte_mask, hi_byte_pos, byte_mask);
+    };
+    using BktauType = Reg<u16, Bktau>;
+    BktauType bktau;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \struct	Bktal
+    ///
+    /// \brief	Back Screen Table Address Lower (BKTAL).
+    ///
+    /// \author	Runik
+    /// \date	17/04/2023
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    struct Bktal {
+        GENERATE_USING(Bktal, u16);
+
+        static constexpr auto lo_byte_pos = PosType(0); ///< Defines the range of the upper 8 bits of the register.
+        static constexpr auto hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
+
+        static constexpr auto byte_mask = 0xFF;
+        GENERATE_MASKED_RANGE("Vdp2Regs::Lctal", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
+        GENERATE_MASKED_RANGE("Vd2pRegs::Lctal", HI_BYTE, hiByte, byte_mask, hi_byte_pos, byte_mask);
+    };
+    using BktalType = Reg<u16, Bktal>;
+    BktalType bktal;
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -437,8 +437,8 @@ auto Vdp2::read16(const u32 addr) const -> u16 {
         case line_scroll_table_address_nbg1_lower: return regs_.lsta1l.data();
         case line_color_screen_table_address_upper: return regs_.lctau.data();
         case line_color_screen_table_address_lower: return regs_.lctal.data();
-        case back_screen_table_address_upper: return bktau_.raw;
-        case back_screen_table_address_lower: return bktal_.raw;
+        case back_screen_table_address_upper: return regs_.bktau.data();
+        case back_screen_table_address_lower: return regs_.bktal.data();
         case rotation_parameter_mode: return rpmd_.raw;
         case rotation_parameter_read_control: return rprctl_.raw;
         case coefficient_table_control: return ktctl_.raw;
@@ -678,10 +678,10 @@ void Vdp2::write8(const u32 addr, const u8 data) {
         case line_color_screen_table_address_upper + 1: regs_.lctau.upd(Vdp2Regs::Lctau::loByte(data)); break;
         case line_color_screen_table_address_lower: regs_.lctal.upd(Vdp2Regs::Lctal::hiByte(data)); break;
         case line_color_screen_table_address_lower + 1: regs_.lctal.upd(Vdp2Regs::Lctal::loByte(data)); break;
-        case back_screen_table_address_upper: bktau_.upper_8_bits = data; break;
-        case back_screen_table_address_upper + 1: bktau_.lower_8_bits = data; break;
-        case back_screen_table_address_lower: bktal_.upper_8_bits = data; break;
-        case back_screen_table_address_lower + 1: bktal_.lower_8_bits = data; break;
+        case back_screen_table_address_upper: regs_.bktau.upd(Vdp2Regs::Bktau::hiByte(data)); break;
+        case back_screen_table_address_upper + 1: regs_.bktau.upd(Vdp2Regs::Bktau::loByte(data)); break;
+        case back_screen_table_address_lower: regs_.bktal.upd(Vdp2Regs::Bktal::hiByte(data)); break;
+        case back_screen_table_address_lower + 1: regs_.bktal.upd(Vdp2Regs::Bktal::loByte(data)); break;
         case rotation_parameter_mode: rpmd_.upper_8_bits = data; break;
         case rotation_parameter_mode + 1: rpmd_.lower_8_bits = data; break;
         case rotation_parameter_read_control: rprctl_.upper_8_bits = data; break;
@@ -887,8 +887,8 @@ void Vdp2::write16(const u32 addr, const u16 data) {
         case line_scroll_table_address_nbg1_lower: regs_.lsta1l = data; break;
         case line_color_screen_table_address_upper: regs_.lctau = data; break;
         case line_color_screen_table_address_lower: regs_.lctal = data; break;
-        case back_screen_table_address_upper: bktau_.raw = data; break;
-        case back_screen_table_address_lower: bktal_.raw = data; break;
+        case back_screen_table_address_upper: regs_.bktau = data; break;
+        case back_screen_table_address_lower: regs_.bktal = data; break;
         case rotation_parameter_mode: rpmd_.raw = data; break;
         case rotation_parameter_read_control: rprctl_.raw = data; break;
         case coefficient_table_control: ktctl_.raw = data; break;
@@ -1111,8 +1111,8 @@ void Vdp2::write32(const u32 addr, const u32 data) {
             regs_.lctal = l;
             break;
         case back_screen_table_address_upper:
-            bktau_.raw = h;
-            bktal_.raw = l;
+            regs_.bktau = h;
+            regs_.bktal = l;
             break;
         case rotation_parameter_mode:
             rpmd_.raw   = h;
