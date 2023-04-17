@@ -1642,96 +1642,111 @@ struct Vdp2Regs {
     };
     using VcstalType = Reg<u16, Vcstal>;
     VcstalType vcstal;
-};
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	LineScrollTableAddressNbg0Upper
-///
-/// \brief	Line Scroll Table Address Upper (NBG0) (LSTA0U).
-///
-/// \author	Runik
-/// \date	23/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \struct	Lstau
+    ///
+    /// \brief	Line Scroll Table Address Upper (NBGx) (LSTAxU).
+    ///
+    /// \author	Runik
+    /// \date	17/04/2023
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-union LineScrollTableAddressNbg0Upper {
-    u16            raw;          ///< Raw representation.
-    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
-    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
-};
+    struct Lstau {
+        GENERATE_USING(Lstau, u16);
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	LineScrollTableAddressNbg0Lower
-///
-/// \brief	Line Scroll Table Address Lower (NBG0) (LSTA0L).
-///
-/// \author	Runik
-/// \date	23/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
+        GENERATE_BIT_WITHOUT_ENUM(lstau, 0, 0b111);     ///< Upper vertical cell scroll table address register(NxZMxDx).
 
-union LineScrollTableAddressNbg0Lower {
-    u16            raw;          ///< Raw representation.
-    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
-    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
-};
+        static constexpr auto lo_byte_pos = PosType(0); ///< Defines the range of the upper 8 bits of the register.
+        static constexpr auto hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	LineScrollTableAddressNbg1Upper
-///
-/// \brief	Line Scroll Table Address Upper (NBG1) (LSTA1U).
-///
-/// \author	Runik
-/// \date	23/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
+        static constexpr auto byte_mask = 0xFF;
+        GENERATE_MASKED_RANGE("Vdp2Regs::Lstau", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
+        GENERATE_MASKED_RANGE("Vd2pRegs::Lstau", HI_BYTE, hiByte, byte_mask, hi_byte_pos, byte_mask);
+    };
+    using LstauType = Reg<u16, Lstau>;
+    LstauType lsta0u;
+    LstauType lsta1u;
 
-union LineScrollTableAddressNbg1Upper {
-    u16            raw;          ///< Raw representation.
-    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
-    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
-};
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \struct	Lstal
+    ///
+    /// \brief	Line Scroll Table Address Lower (NBGx) (LSTAxL).
+    ///
+    /// \author	Runik
+    /// \date	17/04/2023
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	LineScrollTableAddressNbg1Lower
-///
-/// \brief	Line Scroll Table Address Lower (NBG1) (LSTA1L).
-///
-/// \author	Runik
-/// \date	23/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
+    struct Lstal {
+        GENERATE_USING(Lstal, u16);
 
-union LineScrollTableAddressNbg1Lower {
-    u16            raw;          ///< Raw representation.
-    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
-    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
-};
+        GENERATE_BIT_WITHOUT_ENUM(lstal, 1, 0x7FFF);    ///< Upper vertical cell scroll table address register(NxZMxDx).
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	LineColorScreenTableAddressUpper
-///
-/// \brief	Line Color Screen Table Address Upper (LCTAU).
-///
-/// \author	Runik
-/// \date	23/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
+        static constexpr auto lo_byte_pos = PosType(0); ///< Defines the range of the upper 8 bits of the register.
+        static constexpr auto hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
 
-union LineColorScreenTableAddressUpper {
-    u16            raw;          ///< Raw representation.
-    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
-    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
-};
+        static constexpr auto byte_mask = 0xFF;
+        GENERATE_MASKED_RANGE("Vdp2Regs::Lstal", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
+        GENERATE_MASKED_RANGE("Vd2pRegs::Lstal", HI_BYTE, hiByte, byte_mask, hi_byte_pos, byte_mask);
+    };
+    using LstalType = Reg<u16, Lstal>;
+    LstalType lsta0l;
+    LstalType lsta1l;
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	LineColorScreenTableAddressLower
-///
-/// \brief	Line Color Screen Table Address Lower (LCTAL).
-///
-/// \author	Runik
-/// \date	23/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \struct	Lctau
+    ///
+    /// \brief	Line Color Screen Table Address Upper (LCTAU).
+    ///
+    /// \author	Runik
+    /// \date	17/04/2023
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-union LineColorScreenTableAddressLower {
-    u16            raw;          ///< Raw representation.
-    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
-    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
+    struct Lctau {
+        GENERATE_USING(Lctau, u16);
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \enum	LineColorScreenMode
+        ///
+        /// \brief	LNCL color mode bit (LCCLMD)
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        enum class LineColorScreenMode : bool { single_color = false, select_per_line = true };
+
+        GENERATE_BIT_WITH_ENUM(lcclmd, 15, 0b1, LineColorScreenMode); ///< Line color screen mode (LCCLMD).
+        GENERATE_BIT_WITHOUT_ENUM(lctau, 0, 0b111);                   ///< Line color screen table address (upper part).
+
+        static constexpr auto lo_byte_pos = PosType(0);               ///< Defines the range of the upper 8 bits of the register.
+        static constexpr auto hi_byte_pos = PosType(8);               ///< Defines the range of the lower 8 bits of the register.
+
+        static constexpr auto byte_mask = 0xFF;
+        GENERATE_MASKED_RANGE("Vdp2Regs::Lctau", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
+        GENERATE_MASKED_RANGE("Vd2pRegs::Lctau", HI_BYTE, hiByte, byte_mask, hi_byte_pos, byte_mask);
+    };
+    using LctauType = Reg<u16, Lctau>;
+    LctauType lctau;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \struct	Lctal
+    ///
+    /// \brief	Line Color Screen Table Address Lower (LCTAL).
+    ///
+    /// \author	Runik
+    /// \date	17/04/2023
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    struct Lctal {
+        GENERATE_USING(Lctal, u16);
+
+        static constexpr auto lo_byte_pos = PosType(0); ///< Defines the range of the upper 8 bits of the register.
+        static constexpr auto hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
+
+        static constexpr auto byte_mask = 0xFF;
+        GENERATE_MASKED_RANGE("Vdp2Regs::Lctal", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
+        GENERATE_MASKED_RANGE("Vd2pRegs::Lctal", HI_BYTE, hiByte, byte_mask, hi_byte_pos, byte_mask);
+    };
+    using LctalType = Reg<u16, Lctal>;
+    LctalType lctal;
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

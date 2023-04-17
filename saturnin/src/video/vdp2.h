@@ -1883,12 +1883,12 @@ class Vdp2 {
     // LineAndVerticalCellScrollControl    scrctl_;
     // VerticalCellScrollTableAddressUpper vcstau_;
     // VerticalCellScrollTableAddressLower vcstal_;
-    LineScrollTableAddressNbg0Upper    lsta0u_;
-    LineScrollTableAddressNbg0Lower    lsta0l_;
-    LineScrollTableAddressNbg1Upper    lsta1u_;
-    LineScrollTableAddressNbg1Lower    lsta1l_;
-    LineColorScreenTableAddressUpper   lctau_;
-    LineColorScreenTableAddressLower   lctal_;
+    // LineScrollTableAddressNbg0Upper    lsta0u_;
+    // LineScrollTableAddressNbg0Lower    lsta0l_;
+    // LineScrollTableAddressNbg1Upper    lsta1u_;
+    // LineScrollTableAddressNbg1Lower    lsta1l_;
+    // LineColorScreenTableAddressUpper   lctau_;
+    // LineColorScreenTableAddressLower   lctal_;
     BackScreenTableAddressUpper        bktau_;
     BackScreenTableAddressLower        bktal_;
     RotationParameterMode              rpmd_;
