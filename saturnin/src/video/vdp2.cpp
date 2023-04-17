@@ -429,8 +429,8 @@ auto Vdp2::read16(const u32 addr) const -> u16 {
         case screen_scroll_value_nbg3_v: return regs_.scyn3.data();
         case reduction_enable: return regs_.zmctl.data();
         case line_and_vertical_cell_scroll_control: return regs_.scrctl.data();
-        case vertical_cell_scroll_table_address_upper: return vcstau_.raw;
-        case vertical_cell_scroll_table_address_lower: return vcstal_.raw;
+        case vertical_cell_scroll_table_address_upper: return regs_.vcstau.data();
+        case vertical_cell_scroll_table_address_lower: return regs_.vcstal.data();
         case line_scroll_table_address_nbg0_upper: return lsta0u_.raw;
         case line_scroll_table_address_nbg0_lower: return lsta0l_.raw;
         case line_scroll_table_address_nbg1_upper: return lsta1u_.raw;
@@ -662,10 +662,10 @@ void Vdp2::write8(const u32 addr, const u8 data) {
         case reduction_enable + 1: regs_.zmctl.upd(Vdp2Regs::Zmctl::loByte(data)); break;
         case line_and_vertical_cell_scroll_control: regs_.scrctl.upd(Vdp2Regs::Scrctl::hiByte(data)); break;
         case line_and_vertical_cell_scroll_control + 1: regs_.scrctl.upd(Vdp2Regs::Scrctl::loByte(data)); break;
-        case vertical_cell_scroll_table_address_upper: vcstau_.upper_8_bits = data; break;
-        case vertical_cell_scroll_table_address_upper + 1: vcstau_.lower_8_bits = data; break;
-        case vertical_cell_scroll_table_address_lower: vcstal_.upper_8_bits = data; break;
-        case vertical_cell_scroll_table_address_lower + 1: vcstal_.lower_8_bits = data; break;
+        case vertical_cell_scroll_table_address_upper: regs_.vcstau.upd(Vdp2Regs::Vcstau::hiByte(data)); break;
+        case vertical_cell_scroll_table_address_upper + 1: regs_.vcstau.upd(Vdp2Regs::Vcstau::loByte(data)); break;
+        case vertical_cell_scroll_table_address_lower: regs_.vcstal.upd(Vdp2Regs::Vcstal::hiByte(data)); break;
+        case vertical_cell_scroll_table_address_lower + 1: regs_.vcstal.upd(Vdp2Regs::Vcstal::loByte(data)); break;
         case line_scroll_table_address_nbg0_upper: lsta0u_.upper_8_bits = data; break;
         case line_scroll_table_address_nbg0_upper + 1: lsta0u_.lower_8_bits = data; break;
         case line_scroll_table_address_nbg0_lower: lsta0l_.upper_8_bits = data; break;
@@ -879,8 +879,8 @@ void Vdp2::write16(const u32 addr, const u16 data) {
         case screen_scroll_value_nbg3_v: regs_.scyn3 = data; break;
         case reduction_enable: regs_.zmctl = data; break;
         case line_and_vertical_cell_scroll_control: regs_.scrctl = data; break;
-        case vertical_cell_scroll_table_address_upper: vcstau_.raw = data; break;
-        case vertical_cell_scroll_table_address_lower: vcstal_.raw = data; break;
+        case vertical_cell_scroll_table_address_upper: regs_.vcstau = data; break;
+        case vertical_cell_scroll_table_address_lower: regs_.vcstal = data; break;
         case line_scroll_table_address_nbg0_upper: lsta0u_.raw = data; break;
         case line_scroll_table_address_nbg0_lower: lsta0l_.raw = data; break;
         case line_scroll_table_address_nbg1_upper: lsta1u_.raw = data; break;
@@ -1095,8 +1095,8 @@ void Vdp2::write32(const u32 addr, const u32 data) {
             regs_.scrctl = l;
             break;
         case vertical_cell_scroll_table_address_upper:
-            vcstau_.raw = h;
-            vcstal_.raw = l;
+            regs_.vcstau = h;
+            regs_.vcstal = l;
             break;
         case line_scroll_table_address_nbg0_upper:
             lsta0u_.raw = h;

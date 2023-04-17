@@ -1594,36 +1594,54 @@ struct Vdp2Regs {
     };
     using ScrctlType = Reg<u16, Scrctl>;
     ScrctlType scrctl;
-};
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	VerticalCellScrollTableAddressUpper
-///
-/// \brief	Vertical Cell Scroll Table Address Upper (NBG0, NBG1) (VCSTAU).
-///
-/// \author	Runik
-/// \date	23/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \struct	Vcstau
+    ///
+    /// \brief	Vertical Cell Scroll Table Address Upper (NBG0, NBG1) (VCSTAU).
+    ///
+    /// \author	Runik
+    /// \date	16/04/2023
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-union VerticalCellScrollTableAddressUpper {
-    u16            raw;          ///< Raw representation.
-    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
-    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
-};
+    struct Vcstau {
+        GENERATE_USING(Vcstau, u16);
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	VerticalCellScrollTableAddressLower
-///
-/// \brief	Vertical Cell Scroll Table Address Lower (NBG0, NBG1) (VCSTAL).
-///
-/// \author	Runik
-/// \date	23/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
+        GENERATE_BIT_WITHOUT_ENUM(vstau, 0, 0b111);     ///< Upper vertical cell scroll table address register(NxZMxDx).
 
-union VerticalCellScrollTableAddressLower {
-    u16            raw;          ///< Raw representation.
-    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
-    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
+        static constexpr auto lo_byte_pos = PosType(0); ///< Defines the range of the upper 8 bits of the register.
+        static constexpr auto hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
+
+        static constexpr auto byte_mask = 0xFF;
+        GENERATE_MASKED_RANGE("Vdp2Regs::Vcstau", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
+        GENERATE_MASKED_RANGE("Vd2pRegs::Vcstau", HI_BYTE, hiByte, byte_mask, hi_byte_pos, byte_mask);
+    };
+    using VcstauType = Reg<u16, Vcstau>;
+    VcstauType vcstau;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \struct	Vcstal
+    ///
+    /// \brief	Vertical Cell Scroll Table Address Lower (NBG0, NBG1) (VCSTAL).
+    ///
+    /// \author	Runik
+    /// \date	16/04/2023
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    struct Vcstal {
+        GENERATE_USING(Vcstal, u16);
+
+        GENERATE_BIT_WITHOUT_ENUM(vstal, 1, 0x7FFF);    ///< Upper vertical cell scroll table address register(NxZMxDx).
+
+        static constexpr auto lo_byte_pos = PosType(0); ///< Defines the range of the upper 8 bits of the register.
+        static constexpr auto hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
+
+        static constexpr auto byte_mask = 0xFF;
+        GENERATE_MASKED_RANGE("Vdp2Regs::Vcstau", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
+        GENERATE_MASKED_RANGE("Vd2pRegs::Vcstau", HI_BYTE, hiByte, byte_mask, hi_byte_pos, byte_mask);
+    };
+    using VcstalType = Reg<u16, Vcstal>;
+    VcstalType vcstal;
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
