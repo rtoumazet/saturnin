@@ -238,7 +238,9 @@ void Vdp2::onVblankIn() {
     resetCacheState();
 }
 
-auto Vdp2::getSpriteColorAddressOffset() -> u16 { return getColorRamAddressOffset(craofb_.color_ram_address_offset_sprite); }
+auto Vdp2::getSpriteColorAddressOffset() -> u16 {
+    return getColorRamAddressOffset(static_cast<u8>(regs_.craofb >> Vdp2Regs::Craofb::spcaos_shft));
+}
 
 // NOLINTNEXTLINE(readability-convert-member-functions-to-static)
 auto Vdp2::getSpritePriority(const u8 register_number) const -> u8 {
@@ -463,10 +465,10 @@ auto Vdp2::read16(const u32 addr) const -> u16 {
         case line_window_table_address_w0_lower: return regs_.lwta0l.data();
         case line_window_table_address_w1_upper: return regs_.lwta1u.data();
         case line_window_table_address_w1_lower: return regs_.lwta1l.data();
-        case sprite_control: return spctl_.raw;
-        case shadow_control: return sdctl_.raw;
-        case color_ram_address_offset_a: return craofa_.raw;
-        case color_ram_address_offset_b: return craofb_.raw;
+        case sprite_control: return regs_.spctl.data();
+        case shadow_control: return regs_.sdctl.data();
+        case color_ram_address_offset_a: return regs_.craofa.data();
+        case color_ram_address_offset_b: return regs_.craofb.data();
         case line_color_screen_enable: return lnclen_.raw;
         case special_priority_mode: return sfprmd_.raw;
         case color_calculation_control: return ccctl_.raw;
@@ -730,14 +732,14 @@ void Vdp2::write8(const u32 addr, const u8 data) {
         case line_window_table_address_w1_upper + 1: regs_.lwta1u.upd(Vdp2Regs::Lwtau::loByte(data)); break;
         case line_window_table_address_w1_lower: regs_.lwta1l.upd(Vdp2Regs::Lwtal::hiByte(data)); break;
         case line_window_table_address_w1_lower + 1: regs_.lwta1l.upd(Vdp2Regs::Lwtal::loByte(data)); break;
-        case sprite_control: spctl_.upper_8_bits = data; break;
-        case sprite_control + 1: spctl_.lower_8_bits = data; break;
-        case shadow_control: sdctl_.upper_8_bits = data; break;
-        case shadow_control + 1: sdctl_.lower_8_bits = data; break;
-        case color_ram_address_offset_a: craofa_.upper_8_bits = data; break;
-        case color_ram_address_offset_a + 1: craofa_.lower_8_bits = data; break;
-        case color_ram_address_offset_b: craofb_.upper_8_bits = data; break;
-        case color_ram_address_offset_b + 1: craofb_.lower_8_bits = data; break;
+        case sprite_control: regs_.spctl.upd(Vdp2Regs::Spctl::hiByte(data)); break;
+        case sprite_control + 1: regs_.spctl.upd(Vdp2Regs::Spctl::loByte(data)); break;
+        case shadow_control: regs_.sdctl.upd(Vdp2Regs::Sdctl::hiByte(data)); break;
+        case shadow_control + 1: regs_.sdctl.upd(Vdp2Regs::Sdctl::loByte(data)); break;
+        case color_ram_address_offset_a: regs_.craofa.upd(Vdp2Regs::Craofa::hiByte(data)); break;
+        case color_ram_address_offset_a + 1: regs_.craofa.upd(Vdp2Regs::Craofa::loByte(data)); break;
+        case color_ram_address_offset_b: regs_.craofb.upd(Vdp2Regs::Craofb::hiByte(data)); break;
+        case color_ram_address_offset_b + 1: regs_.craofb.upd(Vdp2Regs::Craofb::loByte(data)); break;
         case line_color_screen_enable: lnclen_.upper_8_bits = data; break;
         case line_color_screen_enable + 1: lnclen_.lower_8_bits = data; break;
         case special_priority_mode: sfprmd_.upper_8_bits = data; break;
@@ -913,10 +915,10 @@ void Vdp2::write16(const u32 addr, const u16 data) {
         case line_window_table_address_w0_lower: regs_.lwta0l = data; break;
         case line_window_table_address_w1_upper: regs_.lwta1u = data; break;
         case line_window_table_address_w1_lower: regs_.lwta1l = data; break;
-        case sprite_control: spctl_.raw = data; break;
-        case shadow_control: sdctl_.raw = data; break;
-        case color_ram_address_offset_a: craofa_.raw = data; break;
-        case color_ram_address_offset_b: craofb_.raw = data; break;
+        case sprite_control: regs_.spctl = data; break;
+        case shadow_control: regs_.sdctl = data; break;
+        case color_ram_address_offset_a: regs_.craofa = data; break;
+        case color_ram_address_offset_b: regs_.craofb = data; break;
         case line_color_screen_enable: lnclen_.raw = data; break;
         case special_priority_mode: sfprmd_.raw = data; break;
         case color_calculation_control: ccctl_.raw = data; break;
@@ -1163,12 +1165,12 @@ void Vdp2::write32(const u32 addr, const u32 data) {
             regs_.lwta1l = l;
             break;
         case sprite_control:
-            spctl_.raw = h;
-            sdctl_.raw = l;
+            regs_.spctl = h;
+            regs_.sdctl = l;
             break;
         case color_ram_address_offset_a:
-            craofa_.raw = h;
-            craofb_.raw = l;
+            regs_.craofa = h;
+            regs_.craofb = l;
             break;
         case line_color_screen_enable:
             lnclen_.raw = h;
@@ -2556,12 +2558,14 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
     using Mpkl   = Vdp2Regs::Mpkl;
     using Mpmn   = Vdp2Regs::Mpmn;
     using Mpop   = Vdp2Regs::Mpop;
+    using Craofa = Vdp2Regs::Craofa;
+    using Craofb = Vdp2Regs::Craofb;
 
     switch (s) {
         using enum ScrollScreen;
         case nbg0:
             // Color RAM
-            screen.color_ram_address_offset = getColorRamAddressOffset(craofa_.color_ram_address_offset_nbg0);
+            screen.color_ram_address_offset = getColorRamAddressOffset(static_cast<u8>(regs_.craofa >> Craofa::n0caos_shft));
 
             // Transparency
             screen.is_transparency_code_valid
@@ -2620,7 +2624,7 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
             break;
         case nbg1:
             // Color RAM
-            screen.color_ram_address_offset = getColorRamAddressOffset(craofa_.color_ram_address_offset_nbg1);
+            screen.color_ram_address_offset = getColorRamAddressOffset(static_cast<u8>(regs_.craofa >> Craofa::n1caos_shft));
 
             // Transparency
             screen.is_transparency_code_valid
@@ -2677,7 +2681,7 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
             break;
         case nbg2:
             // Color RAM
-            screen.color_ram_address_offset = getColorRamAddressOffset(static_cast<u8>(craofa_.color_ram_address_offset_nbg2));
+            screen.color_ram_address_offset = getColorRamAddressOffset(static_cast<u8>(regs_.craofa >> Craofa::n2caos_shft));
 
             // Transparency
             screen.is_transparency_code_valid
@@ -2727,7 +2731,7 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
 
         case nbg3:
             // Color RAM
-            screen.color_ram_address_offset = getColorRamAddressOffset(static_cast<u8>(craofa_.color_ram_address_offset_nbg3));
+            screen.color_ram_address_offset = getColorRamAddressOffset(static_cast<u8>(regs_.craofa >> Craofa::n3caos_shft));
 
             // Transparency
             screen.is_transparency_code_valid
@@ -2777,7 +2781,7 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
 
         case rbg0:
             // Color RAM
-            screen.color_ram_address_offset = getColorRamAddressOffset(craofb_.color_ram_address_offset_rbg0);
+            screen.color_ram_address_offset = getColorRamAddressOffset(static_cast<u8>(regs_.craofa >> Craofa::n0caos_shft));
 
             // Transparency
             screen.is_transparency_code_valid
@@ -2842,7 +2846,7 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
 
         case rbg1:
             // Color RAM
-            screen.color_ram_address_offset = getColorRamAddressOffset(craofa_.color_ram_address_offset_nbg0);
+            screen.color_ram_address_offset = getColorRamAddressOffset(static_cast<u8>(regs_.craofa >> Craofa::n0caos_shft));
 
             // Transparency
             screen.is_transparency_code_valid

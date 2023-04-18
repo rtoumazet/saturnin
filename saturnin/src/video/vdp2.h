@@ -735,7 +735,7 @@ class Vdp2 {
     /// \returns    The sprite control register.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    auto getSpriteControlRegister() const -> SpriteControl { return spctl_; }
+    auto getSpriteControlRegister() const -> Vdp2Regs::SpctlType { return regs_.spctl; }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn auto Vdp2::getSpritePriority(const u8 register_number) const -> u8;
@@ -1915,21 +1915,21 @@ class Vdp2 {
     // LineWindowTableAddressW0Lower   lwta0l_;
     // LineWindowTableAddressW1Upper   lwta1u_;
     // LineWindowTableAddressW1Lower   lwta1l_;
-    SpriteControl                   spctl_;
-    ShadowControl                   sdctl_;
-    ColorRamAddressOffsetA          craofa_;
-    ColorRamAddressOffsetB          craofb_;
-    LineColorScreenEnable           lnclen_;
-    SpecialPriorityMode             sfprmd_;
-    ColorCalculationControl         ccctl_;
-    SpecialColorCalculationMode     sfccmd_;
-    PriorityNumberSpriteA           prisa_;
-    PriorityNumberSpriteB           prisb_;
-    PriorityNumberSpriteC           prisc_;
-    PriorityNumberSpriteD           prisd_;
-    PriorityNumberA                 prina_;
-    PriorityNumberB                 prinb_;
-    PriorityNumberR                 prir_;
+    // SpriteControl                   spctl_;
+    // ShadowControl               sdctl_;
+    // ColorRamAddressOffsetA      craofa_;
+    // ColorRamAddressOffsetB      craofb_;
+    LineColorScreenEnable       lnclen_;
+    SpecialPriorityMode         sfprmd_;
+    ColorCalculationControl     ccctl_;
+    SpecialColorCalculationMode sfccmd_;
+    PriorityNumberSpriteA       prisa_;
+    PriorityNumberSpriteB       prisb_;
+    PriorityNumberSpriteC       prisc_;
+    PriorityNumberSpriteD       prisd_;
+    PriorityNumberA             prina_;
+    PriorityNumberB             prinb_;
+    PriorityNumberR             prir_;
     // Reserve                                         rsv2_;
     ColorCalculationRatioSpriteA       ccrsa_;
     ColorCalculationRatioSpriteB       ccrsb_;

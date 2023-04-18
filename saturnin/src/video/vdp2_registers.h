@@ -2454,138 +2454,201 @@ struct Vdp2Regs {
     using LwtalType = Reg<u16, Lwtal>;
     LwtalType lwta0l;
     LwtalType lwta1l;
-};
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   SpriteColorCalculationCondition
-///
-/// \brief  SPCCCSx bits values.
-////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \struct	Spctl
+    ///
+    /// \brief	Sprite Control (SPCTL).
+    ///
+    /// \author	Runik
+    /// \date	18/04/2023
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class SpriteColorCalculationCondition : u8 {
-    only_when_priority_is_less_or_equals_condition   = 0b00, ///< (Priority number) <= (Color calculation condition number) only.
-    only_when_priority_equals_condition              = 0b01, ///< (Priority number) = (Color calculation condition number) only.
-    only_when_priority_is_higher_or_equals_condition = 0b10, ///< (Priority number) >= (Color calculation condition number) only.
-    only_when_color_data_msb_is_1                    = 0b11  ///< Only when Color Data MSB is 1.
-};
+    struct Spctl {
+        GENERATE_USING(Spctl, u16);
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   SpriteColorMode
-///
-/// \brief  SPCLMD bit values.
-////////////////////////////////////////////////////////////////////////////////////////////////////
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \enum   SpriteColorCalculationCondition
+        ///
+        /// \brief  SPCCCSx bits values.
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class SpriteColorMode : bool {
-    only_palette = false, ///< Sprite data is all in palette format.
-    mixed        = true   ///< Sprite data is in palette format and RGB format.
-};
+        enum class SpriteColorCalculationCondition : u8 {
+            only_when_priority_is_less_or_equals_condition
+            = 0b00,                                     ///< (Priority number) <= (Color calculation condition number) only.
+            only_when_priority_equals_condition = 0b01, ///< (Priority number) = (Color calculation condition number) only.
+            only_when_priority_is_higher_or_equals_condition
+            = 0b10,                                     ///< (Priority number) >= (Color calculation condition number) only.
+            only_when_color_data_msb_is_1 = 0b11        ///< Only when Color Data MSB is 1.
+        };
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   SpriteWindowEnable
-///
-/// \brief  SPWINEN bit values.
-////////////////////////////////////////////////////////////////////////////////////////////////////
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \enum   SpriteColorMode
+        ///
+        /// \brief  SPCLMD bit values.
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class SpriteWindowEnable : bool {
-    does_not_use_sprite_window = false, ///< Does not use sprite window.
-    uses_sprite_window         = true   ///< Uses sprite window.
-};
+        enum class SpriteColorMode : bool {
+            only_palette = false, ///< Sprite data is all in palette format.
+            mixed        = true   ///< Sprite data is in palette format and RGB format.
+        };
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   SpriteType
-///
-/// \brief  SPTYPEx bit values.
-////////////////////////////////////////////////////////////////////////////////////////////////////
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \enum   SpriteWindowEnable
+        ///
+        /// \brief  SPWINEN bit values.
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class SpriteType : u8 {
-    type_0 = 0b0000, ///< Type 0.
-    type_1 = 0b0001, ///< Type 1.
-    type_2 = 0b0010, ///< Type 2.
-    type_3 = 0b0011, ///< Type 3.
-    type_4 = 0b0100, ///< Type 4.
-    type_5 = 0b0101, ///< Type 5.
-    type_6 = 0b0110, ///< Type 6.
-    type_7 = 0b0111, ///< Type 7.
-    type_8 = 0b1000, ///< Type 8.
-    type_9 = 0b1001, ///< Type 9.
-    type_a = 0b1010, ///< Type A.
-    type_b = 0b1011, ///< Type B.
-    type_c = 0b1100, ///< Type C.
-    type_d = 0b1101, ///< Type D.
-    type_e = 0b1110, ///< Type E.
-    type_f = 0b1111  ///< Type F.
+        enum class SpriteWindowEnable : bool {
+            does_not_use_sprite_window = false, ///< Does not use sprite window.
+            uses_sprite_window         = true   ///< Uses sprite window.
+        };
 
-};
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \enum   SpriteType
+        ///
+        /// \brief  SPTYPEx bit values.
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	SpriteControl
-///
-/// \brief	Sprite Control (SPCTL).
-///
-/// \author	Runik
-/// \date	25/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
+        enum class SpriteType : u8 {
+            type_0 = 0b0000, ///< Type 0.
+            type_1 = 0b0001, ///< Type 1.
+            type_2 = 0b0010, ///< Type 2.
+            type_3 = 0b0011, ///< Type 3.
+            type_4 = 0b0100, ///< Type 4.
+            type_5 = 0b0101, ///< Type 5.
+            type_6 = 0b0110, ///< Type 6.
+            type_7 = 0b0111, ///< Type 7.
+            type_8 = 0b1000, ///< Type 8.
+            type_9 = 0b1001, ///< Type 9.
+            type_a = 0b1010, ///< Type A.
+            type_b = 0b1011, ///< Type B.
+            type_c = 0b1100, ///< Type C.
+            type_d = 0b1101, ///< Type D.
+            type_e = 0b1110, ///< Type E.
+            type_f = 0b1111  ///< Type F.
 
-union SpriteControl {
-    u16             raw;                                ///< Raw representation.
-    BitField<12, 2> sprite_color_calculation_condition; ///< Defines SPCCCSx bits.
-    BitField<8, 3>  sprite_color_calculation_number;    ///< Defines SPCCNx bits.
-    BitField<5>     sprite_color_mode;                  ///< Defines SPCLMD bit.
-    BitField<4>     sprite_window_enable;               ///< Defines SPWINEN bit.
-    BitField<0, 4>  sprite_type;                        ///< Defines SPTYPEx bits.
-    BitField<8, 8>  upper_8_bits;                       ///< Defines the range of the upper 8 bits of the register.
-    BitField<0, 8>  lower_8_bits;                       ///< Defines the range of the lower 8 bits of the register.
-};
+        };
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	ShadowControl
-///
-/// \brief	Shadow Control (SDCTL).
-///
-/// \author	Runik
-/// \date	23/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
+        GENERATE_BIT_WITH_ENUM(spcccs, 12, 0b11, SpriteColorCalculationCondition); ///< Sprite color calculation condition.
+        GENERATE_BIT_WITHOUT_ENUM(spccn, 8, 0b111);                                ///< Sprite color calculation number.
+        GENERATE_BIT_WITH_ENUM(spclmd, 5, 0b1, SpriteColorMode);                   ///< Sprite color mode.
+        GENERATE_BIT_WITH_ENUM(spwinen, 4, 0b1, SpriteWindowEnable);               ///< Sprite window enable.
+        GENERATE_BIT_WITH_ENUM(sptype, 0, 0b1111, SpriteType);                     ///< Sprite type.
 
-union ShadowControl {
-    u16            raw;          ///< Raw representation.
-    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
-    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
-};
+        static constexpr auto lo_byte_pos = PosType(0); ///< Defines the range of the upper 8 bits of the register.
+        static constexpr auto hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	ColorRamAddressOffsetA
-///
-/// \brief	Color RAM Address Offset (NBG0 - NBG3) (CRAOFA).
-///
-/// \author	Runik
-/// \date	25/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
+        static constexpr auto byte_mask = 0xFF;
+        GENERATE_MASKED_RANGE("Vdp2Regs::Spctl", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
+        GENERATE_MASKED_RANGE("Vd2pRegs::Spctl", HI_BYTE, hiByte, byte_mask, hi_byte_pos, byte_mask);
+    };
+    using SpctlType = Reg<u16, Spctl>;
+    SpctlType spctl;
 
-union ColorRamAddressOffsetA {
-    u16             raw;                           ///< Raw representation.
-    BitField<12, 3> color_ram_address_offset_nbg3; ///< Defines N3CAOSx bits.
-    BitField<8, 3>  color_ram_address_offset_nbg2; ///< Defines N2CAOSx bits.
-    BitField<4, 3>  color_ram_address_offset_nbg1; ///< Defines N1CAOSx bits.
-    BitField<0, 3>  color_ram_address_offset_nbg0; ///< Defines N0CAOSx bits.
-    BitField<8, 8>  upper_8_bits;                  ///< Defines the range of the upper 8 bits of the register.
-    BitField<0, 8>  lower_8_bits;                  ///< Defines the range of the lower 8 bits of the register.
-};
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \struct	Sdctl
+    ///
+    /// \brief	Shadow Control (SDCTL).
+    ///
+    /// \author	Runik
+    /// \date	18/04/2023
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	ColorRamAddressOffsetB
-///
-/// \brief	Color RAM Address Offset (RBG0, SPRITE) (CRAOFB).
-///
-/// \author	Runik
-/// \date	25/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
+    struct Sdctl {
+        GENERATE_USING(Sdctl, u16);
 
-union ColorRamAddressOffsetB {
-    u16            raw;                             ///< Raw representation.
-    BitField<4, 3> color_ram_address_offset_sprite; ///< Defines SPCAOSx bits.
-    BitField<0, 3> color_ram_address_offset_rbg0;   ///< Defines R0CAOSx bits.
-    BitField<8, 8> upper_8_bits;                    ///< Defines the range of the upper 8 bits of the register.
-    BitField<0, 8> lower_8_bits;                    ///< Defines the range of the lower 8 bits of the register.
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \enum	ShadowEnable
+        ///
+        /// \brief	Determines whether to use the shadow function for the scroll screen and back screen.
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        enum class ShadowEnable : bool {
+            does_not_use_shadow_function = false, ///< Does not use shadow function (shadow not added).
+            uses_shadow_function         = true   ///< Uses shadow function (shadow added).
+        };
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \enum	TransparentShadowSelect
+        ///
+        /// \brief	Determines whether to activate the sprite of the transparent shadow.
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        enum class TransparentShadowSelect : bool {
+            disables_transparent_shadow_sprite = false, ///< Disables transparent shadow sprite.
+            enables_transparent_shadow_sprite  = true   ///< Enables transparent shadow sprite.
+        };
+
+        GENERATE_BIT_WITH_ENUM(n0sden, 0, 0b1, ShadowEnable);            ///< NBG0 (or RBG1) shadow enable (N0SDEN).
+        GENERATE_BIT_WITH_ENUM(n1sden, 1, 0b1, ShadowEnable);            ///< NBG1 (or EXBG) shadow enable (N1SDEN).
+        GENERATE_BIT_WITH_ENUM(n2sden, 2, 0b1, ShadowEnable);            ///< NBG2 shadow enable (N2SDEN).
+        GENERATE_BIT_WITH_ENUM(n3sden, 3, 0b1, ShadowEnable);            ///< NBG3 shadow enable (N3SDEN).
+        GENERATE_BIT_WITH_ENUM(r0sden, 4, 0b1, ShadowEnable);            ///< RBG0 shadow enable (R0SDEN).
+        GENERATE_BIT_WITH_ENUM(bksden, 5, 0b1, ShadowEnable);            ///< Back screen shadow enable (BKSDEN).
+        GENERATE_BIT_WITH_ENUM(tpsdsl, 8, 0b1, TransparentShadowSelect); ///< Transparent shadow select.
+
+        static constexpr auto lo_byte_pos = PosType(0); ///< Defines the range of the upper 8 bits of the register.
+        static constexpr auto hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
+
+        static constexpr auto byte_mask = 0xFF;
+        GENERATE_MASKED_RANGE("Vdp2Regs::Sdctl", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
+        GENERATE_MASKED_RANGE("Vd2pRegs::Sdctl", HI_BYTE, hiByte, byte_mask, hi_byte_pos, byte_mask);
+    };
+    using SdctlType = Reg<u16, Sdctl>;
+    SdctlType sdctl;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \struct	Craofa
+    ///
+    /// \brief	Color RAM Address Offset (NBGx) (CRAOFA).
+    ///
+    /// \author	Runik
+    /// \date	18/04/2023
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    struct Craofa {
+        GENERATE_USING(Craofa, u16);
+
+        GENERATE_BIT_WITHOUT_ENUM(n0caos, 0, 0b111);    ///< NBG0 color RAM address offset.
+        GENERATE_BIT_WITHOUT_ENUM(n1caos, 4, 0b111);    ///< NBG1 color RAM address offset.
+        GENERATE_BIT_WITHOUT_ENUM(n2caos, 8, 0b111);    ///< NBG2 color RAM address offset.
+        GENERATE_BIT_WITHOUT_ENUM(n3caos, 12, 0b111);   ///< NBG3 color RAM address offset.
+
+        static constexpr auto lo_byte_pos = PosType(0); ///< Defines the range of the upper 8 bits of the register.
+        static constexpr auto hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
+
+        static constexpr auto byte_mask = 0xFF;
+        GENERATE_MASKED_RANGE("Vdp2Regs::Craofa", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
+        GENERATE_MASKED_RANGE("Vd2pRegs::Craofa", HI_BYTE, hiByte, byte_mask, hi_byte_pos, byte_mask);
+    };
+    using CraofaType = Reg<u16, Craofa>;
+    CraofaType craofa;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \struct	Craofb
+    ///
+    /// \brief	Color RAM Address Offset (RBG0, SPRITE) (CRAOFB).
+    ///
+    /// \author	Runik
+    /// \date	18/04/2023
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    struct Craofb {
+        GENERATE_USING(Craofb, u16);
+
+        GENERATE_BIT_WITHOUT_ENUM(r0caos, 0, 0b111);    ///< RBG0 color RAM address offset.
+        GENERATE_BIT_WITHOUT_ENUM(spcaos, 4, 0b111);    ///< Sprite color RAM address offset.
+
+        static constexpr auto lo_byte_pos = PosType(0); ///< Defines the range of the upper 8 bits of the register.
+        static constexpr auto hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
+
+        static constexpr auto byte_mask = 0xFF;
+        GENERATE_MASKED_RANGE("Vdp2Regs::Craofb", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
+        GENERATE_MASKED_RANGE("Vd2pRegs::Craofb", HI_BYTE, hiByte, byte_mask, hi_byte_pos, byte_mask);
+    };
+    using CraofbType = Reg<u16, Craofb>;
+    CraofbType craofb;
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

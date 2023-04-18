@@ -190,11 +190,13 @@ void Vdp1Part::calculatePriority(const EmulatorModules& modules) {
     // calculation overhead is too big for now, and you can't have a one pixel granularity using OpenGL.
     // That will have to be reworked later.
 
-    using Tvmr = Vdp1Regs::Tvmr;
+    using Tvmr  = Vdp1Regs::Tvmr;
+    using Spctl = Vdp2Regs::Spctl;
 
-    auto       spctl           = modules.vdp2()->getSpriteControlRegister();
-    auto       tvmr            = modules.vdp1()->getTvModeSelectionRegister();
-    const auto sprite_type     = static_cast<SpriteType>(static_cast<u8>(spctl.sprite_type));
+    auto spctl = modules.vdp2()->getSpriteControlRegister();
+    auto tvmr  = modules.vdp1()->getTvModeSelectionRegister();
+    // const auto sprite_type     = static_cast<SpriteType>(static_cast<u8>(spctl.sprite_type));
+    const auto sprite_type     = spctl >> Spctl::sptype_enum;
     auto       sprite_register = SpriteTypeRegisterType{cmdcolr_.data()};
     // sprite_type.
     auto           priority_number_register = byte{};
@@ -202,11 +204,10 @@ void Vdp1Part::calculatePriority(const EmulatorModules& modules) {
     constexpr auto disp_priority_on_1_bit   = byte{2};
 
     if ((tvmr >> Tvmr::tvm0_enum) == Tvmr::BitDepthSelection::sixteen_bits_per_pixel) {
-        const auto is_data_mixed
-            = static_cast<SpriteColorMode>(static_cast<bool>(spctl.sprite_color_mode)) == SpriteColorMode::mixed;
+        const auto is_data_mixed = (spctl >> Spctl::spclmd_enum) == Spctl::SpriteColorMode::mixed;
 
         switch (sprite_type) {
-            using enum SpriteType;
+            using enum Spctl::SpriteType;
             case type_0: {
                 if (is_data_mixed) {
                     priority_number_register
@@ -278,7 +279,7 @@ void Vdp1Part::calculatePriority(const EmulatorModules& modules) {
     } else {
         // 8 bits by pixel
         switch (sprite_type) {
-            using enum SpriteType;
+            using enum Spctl::SpriteType;
             case type_8: {
                 priority_number_register = getPriorityRegister(
                     modules,
