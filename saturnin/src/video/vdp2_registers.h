@@ -1958,216 +1958,158 @@ struct Vdp2Regs {
     };
     using KtctlType = Reg<u16, Ktctl>;
     KtctlType ktctl;
-};
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	CoefficientTableControl
-///
-/// \brief	Coefficient Table Control (KTCTL).
-///
-/// \author	Runik
-/// \date	23/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \struct	Ktaof
+    ///
+    /// \brief	Coefficient Table Address Offset (Rotation Parameter A,B) (KTAOF).
+    ///
+    /// \author	Runik
+    /// \date	17/04/2023
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-// union CoefficientTableControl {
-//     u16            raw;          ///< Raw representation.
-//     BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
-//     BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
-// };
+    struct Ktaof {
+        GENERATE_USING(Ktaof, u16);
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	CoefficientTableAddressOffset
-///
-/// \brief	Coefficient Table Address Offset (Rotation Parameter A,B) (KTAOF).
-///
-/// \author	Runik
-/// \date	23/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
+        GENERATE_BIT_WITHOUT_ENUM(raktaos, 0, 0b111);   /**< Designates the lead address offset value of the coefficient table
+                                                             stored in the rotation parameter A table. (RAKTAOS) */
+        GENERATE_BIT_WITHOUT_ENUM(rbktaos, 8, 0b111);   /**< Designates the lead address offset value of the coefficient table
+                                                             stored in the rotation parameter B table. (RBKTAOS) */
 
-union CoefficientTableAddressOffset {
-    u16            raw;          ///< Raw representation.
-    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
-    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
-};
+        static constexpr auto lo_byte_pos = PosType(0); ///< Defines the range of the upper 8 bits of the register.
+        static constexpr auto hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	ScreenOverPatternNameA
-///
-/// \brief	Screen Over Pattern Name (Rotation Parameter A) (OVPNRA).
-///
-/// \author	Runik
-/// \date	23/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
+        static constexpr auto byte_mask = 0xFF;
+        GENERATE_MASKED_RANGE("Vdp2Regs::Ktaof", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
+        GENERATE_MASKED_RANGE("Vd2pRegs::Ktaof", HI_BYTE, hiByte, byte_mask, hi_byte_pos, byte_mask);
+    };
+    using KtaofType = Reg<u16, Ktaof>;
+    KtaofType ktaof;
 
-union ScreenOverPatternNameA {
-    u16            raw;          ///< Raw representation.
-    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
-    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
-};
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \struct	Ovprn
+    ///
+    /// \brief	Screen Over Pattern Name (OVPRNx)
+    ///
+    /// \author	Runik
+    /// \date	17/04/2023
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	ScreenOverPatternNameB
-///
-/// \brief	Screen Over Pattern Name (Rotation Parameter B) (OVPNRB).
-///
-/// \author	Runik
-/// \date	23/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
+    struct Ovprn {
+        GENERATE_USING(Ovprn, u16);
 
-union ScreenOverPatternNameB {
-    u16            raw;          ///< Raw representation.
-    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
-    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
-};
+        static constexpr auto lo_byte_pos = PosType(0); ///< Defines the range of the upper 8 bits of the register.
+        static constexpr auto hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	RotationParameterTableAddressUpper
-///
-/// \brief	Rotation Parameter Table Address Upper (RPTAU).
-///
-/// \author	Runik
-/// \date	23/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
+        static constexpr auto byte_mask = 0xFF;
+        GENERATE_MASKED_RANGE("Vdp2Regs::Ovprn", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
+        GENERATE_MASKED_RANGE("Vd2pRegs::Ovprn", HI_BYTE, hiByte, byte_mask, hi_byte_pos, byte_mask);
+    };
+    using OvprnType = Reg<u16, Ovprn>;
+    OvprnType ovpnra;
+    OvprnType ovpnrb;
 
-union RotationParameterTableAddressUpper {
-    u16            raw;          ///< Raw representation.
-    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
-    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
-};
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \struct	Rptau
+    ///
+    /// \brief	Rotation Parameter Table Address Upper (RPTAU).
+    ///
+    /// \author	Runik
+    /// \date	17/04/2023
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	RotationParameterTableAddressLower
-///
-/// \brief	Rotation Parameter Table Address Lower (RPTAL).
-///
-/// \author	Runik
-/// \date	23/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
+    struct Rptau {
+        GENERATE_USING(Rptau, u16);
 
-union RotationParameterTableAddressLower {
-    u16            raw;          ///< Raw representation.
-    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
-    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
-};
+        GENERATE_BIT_WITHOUT_ENUM(rptau, 0, 0b111);     ///< Upper rotation parameter table address (RPTA).
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	WindowPositionW0HorizontalStart
-///
-/// \brief	Window Position (W0 Horizontal Start Point) (WPSX0).
-///
-/// \author	Runik
-/// \date	23/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
+        static constexpr auto lo_byte_pos = PosType(0); ///< Defines the range of the upper 8 bits of the register.
+        static constexpr auto hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
 
-union WindowPositionW0HorizontalStart {
-    u16            raw;          ///< Raw representation.
-    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
-    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
-};
+        static constexpr auto byte_mask = 0xFF;
+        GENERATE_MASKED_RANGE("Vdp2Regs::Rptau", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
+        GENERATE_MASKED_RANGE("Vd2pRegs::Rptau", HI_BYTE, hiByte, byte_mask, hi_byte_pos, byte_mask);
+    };
+    using RptauType = Reg<u16, Rptau>;
+    RptauType rptau;
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	WindowPositionW0VerticalStart
-///
-/// \brief	Window Position (W0 Vertical Start Point) (WPSY0).
-///
-/// \author	Runik
-/// \date	23/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \struct	Rptal
+    ///
+    /// \brief	Rotation Parameter Table Address Lower (RPTAL).
+    ///
+    /// \author	Runik
+    /// \date	17/04/2023
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-union WindowPositionW0VerticalStart {
-    u16            raw;          ///< Raw representation.
-    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
-    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
-};
+    struct Rptal {
+        GENERATE_USING(Rptal, u16);
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	WindowPositionW0HorizontalEnd
-///
-/// \brief	Window Position (W0 Horizontal End Point) (WPEX0).
-///
-/// \author	Runik
-/// \date	23/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
+        GENERATE_BIT_WITHOUT_ENUM(rptal, 1, 0x7FFF);    ///< Lower rotation parameter table address (RPTAL).
 
-union WindowPositionW0HorizontalEnd {
-    u16            raw;          ///< Raw representation.
-    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
-    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
-};
+        static constexpr auto lo_byte_pos = PosType(0); ///< Defines the range of the upper 8 bits of the register.
+        static constexpr auto hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	WindowPositionW0VerticalEnd
-///
-/// \brief	Window Position (W0 Vertical End Point) (WPEY0).
-///
-/// \author	Runik
-/// \date	23/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
+        static constexpr auto byte_mask = 0xFF;
+        GENERATE_MASKED_RANGE("Vdp2Regs::Rptal", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
+        GENERATE_MASKED_RANGE("Vd2pRegs::Rptal", HI_BYTE, hiByte, byte_mask, hi_byte_pos, byte_mask);
+    };
+    using RptalType = Reg<u16, Rptal>;
+    RptalType rptal;
 
-union WindowPositionW0VerticalEnd {
-    u16            raw;          ///< Raw representation.
-    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
-    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
-};
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \struct	Wpsx
+    ///
+    /// \brief	Window position (for horizontal coordinates).
+    ///
+    /// \author	Runik
+    /// \date	17/04/2023
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	WindowPositionW1HorizontalStart
-///
-/// \brief	Window Position (W1 Horizontal Start Point) (WPSX1).
-///
-/// \author	Runik
-/// \date	23/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
+    struct Wpsx {
+        GENERATE_USING(Wpsx, u16);
 
-union WindowPositionW1HorizontalStart {
-    u16            raw;          ///< Raw representation.
-    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
-    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
-};
+        GENERATE_BIT_WITHOUT_ENUM(rptau, 0, 0x3FF);     ///< Window start/end X bits (WxxXx).
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	WindowPositionW1VerticalStart
-///
-/// \brief	Window Position (W1 Vertical Start Point) (WPSY1).
-///
-/// \author	Runik
-/// \date	23/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
+        static constexpr auto lo_byte_pos = PosType(0); ///< Defines the range of the upper 8 bits of the register.
+        static constexpr auto hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
 
-union WindowPositionW1VerticalStart {
-    u16            raw;          ///< Raw representation.
-    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
-    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
-};
+        static constexpr auto byte_mask = 0xFF;
+        GENERATE_MASKED_RANGE("Vdp2Regs::Wpsx", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
+        GENERATE_MASKED_RANGE("Vd2pRegs::Wpsx", HI_BYTE, hiByte, byte_mask, hi_byte_pos, byte_mask);
+    };
+    using WpsxType = Reg<u16, Wpsx>;
+    WpsxType wpsx0;
+    WpsxType wpex0;
+    WpsxType wpsx1;
+    WpsxType wpex1;
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	WindowPositionW1HorizontalEnd
-///
-/// \brief	Window Position (W1 Horizontal End Point) (WPEX1).
-///
-/// \author	Runik
-/// \date	23/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \struct	Wpsy
+    ///
+    /// \brief	Window position (for vertical coordinates).
+    ///
+    /// \author	Runik
+    /// \date	18/04/2023
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-union WindowPositionW1HorizontalEnd {
-    u16            raw;          ///< Raw representation.
-    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
-    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
-};
+    struct Wpsy {
+        GENERATE_USING(Wpsy, u16);
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	WindowPositionW1VerticalEnd
-///
-/// \brief	Window Position (W1 Vertical End Point) (WPEY1).
-///
-/// \author	Runik
-/// \date	23/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
+        GENERATE_BIT_WITHOUT_ENUM(rptau, 0, 0x1FF);     ///< Window start/end Y bits (WxxYx).
 
-union WindowPositionW1VerticalEnd {
-    u16            raw;          ///< Raw representation.
-    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
-    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
+        static constexpr auto lo_byte_pos = PosType(0); ///< Defines the range of the upper 8 bits of the register.
+        static constexpr auto hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
+
+        static constexpr auto byte_mask = 0xFF;
+        GENERATE_MASKED_RANGE("Vdp2Regs::Wpsy", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
+        GENERATE_MASKED_RANGE("Vd2pRegs::Wpsy", HI_BYTE, hiByte, byte_mask, hi_byte_pos, byte_mask);
+    };
+    using WpsyType = Reg<u16, Wpsy>;
+    WpsyType wpsy0;
+    WpsyType wpey0;
+    WpsyType wpsy1;
+    WpsyType wpey1;
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
