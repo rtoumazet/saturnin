@@ -1907,10 +1907,10 @@ class Vdp2 {
     // WindowPositionW1VerticalStart   wpsy1_;
     // WindowPositionW1HorizontalEnd   wpex1_;
     // WindowPositionW1VerticalEnd     wpey1_;
-    WindowControlA                  wctla_;
-    WindowControlB                  wctlb_;
-    WindowControlC                  wctlc_;
-    WindowControlD                  wctld_;
+    // WindowControlA                  wctla_;
+    // WindowControlB                  wctlb_;
+    // WindowControlC                  wctlc_;
+    // WindowControlD                  wctld_;
     LineWindowTableAddressW0Upper   lwta0u_;
     LineWindowTableAddressW0Lower   lwta0l_;
     LineWindowTableAddressW1Upper   lwta1u_;

@@ -455,10 +455,10 @@ auto Vdp2::read16(const u32 addr) const -> u16 {
         case window_position_w1_v_start_point: return regs_.wpsy1.data();
         case window_position_w1_h_end_point: return regs_.wpex1.data();
         case window_position_w1_v_end_point: return regs_.wpey1.data();
-        case window_control_a: return wctla_.raw;
-        case window_control_b: return wctlb_.raw;
-        case window_control_c: return wctlc_.raw;
-        case window_control_d: return wctld_.raw;
+        case window_control_a: return regs_.wctla.data();
+        case window_control_b: return regs_.wctlb.data();
+        case window_control_c: return regs_.wctlc.data();
+        case window_control_d: return regs_.wctld.data();
         case line_window_table_address_w0_upper: return lwta0u_.raw;
         case line_window_table_address_w0_lower: return lwta0l_.raw;
         case line_window_table_address_w1_upper: return lwta1u_.raw;
@@ -714,14 +714,14 @@ void Vdp2::write8(const u32 addr, const u8 data) {
         case window_position_w1_h_end_point + 1: regs_.wpex1.upd(Vdp2Regs::Wpsx::loByte(data)); break;
         case window_position_w1_v_end_point: regs_.wpey1.upd(Vdp2Regs::Wpsy::hiByte(data)); break;
         case window_position_w1_v_end_point + 1: regs_.wpey1.upd(Vdp2Regs::Wpsy::loByte(data)); break;
-        case window_control_a: wctla_.upper_8_bits = data; break;
-        case window_control_a + 1: wctla_.lower_8_bits = data; break;
-        case window_control_b: wctlb_.upper_8_bits = data; break;
-        case window_control_b + 1: wctlb_.lower_8_bits = data; break;
-        case window_control_c: wctlc_.upper_8_bits = data; break;
-        case window_control_c + 1: wctlc_.lower_8_bits = data; break;
-        case window_control_d: wctld_.upper_8_bits = data; break;
-        case window_control_d + 1: wctld_.lower_8_bits = data; break;
+        case window_control_a: regs_.wctla.upd(Vdp2Regs::Wctla::hiByte(data)); break;
+        case window_control_a + 1: regs_.wctla.upd(Vdp2Regs::Wctla::loByte(data)); break;
+        case window_control_b: regs_.wctlb.upd(Vdp2Regs::Wctlb::hiByte(data)); break;
+        case window_control_b + 1: regs_.wctlb.upd(Vdp2Regs::Wctlb::loByte(data)); break;
+        case window_control_c: regs_.wctlc.upd(Vdp2Regs::Wctlc::hiByte(data)); break;
+        case window_control_c + 1: regs_.wctlc.upd(Vdp2Regs::Wctlc::loByte(data)); break;
+        case window_control_d: regs_.wctld.upd(Vdp2Regs::Wctld::hiByte(data)); break;
+        case window_control_d + 1: regs_.wctld.upd(Vdp2Regs::Wctld::loByte(data)); break;
         case line_window_table_address_w0_upper: lwta0u_.upper_8_bits = data; break;
         case line_window_table_address_w0_upper + 1: lwta0u_.lower_8_bits = data; break;
         case line_window_table_address_w0_lower: lwta0l_.upper_8_bits = data; break;
@@ -905,10 +905,10 @@ void Vdp2::write16(const u32 addr, const u16 data) {
         case window_position_w1_v_start_point: regs_.wpsy1 = data; break;
         case window_position_w1_h_end_point: regs_.wpex1 = data; break;
         case window_position_w1_v_end_point: regs_.wpey1 = data; break;
-        case window_control_a: wctla_.raw = data; break;
-        case window_control_b: wctlb_.raw = data; break;
-        case window_control_c: wctlc_.raw = data; break;
-        case window_control_d: wctld_.raw = data; break;
+        case window_control_a: regs_.wctla = data; break;
+        case window_control_b: regs_.wctlb = data; break;
+        case window_control_c: regs_.wctlc = data; break;
+        case window_control_d: regs_.wctld = data; break;
         case line_window_table_address_w0_upper: lwta0u_.raw = data; break;
         case line_window_table_address_w0_lower: lwta0l_.raw = data; break;
         case line_window_table_address_w1_upper: lwta1u_.raw = data; break;
@@ -1147,12 +1147,12 @@ void Vdp2::write32(const u32 addr, const u32 data) {
             regs_.wpey1 = l;
             break;
         case window_control_a:
-            wctla_.raw = h;
-            wctlb_.raw = l;
+            regs_.wctla = h;
+            regs_.wctlb = l;
             break;
         case window_control_c:
-            wctlc_.raw = h;
-            wctld_.raw = l;
+            regs_.wctlc = h;
+            regs_.wctld = l;
             break;
         case line_window_table_address_w0_upper:
             lwta0u_.raw = h;

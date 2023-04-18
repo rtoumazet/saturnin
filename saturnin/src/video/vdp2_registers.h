@@ -2110,66 +2110,288 @@ struct Vdp2Regs {
     WpsyType wpey0;
     WpsyType wpsy1;
     WpsyType wpey1;
-};
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	WindowControlA
-///
-/// \brief	Window Control (NBG0, NBG1) (WCTLA).
-///
-/// \author	Runik
-/// \date	23/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \struct	Wctla
+    ///
+    /// \brief	Window Control (NBG0, NBG1) (WCTLA).
+    ///
+    /// \author	Runik
+    /// \date	18/04/2023
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-union WindowControlA {
-    u16            raw;          ///< Raw representation.
-    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
-    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
-};
+    struct Wctla {
+        GENERATE_USING(Wctla, u16);
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	WindowControlB
-///
-/// \brief	Window Control (NBG2, NBG3) (WCTLB).
-///
-/// \author	Runik
-/// \date	23/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \enum	WindowLogic
+        ///
+        /// \brief	Designates the method of overlapping windows used in each screen. (NxLOG)
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-union WindowControlB {
-    u16            raw;          ///< Raw representation.
-    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
-    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
-};
+        enum class WindowLogic : bool {
+            overlaid_logic_or  = false, ///< Or.
+            overlaid_logic_and = true   ///< And.
+        };
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	WindowControlC
-///
-/// \brief	Window Control (RBG0, SPRITE) (WCTLC).
-///
-/// \author	Runik
-/// \date	23/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \enum	WindowEnable
+        ///
+        /// \brief	Designates whether to use the Normal window W0, W1 or sprite window SW in each screen.
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-union WindowControlC {
-    u16            raw;          ///< Raw representation.
-    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
-    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
-};
+        enum class WindowEnable : bool {
+            does_not_use_window = false, ///< Does not use window.
+            uses_window         = true   ///< Uses window.
+        };
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	WindowControlD
-///
-/// \brief	Window Control (Parameter Window, Color Calc. Window) (WCTLD).
-///
-/// \author	Runik
-/// \date	23/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \enum	WindowArea
+        ///
+        /// \brief	Designates the valid area of the Normal window W0, W1 or sprite window SW used in each screen.
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-union WindowControlD {
-    u16            raw;          ///< Raw representation.
-    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
-    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
+        enum class WindowArea : bool {
+            enables_inside_of_window = false, ///< Enables the inside of W0,W1 or SW window.
+            enables_ouside_of_window = true   ///< Enables the outside of W0,W1 or SW window.
+        };
+
+        GENERATE_BIT_WITH_ENUM(n0w0a, 0, 0b1, WindowArea);    ///< NBG0 window area (N0W0A).
+        GENERATE_BIT_WITH_ENUM(n0w0e, 1, 0b1, WindowEnable);  ///< NBG0 window W0 enable (N0W0E).
+        GENERATE_BIT_WITH_ENUM(n0w1a, 2, 0b1, WindowArea);    ///< NBG0 window area (N0W1A).
+        GENERATE_BIT_WITH_ENUM(n0w1e, 3, 0b1, WindowEnable);  ///< NBG0 window W1 enable (N0W1E).
+        GENERATE_BIT_WITH_ENUM(n0swa, 4, 0b1, WindowArea);    ///< NBG0 window area (N0SWA).
+        GENERATE_BIT_WITH_ENUM(n0swe, 5, 0b1, WindowEnable);  ///< NBG0 window SW enable (N0SWE).
+        GENERATE_BIT_WITH_ENUM(n0log, 7, 0b1, WindowLogic);   ///< NBG0 overlapping window method (N0LOG).
+
+        GENERATE_BIT_WITH_ENUM(n1w0a, 8, 0b1, WindowArea);    ///< NBG1 window area (N1W0A).
+        GENERATE_BIT_WITH_ENUM(n1w0e, 9, 0b1, WindowEnable);  ///< NBG1 window W0 enable (N1W0E).
+        GENERATE_BIT_WITH_ENUM(n1w1a, 10, 0b1, WindowArea);   ///< NBG1 window area (N1W1A).
+        GENERATE_BIT_WITH_ENUM(n1w1e, 11, 0b1, WindowEnable); ///< NBG1 window W1 enable (N1W1E).
+        GENERATE_BIT_WITH_ENUM(n1swa, 12, 0b1, WindowArea);   ///< NBG1 window area (N1SWA).
+        GENERATE_BIT_WITH_ENUM(n1swe, 13, 0b1, WindowEnable); ///< NBG1 window SW enable (N1SWE).
+        GENERATE_BIT_WITH_ENUM(n1log, 15, 0b1, WindowLogic);  ///< NBG1 overlapping window method (N1LOG).
+
+        static constexpr auto lo_byte_pos = PosType(0);       ///< Defines the range of the upper 8 bits of the register.
+        static constexpr auto hi_byte_pos = PosType(8);       ///< Defines the range of the lower 8 bits of the register.
+
+        static constexpr auto byte_mask = 0xFF;
+        GENERATE_MASKED_RANGE("Vdp2Regs::Wctla", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
+        GENERATE_MASKED_RANGE("Vd2pRegs::Wctla", HI_BYTE, hiByte, byte_mask, hi_byte_pos, byte_mask);
+    };
+    using WctlaType = Reg<u16, Wctla>;
+    WctlaType wctla;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \struct	Wctlb
+    ///
+    /// \brief	Window Control (NBG2, NBG3) (WCTLB).
+    ///
+    /// \author	Runik
+    /// \date	18/04/2023
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    struct Wctlb {
+        GENERATE_USING(Wctlb, u16);
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \enum	WindowLogic
+        ///
+        /// \brief	Designates the method of overlapping windows used in each screen. (NxLOG)
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        enum class WindowLogic : bool {
+            overlaid_logic_or  = false, ///< Or.
+            overlaid_logic_and = true   ///< And.
+        };
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \enum	WindowEnable
+        ///
+        /// \brief	Designates whether to use the Normal window W0, W1 or sprite window SW in each screen.
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        enum class WindowEnable : bool {
+            does_not_use_window = false, ///< Does not use window.
+            uses_window         = true   ///< Uses window.
+        };
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \enum	WindowArea
+        ///
+        /// \brief	Designates the valid area of the Normal window W0, W1 or sprite window SW used in each screen.
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        enum class WindowArea : bool {
+            enables_inside_of_window = false, ///< Enables the inside of W0,W1 or SW window.
+            enables_ouside_of_window = true   ///< Enables the outside of W0,W1 or SW window.
+        };
+
+        GENERATE_BIT_WITH_ENUM(n2w0a, 0, 0b1, WindowArea);    ///< NBG2 window area (N2W0A).
+        GENERATE_BIT_WITH_ENUM(n2w0e, 1, 0b1, WindowEnable);  ///< NBG2 window W0 enable (N2W0E).
+        GENERATE_BIT_WITH_ENUM(n2w1a, 2, 0b1, WindowArea);    ///< NBG2 window area (N2W1A).
+        GENERATE_BIT_WITH_ENUM(n2w1e, 3, 0b1, WindowEnable);  ///< NBG2 window W1 enable (N2W1E).
+        GENERATE_BIT_WITH_ENUM(n2swa, 4, 0b1, WindowArea);    ///< NBG2 window area (N2SWA).
+        GENERATE_BIT_WITH_ENUM(n2swe, 5, 0b1, WindowEnable);  ///< NBG2 window SW enable (N2SWE).
+        GENERATE_BIT_WITH_ENUM(n2log, 7, 0b1, WindowLogic);   ///< NBG2 overlapping window method (N2LOG).
+
+        GENERATE_BIT_WITH_ENUM(n3w0a, 8, 0b1, WindowArea);    ///< NBG3 window area (N3W0A).
+        GENERATE_BIT_WITH_ENUM(n3w0e, 9, 0b1, WindowEnable);  ///< NBG3 window W0 enable (N3W0E).
+        GENERATE_BIT_WITH_ENUM(n3w1a, 10, 0b1, WindowArea);   ///< NBG3 window area (N3W1A).
+        GENERATE_BIT_WITH_ENUM(n3w1e, 11, 0b1, WindowEnable); ///< NBG3 window W1 enable (N3W1E).
+        GENERATE_BIT_WITH_ENUM(n3swa, 12, 0b1, WindowArea);   ///< NBG3 window area (N3SWA).
+        GENERATE_BIT_WITH_ENUM(n3swe, 13, 0b1, WindowEnable); ///< NBG3 window SW enable (N3SWE).
+        GENERATE_BIT_WITH_ENUM(n3log, 15, 0b1, WindowLogic);  ///< NBG3 overlapping window method (N3LOG).
+
+        static constexpr auto lo_byte_pos = PosType(0);       ///< Defines the range of the upper 8 bits of the register.
+        static constexpr auto hi_byte_pos = PosType(8);       ///< Defines the range of the lower 8 bits of the register.
+
+        static constexpr auto byte_mask = 0xFF;
+        GENERATE_MASKED_RANGE("Vdp2Regs::Wctlb", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
+        GENERATE_MASKED_RANGE("Vd2pRegs::Wctlb", HI_BYTE, hiByte, byte_mask, hi_byte_pos, byte_mask);
+    };
+    using WctlbType = Reg<u16, Wctlb>;
+    WctlbType wctlb;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \struct	Wctlc
+    ///
+    /// \brief	Window Control (RBG0, SPRITE) (WCTLC).
+    ///
+    /// \author	Runik
+    /// \date	18/04/2023
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    struct Wctlc {
+        GENERATE_USING(Wctlc, u16);
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \enum	WindowLogic
+        ///
+        /// \brief	Designates the method of overlapping windows used in each screen.
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        enum class WindowLogic : bool {
+            overlaid_logic_or  = false, ///< Or.
+            overlaid_logic_and = true   ///< And.
+        };
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \enum	WindowEnable
+        ///
+        /// \brief	Designates whether to use the Normal window W0, W1 or sprite window SW in each screen.
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        enum class WindowEnable : bool {
+            does_not_use_window = false, ///< Does not use window.
+            uses_window         = true   ///< Uses window.
+        };
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \enum	WindowArea
+        ///
+        /// \brief	Designates the valid area of the Normal window W0, W1 or sprite window SW used in each screen.
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        enum class WindowArea : bool {
+            enables_inside_of_window = false, ///< Enables the inside of W0,W1 or SW window.
+            enables_ouside_of_window = true   ///< Enables the outside of W0,W1 or SW window.
+        };
+
+        GENERATE_BIT_WITH_ENUM(r0w0a, 0, 0b1, WindowArea);    ///< RBG0 window area (R0W0A).
+        GENERATE_BIT_WITH_ENUM(r0w0e, 1, 0b1, WindowEnable);  ///< RBG0 window W0 enable (R0W0E).
+        GENERATE_BIT_WITH_ENUM(r0w1a, 2, 0b1, WindowArea);    ///< RBG0 window area (R0W1A).
+        GENERATE_BIT_WITH_ENUM(r0w1e, 3, 0b1, WindowEnable);  ///< RBG0 window W1 enable (R0W1E).
+        GENERATE_BIT_WITH_ENUM(r0swa, 4, 0b1, WindowArea);    ///< RBG0 window area (R0SWA).
+        GENERATE_BIT_WITH_ENUM(r0swe, 5, 0b1, WindowEnable);  ///< RBG0 window SW enable (R0SWE).
+        GENERATE_BIT_WITH_ENUM(r0log, 7, 0b1, WindowLogic);   ///< RBG0 overlapping window method (R0LOG).
+
+        GENERATE_BIT_WITH_ENUM(spw0a, 8, 0b1, WindowArea);    ///< Sprite window area (SPW0A).
+        GENERATE_BIT_WITH_ENUM(spw0e, 9, 0b1, WindowEnable);  ///< Sprite window W0 enable (SPW0E).
+        GENERATE_BIT_WITH_ENUM(spw1a, 10, 0b1, WindowArea);   ///< Sprite window area (SPW1A).
+        GENERATE_BIT_WITH_ENUM(spw1e, 11, 0b1, WindowEnable); ///< Sprite window W1 enable (SPW1E).
+        GENERATE_BIT_WITH_ENUM(spswa, 12, 0b1, WindowArea);   ///< Sprite window area (SPSWA).
+        GENERATE_BIT_WITH_ENUM(spswe, 13, 0b1, WindowEnable); ///< Sprite window SW enable (SPSWE).
+        GENERATE_BIT_WITH_ENUM(splog, 15, 0b1, WindowLogic);  ///< Sprite overlapping window method (SPLOG).
+
+        static constexpr auto lo_byte_pos = PosType(0);       ///< Defines the range of the upper 8 bits of the register.
+        static constexpr auto hi_byte_pos = PosType(8);       ///< Defines the range of the lower 8 bits of the register.
+
+        static constexpr auto byte_mask = 0xFF;
+        GENERATE_MASKED_RANGE("Vdp2Regs::Wctlc", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
+        GENERATE_MASKED_RANGE("Vd2pRegs::Wctlc", HI_BYTE, hiByte, byte_mask, hi_byte_pos, byte_mask);
+    };
+    using WctlcType = Reg<u16, Wctlc>;
+    WctlcType wctlc;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \struct	Wctld
+    ///
+    /// \brief	Window Control (Parameter Window, Color Calc. Window) (WCTLD).
+    ///
+    /// \author	Runik
+    /// \date	18/04/2023
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    struct Wctld {
+        GENERATE_USING(Wctld, u16);
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \enum	WindowLogic
+        ///
+        /// \brief	Designates the method of overlapping windows used in each screen.
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        enum class WindowLogic : bool {
+            overlaid_logic_or  = false, ///< Or.
+            overlaid_logic_and = true   ///< And.
+        };
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \enum	WindowEnable
+        ///
+        /// \brief	Designates whether to use the Normal window W0, W1 or sprite window SW in each screen.
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        enum class WindowEnable : bool {
+            does_not_use_window = false, ///< Does not use window.
+            uses_window         = true   ///< Uses window.
+        };
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \enum	WindowArea
+        ///
+        /// \brief	Designates the valid area of the Normal window W0, W1 or sprite window SW used in each screen.
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        enum class WindowArea : bool {
+            enables_inside_of_window = false, ///< Enables the inside of W0,W1 or SW window.
+            enables_ouside_of_window = true   ///< Enables the outside of W0,W1 or SW window.
+        };
+
+        GENERATE_BIT_WITH_ENUM(rpw0a, 0, 0b1, WindowArea);    ///< Rotation parameter window area (RPW0A).
+        GENERATE_BIT_WITH_ENUM(rpw0e, 1, 0b1, WindowEnable);  ///< Rotation parameter window W0 enable (RPW0E).
+        GENERATE_BIT_WITH_ENUM(rpw1a, 2, 0b1, WindowArea);    ///< Rotation parameter window area (RPW1A).
+        GENERATE_BIT_WITH_ENUM(rpw1e, 3, 0b1, WindowEnable);  ///< Rotation parameter window W1 enable (RPW1E).
+        GENERATE_BIT_WITH_ENUM(rplog, 7, 0b1, WindowLogic);   ///< Rotation parameter overlapping window method (RPLOG).
+
+        GENERATE_BIT_WITH_ENUM(ccw0a, 8, 0b1, WindowArea);    ///< Color calculation window area (CCW0A).
+        GENERATE_BIT_WITH_ENUM(ccw0e, 9, 0b1, WindowEnable);  ///< Color calculation window W0 enable (CCW0E).
+        GENERATE_BIT_WITH_ENUM(ccw1a, 10, 0b1, WindowArea);   ///< Color calculation window area (CCW1A).
+        GENERATE_BIT_WITH_ENUM(ccw1e, 11, 0b1, WindowEnable); ///< Color calculation window W1 enable (CCW1E).
+        GENERATE_BIT_WITH_ENUM(ccswa, 12, 0b1, WindowArea);   ///< Color calculation window area (CCSWA).
+        GENERATE_BIT_WITH_ENUM(ccswe, 13, 0b1, WindowEnable); ///< Color calculation window SW enable (CCSWE).
+        GENERATE_BIT_WITH_ENUM(cclog, 15, 0b1, WindowLogic);  ///< Color calculation overlapping window method (CCLOG).
+
+        static constexpr auto lo_byte_pos = PosType(0);       ///< Defines the range of the upper 8 bits of the register.
+        static constexpr auto hi_byte_pos = PosType(8);       ///< Defines the range of the lower 8 bits of the register.
+
+        static constexpr auto byte_mask = 0xFF;
+        GENERATE_MASKED_RANGE("Vdp2Regs::Wctld", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
+        GENERATE_MASKED_RANGE("Vd2pRegs::Wctld", HI_BYTE, hiByte, byte_mask, hi_byte_pos, byte_mask);
+    };
+    using WctldType = Reg<u16, Wctld>;
+    WctldType wctld;
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
