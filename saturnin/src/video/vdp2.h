@@ -1911,10 +1911,10 @@ class Vdp2 {
     // WindowControlB                  wctlb_;
     // WindowControlC                  wctlc_;
     // WindowControlD                  wctld_;
-    LineWindowTableAddressW0Upper   lwta0u_;
-    LineWindowTableAddressW0Lower   lwta0l_;
-    LineWindowTableAddressW1Upper   lwta1u_;
-    LineWindowTableAddressW1Lower   lwta1l_;
+    // LineWindowTableAddressW0Upper   lwta0u_;
+    // LineWindowTableAddressW0Lower   lwta0l_;
+    // LineWindowTableAddressW1Upper   lwta1u_;
+    // LineWindowTableAddressW1Lower   lwta1l_;
     SpriteControl                   spctl_;
     ShadowControl                   sdctl_;
     ColorRamAddressOffsetA          craofa_;

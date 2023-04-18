@@ -2392,66 +2392,68 @@ struct Vdp2Regs {
     };
     using WctldType = Reg<u16, Wctld>;
     WctldType wctld;
-};
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	LineWindowTableAddressW0Upper
-///
-/// \brief	Line Window Table Address Upper (W0) (LWTA0U).
-///
-/// \author	Runik
-/// \date	23/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \struct	Lwtau
+    ///
+    /// \brief	Line Window Table Upper Address for W0, W1. (LWTA0U, LWTA1U)
+    ///
+    /// \author	Runik
+    /// \date	18/04/2023
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-union LineWindowTableAddressW0Upper {
-    u16            raw;          ///< Raw representation.
-    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
-    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
-};
+    struct Lwtau {
+        GENERATE_USING(Lwtau, u16);
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	LineWindowTableAddressW0Lower
-///
-/// \brief	Line Window Table Address Lower (W0) (LWTA0L).
-///
-/// \author	Runik
-/// \date	23/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \enum	LineWindowEnable
+        ///
+        /// \brief	Designates whether to make the Normal window a line window. (W0LVE, W1LVE)
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-union LineWindowTableAddressW0Lower {
-    u16            raw;          ///< Raw representation.
-    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
-    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
-};
+        enum class LineWindowEnable : bool {
+            does_not_process = false, ///< Does not process Normal Window to Line Window
+            processes        = true   ///< Processes Normal Window to Line Window
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	LineWindowTableAddressW1Upper
-///
-/// \brief	Line Window Table Address Upper (W1) (LWTA1U).
-///
-/// \author	Runik
-/// \date	23/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
+        };
+        GENERATE_BIT_WITHOUT_ENUM(lwtau, 0, 0b111);               ///< Line window table lead address (upper).
+        GENERATE_BIT_WITH_ENUM(wxlwe, 15, 0b1, LineWindowEnable); ///< Line window enable.
 
-union LineWindowTableAddressW1Upper {
-    u16            raw;          ///< Raw representation.
-    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
-    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
-};
+        static constexpr auto lo_byte_pos = PosType(0);           ///< Defines the range of the upper 8 bits of the register.
+        static constexpr auto hi_byte_pos = PosType(8);           ///< Defines the range of the lower 8 bits of the register.
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	LineWindowTableAddressW1Lower
-///
-/// \brief	Line Window Table Address Lower (W1) (LWTA1L).
-///
-/// \author	Runik
-/// \date	23/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
+        static constexpr auto byte_mask = 0xFF;
+        GENERATE_MASKED_RANGE("Vdp2Regs::Lwtau", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
+        GENERATE_MASKED_RANGE("Vd2pRegs::Lwtau", HI_BYTE, hiByte, byte_mask, hi_byte_pos, byte_mask);
+    };
+    using LwtauType = Reg<u16, Lwtau>;
+    LwtauType lwta0u;
+    LwtauType lwta1u;
 
-union LineWindowTableAddressW1Lower {
-    u16            raw;          ///< Raw representation.
-    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
-    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \struct	Lwtal
+    ///
+    /// \brief	Line Window Lower Table Address for W0, W1. (LWTA0L, LWTA1L)
+    ///
+    /// \author	Runik
+    /// \date	18/04/2023
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    struct Lwtal {
+        GENERATE_USING(Lwtal, u16);
+
+        GENERATE_BIT_WITHOUT_ENUM(lwtal, 1, 0x7FFF);    ///< Line window table lead address (lower).
+
+        static constexpr auto lo_byte_pos = PosType(0); ///< Defines the range of the upper 8 bits of the register.
+        static constexpr auto hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
+
+        static constexpr auto byte_mask = 0xFF;
+        GENERATE_MASKED_RANGE("Vdp2Regs::Lwtal", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
+        GENERATE_MASKED_RANGE("Vd2pRegs::Lwtal", HI_BYTE, hiByte, byte_mask, hi_byte_pos, byte_mask);
+    };
+    using LwtalType = Reg<u16, Lwtal>;
+    LwtalType lwta0l;
+    LwtalType lwta1l;
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

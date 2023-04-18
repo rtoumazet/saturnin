@@ -459,10 +459,10 @@ auto Vdp2::read16(const u32 addr) const -> u16 {
         case window_control_b: return regs_.wctlb.data();
         case window_control_c: return regs_.wctlc.data();
         case window_control_d: return regs_.wctld.data();
-        case line_window_table_address_w0_upper: return lwta0u_.raw;
-        case line_window_table_address_w0_lower: return lwta0l_.raw;
-        case line_window_table_address_w1_upper: return lwta1u_.raw;
-        case line_window_table_address_w1_lower: return lwta1l_.raw;
+        case line_window_table_address_w0_upper: return regs_.lwta0u.data();
+        case line_window_table_address_w0_lower: return regs_.lwta0l.data();
+        case line_window_table_address_w1_upper: return regs_.lwta1u.data();
+        case line_window_table_address_w1_lower: return regs_.lwta1l.data();
         case sprite_control: return spctl_.raw;
         case shadow_control: return sdctl_.raw;
         case color_ram_address_offset_a: return craofa_.raw;
@@ -722,14 +722,14 @@ void Vdp2::write8(const u32 addr, const u8 data) {
         case window_control_c + 1: regs_.wctlc.upd(Vdp2Regs::Wctlc::loByte(data)); break;
         case window_control_d: regs_.wctld.upd(Vdp2Regs::Wctld::hiByte(data)); break;
         case window_control_d + 1: regs_.wctld.upd(Vdp2Regs::Wctld::loByte(data)); break;
-        case line_window_table_address_w0_upper: lwta0u_.upper_8_bits = data; break;
-        case line_window_table_address_w0_upper + 1: lwta0u_.lower_8_bits = data; break;
-        case line_window_table_address_w0_lower: lwta0l_.upper_8_bits = data; break;
-        case line_window_table_address_w0_lower + 1: lwta0l_.lower_8_bits = data; break;
-        case line_window_table_address_w1_upper: lwta1u_.upper_8_bits = data; break;
-        case line_window_table_address_w1_upper + 1: lwta1u_.lower_8_bits = data; break;
-        case line_window_table_address_w1_lower: lwta1l_.upper_8_bits = data; break;
-        case line_window_table_address_w1_lower + 1: lwta1l_.lower_8_bits = data; break;
+        case line_window_table_address_w0_upper: regs_.lwta0u.upd(Vdp2Regs::Lwtau::hiByte(data)); break;
+        case line_window_table_address_w0_upper + 1: regs_.lwta0u.upd(Vdp2Regs::Lwtau::loByte(data)); break;
+        case line_window_table_address_w0_lower: regs_.lwta0l.upd(Vdp2Regs::Lwtal::hiByte(data)); break;
+        case line_window_table_address_w0_lower + 1: regs_.lwta0l.upd(Vdp2Regs::Lwtal::loByte(data)); break;
+        case line_window_table_address_w1_upper: regs_.lwta1u.upd(Vdp2Regs::Lwtau::hiByte(data)); break;
+        case line_window_table_address_w1_upper + 1: regs_.lwta1u.upd(Vdp2Regs::Lwtau::loByte(data)); break;
+        case line_window_table_address_w1_lower: regs_.lwta1l.upd(Vdp2Regs::Lwtal::hiByte(data)); break;
+        case line_window_table_address_w1_lower + 1: regs_.lwta1l.upd(Vdp2Regs::Lwtal::loByte(data)); break;
         case sprite_control: spctl_.upper_8_bits = data; break;
         case sprite_control + 1: spctl_.lower_8_bits = data; break;
         case shadow_control: sdctl_.upper_8_bits = data; break;
@@ -909,10 +909,10 @@ void Vdp2::write16(const u32 addr, const u16 data) {
         case window_control_b: regs_.wctlb = data; break;
         case window_control_c: regs_.wctlc = data; break;
         case window_control_d: regs_.wctld = data; break;
-        case line_window_table_address_w0_upper: lwta0u_.raw = data; break;
-        case line_window_table_address_w0_lower: lwta0l_.raw = data; break;
-        case line_window_table_address_w1_upper: lwta1u_.raw = data; break;
-        case line_window_table_address_w1_lower: lwta1l_.raw = data; break;
+        case line_window_table_address_w0_upper: regs_.lwta0u = data; break;
+        case line_window_table_address_w0_lower: regs_.lwta0l = data; break;
+        case line_window_table_address_w1_upper: regs_.lwta1u = data; break;
+        case line_window_table_address_w1_lower: regs_.lwta1l = data; break;
         case sprite_control: spctl_.raw = data; break;
         case shadow_control: sdctl_.raw = data; break;
         case color_ram_address_offset_a: craofa_.raw = data; break;
@@ -1155,12 +1155,12 @@ void Vdp2::write32(const u32 addr, const u32 data) {
             regs_.wctld = l;
             break;
         case line_window_table_address_w0_upper:
-            lwta0u_.raw = h;
-            lwta0l_.raw = l;
+            regs_.lwta0u = h;
+            regs_.lwta0l = l;
             break;
         case line_window_table_address_w1_upper:
-            lwta1u_.raw = h;
-            lwta1l_.raw = l;
+            regs_.lwta1u = h;
+            regs_.lwta1l = l;
             break;
         case sprite_control:
             spctl_.raw = h;
