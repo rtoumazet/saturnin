@@ -469,9 +469,9 @@ auto Vdp2::read16(const u32 addr) const -> u16 {
         case shadow_control: return regs_.sdctl.data();
         case color_ram_address_offset_a: return regs_.craofa.data();
         case color_ram_address_offset_b: return regs_.craofb.data();
-        case line_color_screen_enable: return lnclen_.raw;
-        case special_priority_mode: return sfprmd_.raw;
-        case color_calculation_control: return ccctl_.raw;
+        case line_color_screen_enable: return regs_.lnclen.data();
+        case special_priority_mode: return regs_.sfprmd.data();
+        case color_calculation_control: return regs_.ccctl.data();
         case special_color_calculation_mode: return sfccmd_.raw;
         case priority_number_sprite_0_1: return prisa_.raw;
         case priority_number_sprite_2_3: return prisb_.raw;
@@ -740,12 +740,12 @@ void Vdp2::write8(const u32 addr, const u8 data) {
         case color_ram_address_offset_a + 1: regs_.craofa.upd(Vdp2Regs::Craofa::loByte(data)); break;
         case color_ram_address_offset_b: regs_.craofb.upd(Vdp2Regs::Craofb::hiByte(data)); break;
         case color_ram_address_offset_b + 1: regs_.craofb.upd(Vdp2Regs::Craofb::loByte(data)); break;
-        case line_color_screen_enable: lnclen_.upper_8_bits = data; break;
-        case line_color_screen_enable + 1: lnclen_.lower_8_bits = data; break;
-        case special_priority_mode: sfprmd_.upper_8_bits = data; break;
-        case special_priority_mode + 1: sfprmd_.lower_8_bits = data; break;
-        case color_calculation_control: ccctl_.upper_8_bits = data; break;
-        case color_calculation_control + 1: ccctl_.lower_8_bits = data; break;
+        case line_color_screen_enable: regs_.lnclen.upd(Vdp2Regs::Lnclen::hiByte(data)); break;
+        case line_color_screen_enable + 1: regs_.lnclen.upd(Vdp2Regs::Lnclen::loByte(data)); break;
+        case special_priority_mode: regs_.sfprmd.upd(Vdp2Regs::Sfprmd::hiByte(data)); break;
+        case special_priority_mode + 1: regs_.sfprmd.upd(Vdp2Regs::Sfprmd::loByte(data)); break;
+        case color_calculation_control: regs_.ccctl.upd(Vdp2Regs::Ccctl::hiByte(data)); break;
+        case color_calculation_control + 1: regs_.ccctl.upd(Vdp2Regs::Ccctl::loByte(data)); break;
         case special_color_calculation_mode: sfccmd_.upper_8_bits = data; break;
         case special_color_calculation_mode + 1: sfccmd_.lower_8_bits = data; break;
         case priority_number_sprite_0_1: prisa_.upper_8_bits = data; break;
@@ -919,9 +919,9 @@ void Vdp2::write16(const u32 addr, const u16 data) {
         case shadow_control: regs_.sdctl = data; break;
         case color_ram_address_offset_a: regs_.craofa = data; break;
         case color_ram_address_offset_b: regs_.craofb = data; break;
-        case line_color_screen_enable: lnclen_.raw = data; break;
-        case special_priority_mode: sfprmd_.raw = data; break;
-        case color_calculation_control: ccctl_.raw = data; break;
+        case line_color_screen_enable: regs_.lnclen = data; break;
+        case special_priority_mode: regs_.sfprmd = data; break;
+        case color_calculation_control: regs_.ccctl = data; break;
         case special_color_calculation_mode: sfccmd_.raw = data; break;
         case priority_number_sprite_0_1: prisa_.raw = data; break;
         case priority_number_sprite_2_3: prisb_.raw = data; break;
@@ -1173,11 +1173,11 @@ void Vdp2::write32(const u32 addr, const u32 data) {
             regs_.craofb = l;
             break;
         case line_color_screen_enable:
-            lnclen_.raw = h;
-            sfprmd_.raw = l;
+            regs_.lnclen = h;
+            regs_.sfprmd = l;
             break;
         case color_calculation_control:
-            ccctl_.raw  = h;
+            regs_.ccctl = h;
             sfccmd_.raw = l;
             break;
         case priority_number_sprite_0_1:

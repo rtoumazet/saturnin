@@ -2649,51 +2649,194 @@ struct Vdp2Regs {
     };
     using CraofbType = Reg<u16, Craofb>;
     CraofbType craofb;
-};
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	LineColorScreenEnable
-///
-/// \brief	Line Color Screen Enable (LNCLEN).
-///
-/// \author	Runik
-/// \date	23/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \struct	Lnclen
+    ///
+    /// \brief	Line Color Screen Enable (LNCLEN).
+    ///
+    /// \author	Runik
+    /// \date	19/04/2023
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-union LineColorScreenEnable {
-    u16            raw;          ///< Raw representation.
-    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
-    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
-};
+    struct Lnclen {
+        GENERATE_USING(Lnclen, u16);
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	SpecialPriorityMode
-///
-/// \brief	Special Priority Mode (SFPRMD).
-///
-/// \author	Runik
-/// \date	23/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \enum	LineColorEnable
+        ///
+        /// \brief	Designates whether to insert the line color screen when each screen is a top image.
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-union SpecialPriorityMode {
-    u16            raw;          ///< Raw representation.
-    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
-    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
-};
+        enum class LineColorEnable : bool {
+            does_not_insert = false, ///< Does not insert the line color screen when corresponding screen is top image.
+            inserts         = true   ///< Inserts the line color screen when corresponding screen is top image.
+        };
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	ColorCalculationControl
-///
-/// \brief	Color Calculation Control (CCCTL).
-///
-/// \author	Runik
-/// \date	23/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
+        GENERATE_BIT_WITH_ENUM(n0lcen, 0, 0b1, LineColorEnable); ///< NBG0 (or RBG1) line color enable (N0LCEN).
+        GENERATE_BIT_WITH_ENUM(n1lcen, 1, 0b1, LineColorEnable); ///< NBG1 (or EXBG) line color enable (N1LCEN).
+        GENERATE_BIT_WITH_ENUM(n2lcen, 2, 0b1, LineColorEnable); ///< NBG2 line color enable (N2LCEN).
+        GENERATE_BIT_WITH_ENUM(n3lcen, 3, 0b1, LineColorEnable); ///< NBG3 line color enable (N3LCEN).
+        GENERATE_BIT_WITH_ENUM(r0lcen, 4, 0b1, LineColorEnable); ///< RBG0 line color enable (R0LCEN).
+        GENERATE_BIT_WITH_ENUM(splcen, 5, 0b1, LineColorEnable); ///< Sprite line color enable (SPLCEN).
 
-union ColorCalculationControl {
-    u16            raw;          ///< Raw representation.
-    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
-    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
+        static constexpr auto lo_byte_pos = PosType(0);          ///< Defines the range of the upper 8 bits of the register.
+        static constexpr auto hi_byte_pos = PosType(8);          ///< Defines the range of the lower 8 bits of the register.
+
+        static constexpr auto byte_mask = 0xFF;
+        GENERATE_MASKED_RANGE("Vdp2Regs::Lnclen", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
+        GENERATE_MASKED_RANGE("Vd2pRegs::Lnclen", HI_BYTE, hiByte, byte_mask, hi_byte_pos, byte_mask);
+    };
+    using LnclenType = Reg<u16, Lnclen>;
+    LnclenType lnclen;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \struct	Sfprmd
+    ///
+    /// \brief	Special Priority Mode (SFPRMD).
+    ///
+    /// \author	Runik
+    /// \date	19/04/2023
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    struct Sfprmd {
+        GENERATE_USING(Sfprmd, u16);
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \enum	SpecialPriorityMode
+        ///
+        /// \brief	Designates the special priority function mode of each screen scroll.
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        enum class SpecialPriorityMode : u8 {
+            mode_0      = 0b00, ///< Select the priority number LSB per each screen.
+            mode_1      = 0b01, ///< Select the priority number LSB per each character.
+            mode_2      = 0b10, ///< Select the priority number LSB per each dot.
+            not_allowed = 0b11  ///< Selection not allowed.
+        };
+
+        GENERATE_BIT_WITH_ENUM(n0lcen, 0, 0b11, SpecialPriorityMode); ///< NBG0 (or RBG1) special priority mode (N0SPRM).
+        GENERATE_BIT_WITH_ENUM(n1lcen, 1, 0b11, SpecialPriorityMode); ///< NBG1 (or EXBG) special priority mode (N1SPRM).
+        GENERATE_BIT_WITH_ENUM(n2lcen, 2, 0b11, SpecialPriorityMode); ///< NBG2 special priority mode (N2SPRM).
+        GENERATE_BIT_WITH_ENUM(n3lcen, 3, 0b11, SpecialPriorityMode); ///< NBG3 special priority mode (N3SPRM).
+        GENERATE_BIT_WITH_ENUM(r0lcen, 4, 0b11, SpecialPriorityMode); ///< RBG0 special priority mode (R0SPRM).
+
+        static constexpr auto lo_byte_pos = PosType(0);               ///< Defines the range of the upper 8 bits of the register.
+        static constexpr auto hi_byte_pos = PosType(8);               ///< Defines the range of the lower 8 bits of the register.
+
+        static constexpr auto byte_mask = 0xFF;
+        GENERATE_MASKED_RANGE("Vdp2Regs::Sfprmd", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
+        GENERATE_MASKED_RANGE("Vd2pRegs::Sfprmd", HI_BYTE, hiByte, byte_mask, hi_byte_pos, byte_mask);
+    };
+    using SfprmdType = Reg<u16, Sfprmd>;
+    SfprmdType sfprmd;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \struct	Ccctl
+    ///
+    /// \brief	Color Calculation Control (CCCTL).
+    ///
+    /// \author	Runik
+    /// \date	19/04/2023
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    struct Ccctl {
+        GENERATE_USING(Ccctl, u16);
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \enum   GradationEnable
+        ///
+        /// \brief  Determines whether to use the gradation function.
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        enum class GradationEnable : bool {
+            do_not_use = false, ///< Do not use gradation calculation function.
+            use        = true   ///< Use gradation calculation function.
+        };
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \enum   GradationScreenNumber
+        ///
+        /// \brief  Designates the screen using the gradation (shading) calculation function.
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        enum class GradationScreenNumber : u8 {
+            sprite   = 0b000, ///< Sprite.
+            rbg0     = 0b001, ///< RBG0
+            nbg0     = 0b010, ///< NBG0 or RBG1
+            invalid1 = 0b011, ///< Invalid
+            nbg1     = 0b100, ///< NBG1 or EXBG
+            nbg2     = 0b101, ///< NBG2
+            nbg3     = 0b110, ///< NBG3
+            invalid2 = 0b111  ///< Invalid
+        };
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \enum   ExtendedColorCalculationEnable
+        ///
+        /// \brief  Determines whether to use the extended color calculation function.
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        enum class ExtendedColorCalculationEnable : bool {
+            do_not_use = false, ///< Do not use extended color calculation.
+            use        = true   ///< Use extended color calculation.
+        };
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \enum   ColorCalculationRatioMode
+        ///
+        /// \brief  Designates the color calculation ratio mode.
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        enum class ColorCalculationRatioMode : bool {
+            select_per_top_screen_side    = false, ///< For color calculation ratio, select per top screen side.
+            select_per_second_screen_side = true   ///< For color calculation ratio, select per second screen side.
+        };
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \enum   ColorCalculationMode
+        ///
+        /// \brief  Designates the color calculation ratio mode.
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        enum class ColorCalculationMode : bool {
+            add_according_to_register = false, ///< Add according to the color calculation register value.
+            add_as_is                 = true   ///< Add as is.
+        };
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \enum   ColorCalculationEnable
+        ///
+        /// \brief  Designates whether to perform color calculation (color calculation enable).
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        enum class ColorCalculationEnable : bool {
+            does_not_color_calculate = false, ///< Does not color-calculate.
+            color_calculates         = true   ///< Color-calculates.
+        };
+
+        GENERATE_BIT_WITH_ENUM(boken, 15, 0b1, GradationEnable);                 ///< Gradation enable (BOKEN).
+        GENERATE_BIT_WITH_ENUM(bokn, 12, 0b111, GradationScreenNumber);          ///< Gradation screen number (BOKNx).
+        GENERATE_BIT_WITH_ENUM(exccen, 10, 0b1, ExtendedColorCalculationEnable); ///< Extended color calculation enable (EXCCEN).
+        GENERATE_BIT_WITH_ENUM(ccrtmd, 9, 0b1, ColorCalculationRatioMode);       ///< Color calculation ratio mode (CCRTMD).
+        GENERATE_BIT_WITH_ENUM(ccmd, 8, 0b1, ColorCalculationMode);              ///< Color calculation mode (CCMD).
+        GENERATE_BIT_WITH_ENUM(spccen, 6, 0b1, ColorCalculationEnable);          ///< Sprite color calculation enable (SPCCEN).
+        GENERATE_BIT_WITH_ENUM(lcccen, 5, 0b1, ColorCalculationEnable);          ///< LNCL color calculation enable (LCCCEN).
+        GENERATE_BIT_WITH_ENUM(r0ccen, 4, 0b1, ColorCalculationEnable);          ///< RBG0 color calculation enable (R0CCEN).
+        GENERATE_BIT_WITH_ENUM(n3ccen, 3, 0b1, ColorCalculationEnable);          ///< NBG3 color calculation enable (N3CCEN).
+        GENERATE_BIT_WITH_ENUM(n2ccen, 2, 0b1, ColorCalculationEnable);          ///< NBG2 color calculation enable (N2CCEN).
+        GENERATE_BIT_WITH_ENUM(n1ccen, 1, 0b1, ColorCalculationEnable); ///< NBG1 (or EXBG) color calculation enable (N1CCEN).
+        GENERATE_BIT_WITH_ENUM(n0ccen, 0, 0b1, ColorCalculationEnable); ///< NBG0 (or RBG1) color calculation enable (N0CCEN).
+
+        static constexpr auto lo_byte_pos = PosType(0); ///< Defines the range of the upper 8 bits of the register.
+        static constexpr auto hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
+
+        static constexpr auto byte_mask = 0xFF;
+        GENERATE_MASKED_RANGE("Vdp2Regs::Ccctl", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
+        GENERATE_MASKED_RANGE("Vd2pRegs::Ccctl", HI_BYTE, hiByte, byte_mask, hi_byte_pos, byte_mask);
+    };
+    using CcctlType = Reg<u16, Ccctl>;
+    CcctlType ccctl;
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

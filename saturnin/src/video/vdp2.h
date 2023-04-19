@@ -1919,9 +1919,9 @@ class Vdp2 {
     // ShadowControl               sdctl_;
     // ColorRamAddressOffsetA      craofa_;
     // ColorRamAddressOffsetB      craofb_;
-    LineColorScreenEnable       lnclen_;
-    SpecialPriorityMode         sfprmd_;
-    ColorCalculationControl     ccctl_;
+    // LineColorScreenEnable       lnclen_;
+    // SpecialPriorityMode         sfprmd_;
+    // ColorCalculationControl     ccctl_;
     SpecialColorCalculationMode sfccmd_;
     PriorityNumberSpriteA       prisa_;
     PriorityNumberSpriteB       prisb_;
