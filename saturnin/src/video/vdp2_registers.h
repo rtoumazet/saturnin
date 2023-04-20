@@ -2837,438 +2837,668 @@ struct Vdp2Regs {
     };
     using CcctlType = Reg<u16, Ccctl>;
     CcctlType ccctl;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \struct	Sfccmd
+    ///
+    /// \brief	Special Color Calculation Mode (SFCCMD).
+    ///
+    /// \author	Runik
+    /// \date	19/04/2023
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    struct Sfccmd {
+        GENERATE_USING(Sfccmd, u16);
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \enum	SpecialColorCalculationMode
+        ///
+        /// \brief	Designates the special color calculation function mode of each scroll screen.
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        enum class SpecialColorCalculationMode : u8 {
+            per_screen          = 0b00, ///< Select color calculation enable per screen.
+            per_character       = 0b01, ///< Select color calculation enable per character.
+            per_dot             = 0b10, ///< Select color calculation enable per dot.
+            with_color_data_msb = 0b11, ///< Select color calculation enable with color data MSB.
+        };
+
+        GENERATE_BIT_WITH_ENUM(r0sccm, 8, 0b11, SpecialColorCalculationMode); ///< RBG0 color calculation enable (R0SCCMx).
+        GENERATE_BIT_WITH_ENUM(n3sccm, 6, 0b11, SpecialColorCalculationMode); ///< NBG3 color calculation enable (N3SCCMx).
+        GENERATE_BIT_WITH_ENUM(n2sccm, 4, 0b11, SpecialColorCalculationMode); ///< NBG2 color calculation enable (N2SCCMx).
+        GENERATE_BIT_WITH_ENUM(n1sccm,
+                               2,
+                               0b11,
+                               SpecialColorCalculationMode); ///< NBG1 (or EXBG) color calculation enable (N1SCCMx).
+        GENERATE_BIT_WITH_ENUM(n0sccm,
+                               0,
+                               0b11,
+                               SpecialColorCalculationMode); ///< NBG0 (or RBG1) special color calculation enable (N0SCCMx).
+
+        static constexpr auto lo_byte_pos = PosType(0);      ///< Defines the range of the upper 8 bits of the register.
+        static constexpr auto hi_byte_pos = PosType(8);      ///< Defines the range of the lower 8 bits of the register.
+
+        static constexpr auto byte_mask = 0xFF;
+        GENERATE_MASKED_RANGE("Vdp2Regs::Sfccmd", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
+        GENERATE_MASKED_RANGE("Vd2pRegs::Sfccmd", HI_BYTE, hiByte, byte_mask, hi_byte_pos, byte_mask);
+    };
+    using SfccmdType = Reg<u16, Sfccmd>;
+    SfccmdType sfccmd;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \struct	Prisa
+    ///
+    /// \brief	Priority Number (SPRITE 0,1) (PRISA).
+    ///
+    /// \author	Runik
+    /// \date	20/04/2023
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    struct Prisa {
+        GENERATE_USING(Prisa, u16);
+
+        GENERATE_BIT_WITHOUT_ENUM(s0prin, 0, 0b111);    ///< Sprite register 0 (S0PRINx).
+        GENERATE_BIT_WITHOUT_ENUM(s1prin, 8, 0b111);    ///< Sprite register 1 (S1PRINx).
+
+        static constexpr auto lo_byte_pos = PosType(0); ///< Defines the range of the upper 8 bits of the register.
+        static constexpr auto hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
+
+        static constexpr auto byte_mask = 0xFF;
+        GENERATE_MASKED_RANGE("Vdp2Regs::Prisa", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
+        GENERATE_MASKED_RANGE("Vd2pRegs::Prisa", HI_BYTE, hiByte, byte_mask, hi_byte_pos, byte_mask);
+    };
+    using PrisaType = Reg<u16, Prisa>;
+    PrisaType prisa;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \struct	Prisb
+    ///
+    /// \brief	Priority Number (SPRITE 2,3) (PRISB).
+    ///
+    /// \author	Runik
+    /// \date	20/04/2023
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    struct Prisb {
+        GENERATE_USING(Prisb, u16);
+
+        GENERATE_BIT_WITHOUT_ENUM(s2prin, 0, 0b111);    ///< Sprite register 2 (S2PRINx).
+        GENERATE_BIT_WITHOUT_ENUM(s3prin, 8, 0b111);    ///< Sprite register 3 (S3PRINx).
+
+        static constexpr auto lo_byte_pos = PosType(0); ///< Defines the range of the upper 8 bits of the register.
+        static constexpr auto hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
+
+        static constexpr auto byte_mask = 0xFF;
+        GENERATE_MASKED_RANGE("Vdp2Regs::Prisb", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
+        GENERATE_MASKED_RANGE("Vd2pRegs::Prisb", HI_BYTE, hiByte, byte_mask, hi_byte_pos, byte_mask);
+    };
+    using PrisbType = Reg<u16, Prisb>;
+    PrisbType prisb;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \struct	Prisc
+    ///
+    /// \brief	Priority Number (SPRITE 4,5) (PRISC).
+    ///
+    /// \author	Runik
+    /// \date	20/04/2023
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    struct Prisc {
+        GENERATE_USING(Prisc, u16);
+
+        GENERATE_BIT_WITHOUT_ENUM(s4prin, 0, 0b111);    ///< Sprite register 4 (S4PRINx).
+        GENERATE_BIT_WITHOUT_ENUM(s5prin, 8, 0b111);    ///< Sprite register 5 (S5PRINx).
+
+        static constexpr auto lo_byte_pos = PosType(0); ///< Defines the range of the upper 8 bits of the register.
+        static constexpr auto hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
+
+        static constexpr auto byte_mask = 0xFF;
+        GENERATE_MASKED_RANGE("Vdp2Regs::Prisc", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
+        GENERATE_MASKED_RANGE("Vd2pRegs::Prisc", HI_BYTE, hiByte, byte_mask, hi_byte_pos, byte_mask);
+    };
+    using PriscType = Reg<u16, Prisc>;
+    PriscType prisc;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \struct	Prisd
+    ///
+    /// \brief	Priority Number (SPRITE 6,7) (PRISD).
+    ///
+    /// \author	Runik
+    /// \date	20/04/2023
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    struct Prisd {
+        GENERATE_USING(Prisd, u16);
+
+        GENERATE_BIT_WITHOUT_ENUM(s6prin, 0, 0b111);    ///< Sprite register 6 (S6PRINx).
+        GENERATE_BIT_WITHOUT_ENUM(s7prin, 8, 0b111);    ///< Sprite register 7 (S7PRINx).
+
+        static constexpr auto lo_byte_pos = PosType(0); ///< Defines the range of the upper 8 bits of the register.
+        static constexpr auto hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
+
+        static constexpr auto byte_mask = 0xFF;
+        GENERATE_MASKED_RANGE("Vdp2Regs::Prisd", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
+        GENERATE_MASKED_RANGE("Vd2pRegs::Prisd", HI_BYTE, hiByte, byte_mask, hi_byte_pos, byte_mask);
+    };
+    using PrisdType = Reg<u16, Prisd>;
+    PrisdType prisd;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \struct	Prina
+    ///
+    /// \brief	Priority Number A (NBG0, NBG1) (PRINA).
+    ///
+    /// \author	Runik
+    /// \date	20/04/2023
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    struct Prina {
+        GENERATE_USING(Prina, u16);
+
+        GENERATE_BIT_WITHOUT_ENUM(n0prin, 0, 0b111);    ///< NBG0 priority number (N0PRINx).
+        GENERATE_BIT_WITHOUT_ENUM(n1prin, 8, 0b111);    ///< NBG1 priority number (N1PRINx).
+
+        static constexpr auto lo_byte_pos = PosType(0); ///< Defines the range of the upper 8 bits of the register.
+        static constexpr auto hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
+
+        static constexpr auto byte_mask = 0xFF;
+        GENERATE_MASKED_RANGE("Vdp2Regs::Prina", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
+        GENERATE_MASKED_RANGE("Vd2pRegs::Prina", HI_BYTE, hiByte, byte_mask, hi_byte_pos, byte_mask);
+    };
+    using PrinaType = Reg<u16, Prina>;
+    PrinaType prina;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \struct	Prinb
+    ///
+    /// \brief	Priority Number B (NBG2, NBG3) (PRINB).
+    ///
+    /// \author	Runik
+    /// \date	20/04/2023
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    struct Prinb {
+        GENERATE_USING(Prinb, u16);
+
+        GENERATE_BIT_WITHOUT_ENUM(n2prin, 0, 0b111);    ///< NBG2 priority number (N2PRINx).
+        GENERATE_BIT_WITHOUT_ENUM(n3prin, 8, 0b111);    ///< NBG3 priority number (N3PRINx).
+
+        static constexpr auto lo_byte_pos = PosType(0); ///< Defines the range of the upper 8 bits of the register.
+        static constexpr auto hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
+
+        static constexpr auto byte_mask = 0xFF;
+        GENERATE_MASKED_RANGE("Vdp2Regs::Prinb", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
+        GENERATE_MASKED_RANGE("Vd2pRegs::Prinb", HI_BYTE, hiByte, byte_mask, hi_byte_pos, byte_mask);
+    };
+    using PrinbType = Reg<u16, Prinb>;
+    PrinbType prinb;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \struct	Prir
+    ///
+    /// \brief	Priority Number R (Rbg0) (PRIR).
+    ///
+    /// \author	Runik
+    /// \date	20/04/2023
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    struct Prir {
+        GENERATE_USING(Prir, u16);
+
+        GENERATE_BIT_WITHOUT_ENUM(r0prin, 0, 0b111);    ///< RBG0 priority number (R0PRINx).
+
+        static constexpr auto lo_byte_pos = PosType(0); ///< Defines the range of the upper 8 bits of the register.
+        static constexpr auto hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
+
+        static constexpr auto byte_mask = 0xFF;
+        GENERATE_MASKED_RANGE("Vdp2Regs::Prir", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
+        GENERATE_MASKED_RANGE("Vd2pRegs::Prir", HI_BYTE, hiByte, byte_mask, hi_byte_pos, byte_mask);
+    };
+    using PrirType = Reg<u16, Prir>;
+    PrirType prir;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \struct	Ccrsa
+    ///
+    /// \brief	Color Calculation Ratio (Sprite 0,1) (CCRSA).
+    ///
+    /// \author	Runik
+    /// \date	20/04/2023
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    struct Ccrsa {
+        GENERATE_USING(Ccrsa, u16);
+
+        GENERATE_BIT_WITHOUT_ENUM(s0ccrt, 0, 0b11111);  ///< Sprite register 0 color calculation ratio (S0CCRTx).
+        GENERATE_BIT_WITHOUT_ENUM(s1ccrt, 8, 0b11111);  ///< Sprite register 1 color calculation ratio (S1CCRTx).
+
+        static constexpr auto lo_byte_pos = PosType(0); ///< Defines the range of the upper 8 bits of the register.
+        static constexpr auto hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
+
+        static constexpr auto byte_mask = 0xFF;
+        GENERATE_MASKED_RANGE("Vdp2Regs::Ccrsa", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
+        GENERATE_MASKED_RANGE("Vd2pRegs::Ccrsa", HI_BYTE, hiByte, byte_mask, hi_byte_pos, byte_mask);
+    };
+    using CcrsaType = Reg<u16, Ccrsa>;
+    CcrsaType ccrsa;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \struct	Ccrsb
+    ///
+    /// \brief	Color Calculation Ratio (Sprite 2,3) (CCRSB).
+    ///
+    /// \author	Runik
+    /// \date	20/04/2023
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    struct Ccrsb {
+        GENERATE_USING(Ccrsb, u16);
+
+        GENERATE_BIT_WITHOUT_ENUM(s2ccrt, 0, 0b11111);  ///< Sprite register 2 color calculation ratio (S2CCRTx).
+        GENERATE_BIT_WITHOUT_ENUM(s3ccrt, 8, 0b11111);  ///< Sprite register 3 color calculation ratio (S3CCRTx).
+
+        static constexpr auto lo_byte_pos = PosType(0); ///< Defines the range of the upper 8 bits of the register.
+        static constexpr auto hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
+
+        static constexpr auto byte_mask = 0xFF;
+        GENERATE_MASKED_RANGE("Vdp2Regs::Ccrsb", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
+        GENERATE_MASKED_RANGE("Vd2pRegs::Ccrsb", HI_BYTE, hiByte, byte_mask, hi_byte_pos, byte_mask);
+    };
+    using CcrsbType = Reg<u16, Ccrsb>;
+    CcrsbType ccrsb;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \struct	Ccrsc
+    ///
+    /// \brief	Color Calculation Ratio (Sprite 4,5) (CCRSC).
+    ///
+    /// \author	Runik
+    /// \date	20/04/2023
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    struct Ccrsc {
+        GENERATE_USING(Ccrsc, u16);
+
+        GENERATE_BIT_WITHOUT_ENUM(s4ccrt, 0, 0b11111);  ///< Sprite register 4 color calculation ratio (S4CCRTx).
+        GENERATE_BIT_WITHOUT_ENUM(s5ccrt, 8, 0b11111);  ///< Sprite register 5 color calculation ratio (S5CCRTx).
+
+        static constexpr auto lo_byte_pos = PosType(0); ///< Defines the range of the upper 8 bits of the register.
+        static constexpr auto hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
+
+        static constexpr auto byte_mask = 0xFF;
+        GENERATE_MASKED_RANGE("Vdp2Regs::Ccrsc", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
+        GENERATE_MASKED_RANGE("Vd2pRegs::Ccrsc", HI_BYTE, hiByte, byte_mask, hi_byte_pos, byte_mask);
+    };
+    using CcrscType = Reg<u16, Ccrsc>;
+    CcrscType ccrsc;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \struct	Ccrsd
+    ///
+    /// \brief	Color Calculation Ratio (Sprite 6,7) (CCRSD).
+    ///
+    /// \author	Runik
+    /// \date	20/04/2023
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    struct Ccrsd {
+        GENERATE_USING(Ccrsd, u16);
+
+        GENERATE_BIT_WITHOUT_ENUM(s6ccrt, 0, 0b11111);  ///< Sprite register 6 color calculation ratio (S6CCRTx).
+        GENERATE_BIT_WITHOUT_ENUM(s7ccrt, 8, 0b11111);  ///< Sprite register 7 color calculation ratio (S7CCRTx).
+
+        static constexpr auto lo_byte_pos = PosType(0); ///< Defines the range of the upper 8 bits of the register.
+        static constexpr auto hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
+
+        static constexpr auto byte_mask = 0xFF;
+        GENERATE_MASKED_RANGE("Vdp2Regs::Ccrsd", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
+        GENERATE_MASKED_RANGE("Vd2pRegs::Ccrsd", HI_BYTE, hiByte, byte_mask, hi_byte_pos, byte_mask);
+    };
+    using CcrsdType = Reg<u16, Ccrsd>;
+    CcrsdType ccrsd;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \struct	Ccrna
+    ///
+    /// \brief	Color Calculation Ratio (NBG0, NBG1) (CCRNA).
+    ///
+    /// \author	Runik
+    /// \date	20/04/2023
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    struct Ccrna {
+        GENERATE_USING(Ccrna, u16);
+
+        GENERATE_BIT_WITHOUT_ENUM(n0ccrt, 0, 0b11111);  ///< NBG0 color calculation ratio (N0CCRTx).
+        GENERATE_BIT_WITHOUT_ENUM(n1ccrt, 8, 0b11111);  ///< NBG1 color calculation ratio (N1CCRTx).
+
+        static constexpr auto lo_byte_pos = PosType(0); ///< Defines the range of the upper 8 bits of the register.
+        static constexpr auto hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
+
+        static constexpr auto byte_mask = 0xFF;
+        GENERATE_MASKED_RANGE("Vdp2Regs::Ccrna", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
+        GENERATE_MASKED_RANGE("Vd2pRegs::Ccrna", HI_BYTE, hiByte, byte_mask, hi_byte_pos, byte_mask);
+    };
+    using CcrnaType = Reg<u16, Ccrna>;
+    CcrnaType ccrna;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \struct	Ccrnb
+    ///
+    /// \brief	Color Calculation Ratio (NBG2, NBG3) (CCRNB).
+    ///
+    /// \author	Runik
+    /// \date	20/04/2023
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    struct Ccrnb {
+        GENERATE_USING(Ccrnb, u16);
+
+        GENERATE_BIT_WITHOUT_ENUM(n2ccrt, 0, 0b11111);  ///< NBG2 color calculation ratio (N2CCRTx).
+        GENERATE_BIT_WITHOUT_ENUM(n3ccrt, 8, 0b11111);  ///< NBG3 color calculation ratio (N3CCRTx).
+
+        static constexpr auto lo_byte_pos = PosType(0); ///< Defines the range of the upper 8 bits of the register.
+        static constexpr auto hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
+
+        static constexpr auto byte_mask = 0xFF;
+        GENERATE_MASKED_RANGE("Vdp2Regs::Ccrnb", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
+        GENERATE_MASKED_RANGE("Vd2pRegs::Ccrnb", HI_BYTE, hiByte, byte_mask, hi_byte_pos, byte_mask);
+    };
+    using CcrnbType = Reg<u16, Ccrnb>;
+    CcrnbType ccrnb;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \struct	Ccrr
+    ///
+    /// \brief	Color Calculation Ratio (RBG0) (CCRR).
+    ///
+    /// \author	Runik
+    /// \date	20/04/2023
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    struct Ccrr {
+        GENERATE_USING(Ccrr, u16);
+
+        GENERATE_BIT_WITHOUT_ENUM(r0ccrt, 0, 0b11111);  ///< RBG0 color calculation ratio (R0CCRTx).
+
+        static constexpr auto lo_byte_pos = PosType(0); ///< Defines the range of the upper 8 bits of the register.
+        static constexpr auto hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
+
+        static constexpr auto byte_mask = 0xFF;
+        GENERATE_MASKED_RANGE("Vdp2Regs::Ccrr", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
+        GENERATE_MASKED_RANGE("Vd2pRegs::Ccrr", HI_BYTE, hiByte, byte_mask, hi_byte_pos, byte_mask);
+    };
+    using CcrrType = Reg<u16, Ccrr>;
+    CcrrType ccrr;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \struct	Ccrlb
+    ///
+    /// \brief	Color Calculation Ratio (Line Color Screen, Back Screen) (CCRLB).
+    ///
+    /// \author	Runik
+    /// \date	20/04/2023
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    struct Ccrlb {
+        GENERATE_USING(Ccrlb, u16);
+
+        GENERATE_BIT_WITHOUT_ENUM(lcccrt, 0, 0b11111);  ///< LNCL color calculation ratio (LCCCRTx).
+        GENERATE_BIT_WITHOUT_ENUM(bkccrt, 8, 0b11111);  ///< Back color calculation ratio (BKCCRTx).
+
+        static constexpr auto lo_byte_pos = PosType(0); ///< Defines the range of the upper 8 bits of the register.
+        static constexpr auto hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
+
+        static constexpr auto byte_mask = 0xFF;
+        GENERATE_MASKED_RANGE("Vdp2Regs::Ccrlb", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
+        GENERATE_MASKED_RANGE("Vd2pRegs::Ccrlb", HI_BYTE, hiByte, byte_mask, hi_byte_pos, byte_mask);
+    };
+    using CcrlbType = Reg<u16, Ccrlb>;
+    CcrlbType ccrlb;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \struct	Clofen
+    ///
+    /// \brief	Color Offset Enable (CLOFEN).
+    ///
+    /// \author	Runik
+    /// \date	20/04/2023
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    struct Clofen {
+        GENERATE_USING(Clofen, u16);
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \enum   ColorOffsetEnableBit
+        ///
+        /// \brief  Designates whether to use the color offset function.
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        enum class ColorOffsetEnable : bool {
+            disabled = false, ///< Do not use color offset function.
+            enabled  = true   ///< Use color offset function.
+        };
+
+        GENERATE_BIT_WITH_ENUM(n0coen, 0, 0b1, ColorOffsetEnable); ///< NBG0 (or RBG1) color offset enable (N0COEN).
+        GENERATE_BIT_WITH_ENUM(n1coen, 1, 0b1, ColorOffsetEnable); ///< NBG1 (or EXBG) color offset enable (N1COEN).
+        GENERATE_BIT_WITH_ENUM(n2coen, 2, 0b1, ColorOffsetEnable); ///< NBG2 color offset enable (N2COEN).
+        GENERATE_BIT_WITH_ENUM(n3coen, 3, 0b1, ColorOffsetEnable); ///< NBG3 color offset enable (N3COEN).
+        GENERATE_BIT_WITH_ENUM(r0coen, 4, 0b1, ColorOffsetEnable); ///< RBG0 color offset enable (R0COEN).
+        GENERATE_BIT_WITH_ENUM(bkcoen, 5, 0b1, ColorOffsetEnable); ///< Back color offset enable (BKCOEN).
+        GENERATE_BIT_WITH_ENUM(spcoen, 6, 0b1, ColorOffsetEnable); ///< Sprite color offset enable (SPCOEN).
+
+        static constexpr auto lo_byte_pos = PosType(0);            ///< Defines the range of the upper 8 bits of the register.
+        static constexpr auto hi_byte_pos = PosType(8);            ///< Defines the range of the lower 8 bits of the register.
+
+        static constexpr auto byte_mask = 0xFF;
+        GENERATE_MASKED_RANGE("Vdp2Regs::Clofen", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
+        GENERATE_MASKED_RANGE("Vd2pRegs::Clofen", HI_BYTE, hiByte, byte_mask, hi_byte_pos, byte_mask);
+    };
+    using ClofenType = Reg<u16, Clofen>;
+    ClofenType clofen;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \struct	Clofsl
+    ///
+    /// \brief	Color Offset Select (CLOFSL).
+    ///
+    /// \author	Runik
+    /// \date	20/04/2023
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    struct Clofsl {
+        GENERATE_USING(Clofsl, u16);
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \enum   ColorOffsetSelect
+        ///
+        /// \brief  Designates the color offset register to use when using the color offset function.
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        enum class ColorOffsetSelect : bool {
+            use_color_offset_a = false, ///< Use color offset A.
+            use_color_offset_b = true   ///< Use color offset B.
+        };
+
+        GENERATE_BIT_WITH_ENUM(n0cosl, 0, 0b1, ColorOffsetSelect); ///< NBG0 (or RBG1) color offset select (N0COSL).
+        GENERATE_BIT_WITH_ENUM(n1cosl, 1, 0b1, ColorOffsetSelect); ///< NBG1 (or EXBG) color offset select (N1COSL).
+        GENERATE_BIT_WITH_ENUM(n2cosl, 2, 0b1, ColorOffsetSelect); ///< NBG2 color offset select (N2COSL).
+        GENERATE_BIT_WITH_ENUM(n3cosl, 3, 0b1, ColorOffsetSelect); ///< NBG3 color offset select (N3COSL).
+        GENERATE_BIT_WITH_ENUM(r0cosl, 4, 0b1, ColorOffsetSelect); ///< RBG0 color offset select (R0COSL).
+        GENERATE_BIT_WITH_ENUM(bkcosl, 5, 0b1, ColorOffsetSelect); ///< Back color offset select (BKCOSL).
+        GENERATE_BIT_WITH_ENUM(spcosl, 6, 0b1, ColorOffsetSelect); ///< Sprite color offset select (SPCOSL).
+
+        static constexpr auto lo_byte_pos = PosType(0);            ///< Defines the range of the upper 8 bits of the register.
+        static constexpr auto hi_byte_pos = PosType(8);            ///< Defines the range of the lower 8 bits of the register.
+
+        static constexpr auto byte_mask = 0xFF;
+        GENERATE_MASKED_RANGE("Vdp2Regs::Clofsl", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
+        GENERATE_MASKED_RANGE("Vd2pRegs::Clofsl", HI_BYTE, hiByte, byte_mask, hi_byte_pos, byte_mask);
+    };
+    using ClofslType = Reg<u16, Clofsl>;
+    ClofslType clofsl;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \enum	Sign
+    ///
+    /// \brief	Sign bit values.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    enum class Sign : bool {
+        positive = false, ///< Sign is positive.
+        negative = true   ///< Sign is negative.
+    };
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \struct	Coar
+    ///
+    /// \brief	Color Offset A (Red) (COAR).
+    ///
+    /// \author	Runik
+    /// \date	20/04/2023
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    struct Coar {
+        GENERATE_USING(Coar, u16);
+
+        GENERATE_BIT_WITH_ENUM(sign, 8, 0b1, Sign);     ///< Sign of the data..
+        GENERATE_BIT_WITHOUT_ENUM(coard, 0, 0xFF);      ///< Defines the color offset A red data (COARDx).
+
+        static constexpr auto lo_byte_pos = PosType(0); ///< Defines the range of the upper 8 bits of the register.
+        static constexpr auto hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
+
+        static constexpr auto byte_mask = 0xFF;
+        GENERATE_MASKED_RANGE("Vdp2Regs::Coar", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
+        GENERATE_MASKED_RANGE("Vd2pRegs::Coar", HI_BYTE, hiByte, byte_mask, hi_byte_pos, byte_mask);
+    };
+    using CoarType = Reg<u16, Coar>;
+    CoarType coar;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \struct	Coag
+    ///
+    /// \brief	Color Offset A (Green) (COAG).
+    ///
+    /// \author	Runik
+    /// \date	20/04/2023
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    struct Coag {
+        GENERATE_USING(Coag, u16);
+
+        GENERATE_BIT_WITH_ENUM(sign, 8, 0b1, Sign);     ///< Sign of the data..
+        GENERATE_BIT_WITHOUT_ENUM(coagd, 0, 0xFF);      ///< Defines the color offset A green data (COAGDx).
+
+        static constexpr auto lo_byte_pos = PosType(0); ///< Defines the range of the upper 8 bits of the register.
+        static constexpr auto hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
+
+        static constexpr auto byte_mask = 0xFF;
+        GENERATE_MASKED_RANGE("Vdp2Regs::Coag", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
+        GENERATE_MASKED_RANGE("Vd2pRegs::Coag", HI_BYTE, hiByte, byte_mask, hi_byte_pos, byte_mask);
+    };
+    using CoagType = Reg<u16, Coag>;
+    CoagType coag;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \struct	Coab
+    ///
+    /// \brief	Color Offset A (Blue)  (COAB).
+    ///
+    /// \author	Runik
+    /// \date	20/04/2023
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    struct Coab {
+        GENERATE_USING(Coab, u16);
+
+        GENERATE_BIT_WITH_ENUM(sign, 8, 0b1, Sign);     ///< Sign of the data..
+        GENERATE_BIT_WITHOUT_ENUM(coarb, 0, 0xFF);      ///< Defines the color offset A blue data (COABDx).
+
+        static constexpr auto lo_byte_pos = PosType(0); ///< Defines the range of the upper 8 bits of the register.
+        static constexpr auto hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
+
+        static constexpr auto byte_mask = 0xFF;
+        GENERATE_MASKED_RANGE("Vdp2Regs::Coab", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
+        GENERATE_MASKED_RANGE("Vd2pRegs::Coab", HI_BYTE, hiByte, byte_mask, hi_byte_pos, byte_mask);
+    };
+    using CoabType = Reg<u16, Coab>;
+    CoabType coab;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \struct	Cobr
+    ///
+    /// \brief	Color Offset B (Red) (COBR).
+    ///
+    /// \author	Runik
+    /// \date	20/04/2023
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    struct Cobr {
+        GENERATE_USING(Cobr, u16);
+
+        GENERATE_BIT_WITH_ENUM(sign, 8, 0b1, Sign);     ///< Sign of the data..
+        GENERATE_BIT_WITHOUT_ENUM(cobrd, 0, 0xFF);      ///< Defines the color offset B red data (COBRDx).
+
+        static constexpr auto lo_byte_pos = PosType(0); ///< Defines the range of the upper 8 bits of the register.
+        static constexpr auto hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
+
+        static constexpr auto byte_mask = 0xFF;
+        GENERATE_MASKED_RANGE("Vdp2Regs::Cobr", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
+        GENERATE_MASKED_RANGE("Vd2pRegs::Cobr", HI_BYTE, hiByte, byte_mask, hi_byte_pos, byte_mask);
+    };
+    using CobrType = Reg<u16, Cobr>;
+    CobrType cobr;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \struct	Cobg
+    ///
+    /// \brief	Color Offset B (Green) (COBG).
+    ///
+    /// \author	Runik
+    /// \date	20/04/2023
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    struct Cobg {
+        GENERATE_USING(Cobg, u16);
+
+        GENERATE_BIT_WITH_ENUM(sign, 8, 0b1, Sign);     ///< Sign of the data..
+        GENERATE_BIT_WITHOUT_ENUM(cobgr, 0, 0xFF);      ///< Defines the color offset B green data (COBGRx).
+
+        static constexpr auto lo_byte_pos = PosType(0); ///< Defines the range of the upper 8 bits of the register.
+        static constexpr auto hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
+
+        static constexpr auto byte_mask = 0xFF;
+        GENERATE_MASKED_RANGE("Vdp2Regs::Cobg", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
+        GENERATE_MASKED_RANGE("Vd2pRegs::Cobg", HI_BYTE, hiByte, byte_mask, hi_byte_pos, byte_mask);
+    };
+    using CobgType = Reg<u16, Cobg>;
+    CobgType cobg;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \struct	Cobb
+    ///
+    /// \brief	Color Offset B (Blue)  (COBB).
+    ///
+    /// \author	Runik
+    /// \date	20/04/2023
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    struct Cobb {
+        GENERATE_USING(Cobb, u16);
+
+        GENERATE_BIT_WITH_ENUM(sign, 8, 0b1, Sign);     ///< Sign of the data..
+        GENERATE_BIT_WITHOUT_ENUM(cobbl, 0, 0xFF);      ///< Defines the color offset B blue data (COBBLx).
+
+        static constexpr auto lo_byte_pos = PosType(0); ///< Defines the range of the upper 8 bits of the register.
+        static constexpr auto hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
+
+        static constexpr auto byte_mask = 0xFF;
+        GENERATE_MASKED_RANGE("Vdp2Regs::Cobb", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
+        GENERATE_MASKED_RANGE("Vd2pRegs::Cobb", HI_BYTE, hiByte, byte_mask, hi_byte_pos, byte_mask);
+    };
+    using CobbType = Reg<u16, Cobb>;
+    CobbType cobb;
 };
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	SpecialColorCalculationMode
-///
-/// \brief	Special Color Calculation Mode (SFCCMD).
-///
-/// \author	Runik
-/// \date	23/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-union SpecialColorCalculationMode {
-    u16            raw;          ///< Raw representation.
-    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
-    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	PriorityNumberSpriteA
-///
-/// \brief	Priority Number (SPRITE 0,1) (PRISA).
-///
-/// \author	Runik
-/// \date	25/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-union PriorityNumberSpriteA {
-    u16            raw;               ///< Raw representation.
-    BitField<0, 3> sprite_register_0; ///< Defines S0PRINx bits.
-    BitField<8, 3> sprite_register_1; ///< Defines S1PRINx bits.
-    BitField<8, 8> upper_8_bits;      ///< Defines the range of the upper 8 bits of the register.
-    BitField<0, 8> lower_8_bits;      ///< Defines the range of the lower 8 bits of the register.
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	PriorityNumber
-///
-/// \brief	Priority Number (SPRITE 2,3) (PRISB).
-///
-/// \author	Runik
-/// \date	25/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-union PriorityNumberSpriteB {
-    u16            raw;               ///< Raw representation.
-    BitField<0, 3> sprite_register_2; ///< Defines S2PRINx bits.
-    BitField<8, 3> sprite_register_3; ///< Defines S3PRINx bits.
-    BitField<8, 8> upper_8_bits;      ///< Defines the range of the upper 8 bits of the register.
-    BitField<0, 8> lower_8_bits;      ///< Defines the range of the lower 8 bits of the register.
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	PriorityNumberSpriteC
-///
-/// \brief	Priority Number (SPRITE 4,5) (PRISC).
-///
-/// \author	Runik
-/// \date	25/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-union PriorityNumberSpriteC {
-    u16            raw;               ///< Raw representation.
-    BitField<0, 3> sprite_register_4; ///< Defines S4PRINx bits.
-    BitField<8, 3> sprite_register_5; ///< Defines S5PRINx bits.
-    BitField<8, 8> upper_8_bits;      ///< Defines the range of the upper 8 bits of the register.
-    BitField<0, 8> lower_8_bits;      ///< Defines the range of the lower 8 bits of the register.
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	PriorityNumberSpriteD
-///
-/// \brief	Priority Number (SPRITE 6,7) (PRISD).
-///
-/// \author	Runik
-/// \date	25/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-union PriorityNumberSpriteD {
-    u16            raw;               ///< Raw representation.
-    BitField<0, 3> sprite_register_6; ///< Defines S6PRINx bits.
-    BitField<8, 3> sprite_register_7; ///< Defines S7PRINx bits.
-    BitField<8, 8> upper_8_bits;      ///< Defines the range of the upper 8 bits of the register.
-    BitField<0, 8> lower_8_bits;      ///< Defines the range of the lower 8 bits of the register.
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	PriorityNumberA
-///
-/// \brief	Priority Number A (NBG0, NBG1) (PRINA).
-///
-/// \author	Runik
-/// \date	25/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-union PriorityNumberA {
-    u16            raw;          ///< Raw representation.
-    BitField<8, 3> nbg1;         ///< Defines the priority number of NBG1 (N1PRINx).
-    BitField<0, 3> nbg0;         ///< Defines the priority number of NBG0 (N0PRINx).
-    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
-    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	PriorityNumberB
-///
-/// \brief	Priority Number B (NBG2, NBG3) (PRINB).
-///
-/// \author	Runik
-/// \date	25/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-union PriorityNumberB {
-    u16            raw;          ///< Raw representation.
-    BitField<8, 3> nbg3;         ///< Defines the priority number of NBG1 (N1PRINx).
-    BitField<0, 3> nbg2;         ///< Defines the priority number of NBG0 (N0PRINx).
-    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
-    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	PriorityNumberR
-///
-/// \brief	Priority Number R (Rbg0) (PRIR).
-///
-/// \author	Runik
-/// \date	25/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-union PriorityNumberR {
-    u16            raw;          ///< Raw representation.
-    BitField<0, 3> rbg0;         ///< Defines the priority number of RBG0 (R0PRINx).
-    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
-    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	ColorCalculationRatioSpriteA
-///
-/// \brief	Color Calculation Ratio (Sprite 0,1) (CCRSA).
-///
-/// \author	Runik
-/// \date	23/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-union ColorCalculationRatioSpriteA {
-    u16            raw;          ///< Raw representation.
-    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
-    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	ColorCalculationRatioSpriteB
-///
-/// \brief	Color Calculation Ratio (Sprite 2,3) (CCRSB).
-///
-/// \author	Runik
-/// \date	23/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-union ColorCalculationRatioSpriteB {
-    u16            raw;          ///< Raw representation.
-    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
-    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	ColorCalculationRatioSpriteC
-///
-/// \brief	Color Calculation Ratio (Sprite 4,5) (CCRSC).
-///
-/// \author	Runik
-/// \date	23/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-union ColorCalculationRatioSpriteC {
-    u16            raw;          ///< Raw representation.
-    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
-    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	ColorCalculationRatioSpriteD
-///
-/// \brief	Color Calculation Ratio (Sprite 6,7) (CCRSD).
-///
-/// \author	Runik
-/// \date	23/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-union ColorCalculationRatioSpriteD {
-    u16            raw;          ///< Raw representation.
-    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
-    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	ColorCalculationRatioNbg0Nbg1
-///
-/// \brief	Color Calculation Ratio (NBG0, NBG1) (CCRNA).
-///
-/// \author	Runik
-/// \date	23/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-union ColorCalculationRatioNbg0Nbg1 {
-    u16            raw;          ///< Raw representation.
-    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
-    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	ColorCalculationRatioNbg2Nbg3
-///
-/// \brief	Color Calculation Ratio (NBG2, NBG3) (CCRNB).
-///
-/// \author	Runik
-/// \date	23/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-union ColorCalculationRatioNbg2Nbg3 {
-    u16            raw;          ///< Raw representation.
-    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
-    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	ColorCalculationRatioRbg0
-///
-/// \brief	Color Calculation Ratio (RBG0) (CCRR).
-///
-/// \author	Runik
-/// \date	23/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-union ColorCalculationRatioRbg0 {
-    u16            raw;          ///< Raw representation.
-    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
-    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	ColorCalculationRatioLineColorBack
-///
-/// \brief	Color Calculation Ratio (Line Color Screen, Back Screen) (CCRLB).
-///
-/// \author	Runik
-/// \date	23/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-union ColorCalculationRatioLineColorBack {
-    u16            raw;          ///< Raw representation.
-    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
-    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   ColorOffsetEnableBit
-///
-/// \brief  xxCOEN bits values.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-enum class ColorOffsetEnableBit : bool {
-    disabled = false, ///< Do not use color offset function.
-    enabled  = true   ///< Use color offset function.
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	ColorOffsetEnable
-///
-/// \brief	Color Offset Enable (CLOFEN).
-///
-/// \author	Runik
-/// \date	23/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-union ColorOffsetEnable {
-    u16            raw;          ///< Raw representation.
-    BitField<0>    nbg0;         ///< Defines N0COEN bit.
-    BitField<1>    nbg1;         ///< Defines N1COEN bit.
-    BitField<2>    nbg2;         ///< Defines N2COEN bit.
-    BitField<3>    nbg3;         ///< Defines N3COEN bit.
-    BitField<4>    rbg0;         ///< Defines R0COEN bit.
-    BitField<5>    back;         ///< Defines BKCOEN bit.
-    BitField<6>    sprite;       ///< Defines SPCOEN bit.
-    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
-    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   ColorOffsetSelectBit
-///
-/// \brief  xxCOSL bits values.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-enum class ColorOffsetSelectBit : bool {
-    use_color_offset_a = false, ///< Use color offset A.
-    use_color_offset_b = true   ///< Use color offset B.
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	ColorOffsetSelect
-///
-/// \brief	Color Offset Select (CLOFSL).
-///
-/// \author	Runik
-/// \date	23/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-union ColorOffsetSelect {
-    u16            raw;          ///< Raw representation.
-    BitField<0>    nbg0;         ///< Defines N0COSL bit.
-    BitField<1>    nbg1;         ///< Defines N1COSL bit.
-    BitField<2>    nbg2;         ///< Defines N2COSL bit.
-    BitField<3>    nbg3;         ///< Defines N3COSL bit.
-    BitField<4>    rbg0;         ///< Defines R0COSL bit.
-    BitField<5>    back;         ///< Defines BKCOSL bit.
-    BitField<6>    sprite;       ///< Defines SPCOSL bit.
-    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
-    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum	Sign
-///
-/// \brief	Sign bit values.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-enum class Sign : bool {
-    positive = false, ///< Sign is positive.
-    negative = true   ///< Sign is negative.
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	ColorOffsetARed
-///
-/// \brief	Color Offset A (Red) (COAR).
-///
-/// \author	Runik
-/// \date	23/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-union ColorOffsetARed {
-    u16            raw;          ///< Raw representation.
-    BitField<0, 8> red_data;     ///< Defines the color offset A red data (COARDx).
-    BitField<8>    sign;         ///< Sign of the data.
-    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
-    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	ColorOffsetAGreen
-///
-/// \brief	Color Offset A (Green) (COAG).
-///
-/// \author	Runik
-/// \date	23/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-union ColorOffsetAGreen {
-    u16            raw;          ///< Raw representation.
-    BitField<0, 8> green_data;   ///< Defines the color offset A green data (COAGRx).
-    BitField<8>    sign;         ///< Sign of the data.
-    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
-    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	ColorOffsetABlue
-///
-/// \brief	Color Offset A (Blue)  (COAB).
-///
-/// \author	Runik
-/// \date	23/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-union ColorOffsetABlue {
-    u16            raw;          ///< Raw representation.
-    BitField<0, 8> blue_data;    ///< Defines the color offset A red data (COABLx).
-    BitField<8>    sign;         ///< Sign of the data.
-    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
-    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	ColorOffsetBRed
-///
-/// \brief	Color Offset B (Red) (COBR).
-///
-/// \author	Runik
-/// \date	23/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-union ColorOffsetBRed {
-    u16            raw;          ///< Raw representation.
-    BitField<0, 8> red_data;     ///< Defines the color offset B red data (COBRDx).
-    BitField<8>    sign;         ///< Sign of the data.
-    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
-    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	ColorOffsetBGreen
-///
-/// \brief	Color Offset B (Green) (COBG).
-///
-/// \author	Runik
-/// \date	23/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-union ColorOffsetBGreen {
-    u16            raw;          ///< Raw representation.
-    BitField<0, 8> green_data;   ///< Defines the color offset B green data (COBGRx).
-    BitField<8>    sign;         ///< Sign of the data.
-    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
-    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union	ColorOffsetBBlue
-///
-/// \brief	Color Offset A (Blue) (COBB).
-///
-/// \author	Runik
-/// \date	23/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-union ColorOffsetBBlue {
-    u16            raw;          ///< Raw representation.
-    BitField<0, 8> blue_data;    ///< Defines the color offset B red data (COBBLx).
-    BitField<8>    sign;         ///< Sign of the data.
-    BitField<8, 8> upper_8_bits; ///< Defines the range of the upper 8 bits of the register.
-    BitField<0, 8> lower_8_bits; ///< Defines the range of the lower 8 bits of the register.
-};
-
 } // namespace saturnin::video

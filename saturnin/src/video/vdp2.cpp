@@ -246,60 +246,67 @@ auto Vdp2::getSpriteColorAddressOffset() -> u16 {
 auto Vdp2::getSpritePriority(const u8 register_number) const -> u8 {
     // Next line works from LLVM version 14.0.0
     // NOLINTBEGIN(readability-magic-numbers)
+    using Prisa = Vdp2Regs::Prisa;
+    using Prisb = Vdp2Regs::Prisb;
+    using Prisc = Vdp2Regs::Prisc;
+    using Prisd = Vdp2Regs::Prisd;
     switch (register_number) {
-        case 0: return prisa_.sprite_register_0;
-        case 1: return static_cast<u8>(prisa_.sprite_register_1);
-        case 2: return prisb_.sprite_register_2;
-        case 3: return static_cast<u8>(prisb_.sprite_register_3);
-        case 4: return prisc_.sprite_register_4;
-        case 5: return static_cast<u8>(prisc_.sprite_register_5);
-        case 6: return prisd_.sprite_register_6;
-        case 7: return static_cast<u8>(prisd_.sprite_register_7);
+        case 0: return static_cast<u8>(regs_.prisa >> Prisa::s0prin_shft);
+        case 1: return static_cast<u8>(regs_.prisa >> Prisa::s1prin_shft);
+        case 2: return static_cast<u8>(regs_.prisb >> Prisb::s2prin_shft);
+        case 3: return static_cast<u8>(regs_.prisb >> Prisb::s3prin_shft);
+        case 4: return static_cast<u8>(regs_.prisc >> Prisc::s4prin_shft);
+        case 5: return static_cast<u8>(regs_.prisc >> Prisc::s5prin_shft);
+        case 6: return static_cast<u8>(regs_.prisd >> Prisd::s6prin_shft);
+        case 7: return static_cast<u8>(regs_.prisd >> Prisd::s7prin_shft);
+        default: core::Log::warning(Logger::vdp2, core::tr("Unknown sprite priority."));
     }
     // NOLINTEND(readability-magic-numbers)
-    core::Log::warning(Logger::vdp2, core::tr("Unknown sprite priority."));
+
     return 0;
 }
 
 // NOLINTNEXTLINE(readability-convert-member-functions-to-static)
 auto Vdp2::getColorOffset(const Layer layer) -> ColorOffset {
-    auto enable_bit = ColorOffsetEnableBit{};
-    auto select_bit = ColorOffsetSelectBit{};
+    using Clofen    = Vdp2Regs::Clofen;
+    using Clofsl    = Vdp2Regs::Clofsl;
+    auto enable_bit = Clofen::ColorOffsetEnable{};
+    auto select_bit = Clofsl::ColorOffsetSelect{};
     switch (layer) {
         using enum Layer;
         case nbg0: {
-            enable_bit = toEnum<ColorOffsetEnableBit>(clofen_.nbg0);
-            select_bit = toEnum<ColorOffsetSelectBit>(clofsl_.nbg0);
+            enable_bit = regs_.clofen >> Clofen::n0coen_enum;
+            select_bit = regs_.clofsl >> Clofsl::n0cosl_enum;
             break;
         }
         case nbg1: {
-            enable_bit = toEnum<ColorOffsetEnableBit>(clofen_.nbg1);
-            select_bit = toEnum<ColorOffsetSelectBit>(clofsl_.nbg1);
+            enable_bit = regs_.clofen >> Clofen::n1coen_enum;
+            select_bit = regs_.clofsl >> Clofsl::n1cosl_enum;
             break;
         }
         case nbg2: {
-            enable_bit = toEnum<ColorOffsetEnableBit>(clofen_.nbg2);
-            select_bit = toEnum<ColorOffsetSelectBit>(clofsl_.nbg2);
+            enable_bit = regs_.clofen >> Clofen::n2coen_enum;
+            select_bit = regs_.clofsl >> Clofsl::n2cosl_enum;
             break;
         }
         case nbg3: {
-            enable_bit = toEnum<ColorOffsetEnableBit>(clofen_.nbg3);
-            select_bit = toEnum<ColorOffsetSelectBit>(clofsl_.nbg3);
+            enable_bit = regs_.clofen >> Clofen::n3coen_enum;
+            select_bit = regs_.clofsl >> Clofsl::n3cosl_enum;
             break;
         }
         case rbg0: {
-            enable_bit = toEnum<ColorOffsetEnableBit>(clofen_.rbg0);
-            select_bit = toEnum<ColorOffsetSelectBit>(clofsl_.rbg0);
+            enable_bit = regs_.clofen >> Clofen::r0coen_enum;
+            select_bit = regs_.clofsl >> Clofsl::r0cosl_enum;
             break;
         }
         case back: {
-            enable_bit = toEnum<ColorOffsetEnableBit>(clofen_.back);
-            select_bit = toEnum<ColorOffsetSelectBit>(clofsl_.back);
+            enable_bit = regs_.clofen >> Clofen::bkcoen_enum;
+            select_bit = regs_.clofsl >> Clofsl::bkcosl_enum;
             break;
         }
         case sprite: {
-            enable_bit = toEnum<ColorOffsetEnableBit>(clofen_.sprite);
-            select_bit = toEnum<ColorOffsetSelectBit>(clofsl_.sprite);
+            enable_bit = regs_.clofen >> Clofen::spcoen_enum;
+            select_bit = regs_.clofsl >> Clofsl::spcosl_enum;
             break;
         }
         default: {
@@ -309,23 +316,23 @@ auto Vdp2::getColorOffset(const Layer layer) -> ColorOffset {
     }
 
     auto color_offset = ColorOffset{};
-    if (enable_bit == ColorOffsetEnableBit::enabled) {
+    if (enable_bit == Clofen::ColorOffsetEnable::enabled) {
         constexpr auto sign_ext_mask = u16{0xFF00};
-
-        if (select_bit == ColorOffsetSelectBit::use_color_offset_a) {
-            if (toEnum<Sign>(coar_.sign) == Sign::negative) { coar_.raw |= sign_ext_mask; }
-            if (toEnum<Sign>(coag_.sign) == Sign::negative) { coag_.raw |= sign_ext_mask; }
-            if (toEnum<Sign>(coab_.sign) == Sign::negative) { coab_.raw |= sign_ext_mask; }
-            color_offset.as_s16.r = static_cast<s16>(coar_.raw);
-            color_offset.as_s16.g = static_cast<s16>(coag_.raw);
-            color_offset.as_s16.b = static_cast<s16>(coab_.raw);
+        using Sign                   = Vdp2Regs::Sign;
+        if (select_bit == Clofsl::ColorOffsetSelect::use_color_offset_a) {
+            if ((regs_.coar >> Vdp2Regs::Coar::sign_enum) == Sign::negative) { regs_.coar = (regs_.coar.data() | sign_ext_mask); }
+            if ((regs_.coag >> Vdp2Regs::Coag::sign_enum) == Sign::negative) { regs_.coag = (regs_.coag.data() | sign_ext_mask); }
+            if ((regs_.coab >> Vdp2Regs::Coab::sign_enum) == Sign::negative) { regs_.coab = (regs_.coab.data() | sign_ext_mask); }
+            color_offset.as_s16.r = static_cast<s16>(regs_.coar.data());
+            color_offset.as_s16.g = static_cast<s16>(regs_.coag.data());
+            color_offset.as_s16.b = static_cast<s16>(regs_.coab.data());
         } else {
-            if (cobr_.sign == 1) { cobr_.raw |= sign_ext_mask; }
-            if (cobg_.sign == 1) { cobg_.raw |= sign_ext_mask; }
-            if (cobb_.sign == 1) { cobb_.raw |= sign_ext_mask; }
-            color_offset.as_s16.r = static_cast<s16>(cobr_.raw);
-            color_offset.as_s16.g = static_cast<s16>(cobg_.raw);
-            color_offset.as_s16.b = static_cast<s16>(cobb_.raw);
+            if ((regs_.cobr >> Vdp2Regs::Cobr::sign_enum) == Sign::positive) { regs_.cobr = (regs_.cobr.data() | sign_ext_mask); }
+            if ((regs_.cobg >> Vdp2Regs::Cobg::sign_enum) == Sign::positive) { regs_.cobg = (regs_.cobg.data() | sign_ext_mask); }
+            if ((regs_.cobb >> Vdp2Regs::Cobb::sign_enum) == Sign::positive) { regs_.cobb = (regs_.cobb.data() | sign_ext_mask); }
+            color_offset.as_s16.r = static_cast<s16>(regs_.cobr.data());
+            color_offset.as_s16.g = static_cast<s16>(regs_.cobg.data());
+            color_offset.as_s16.b = static_cast<s16>(regs_.cobb.data());
         }
 
         color_offset.as_float.r = static_cast<float>(color_offset.as_s16.r) / static_cast<float>(u8_max);
@@ -472,31 +479,31 @@ auto Vdp2::read16(const u32 addr) const -> u16 {
         case line_color_screen_enable: return regs_.lnclen.data();
         case special_priority_mode: return regs_.sfprmd.data();
         case color_calculation_control: return regs_.ccctl.data();
-        case special_color_calculation_mode: return sfccmd_.raw;
-        case priority_number_sprite_0_1: return prisa_.raw;
-        case priority_number_sprite_2_3: return prisb_.raw;
-        case priority_number_sprite_4_5: return prisc_.raw;
-        case priority_number_sprite_6_7: return prisd_.raw;
-        case priority_number_nbg0_nbg1: return prina_.raw;
-        case priority_number_nbg2_nbg3: return prinb_.raw;
-        case priority_number_rbg0: return prir_.raw;
+        case special_color_calculation_mode: return regs_.sfccmd.data();
+        case priority_number_sprite_0_1: return regs_.prisa.data();
+        case priority_number_sprite_2_3: return regs_.prisb.data();
+        case priority_number_sprite_4_5: return regs_.prisc.data();
+        case priority_number_sprite_6_7: return regs_.prisd.data();
+        case priority_number_nbg0_nbg1: return regs_.prina.data();
+        case priority_number_nbg2_nbg3: return regs_.prinb.data();
+        case priority_number_rbg0: return regs_.prir.data();
         case reserve_2: return regs_.rsv2.data();
-        case color_calculation_ratio_sprite_0_1: return ccrsa_.raw;
-        case color_calculation_ratio_sprite_2_3: return ccrsb_.raw;
-        case color_calculation_ratio_sprite_4_5: return ccrsc_.raw;
-        case color_calculation_ratio_sprite_6_7: return ccrsd_.raw;
-        case color_calculation_ratio_nbg0_nbg1: return ccrna_.raw;
-        case color_calculation_ratio_nbg2_nbg3: return ccrnb_.raw;
-        case color_calculation_ratio_rbg0: return ccrr_.raw;
-        case color_calculation_ratio_line_color_back: return ccrlb_.raw;
-        case color_offset_enable: return clofen_.raw;
-        case color_offset_select: return clofsl_.raw;
-        case color_offset_a_red: return coar_.raw;
-        case color_offset_a_green: return coag_.raw;
-        case color_offset_a_blue: return coab_.raw;
-        case color_offset_b_red: return cobr_.raw;
-        case color_offset_b_green: return cobg_.raw;
-        case color_offset_b_blue: return cobb_.raw;
+        case color_calculation_ratio_sprite_0_1: return regs_.ccrsa.data();
+        case color_calculation_ratio_sprite_2_3: return regs_.ccrsb.data();
+        case color_calculation_ratio_sprite_4_5: return regs_.ccrsc.data();
+        case color_calculation_ratio_sprite_6_7: return regs_.ccrsd.data();
+        case color_calculation_ratio_nbg0_nbg1: return regs_.ccrna.data();
+        case color_calculation_ratio_nbg2_nbg3: return regs_.ccrnb.data();
+        case color_calculation_ratio_rbg0: return regs_.ccrr.data();
+        case color_calculation_ratio_line_color_back: return regs_.ccrlb.data();
+        case color_offset_enable: return regs_.clofen.data();
+        case color_offset_select: return regs_.clofsl.data();
+        case color_offset_a_red: return regs_.coar.data();
+        case color_offset_a_green: return regs_.coag.data();
+        case color_offset_a_blue: return regs_.coab.data();
+        case color_offset_b_red: return regs_.cobr.data();
+        case color_offset_b_green: return regs_.cobg.data();
+        case color_offset_b_blue: return regs_.cobb.data();
 
         default: core::Log::warning(Logger::vdp2, core::tr("Unimplemented register read (16) {:#010x}"), addr);
     }
@@ -746,56 +753,56 @@ void Vdp2::write8(const u32 addr, const u8 data) {
         case special_priority_mode + 1: regs_.sfprmd.upd(Vdp2Regs::Sfprmd::loByte(data)); break;
         case color_calculation_control: regs_.ccctl.upd(Vdp2Regs::Ccctl::hiByte(data)); break;
         case color_calculation_control + 1: regs_.ccctl.upd(Vdp2Regs::Ccctl::loByte(data)); break;
-        case special_color_calculation_mode: sfccmd_.upper_8_bits = data; break;
-        case special_color_calculation_mode + 1: sfccmd_.lower_8_bits = data; break;
-        case priority_number_sprite_0_1: prisa_.upper_8_bits = data; break;
-        case priority_number_sprite_0_1 + 1: prisa_.lower_8_bits = data; break;
-        case priority_number_sprite_2_3: prisb_.upper_8_bits = data; break;
-        case priority_number_sprite_2_3 + 1: prisb_.lower_8_bits = data; break;
-        case priority_number_sprite_4_5: prisc_.upper_8_bits = data; break;
-        case priority_number_sprite_4_5 + 1: prisc_.lower_8_bits = data; break;
-        case priority_number_sprite_6_7: prisd_.upper_8_bits = data; break;
-        case priority_number_sprite_6_7 + 1: prisd_.lower_8_bits = data; break;
-        case priority_number_nbg0_nbg1: prina_.upper_8_bits = data; break;
-        case priority_number_nbg0_nbg1 + 1: prina_.lower_8_bits = data; break;
-        case priority_number_nbg2_nbg3: prinb_.upper_8_bits = data; break;
-        case priority_number_nbg2_nbg3 + 1: prinb_.lower_8_bits = data; break;
-        case priority_number_rbg0: prir_.upper_8_bits = data; break;
-        case priority_number_rbg0 + 1: prir_.lower_8_bits = data; break;
+        case special_color_calculation_mode: regs_.sfccmd.upd(Vdp2Regs::Sfccmd::hiByte(data)); break;
+        case special_color_calculation_mode + 1: regs_.sfccmd.upd(Vdp2Regs::Sfccmd::loByte(data)); break;
+        case priority_number_sprite_0_1: regs_.prisa.upd(Vdp2Regs::Prisa::hiByte(data)); break;
+        case priority_number_sprite_0_1 + 1: regs_.prisa.upd(Vdp2Regs::Prisa::loByte(data)); break;
+        case priority_number_sprite_2_3: regs_.prisb.upd(Vdp2Regs::Prisb::hiByte(data)); break;
+        case priority_number_sprite_2_3 + 1: regs_.prisb.upd(Vdp2Regs::Prisb::loByte(data)); break;
+        case priority_number_sprite_4_5: regs_.prisc.upd(Vdp2Regs::Prisc::hiByte(data)); break;
+        case priority_number_sprite_4_5 + 1: regs_.prisc.upd(Vdp2Regs::Prisc::loByte(data)); break;
+        case priority_number_sprite_6_7: regs_.prisd.upd(Vdp2Regs::Prisd::hiByte(data)); break;
+        case priority_number_sprite_6_7 + 1: regs_.prisd.upd(Vdp2Regs::Prisd::loByte(data)); break;
+        case priority_number_nbg0_nbg1: regs_.prina.upd(Vdp2Regs::Prina::hiByte(data)); break;
+        case priority_number_nbg0_nbg1 + 1: regs_.prina.upd(Vdp2Regs::Prina::loByte(data)); break;
+        case priority_number_nbg2_nbg3: regs_.prinb.upd(Vdp2Regs::Prinb::hiByte(data)); break;
+        case priority_number_nbg2_nbg3 + 1: regs_.prinb.upd(Vdp2Regs::Prinb::loByte(data)); break;
+        case priority_number_rbg0: regs_.prir.upd(Vdp2Regs::Prir::hiByte(data)); break;
+        case priority_number_rbg0 + 1: regs_.prir.upd(Vdp2Regs::Prir::loByte(data)); break;
         case reserve_2: regs_.rsv2.upd(Vdp2Regs::Reserve::hiByte(data)); break;
         case reserve_2 + 1: regs_.rsv2.upd(Vdp2Regs::Reserve::loByte(data)); break;
-        case color_calculation_ratio_sprite_0_1: ccrsa_.upper_8_bits = data; break;
-        case color_calculation_ratio_sprite_0_1 + 1: ccrsa_.lower_8_bits = data; break;
-        case color_calculation_ratio_sprite_2_3: ccrsb_.upper_8_bits = data; break;
-        case color_calculation_ratio_sprite_2_3 + 1: ccrsb_.lower_8_bits = data; break;
-        case color_calculation_ratio_sprite_4_5: ccrsc_.upper_8_bits = data; break;
-        case color_calculation_ratio_sprite_4_5 + 1: ccrsc_.lower_8_bits = data; break;
-        case color_calculation_ratio_sprite_6_7: ccrsd_.upper_8_bits = data; break;
-        case color_calculation_ratio_sprite_6_7 + 1: ccrsd_.lower_8_bits = data; break;
-        case color_calculation_ratio_nbg0_nbg1: ccrna_.upper_8_bits = data; break;
-        case color_calculation_ratio_nbg0_nbg1 + 1: ccrna_.lower_8_bits = data; break;
-        case color_calculation_ratio_nbg2_nbg3: ccrnb_.upper_8_bits = data; break;
-        case color_calculation_ratio_nbg2_nbg3 + 1: ccrnb_.lower_8_bits = data; break;
-        case color_calculation_ratio_rbg0: ccrr_.upper_8_bits = data; break;
-        case color_calculation_ratio_rbg0 + 1: ccrr_.lower_8_bits = data; break;
-        case color_calculation_ratio_line_color_back: ccrlb_.upper_8_bits = data; break;
-        case color_calculation_ratio_line_color_back + 1: ccrlb_.lower_8_bits = data; break;
-        case color_offset_enable: clofen_.upper_8_bits = data; break;
-        case color_offset_enable + 1: clofen_.lower_8_bits = data; break;
-        case color_offset_select: clofsl_.upper_8_bits = data; break;
-        case color_offset_select + 1: clofsl_.lower_8_bits = data; break;
-        case color_offset_a_red: coar_.upper_8_bits = data; break;
-        case color_offset_a_red + 1: coar_.lower_8_bits = data; break;
-        case color_offset_a_green: coag_.upper_8_bits = data; break;
-        case color_offset_a_green + 1: coag_.lower_8_bits = data; break;
-        case color_offset_a_blue: coab_.upper_8_bits = data; break;
-        case color_offset_a_blue + 1: coab_.lower_8_bits = data; break;
-        case color_offset_b_red: cobr_.upper_8_bits = data; break;
-        case color_offset_b_red + 1: cobr_.lower_8_bits = data; break;
-        case color_offset_b_green: cobg_.upper_8_bits = data; break;
-        case color_offset_b_green + 1: cobg_.lower_8_bits = data; break;
-        case color_offset_b_blue: cobb_.upper_8_bits = data; break;
-        case color_offset_b_blue + 1: cobb_.lower_8_bits = data; break;
+        case color_calculation_ratio_sprite_0_1: regs_.ccrsa.upd(Vdp2Regs::Ccrsa::hiByte(data)); break;
+        case color_calculation_ratio_sprite_0_1 + 1: regs_.ccrsa.upd(Vdp2Regs::Ccrsa::loByte(data)); break;
+        case color_calculation_ratio_sprite_2_3: regs_.ccrsb.upd(Vdp2Regs::Ccrsb::hiByte(data)); break;
+        case color_calculation_ratio_sprite_2_3 + 1: regs_.ccrsb.upd(Vdp2Regs::Ccrsb::loByte(data)); break;
+        case color_calculation_ratio_sprite_4_5: regs_.ccrsc.upd(Vdp2Regs::Ccrsc::hiByte(data)); break;
+        case color_calculation_ratio_sprite_4_5 + 1: regs_.ccrsc.upd(Vdp2Regs::Ccrsc::loByte(data)); break;
+        case color_calculation_ratio_sprite_6_7: regs_.ccrsd.upd(Vdp2Regs::Ccrsd::hiByte(data)); break;
+        case color_calculation_ratio_sprite_6_7 + 1: regs_.ccrsd.upd(Vdp2Regs::Ccrsd::loByte(data)); break;
+        case color_calculation_ratio_nbg0_nbg1: regs_.ccrna.upd(Vdp2Regs::Ccrna::hiByte(data)); break;
+        case color_calculation_ratio_nbg0_nbg1 + 1: regs_.ccrna.upd(Vdp2Regs::Ccrna::loByte(data)); break;
+        case color_calculation_ratio_nbg2_nbg3: regs_.ccrnb.upd(Vdp2Regs::Ccrnb::hiByte(data)); break;
+        case color_calculation_ratio_nbg2_nbg3 + 1: regs_.ccrnb.upd(Vdp2Regs::Ccrnb::loByte(data)); break;
+        case color_calculation_ratio_rbg0: regs_.ccrr.upd(Vdp2Regs::Ccrr::hiByte(data)); break;
+        case color_calculation_ratio_rbg0 + 1: regs_.ccrr.upd(Vdp2Regs::Ccrr::loByte(data)); break;
+        case color_calculation_ratio_line_color_back: regs_.ccrlb.upd(Vdp2Regs::Ccrlb::hiByte(data)); break;
+        case color_calculation_ratio_line_color_back + 1: regs_.ccrlb.upd(Vdp2Regs::Ccrlb::loByte(data)); break;
+        case color_offset_enable: regs_.clofen.upd(Vdp2Regs::Clofen::hiByte(data)); break;
+        case color_offset_enable + 1: regs_.clofen.upd(Vdp2Regs::Clofen::loByte(data)); break;
+        case color_offset_select: regs_.clofsl.upd(Vdp2Regs::Clofsl::hiByte(data)); break;
+        case color_offset_select + 1: regs_.clofsl.upd(Vdp2Regs::Clofsl::loByte(data)); break;
+        case color_offset_a_red: regs_.coar.upd(Vdp2Regs::Coar::hiByte(data)); break;
+        case color_offset_a_red + 1: regs_.coar.upd(Vdp2Regs::Coar::loByte(data)); break;
+        case color_offset_a_green: regs_.coag.upd(Vdp2Regs::Coag::hiByte(data)); break;
+        case color_offset_a_green + 1: regs_.coag.upd(Vdp2Regs::Coag::loByte(data)); break;
+        case color_offset_a_blue: regs_.coab.upd(Vdp2Regs::Coab::hiByte(data)); break;
+        case color_offset_a_blue + 1: regs_.coab.upd(Vdp2Regs::Coab::loByte(data)); break;
+        case color_offset_b_red: regs_.cobr.upd(Vdp2Regs::Cobr::hiByte(data)); break;
+        case color_offset_b_red + 1: regs_.cobr.upd(Vdp2Regs::Cobr::loByte(data)); break;
+        case color_offset_b_green: regs_.cobg.upd(Vdp2Regs::Cobg::hiByte(data)); break;
+        case color_offset_b_green + 1: regs_.cobg.upd(Vdp2Regs::Cobg::loByte(data)); break;
+        case color_offset_b_blue: regs_.cobb.upd(Vdp2Regs::Cobb::hiByte(data)); break;
+        case color_offset_b_blue + 1: regs_.cobb.upd(Vdp2Regs::Cobb::loByte(data)); break;
         default: core::Log::warning(Logger::vdp2, core::tr("Unimplemented register write (8) {:#010x} {:#04x}"), addr, data);
     }
 }
@@ -922,31 +929,31 @@ void Vdp2::write16(const u32 addr, const u16 data) {
         case line_color_screen_enable: regs_.lnclen = data; break;
         case special_priority_mode: regs_.sfprmd = data; break;
         case color_calculation_control: regs_.ccctl = data; break;
-        case special_color_calculation_mode: sfccmd_.raw = data; break;
-        case priority_number_sprite_0_1: prisa_.raw = data; break;
-        case priority_number_sprite_2_3: prisb_.raw = data; break;
-        case priority_number_sprite_4_5: prisc_.raw = data; break;
-        case priority_number_sprite_6_7: prisd_.raw = data; break;
-        case priority_number_nbg0_nbg1: prina_.raw = data; break;
-        case priority_number_nbg2_nbg3: prinb_.raw = data; break;
-        case priority_number_rbg0: prir_.raw = data; break;
+        case special_color_calculation_mode: regs_.sfccmd = data; break;
+        case priority_number_sprite_0_1: regs_.prisa = data; break;
+        case priority_number_sprite_2_3: regs_.prisb = data; break;
+        case priority_number_sprite_4_5: regs_.prisc = data; break;
+        case priority_number_sprite_6_7: regs_.prisd = data; break;
+        case priority_number_nbg0_nbg1: regs_.prina = data; break;
+        case priority_number_nbg2_nbg3: regs_.prinb = data; break;
+        case priority_number_rbg0: regs_.prir = data; break;
         case reserve_2: regs_.rsv2 = data; break;
-        case color_calculation_ratio_sprite_0_1: ccrsa_.raw = data; break;
-        case color_calculation_ratio_sprite_2_3: ccrsb_.raw = data; break;
-        case color_calculation_ratio_sprite_4_5: ccrsc_.raw = data; break;
-        case color_calculation_ratio_sprite_6_7: ccrsd_.raw = data; break;
-        case color_calculation_ratio_nbg0_nbg1: ccrna_.raw = data; break;
-        case color_calculation_ratio_nbg2_nbg3: ccrnb_.raw = data; break;
-        case color_calculation_ratio_rbg0: ccrr_.raw = data; break;
-        case color_calculation_ratio_line_color_back: ccrlb_.raw = data; break;
-        case color_offset_enable: clofen_.raw = data; break;
-        case color_offset_select: clofsl_.raw = data; break;
-        case color_offset_a_red: coar_.raw = data; break;
-        case color_offset_a_green: coag_.raw = data; break;
-        case color_offset_a_blue: coab_.raw = data; break;
-        case color_offset_b_red: cobr_.raw = data; break;
-        case color_offset_b_green: cobg_.raw = data; break;
-        case color_offset_b_blue: cobb_.raw = data; break;
+        case color_calculation_ratio_sprite_0_1: regs_.ccrsa = data; break;
+        case color_calculation_ratio_sprite_2_3: regs_.ccrsb = data; break;
+        case color_calculation_ratio_sprite_4_5: regs_.ccrsc = data; break;
+        case color_calculation_ratio_sprite_6_7: regs_.ccrsd = data; break;
+        case color_calculation_ratio_nbg0_nbg1: regs_.ccrna = data; break;
+        case color_calculation_ratio_nbg2_nbg3: regs_.ccrnb = data; break;
+        case color_calculation_ratio_rbg0: regs_.ccrr = data; break;
+        case color_calculation_ratio_line_color_back: regs_.ccrlb = data; break;
+        case color_offset_enable: regs_.clofen = data; break;
+        case color_offset_select: regs_.clofsl = data; break;
+        case color_offset_a_red: regs_.coar = data; break;
+        case color_offset_a_green: regs_.coag = data; break;
+        case color_offset_a_blue: regs_.coab = data; break;
+        case color_offset_b_red: regs_.cobr = data; break;
+        case color_offset_b_green: regs_.cobg = data; break;
+        case color_offset_b_blue: regs_.cobb = data; break;
         default: core::Log::warning(Logger::vdp2, core::tr("Unimplemented register write (16) {:#010x}"), addr);
     }
 }
@@ -1177,56 +1184,56 @@ void Vdp2::write32(const u32 addr, const u32 data) {
             regs_.sfprmd = l;
             break;
         case color_calculation_control:
-            regs_.ccctl = h;
-            sfccmd_.raw = l;
+            regs_.ccctl  = h;
+            regs_.sfccmd = l;
             break;
         case priority_number_sprite_0_1:
-            prisa_.raw = h;
-            prisb_.raw = l;
+            regs_.prisa = h;
+            regs_.prisb = l;
             break;
         case priority_number_sprite_4_5:
-            prisc_.raw = h;
-            prisd_.raw = l;
+            regs_.prisc = h;
+            regs_.prisd = l;
             break;
         case priority_number_nbg0_nbg1:
-            prina_.raw = h;
-            prinb_.raw = l;
+            regs_.prina = h;
+            regs_.prinb = l;
             break;
         case priority_number_rbg0:
-            prir_.raw  = h;
+            regs_.prir = h;
             regs_.rsv2 = l;
             break;
         case color_calculation_ratio_sprite_0_1:
-            ccrsa_.raw = h;
-            ccrsb_.raw = l;
+            regs_.ccrsa = h;
+            regs_.ccrsb = l;
             break;
         case color_calculation_ratio_sprite_4_5:
-            ccrsc_.raw = h;
-            ccrsd_.raw = l;
+            regs_.ccrsc = h;
+            regs_.ccrsd = l;
             break;
         case color_calculation_ratio_nbg0_nbg1:
-            ccrna_.raw = h;
-            ccrnb_.raw = l;
+            regs_.ccrna = h;
+            regs_.ccrnb = l;
             break;
         case color_calculation_ratio_rbg0:
-            ccrr_.raw  = h;
-            ccrlb_.raw = l;
+            regs_.ccrr  = h;
+            regs_.ccrlb = l;
             break;
         case color_offset_enable:
-            clofen_.raw = h;
-            clofsl_.raw = l;
+            regs_.clofen = h;
+            regs_.clofsl = l;
             break;
         case color_offset_a_red:
-            coar_.raw = h;
-            coag_.raw = l;
+            regs_.coar = h;
+            regs_.coag = l;
             break;
         case color_offset_a_blue:
-            coab_.raw = h;
-            cobr_.raw = l;
+            regs_.coab = h;
+            regs_.cobr = l;
             break;
         case color_offset_b_green:
-            cobg_.raw = h;
-            cobb_.raw = l;
+            regs_.cobg = h;
+            regs_.cobb = l;
             break;
         default: core::Log::warning(Logger::vdp2, core::tr("Unimplemented register write (16) {:#010x}"), addr);
     }
@@ -2560,6 +2567,9 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
     using Mpop   = Vdp2Regs::Mpop;
     using Craofa = Vdp2Regs::Craofa;
     using Craofb = Vdp2Regs::Craofb;
+    using Prina  = Vdp2Regs::Prina;
+    using Prinb  = Vdp2Regs::Prinb;
+    using Prir   = Vdp2Regs::Prir;
 
     switch (s) {
         using enum ScrollScreen;
@@ -2572,7 +2582,7 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
                 = ((regs_.bgon >> Bgon::n0tpon_enum) == Bgon::TransparentDisplayEnable::transparency_code_valid);
 
             // Priority
-            screen.priority_number = prina_.nbg0;
+            screen.priority_number = static_cast<u8>(regs_.prina >> Prina::n0prin_shft);
 
             // Map
             screen.map_size   = map_size_nbg;
@@ -2630,7 +2640,7 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
             screen.is_transparency_code_valid
                 = ((regs_.bgon >> Bgon::n1tpon_enum) == Bgon::TransparentDisplayEnable::transparency_code_valid);
             // Priority
-            screen.priority_number = static_cast<u8>(prina_.nbg1);
+            screen.priority_number = static_cast<u8>(regs_.prina >> Prina::n1prin_shft);
 
             // Map
             screen.map_size   = map_size_nbg;
@@ -2688,7 +2698,7 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
                 = ((regs_.bgon >> Bgon::n2tpon_enum) == Bgon::TransparentDisplayEnable::transparency_code_valid);
 
             // Priority
-            screen.priority_number = prinb_.nbg2;
+            screen.priority_number = static_cast<u8>(regs_.prinb >> Prinb::n2prin_shft);
 
             // Map
             screen.map_size   = map_size_nbg;
@@ -2738,7 +2748,7 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
                 = ((regs_.bgon >> Bgon::n3tpon_enum) == Bgon::TransparentDisplayEnable::transparency_code_valid);
 
             // Priority
-            screen.priority_number = static_cast<u8>(prinb_.nbg3);
+            screen.priority_number = static_cast<u8>(regs_.prinb >> Prinb::n3prin_shft);
 
             // Map
             screen.map_size   = map_size_nbg;
@@ -2788,7 +2798,7 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
                 = ((regs_.bgon >> Bgon::r0tpon_enum) == Bgon::TransparentDisplayEnable::transparency_code_valid);
 
             // Priority
-            screen.priority_number = prir_.rbg0;
+            screen.priority_number = static_cast<u8>(regs_.prir >> Prir::r0prin_shft);
 
             // Map
             screen.map_size   = map_size_rbg;
@@ -2853,7 +2863,7 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
                 = ((regs_.bgon >> Bgon::n0tpon_enum) == Bgon::TransparentDisplayEnable::transparency_code_valid);
 
             // Priority
-            screen.priority_number = prina_.nbg0;
+            screen.priority_number = static_cast<u8>(regs_.prina >> Prina::n0prin_shft);
 
             // Map
             screen.map_size   = map_size_rbg;
