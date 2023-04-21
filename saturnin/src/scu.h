@@ -544,38 +544,7 @@ class Scu {
     std::array<u8, program_ram_size>                           program_ram_; ///< DSP Program RAM.
     std::array<std::array<u8, data_ram_size>, data_ram_number> data_ram_;    ///< DSP Data RAM.
 
-    //{@
-    // Scu memory registers
-    ScuRegs regs_;
-    // DmaEnableRegister d0en_;
-    // DmaEnableRegister d1en_;
-    // DmaEnableRegister d2en_;
-    //  DmaAddressAddValueRegister d0ad_;
-    //  DmaAddressAddValueRegister d1ad_;
-    //  DmaAddressAddValueRegister d2ad_;
-    //   DmaReadAddressRegister              d0r_;
-    //   DmaReadAddressRegister              d1r_;
-    //   DmaReadAddressRegister              d2r_;
-    //   DmaWriteAddressRegister             d0w_;
-    //   DmaWriteAddressRegister             d1w_;
-    //   DmaWriteAddressRegister             d2w_;
-    // DmaModeRegister d0md_;
-    // DmaModeRegister d1md_;
-    // DmaModeRegister d2md_;
-    // DmaLevel0TransferByteNumberRegister d0c_;
-    // DmaLevel1TransferByteNumberRegister d1c_;
-    // DmaLevel2TransferByteNumberRegister d2c_;
-    // DmaStatusRegister       dsta_;
-    InterruptStatusRegister interrupt_status_register_;
-    InterruptMaskRegister   interrupt_mask_register_;
-    // Timer0CompareRegister   t0c_;
-    // Timer1SetDataRegister t1s_;
-    // Timer1ModeRegister    t1md_;
-    // DspProgramControlPort ppaf_;
-    // DspProgramDataPort    ppd_;
-    // DspDataRamAddressPort ppa_;
-    // DspDataRamDataPort pdd_;
-    //@}
+    ScuRegs regs_;                                                           ///< Scu memory registers.
 };
 
 } // namespace saturnin::core

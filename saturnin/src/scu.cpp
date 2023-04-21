@@ -64,8 +64,8 @@ auto Scu::read32(const u32 addr) const -> u32 {
         case level_0_dma_transfer_byte_number: return regs_.d0c.data();
         case level_1_dma_transfer_byte_number: return regs_.d1c.data();
         case level_2_dma_transfer_byte_number: return regs_.d2c.data();
-        case interrupt_status_register: return interrupt_status_register_.toU32();
-        case interrupt_mask_register: return interrupt_mask_register_.toU32();
+        case interrupt_status_register: return regs_.ist.data();
+        case interrupt_mask_register: return regs_.ims.data();
         default: return rawRead<u32>(modules_.memory()->scu_, addr & scu_memory_mask);
     }
     return rawRead<u32>(modules_.memory()->scu_, addr & scu_memory_mask);
@@ -159,8 +159,8 @@ void Scu::write32(const u32 addr, const u32 data) {
         case level_0_dma_transfer_byte_number: regs_.d0c = data; return;
         case level_1_dma_transfer_byte_number: regs_.d1c = data; return;
         case level_2_dma_transfer_byte_number: regs_.d2c = data; return;
-        case interrupt_status_register: interrupt_status_register_.set(bits_0_31, data); return;
-        case interrupt_mask_register: interrupt_mask_register_.set(bits_0_31, data); return;
+        case interrupt_status_register: regs_.ist = data; return;
+        case interrupt_mask_register: regs_.ims = data; return;
         case timer_0_compare_register: regs_.t0c = data; return;
         case timer_1_set_data_register: regs_.t1s = data; return;
         case timer_1_mode_register:
@@ -550,9 +550,9 @@ void Scu::executeDma(DmaConfiguration& dc) {
     // If DMA enable bit is set and start factor occurs, DMA transfer is added to the queue
 }
 
-void Scu::setInterruptStatusRegister(const Interrupt& i) { interrupt_status_register_.set(i.status); };
+void Scu::setInterruptStatusRegister(const Interrupt& i) { regs_.ist.upd(i.status, ScuRegs::Ist::InterruptEnable::enabled); };
 
-void Scu::resetInterruptStatusRegister(const Interrupt& i) { interrupt_status_register_.reset(i.status); };
+void Scu::resetInterruptStatusRegister(const Interrupt& i) { regs_.ist.upd(i.status, ScuRegs::Ist::InterruptEnable::disabled); };
 
 void Scu::generateInterrupt(const Interrupt& i) {
     if (i.level != 0) {
@@ -575,11 +575,12 @@ void Scu::generateInterrupt(const Interrupt& i) {
 };
 
 auto Scu::isInterruptMasked(const Interrupt& i) -> bool {
+    using Ims = ScuRegs::Ims;
     switch (i) {
         case is::vector_nmi: return true; // NMI interrupt is always accepted
         case is::vector_system_manager:
             if (modules_.context()->hardwareMode() == HardwareMode::stv) { return true; }
-            return (interrupt_mask_register_.get(i.mask) == InterruptMask::masked);
+            return (regs_.ims >> i.mask) == Ims::InterruptMask::masked;
         case is::vector_v_blank_in:
         case is::vector_v_blank_out:
         case is::vector_h_blank_in:
@@ -608,14 +609,15 @@ auto Scu::isInterruptMasked(const Interrupt& i) -> bool {
         case is::vector_external_12:
         case is::vector_external_13:
         case is::vector_external_14:
-        case is::vector_external_15: return (interrupt_mask_register_.get(i.mask) == InterruptMask::masked);
+        case is::vector_external_15: return (regs_.ims >> i.mask) == Ims::InterruptMask::masked;
         default: Log::warning(Logger::scu, uti::format("Unknown interrupt vector {}", i.vector));
     }
     return false;
 }
 
 auto Scu::isInterruptExecuting(const Interrupt& i) -> bool {
-    return (interrupt_status_register_.get(i.status) == InterruptEnable::enabled);
+    using Ist = ScuRegs::Ist;
+    return (regs_.ist >> i.status) == Ist::InterruptEnable::enabled;
 }
 
 void Scu::sendStartFactor(const ScuRegs::Dxmd::StartingFactorSelect sfs) {
@@ -628,7 +630,10 @@ void Scu::sendStartFactor(const ScuRegs::Dxmd::StartingFactorSelect sfs) {
     if (!dma_queue_.empty()) { activateDma(); }
 }
 
-void Scu::clearInterruptFlag(const Interrupt& i) { interrupt_status_register_.reset(i.status); }
+void Scu::clearInterruptFlag(const Interrupt& i) {
+    using Ist = ScuRegs::Ist;
+    regs_.ist.upd(i.status, Ist::InterruptEnable::disabled);
+}
 
 void Scu::initializeRegisters() {
     // DMA
@@ -656,8 +661,8 @@ void Scu::initializeRegisters() {
 
     // Interrupt control
     constexpr auto interrupt_mask_default_value = u32{0xBFFF};
-    interrupt_mask_register_.set(bits_0_31, interrupt_mask_default_value);
-    interrupt_status_register_.reset();
+    regs_.ims                                   = interrupt_mask_default_value;
+    regs_.ist                                   = {};
 
     // A-BUS control
     rawWrite<u32>(modules_.memory()->scu_, a_bus_interrupt_acknowledge & scu_memory_mask, 0x00000000);

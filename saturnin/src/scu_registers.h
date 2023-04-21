@@ -894,170 +894,40 @@ struct ScuRegs {
             enabled  = true   ///< Interrupt is enabled
         };
 
-        GENERATE_BIT_WITH_ENUM(external_15, 31, 0b1, InterruptMask);     ///< Defines External interrupt 15 status.
-        GENERATE_BIT_WITH_ENUM(external_14, 30, 0b1, InterruptMask);     ///< Defines External interrupt 14 status.
-        GENERATE_BIT_WITH_ENUM(external_13, 29, 0b1, InterruptMask);     ///< Defines External interrupt 13 status.
-        GENERATE_BIT_WITH_ENUM(external_12, 28, 0b1, InterruptMask);     ///< Defines External interrupt 12 status.
-        GENERATE_BIT_WITH_ENUM(external_11, 27, 0b1, InterruptMask);     ///< Defines External interrupt 11 status.
-        GENERATE_BIT_WITH_ENUM(external_10, 26, 0b1, InterruptMask);     ///< Defines External interrupt 10 status.
-        GENERATE_BIT_WITH_ENUM(external_09, 25, 0b1, InterruptMask);     ///< Defines External interrupt 09 status.
-        GENERATE_BIT_WITH_ENUM(external_08, 24, 0b1, InterruptMask);     ///< Defines External interrupt 08 status.
-        GENERATE_BIT_WITH_ENUM(external_07, 23, 0b1, InterruptMask);     ///< Defines External interrupt 07 status.
-        GENERATE_BIT_WITH_ENUM(external_06, 22, 0b1, InterruptMask);     ///< Defines External interrupt 06 status.
-        GENERATE_BIT_WITH_ENUM(external_05, 21, 0b1, InterruptMask);     ///< Defines External interrupt 05 status.
-        GENERATE_BIT_WITH_ENUM(external_04, 20, 0b1, InterruptMask);     ///< Defines External interrupt 04 status.
-        GENERATE_BIT_WITH_ENUM(external_03, 19, 0b1, InterruptMask);     ///< Defines External interrupt 03 status.
-        GENERATE_BIT_WITH_ENUM(external_02, 18, 0b1, InterruptMask);     ///< Defines External interrupt 02 status.
-        GENERATE_BIT_WITH_ENUM(external_01, 17, 0b1, InterruptMask);     ///< Defines External interrupt 01 status.
-        GENERATE_BIT_WITH_ENUM(external_00, 16, 0b1, InterruptMask);     ///< Defines External interrupt 00 status.
-        GENERATE_BIT_WITH_ENUM(a_bus, 15, 0b1, InterruptMask);           ///< Defines A-Bus interrupt status.
-        GENERATE_BIT_WITH_ENUM(sprite_draw_end, 13, 0b1, InterruptMask); ///< Defines Sprite Draw End interrupt status.
-        GENERATE_BIT_WITH_ENUM(dma_illegal, 12, 0b1, InterruptMask);     ///< Defines DMA Illegal interrupt status.
-        GENERATE_BIT_WITH_ENUM(level_0_dma, 11, 0b1, InterruptMask);     ///< Defines Level 0 DMA interrupt status.
-        GENERATE_BIT_WITH_ENUM(level_1_dma, 10, 0b1, InterruptMask);     ///< Defines Level 1 DMA interrupt status.
-        GENERATE_BIT_WITH_ENUM(level_2_dma, 9, 0b1, InterruptMask);      ///< Defines Level 2 DMA interrupt status.
-        GENERATE_BIT_WITH_ENUM(pad, 8, 0b1, InterruptMask);              ///< Defines PAD interrupt status.
-        GENERATE_BIT_WITH_ENUM(system_manager, 7, 0b1, InterruptMask);   ///< Defines System Manager interrupt status.
-        GENERATE_BIT_WITH_ENUM(sound_request, 6, 0b1, InterruptMask);    ///< Defines Sound Request interrupt status.
-        GENERATE_BIT_WITH_ENUM(dsp_end, 5, 0b1, InterruptMask);          ///< Defines DSP End interrupt status.
-        GENERATE_BIT_WITH_ENUM(timer_1, 4, 0b1, InterruptMask);          ///< Defines Timer 1 interrupt status.
-        GENERATE_BIT_WITH_ENUM(timer_0, 3, 0b1, InterruptMask);          ///< Defines Timer 0 interrupt status.
-        GENERATE_BIT_WITH_ENUM(h_blank_in, 2, 0b1, InterruptMask);       ///< Defines H-Blank-In interrupt status.
-        GENERATE_BIT_WITH_ENUM(v_blank_out, 1, 0b1, InterruptMask);      ///< Defines V-Blank-Out interrupt status.
-        GENERATE_BIT_WITH_ENUM(v_blank_in, 0, 0b1, InterruptMask);       ///< Defines V-Blank-In interrupt status.
-        GENERATE_BIT_WITH_ENUM(undefined, 0, 0b1, InterruptMask);        ///< Undefined value.
+        GENERATE_BIT_WITH_ENUM(external_15, 31, 0b1, InterruptEnable);     ///< Defines External interrupt 15 status.
+        GENERATE_BIT_WITH_ENUM(external_14, 30, 0b1, InterruptEnable);     ///< Defines External interrupt 14 status.
+        GENERATE_BIT_WITH_ENUM(external_13, 29, 0b1, InterruptEnable);     ///< Defines External interrupt 13 status.
+        GENERATE_BIT_WITH_ENUM(external_12, 28, 0b1, InterruptEnable);     ///< Defines External interrupt 12 status.
+        GENERATE_BIT_WITH_ENUM(external_11, 27, 0b1, InterruptEnable);     ///< Defines External interrupt 11 status.
+        GENERATE_BIT_WITH_ENUM(external_10, 26, 0b1, InterruptEnable);     ///< Defines External interrupt 10 status.
+        GENERATE_BIT_WITH_ENUM(external_09, 25, 0b1, InterruptEnable);     ///< Defines External interrupt 09 status.
+        GENERATE_BIT_WITH_ENUM(external_08, 24, 0b1, InterruptEnable);     ///< Defines External interrupt 08 status.
+        GENERATE_BIT_WITH_ENUM(external_07, 23, 0b1, InterruptEnable);     ///< Defines External interrupt 07 status.
+        GENERATE_BIT_WITH_ENUM(external_06, 22, 0b1, InterruptEnable);     ///< Defines External interrupt 06 status.
+        GENERATE_BIT_WITH_ENUM(external_05, 21, 0b1, InterruptEnable);     ///< Defines External interrupt 05 status.
+        GENERATE_BIT_WITH_ENUM(external_04, 20, 0b1, InterruptEnable);     ///< Defines External interrupt 04 status.
+        GENERATE_BIT_WITH_ENUM(external_03, 19, 0b1, InterruptEnable);     ///< Defines External interrupt 03 status.
+        GENERATE_BIT_WITH_ENUM(external_02, 18, 0b1, InterruptEnable);     ///< Defines External interrupt 02 status.
+        GENERATE_BIT_WITH_ENUM(external_01, 17, 0b1, InterruptEnable);     ///< Defines External interrupt 01 status.
+        GENERATE_BIT_WITH_ENUM(external_00, 16, 0b1, InterruptEnable);     ///< Defines External interrupt 00 status.
+        GENERATE_BIT_WITH_ENUM(a_bus, 15, 0b1, InterruptEnable);           ///< Defines A-Bus interrupt status.
+        GENERATE_BIT_WITH_ENUM(sprite_draw_end, 13, 0b1, InterruptEnable); ///< Defines Sprite Draw End interrupt status.
+        GENERATE_BIT_WITH_ENUM(dma_illegal, 12, 0b1, InterruptEnable);     ///< Defines DMA Illegal interrupt status.
+        GENERATE_BIT_WITH_ENUM(level_0_dma, 11, 0b1, InterruptEnable);     ///< Defines Level 0 DMA interrupt status.
+        GENERATE_BIT_WITH_ENUM(level_1_dma, 10, 0b1, InterruptEnable);     ///< Defines Level 1 DMA interrupt status.
+        GENERATE_BIT_WITH_ENUM(level_2_dma, 9, 0b1, InterruptEnable);      ///< Defines Level 2 DMA interrupt status.
+        GENERATE_BIT_WITH_ENUM(pad, 8, 0b1, InterruptEnable);              ///< Defines PAD interrupt status.
+        GENERATE_BIT_WITH_ENUM(system_manager, 7, 0b1, InterruptEnable);   ///< Defines System Manager interrupt status.
+        GENERATE_BIT_WITH_ENUM(sound_request, 6, 0b1, InterruptEnable);    ///< Defines Sound Request interrupt status.
+        GENERATE_BIT_WITH_ENUM(dsp_end, 5, 0b1, InterruptEnable);          ///< Defines DSP End interrupt status.
+        GENERATE_BIT_WITH_ENUM(timer_1, 4, 0b1, InterruptEnable);          ///< Defines Timer 1 interrupt status.
+        GENERATE_BIT_WITH_ENUM(timer_0, 3, 0b1, InterruptEnable);          ///< Defines Timer 0 interrupt status.
+        GENERATE_BIT_WITH_ENUM(h_blank_in, 2, 0b1, InterruptEnable);       ///< Defines H-Blank-In interrupt status.
+        GENERATE_BIT_WITH_ENUM(v_blank_out, 1, 0b1, InterruptEnable);      ///< Defines V-Blank-Out interrupt status.
+        GENERATE_BIT_WITH_ENUM(v_blank_in, 0, 0b1, InterruptEnable);       ///< Defines V-Blank-In interrupt status.
+        GENERATE_BIT_WITH_ENUM(undefined, 0, 0b1, InterruptEnable);        ///< Undefined value.
     };
     using IstType = Reg<u32, Ist>;
     IstType ist;
 };
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   InterruptMask
-///
-/// \brief  Values that represent interrupt masks.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-enum class InterruptMask : bool {
-    not_masked = false, ///< Interupt is not masked
-    masked     = true   ///< Interrupt is masked
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  InterruptMaskRegister
-///
-/// \brief  Interrupt Mask Register (IMS).
-///
-/// \author Runik
-/// \date   16/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-class InterruptMaskRegister : public Register {
-  public:
-    using Register::Register;
-
-    inline static const auto external_15     = BitRange<InterruptMask>{31}; ///< Defines External interrupt 15 mask bit.
-    inline static const auto external_14     = BitRange<InterruptMask>{30}; ///< Defines External interrupt 14 mask bit.
-    inline static const auto external_13     = BitRange<InterruptMask>{29}; ///< Defines External interrupt 13 mask bit.
-    inline static const auto external_12     = BitRange<InterruptMask>{28}; ///< Defines External interrupt 12 mask bit.
-    inline static const auto external_11     = BitRange<InterruptMask>{27}; ///< Defines External interrupt 11 mask bit.
-    inline static const auto external_10     = BitRange<InterruptMask>{26}; ///< Defines External interrupt 10 mask bit.
-    inline static const auto external_09     = BitRange<InterruptMask>{25}; ///< Defines External interrupt 09 mask bit.
-    inline static const auto external_08     = BitRange<InterruptMask>{24}; ///< Defines External interrupt 08 mask bit.
-    inline static const auto external_07     = BitRange<InterruptMask>{23}; ///< Defines External interrupt 07 mask bit.
-    inline static const auto external_06     = BitRange<InterruptMask>{22}; ///< Defines External interrupt 06 mask bit.
-    inline static const auto external_05     = BitRange<InterruptMask>{21}; ///< Defines External interrupt 05 mask bit.
-    inline static const auto external_04     = BitRange<InterruptMask>{20}; ///< Defines External interrupt 04 mask bit.
-    inline static const auto external_03     = BitRange<InterruptMask>{19}; ///< Defines External interrupt 03 mask bit.
-    inline static const auto external_02     = BitRange<InterruptMask>{18}; ///< Defines External interrupt 02 mask bit.
-    inline static const auto external_01     = BitRange<InterruptMask>{17}; ///< Defines External interrupt 01 mask bit.
-    inline static const auto external_00     = BitRange<InterruptMask>{16}; ///< Defines External interrupt 00 mask bit.
-    inline static const auto a_bus           = BitRange<InterruptMask>{15}; ///< Defines A-Bus interrupt mask bit.
-    inline static const auto sprite_draw_end = BitRange<InterruptMask>{13}; ///< Defines Sprite Draw End interrupt mask bit.
-    inline static const auto dma_illegal     = BitRange<InterruptMask>{12}; ///< Defines DMA Illegal interrupt mask bit.
-    inline static const auto level_0_dma     = BitRange<InterruptMask>{11}; ///< Defines Level 0 DMA interrupt mask bit.
-    inline static const auto level_1_dma     = BitRange<InterruptMask>{10}; ///< Defines Level 1 DMA interrupt mask bit.
-    inline static const auto level_2_dma     = BitRange<InterruptMask>{9};  ///< Defines Level 2 DMA interrupt mask bit.
-    inline static const auto pad             = BitRange<InterruptMask>{8};  ///< Defines PAD interrupt mask bit.
-    inline static const auto system_manager  = BitRange<InterruptMask>{7};  ///< Defines System Manager interrupt mask bit.
-    inline static const auto sound_request   = BitRange<InterruptMask>{6};  ///< Defines Sound Request interrupt mask bit.
-    inline static const auto dsp_end         = BitRange<InterruptMask>{5};  ///< Defines DSP End interrupt mask bit.
-    inline static const auto timer_1         = BitRange<InterruptMask>{4};  ///< Defines Timer 1 interrupt mask bit.
-    inline static const auto timer_0         = BitRange<InterruptMask>{3};  ///< Defines Timer 0 interrupt mask bit.
-    inline static const auto h_blank_in      = BitRange<InterruptMask>{2};  ///< Defines H-Blank-In interrupt mask bit.
-    inline static const auto v_blank_out     = BitRange<InterruptMask>{1};  ///< Defines V-Blank-Out interrupt mask bit.
-    inline static const auto v_blank_in      = BitRange<InterruptMask>{0};  ///< Defines V-Blank-In interrupt mask bit.
-    inline static const auto undefined       = BitRange<InterruptMask>{0};  ///< Undefined value.
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   InterruptEnable
-///
-/// \brief  Values that represent if an interrupt is enabled or not.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-enum class InterruptEnable : bool {
-    disabled = false, ///< Interrupt is disabled
-    enabled  = true   ///< Interrupt is enabled
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  InterruptStatusRegister
-///
-/// \brief  Interrupt Status Register (IST).
-///
-/// \author Runik
-/// \date   05/02/2019
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-class InterruptStatusRegister : public Register {
-  public:
-    using Register::Register;
-
-    inline static const auto external_15     = BitRange<InterruptEnable>{31}; ///< Defines External interrupt 15 status.
-    inline static const auto external_14     = BitRange<InterruptEnable>{30}; ///< Defines External interrupt 14 status.
-    inline static const auto external_13     = BitRange<InterruptEnable>{29}; ///< Defines External interrupt 13 status.
-    inline static const auto external_12     = BitRange<InterruptEnable>{28}; ///< Defines External interrupt 12 status.
-    inline static const auto external_11     = BitRange<InterruptEnable>{27}; ///< Defines External interrupt 11 status.
-    inline static const auto external_10     = BitRange<InterruptEnable>{26}; ///< Defines External interrupt 10 status.
-    inline static const auto external_09     = BitRange<InterruptEnable>{25}; ///< Defines External interrupt 09 status.
-    inline static const auto external_08     = BitRange<InterruptEnable>{24}; ///< Defines External interrupt 08 status.
-    inline static const auto external_07     = BitRange<InterruptEnable>{23}; ///< Defines External interrupt 07 status.
-    inline static const auto external_06     = BitRange<InterruptEnable>{22}; ///< Defines External interrupt 06 status.
-    inline static const auto external_05     = BitRange<InterruptEnable>{21}; ///< Defines External interrupt 05 status.
-    inline static const auto external_04     = BitRange<InterruptEnable>{20}; ///< Defines External interrupt 04 status.
-    inline static const auto external_03     = BitRange<InterruptEnable>{19}; ///< Defines External interrupt 03 status.
-    inline static const auto external_02     = BitRange<InterruptEnable>{18}; ///< Defines External interrupt 02 status.
-    inline static const auto external_01     = BitRange<InterruptEnable>{17}; ///< Defines External interrupt 01 status.
-    inline static const auto external_00     = BitRange<InterruptEnable>{16}; ///< Defines External interrupt 00 status.
-    inline static const auto a_bus           = BitRange<InterruptEnable>{15}; ///< Defines A-Bus interrupt status.
-    inline static const auto sprite_draw_end = BitRange<InterruptEnable>{13}; ///< Defines Sprite Draw End interrupt status.
-    inline static const auto dma_illegal     = BitRange<InterruptEnable>{12}; ///< Defines DMA Illegal interrupt status.
-    inline static const auto level_0_dma     = BitRange<InterruptEnable>{11}; ///< Defines Level 0 DMA interrupt status.
-    inline static const auto level_1_dma     = BitRange<InterruptEnable>{10}; ///< Defines Level 1 DMA interrupt status.
-    inline static const auto level_2_dma     = BitRange<InterruptEnable>{9};  ///< Defines Level 2 DMA interrupt status.
-    inline static const auto pad             = BitRange<InterruptEnable>{8};  ///< Defines PAD interrupt status.
-    inline static const auto system_manager  = BitRange<InterruptEnable>{7};  ///< Defines System Manager interrupt status.
-    inline static const auto sound_request   = BitRange<InterruptEnable>{6};  ///< Defines Sound Request interrupt status.
-    inline static const auto dsp_end         = BitRange<InterruptEnable>{5};  ///< Defines DSP End interrupt status.
-    inline static const auto timer_1         = BitRange<InterruptEnable>{4};  ///< Defines Timer 1 interrupt status.
-    inline static const auto timer_0         = BitRange<InterruptEnable>{3};  ///< Defines Timer 0 interrupt status.
-    inline static const auto h_blank_in      = BitRange<InterruptEnable>{2};  ///< Defines H-Blank-In interrupt status.
-    inline static const auto v_blank_out     = BitRange<InterruptEnable>{1};  ///< Defines V-Blank-Out interrupt status.
-    inline static const auto v_blank_in      = BitRange<InterruptEnable>{0};  ///< Defines V-Blank-In interrupt status.
-    inline static const auto undefined       = BitRange<InterruptEnable>{0};  ///< Undefined value.
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \union DspDataRamDataPort
-///
-/// \brief  DSP Data RAM Data Port (PDD).
-///
-/// \author Runik
-/// \date   16/01/2022
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-// union DspDataRamDataPort {
-//     u32 raw; ///< Defines DSP data ram port.
-// };
-
 } // namespace saturnin::core

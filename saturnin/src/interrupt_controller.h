@@ -25,18 +25,18 @@
 
 #pragma once
 
-#include <string> // string
+#include <string>                       // string
 #include <saturnin/src/emulator_defs.h>
 #include <saturnin/src/scu_registers.h> // InterruptMask, InterruptEnable
 
 namespace saturnin::core {
 
 struct Interrupt {
-    u8                        vector;
-    u8                        level;
-    BitRange<InterruptMask>   mask;
-    BitRange<InterruptEnable> status;
-    std::string               name;
+    u8                                                    vector;
+    u8                                                    level;
+    ScuRegs::Ims::EnumType<ScuRegs::Ims::InterruptMask>   mask;
+    ScuRegs::Ist::EnumType<ScuRegs::Ist::InterruptEnable> status;
+    std::string                                           name;
 
     operator int() const { return vector; } ///< Internal conversion operator.
 };

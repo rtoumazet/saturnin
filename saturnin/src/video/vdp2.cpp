@@ -327,9 +327,9 @@ auto Vdp2::getColorOffset(const Layer layer) -> ColorOffset {
             color_offset.as_s16.g = static_cast<s16>(regs_.coag.data());
             color_offset.as_s16.b = static_cast<s16>(regs_.coab.data());
         } else {
-            if ((regs_.cobr >> Vdp2Regs::Cobr::sign_enum) == Sign::positive) { regs_.cobr = (regs_.cobr.data() | sign_ext_mask); }
-            if ((regs_.cobg >> Vdp2Regs::Cobg::sign_enum) == Sign::positive) { regs_.cobg = (regs_.cobg.data() | sign_ext_mask); }
-            if ((regs_.cobb >> Vdp2Regs::Cobb::sign_enum) == Sign::positive) { regs_.cobb = (regs_.cobb.data() | sign_ext_mask); }
+            if ((regs_.cobr >> Vdp2Regs::Cobr::sign_enum) == Sign::negative) { regs_.cobr = (regs_.cobr.data() | sign_ext_mask); }
+            if ((regs_.cobg >> Vdp2Regs::Cobg::sign_enum) == Sign::negative) { regs_.cobg = (regs_.cobg.data() | sign_ext_mask); }
+            if ((regs_.cobb >> Vdp2Regs::Cobb::sign_enum) == Sign::negative) { regs_.cobb = (regs_.cobb.data() | sign_ext_mask); }
             color_offset.as_s16.r = static_cast<s16>(regs_.cobr.data());
             color_offset.as_s16.g = static_cast<s16>(regs_.cobg.data());
             color_offset.as_s16.b = static_cast<s16>(regs_.cobb.data());
