@@ -1508,7 +1508,6 @@ class Vdp2 {
         auto           current_address = vram_start_address + cell_address;
         auto           row             = DataExtraction{};
         for (u32 i = 0; i < 8; ++i) {
-            // auto row = Dots4Bits{modules_.memory()->read<u32>(current_address)};
             row.as_4bits = modules_.memory()->read<u32>(current_address);
             readPalette16Dot<T>(texture_data, screen, palette_number, row.as_4bits >> DataExtraction::As4Bits::dot0_shift);
             readPalette16Dot<T>(texture_data, screen, palette_number, row.as_4bits >> DataExtraction::As4Bits::dot1_shift);
