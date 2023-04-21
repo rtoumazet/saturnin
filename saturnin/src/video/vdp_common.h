@@ -26,7 +26,6 @@
 #pragma once
 
 #include <saturnin/src/emulator_defs.h> // u8, u16, u32
-#include <saturnin/src/bitfield.h>
 #include <saturnin/src/bit_register.h>
 
 namespace saturnin::video {
@@ -223,15 +222,6 @@ struct Vertex {
         tex_coords(TextureCoordinates(s, t, p)),
         color(VertexColor(r, g, b, a)),
         gouraud(grd){};
-};
-
-// Some testing
-class Dots16BitsRegister : public Register {
-  public:
-    using Register::Register;
-    inline static const BitRange<u32> raw{0, 31};
-    inline static const BitRange<u16> dot_0{16, 31};
-    inline static const BitRange<u16> dot_1{0, 15};
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

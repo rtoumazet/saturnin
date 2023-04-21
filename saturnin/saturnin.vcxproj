@@ -377,7 +377,6 @@
     <ClInclude Include="lib\musashi\m68kcpu.h" />
     <ClInclude Include="lib\musashi\m68kops.h" />
     <ClInclude Include="lib\scsp_stef\scsp_stef.h" />
-    <ClInclude Include="src\bitfield.h" />
     <ClInclude Include="src\cdrom\cdrom_registers.h" />
     <ClCompile Include="src\cdrom\scsi.cpp" />
     <ClCompile Include="src\cdrom\spti.cpp">

@@ -71,23 +71,13 @@ void runTests() {
 
         reg.startTest();
 
-        constexpr auto     iterations{1000000};
-        Dots16BitsRegister reg32{};
-        reg32.set(Dots16BitsRegister::raw, 0x80000000);
-        auto val = u32{};
-
-        for (int i = 0; i < iterations; ++i) {
-            val += reg32.get(Dots16BitsRegister::dot_0);
-            val += reg32.get(Dots16BitsRegister::dot_1);
-        }
-
-        core::Log::info(Logger::test, result, "Register"s, reg.endTest(), val);
+        constexpr auto iterations{1000000};
 
         // 3
         reg.startTest();
 
         auto row_slice = std::bitset<32>{0x12345678};
-        val            = 0;
+        int  val       = 0;
         for (int i = 0; i < iterations; ++i) {
             val += slice<32, 31, 16>(row_slice).to_ulong();
             val += slice<32, 15, 0>(row_slice).to_ulong();

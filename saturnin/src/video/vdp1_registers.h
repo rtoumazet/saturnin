@@ -26,7 +26,6 @@
 #pragma once
 
 #include <saturnin/src/emulator_defs.h>
-#include <saturnin/src/bitfield.h>
 #include <saturnin/src/bit_register.h>
 
 namespace saturnin::video {

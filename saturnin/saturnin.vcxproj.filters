@@ -302,9 +302,6 @@
     <ClInclude Include="src\resource_holder.hpp">
       <Filter>Fichiers sources</Filter>
     </ClInclude>
-    <ClInclude Include="src\bitfield.h">
-      <Filter>Fichiers sources</Filter>
-    </ClInclude>
     <ClInclude Include="src\thread_pool.h">
       <Filter>Fichiers sources</Filter>
     </ClInclude>

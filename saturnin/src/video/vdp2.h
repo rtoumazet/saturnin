@@ -29,7 +29,6 @@
 #include <chrono>                          // duration
 #include <saturnin/src/emulator_context.h> // EmulatorContext
 #include <saturnin/src/emulator_defs.h>    // u8, u16, u32
-#include <saturnin/src/bitfield.h>
 #include <saturnin/src/emulator_modules.h> // EmulatorModules
 #include <saturnin/src/locale.h>           // tr
 #include <saturnin/src/log.h>              // Log
