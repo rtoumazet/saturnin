@@ -73,37 +73,13 @@ void runTests() {
 
         constexpr auto iterations{1000000};
 
-        // 3
-        reg.startTest();
-
-        auto row_slice = std::bitset<32>{0x12345678};
-        int  val       = 0;
-        for (int i = 0; i < iterations; ++i) {
-            val += slice<32, 31, 16>(row_slice).to_ulong();
-            val += slice<32, 15, 0>(row_slice).to_ulong();
-        }
-
-        core::Log::info(Logger::test, result, "Slice"s, reg.endTest(), val);
-
-        // 4
-        reg.startTest();
-
-        auto row_slice2 = std::bitset<32>{0x12345678};
-        val             = 0;
-        for (int i = 0; i < iterations; ++i) {
-            val += make_slice<16, 16>(row_slice2).operator std::bitset<16Ui64>().to_ulong();
-            val += make_slice<0, 16>(row_slice2).operator std::bitset<16Ui64>().to_ulong();
-        }
-
-        core::Log::info(Logger::test, result, "Slice2"s, reg.endTest(), val);
-
         // 5
         reg.startTest();
 
         DataExtraction data{};
         data.as_16bits = 0x12345678;
 
-        val = 0;
+        int val = 0;
         for (int i = 0; i < iterations; ++i) {
             val += data.as_16bits >> DataExtraction::As16Bits::dot0_shift;
             val += data.as_16bits >> DataExtraction::As16Bits::dot1_shift;

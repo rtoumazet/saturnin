@@ -741,7 +741,7 @@ struct ScuRegs {
         GENERATE_BIT_WITH_ENUM(ep, 25, 0b1, ExecutePause);                 ///< Execute Pause (EP).
         GENERATE_BIT_WITH_ENUM(pp, 26, 0b1, ExecutePauseReset);            ///< Execute Pause Reset (PP).
 
-        static constexpr auto p_pos  = PosType(0); ///< Program RAM Address (P7-0).
+        static constexpr auto p_pos  = PosType(0);                         ///< Program RAM Address (P7-0).
         static constexpr auto p_mask = 0xFF;
         static constexpr auto p_shft = ShiftedType(p_mask, p_pos);
 
@@ -790,7 +790,7 @@ struct ScuRegs {
 
         GENERATE_BIT_WITH_ENUM(drs, 6, 0b11, DataRamSelect); ///< Data RAM Select (RA6-7).
 
-        static constexpr auto dra_pos  = PosType(0); ///< Data RAM Address (RA6-0).
+        static constexpr auto dra_pos  = PosType(0);         ///< Data RAM Address (RA6-0).
         static constexpr auto dra_mask = 0x3F;
         static constexpr auto dra_shft = ShiftedType(dra_mask, dra_pos);
 
@@ -811,6 +811,124 @@ struct ScuRegs {
     struct Pdd {};
     using PddType = Reg<u32, Pdd>;
     PddType pdd;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \class  Ims
+    ///
+    /// \brief  Interrupt Mask Register (IMS).
+    ///
+    /// \author Runik
+    /// \date   21/04/2023
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    struct Ims {
+        GENERATE_USING(Ims, u32);
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \enum   InterruptMask
+        ///
+        /// \brief  Values that represent interrupt masks.
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        enum class InterruptMask : bool {
+            not_masked = false, ///< Interupt is not masked
+            masked     = true   ///< Interrupt is masked
+        };
+
+        GENERATE_BIT_WITH_ENUM(external_15, 31, 0b1, InterruptMask);     ///< Defines External interrupt 15 mask bit.
+        GENERATE_BIT_WITH_ENUM(external_14, 30, 0b1, InterruptMask);     ///< Defines External interrupt 14 mask bit.
+        GENERATE_BIT_WITH_ENUM(external_13, 29, 0b1, InterruptMask);     ///< Defines External interrupt 13 mask bit.
+        GENERATE_BIT_WITH_ENUM(external_12, 28, 0b1, InterruptMask);     ///< Defines External interrupt 12 mask bit.
+        GENERATE_BIT_WITH_ENUM(external_11, 27, 0b1, InterruptMask);     ///< Defines External interrupt 11 mask bit.
+        GENERATE_BIT_WITH_ENUM(external_10, 26, 0b1, InterruptMask);     ///< Defines External interrupt 10 mask bit.
+        GENERATE_BIT_WITH_ENUM(external_09, 25, 0b1, InterruptMask);     ///< Defines External interrupt 09 mask bit.
+        GENERATE_BIT_WITH_ENUM(external_08, 24, 0b1, InterruptMask);     ///< Defines External interrupt 08 mask bit.
+        GENERATE_BIT_WITH_ENUM(external_07, 23, 0b1, InterruptMask);     ///< Defines External interrupt 07 mask bit.
+        GENERATE_BIT_WITH_ENUM(external_06, 22, 0b1, InterruptMask);     ///< Defines External interrupt 06 mask bit.
+        GENERATE_BIT_WITH_ENUM(external_05, 21, 0b1, InterruptMask);     ///< Defines External interrupt 05 mask bit.
+        GENERATE_BIT_WITH_ENUM(external_04, 20, 0b1, InterruptMask);     ///< Defines External interrupt 04 mask bit.
+        GENERATE_BIT_WITH_ENUM(external_03, 19, 0b1, InterruptMask);     ///< Defines External interrupt 03 mask bit.
+        GENERATE_BIT_WITH_ENUM(external_02, 18, 0b1, InterruptMask);     ///< Defines External interrupt 02 mask bit.
+        GENERATE_BIT_WITH_ENUM(external_01, 17, 0b1, InterruptMask);     ///< Defines External interrupt 01 mask bit.
+        GENERATE_BIT_WITH_ENUM(external_00, 16, 0b1, InterruptMask);     ///< Defines External interrupt 00 mask bit.
+        GENERATE_BIT_WITH_ENUM(a_bus, 15, 0b1, InterruptMask);           ///< Defines A-Bus interrupt mask bit.
+        GENERATE_BIT_WITH_ENUM(sprite_draw_end, 13, 0b1, InterruptMask); ///< Defines Sprite Draw End interrupt mask bit.
+        GENERATE_BIT_WITH_ENUM(dma_illegal, 12, 0b1, InterruptMask);     ///< Defines DMA Illegal interrupt mask bit.
+        GENERATE_BIT_WITH_ENUM(level_0_dma, 11, 0b1, InterruptMask);     ///< Defines Level 0 DMA interrupt mask bit.
+        GENERATE_BIT_WITH_ENUM(level_1_dma, 10, 0b1, InterruptMask);     ///< Defines Level 1 DMA interrupt mask bit.
+        GENERATE_BIT_WITH_ENUM(level_2_dma, 9, 0b1, InterruptMask);      ///< Defines Level 2 DMA interrupt mask bit.
+        GENERATE_BIT_WITH_ENUM(pad, 8, 0b1, InterruptMask);              ///< Defines PAD interrupt mask bit.
+        GENERATE_BIT_WITH_ENUM(system_manager, 7, 0b1, InterruptMask);   ///< Defines System Manager interrupt mask bit.
+        GENERATE_BIT_WITH_ENUM(sound_request, 6, 0b1, InterruptMask);    ///< Defines Sound Request interrupt mask bit.
+        GENERATE_BIT_WITH_ENUM(dsp_end, 5, 0b1, InterruptMask);          ///< Defines DSP End interrupt mask bit.
+        GENERATE_BIT_WITH_ENUM(timer_1, 4, 0b1, InterruptMask);          ///< Defines Timer 1 interrupt mask bit.
+        GENERATE_BIT_WITH_ENUM(timer_0, 3, 0b1, InterruptMask);          ///< Defines Timer 0 interrupt mask bit.
+        GENERATE_BIT_WITH_ENUM(h_blank_in, 2, 0b1, InterruptMask);       ///< Defines H-Blank-In interrupt mask bit.
+        GENERATE_BIT_WITH_ENUM(v_blank_out, 1, 0b1, InterruptMask);      ///< Defines V-Blank-Out interrupt mask bit.
+        GENERATE_BIT_WITH_ENUM(v_blank_in, 0, 0b1, InterruptMask);       ///< Defines V-Blank-In interrupt mask bit.
+        GENERATE_BIT_WITH_ENUM(undefined, 0, 0b1, InterruptMask);        ///< Undefined value.
+    };
+    using ImsType = Reg<u32, Ims>;
+    ImsType ims;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \class  Ist
+    ///
+    /// \brief  Interrupt Status Register (IST).
+    ///
+    /// \author Runik
+    /// \date   21/04/2023
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    struct Ist {
+        GENERATE_USING(Ist, u32);
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// \enum   InterruptEnable
+        ///
+        /// \brief  Values that represent if an interrupt is enabled or not.
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        enum class InterruptEnable : bool {
+            disabled = false, ///< Interrupt is disabled
+            enabled  = true   ///< Interrupt is enabled
+        };
+
+        GENERATE_BIT_WITH_ENUM(external_15, 31, 0b1, InterruptMask);     ///< Defines External interrupt 15 status.
+        GENERATE_BIT_WITH_ENUM(external_14, 30, 0b1, InterruptMask);     ///< Defines External interrupt 14 status.
+        GENERATE_BIT_WITH_ENUM(external_13, 29, 0b1, InterruptMask);     ///< Defines External interrupt 13 status.
+        GENERATE_BIT_WITH_ENUM(external_12, 28, 0b1, InterruptMask);     ///< Defines External interrupt 12 status.
+        GENERATE_BIT_WITH_ENUM(external_11, 27, 0b1, InterruptMask);     ///< Defines External interrupt 11 status.
+        GENERATE_BIT_WITH_ENUM(external_10, 26, 0b1, InterruptMask);     ///< Defines External interrupt 10 status.
+        GENERATE_BIT_WITH_ENUM(external_09, 25, 0b1, InterruptMask);     ///< Defines External interrupt 09 status.
+        GENERATE_BIT_WITH_ENUM(external_08, 24, 0b1, InterruptMask);     ///< Defines External interrupt 08 status.
+        GENERATE_BIT_WITH_ENUM(external_07, 23, 0b1, InterruptMask);     ///< Defines External interrupt 07 status.
+        GENERATE_BIT_WITH_ENUM(external_06, 22, 0b1, InterruptMask);     ///< Defines External interrupt 06 status.
+        GENERATE_BIT_WITH_ENUM(external_05, 21, 0b1, InterruptMask);     ///< Defines External interrupt 05 status.
+        GENERATE_BIT_WITH_ENUM(external_04, 20, 0b1, InterruptMask);     ///< Defines External interrupt 04 status.
+        GENERATE_BIT_WITH_ENUM(external_03, 19, 0b1, InterruptMask);     ///< Defines External interrupt 03 status.
+        GENERATE_BIT_WITH_ENUM(external_02, 18, 0b1, InterruptMask);     ///< Defines External interrupt 02 status.
+        GENERATE_BIT_WITH_ENUM(external_01, 17, 0b1, InterruptMask);     ///< Defines External interrupt 01 status.
+        GENERATE_BIT_WITH_ENUM(external_00, 16, 0b1, InterruptMask);     ///< Defines External interrupt 00 status.
+        GENERATE_BIT_WITH_ENUM(a_bus, 15, 0b1, InterruptMask);           ///< Defines A-Bus interrupt status.
+        GENERATE_BIT_WITH_ENUM(sprite_draw_end, 13, 0b1, InterruptMask); ///< Defines Sprite Draw End interrupt status.
+        GENERATE_BIT_WITH_ENUM(dma_illegal, 12, 0b1, InterruptMask);     ///< Defines DMA Illegal interrupt status.
+        GENERATE_BIT_WITH_ENUM(level_0_dma, 11, 0b1, InterruptMask);     ///< Defines Level 0 DMA interrupt status.
+        GENERATE_BIT_WITH_ENUM(level_1_dma, 10, 0b1, InterruptMask);     ///< Defines Level 1 DMA interrupt status.
+        GENERATE_BIT_WITH_ENUM(level_2_dma, 9, 0b1, InterruptMask);      ///< Defines Level 2 DMA interrupt status.
+        GENERATE_BIT_WITH_ENUM(pad, 8, 0b1, InterruptMask);              ///< Defines PAD interrupt status.
+        GENERATE_BIT_WITH_ENUM(system_manager, 7, 0b1, InterruptMask);   ///< Defines System Manager interrupt status.
+        GENERATE_BIT_WITH_ENUM(sound_request, 6, 0b1, InterruptMask);    ///< Defines Sound Request interrupt status.
+        GENERATE_BIT_WITH_ENUM(dsp_end, 5, 0b1, InterruptMask);          ///< Defines DSP End interrupt status.
+        GENERATE_BIT_WITH_ENUM(timer_1, 4, 0b1, InterruptMask);          ///< Defines Timer 1 interrupt status.
+        GENERATE_BIT_WITH_ENUM(timer_0, 3, 0b1, InterruptMask);          ///< Defines Timer 0 interrupt status.
+        GENERATE_BIT_WITH_ENUM(h_blank_in, 2, 0b1, InterruptMask);       ///< Defines H-Blank-In interrupt status.
+        GENERATE_BIT_WITH_ENUM(v_blank_out, 1, 0b1, InterruptMask);      ///< Defines V-Blank-Out interrupt status.
+        GENERATE_BIT_WITH_ENUM(v_blank_in, 0, 0b1, InterruptMask);       ///< Defines V-Blank-In interrupt status.
+        GENERATE_BIT_WITH_ENUM(undefined, 0, 0b1, InterruptMask);        ///< Undefined value.
+    };
+    using IstType = Reg<u32, Ist>;
+    IstType ist;
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -868,7 +986,7 @@ class InterruptMaskRegister : public Register {
     inline static const auto h_blank_in      = BitRange<InterruptMask>{2};  ///< Defines H-Blank-In interrupt mask bit.
     inline static const auto v_blank_out     = BitRange<InterruptMask>{1};  ///< Defines V-Blank-Out interrupt mask bit.
     inline static const auto v_blank_in      = BitRange<InterruptMask>{0};  ///< Defines V-Blank-In interrupt mask bit.
-    inline static const auto undefined       = BitRange<InterruptMask>{14}; ///< Undefined value.
+    inline static const auto undefined       = BitRange<InterruptMask>{0};  ///< Undefined value.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
