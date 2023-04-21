@@ -2791,7 +2791,7 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
 
         case rbg0:
             // Color RAM
-            screen.color_ram_address_offset = getColorRamAddressOffset(static_cast<u8>(regs_.craofa >> Craofa::n0caos_shft));
+            screen.color_ram_address_offset = getColorRamAddressOffset(static_cast<u8>(regs_.craofb >> Craofb::r0caos_shft));
 
             // Transparency
             screen.is_transparency_code_valid
