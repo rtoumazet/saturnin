@@ -385,8 +385,8 @@ void Scu::executeDma(DmaConfiguration& dc) {
 
             auto is_transfer_done = bool{false};
             while (!is_transfer_done) {
-                read_address  = modules_.memory()->read<u32>(execute_address_storage_buffer + displacement_8);
-                write_address = modules_.memory()->read<u32>(execute_address_storage_buffer + displacement_4);
+                read_address  = modules_.memory()->read<u32>(execute_address_storage_buffer + 8);
+                write_address = modules_.memory()->read<u32>(execute_address_storage_buffer + 4);
                 count         = modules_.memory()->read<u32>(execute_address_storage_buffer);
                 if (count == 0) { count = max_transfer_byte_number; }
 

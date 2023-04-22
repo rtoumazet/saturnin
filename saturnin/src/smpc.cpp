@@ -672,7 +672,7 @@ void Smpc::getStatus() {
     regs_.oreg[10].clr(Oreg::bit_1); // SYSRES is never triggered by software
     regs_.oreg[10].upd(Oreg::soundOn(is_sound_on_));
 
-    //  oreg_[index_11][6] = is_cd_on_;
+    //  oreg_[11][6] = is_cd_on_;
     regs_.oreg[11].clr(Oreg::bit_6);
 
     regs_.oreg[12] = smem_[0];
@@ -1121,9 +1121,9 @@ auto getRtcTime() -> RtcTime {
     auto       rtc      = RtcTime{};
     const auto year     = static_cast<int>(today.year());
     const auto year_bcd = uti::dec2bcd(year);
-    rtc.year_1000_bcd   = std::bitset<4>((year_bcd >> displacement_12) & bitmask_0F);
-    rtc.year_100_bcd    = std::bitset<4>((year_bcd >> displacement_8) & bitmask_0F);
-    rtc.year_10_bcd     = std::bitset<4>((year_bcd >> displacement_4) & bitmask_0F);
+    rtc.year_1000_bcd   = std::bitset<4>((year_bcd >> 12) & bitmask_0F);
+    rtc.year_100_bcd    = std::bitset<4>((year_bcd >> 8) & bitmask_0F);
+    rtc.year_10_bcd     = std::bitset<4>((year_bcd >> 4) & bitmask_0F);
     rtc.year_1_bcd      = std::bitset<4>(year_bcd & bitmask_0F);
 
     rtc.month_hex = static_cast<unsigned>(today.month());
@@ -1131,26 +1131,26 @@ auto getRtcTime() -> RtcTime {
 
     // const auto month     = static_cast<unsigned>(today.month());
     // const auto month_bcd = uti::dec2bcd(month);
-    // rtc.day_10_bcd       = std::bitset<4>((month_bcd >> displacement_4) & bitmask_0F);
+    // rtc.day_10_bcd       = std::bitset<4>((month_bcd >> 4) & bitmask_0F);
     // rtc.day_1_bcd        = std::bitset<4>(month_bcd & bitmask_0F);
     const auto day     = static_cast<unsigned>(today.day());
     const auto day_bcd = uti::dec2bcd(day);
-    rtc.day_10_bcd     = std::bitset<4>((day_bcd >> displacement_4) & bitmask_0F);
+    rtc.day_10_bcd     = std::bitset<4>((day_bcd >> 4) & bitmask_0F);
     rtc.day_1_bcd      = std::bitset<4>(day_bcd & bitmask_0F);
 
     const auto hour     = time.hours().count();
     const auto hour_bcd = uti::dec2bcd(hour);
-    rtc.hour_10_bcd     = std::bitset<4>((hour_bcd >> displacement_4) & bitmask_0F);
+    rtc.hour_10_bcd     = std::bitset<4>((hour_bcd >> 4) & bitmask_0F);
     rtc.hour_1_bcd      = std::bitset<4>(hour_bcd & bitmask_0F);
 
     const auto minute     = time.minutes().count();
     const auto minute_bcd = uti::dec2bcd(minute);
-    rtc.minute_10_bcd     = std::bitset<4>((minute_bcd >> displacement_4) & bitmask_0F);
+    rtc.minute_10_bcd     = std::bitset<4>((minute_bcd >> 4) & bitmask_0F);
     rtc.minute_1_bcd      = std::bitset<4>(minute_bcd & bitmask_0F);
 
     const auto second     = static_cast<u16>(time.seconds().count());
     const auto second_bcd = uti::dec2bcd(second);
-    rtc.second_10_bcd     = std::bitset<4>((second_bcd >> displacement_4) & bitmask_0F);
+    rtc.second_10_bcd     = std::bitset<4>((second_bcd >> 4) & bitmask_0F);
     rtc.second_1_bcd      = std::bitset<4>(second_bcd & bitmask_0F);
 
     return rtc;

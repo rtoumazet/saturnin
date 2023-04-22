@@ -109,15 +109,15 @@ auto Spti::readOneSector(const u32& fad) -> std::string {
     input_buffer.Lun                = Cdrom::scsi_lun;
     input_buffer.SenseInfoOffset    = 0;
     input_buffer.DataIn             = SCSI_IOCTL_DATA_IN;
-    input_buffer.Cdb[index_0]       = command_code;
-    input_buffer.Cdb[index_2]       = static_cast<u8>(real_fad >> displacement_24);
-    input_buffer.Cdb[index_3]       = static_cast<u8>(real_fad >> displacement_16);
-    input_buffer.Cdb[index_4]       = static_cast<u8>(real_fad >> displacement_8);
-    input_buffer.Cdb[index_5]       = static_cast<u8>(real_fad);
-    input_buffer.Cdb[index_6]       = 0;
-    input_buffer.Cdb[index_7]       = 0;
-    input_buffer.Cdb[index_8]       = number_of_frames_to_read;
-    input_buffer.Cdb[index_9]       = only_main_channel_data;
+    input_buffer.Cdb[0]       = command_code;
+    input_buffer.Cdb[2]       = static_cast<u8>(real_fad >> 24);
+    input_buffer.Cdb[3]       = static_cast<u8>(real_fad >> 16);
+    input_buffer.Cdb[4]       = static_cast<u8>(real_fad >> 8);
+    input_buffer.Cdb[5]       = static_cast<u8>(real_fad);
+    input_buffer.Cdb[6]       = 0;
+    input_buffer.Cdb[7]       = 0;
+    input_buffer.Cdb[8]       = number_of_frames_to_read;
+    input_buffer.Cdb[9]       = only_main_channel_data;
 
     const auto drive_handle = Scsi::openDrive(Cdrom::scsi_letter);
     auto       dummy        = u32{};
@@ -177,8 +177,8 @@ void Spti::inquiry(const HANDLE& h, ScsiDriveInfo& di) {
     input_buffer.DataBuffer         = &output_buffer[0];
     input_buffer.SenseInfoLength    = 0;
     input_buffer.CdbLength          = cdb_length;
-    input_buffer.Cdb[index_0]       = scsi_inquiry;
-    input_buffer.Cdb[index_4]       = output_buffer_size;
+    input_buffer.Cdb[0]       = scsi_inquiry;
+    input_buffer.Cdb[4]       = output_buffer_size;
     input_buffer.TimeOutValue       = spti_timeout;
 
     auto dummy = u32{};

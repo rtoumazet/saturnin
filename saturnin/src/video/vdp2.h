@@ -604,7 +604,7 @@ class Vdp2 {
 
     template<typename T>
     void writeRegisters(const u32 addr, const T data) {
-        core::Log::warning(Logger::vdp2, core::tr("{}bits register write {:#0x}"), sizeof(T) * number_of_bits_8, addr);
+        core::Log::warning(Logger::vdp2, core::tr("{}bits register write {:#0x}"), sizeof(T) * 8, addr);
     }
 
     // 8 bits specialization
@@ -625,7 +625,7 @@ class Vdp2 {
     }
     template<typename T>
     auto readRegisters(const u32 addr) -> T {
-        core::Log::warning(Logger::vdp2, core::tr("{}bits register read {:#0x}"), sizeof(T) * number_of_bits_8, addr);
+        core::Log::warning(Logger::vdp2, core::tr("{}bits register read {:#0x}"), sizeof(T) * 8, addr);
         return 0;
     }
     // 16 bits specialization

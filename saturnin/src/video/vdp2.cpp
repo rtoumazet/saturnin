@@ -960,7 +960,7 @@ void Vdp2::write16(const u32 addr, const u16 data) {
 
 // NOLINTNEXTLINE(readability-convert-member-functions-to-static)
 void Vdp2::write32(const u32 addr, const u32 data) {
-    const auto h = static_cast<u16>(data >> displacement_16);
+    const auto h = static_cast<u16>(data >> 16);
     const auto l = static_cast<u16>(data & bitmask_FFFF);
     switch (addr & core::vdp2_registers_memory_mask) {
         case vram_cycle_pattern_bank_a0_lower:
@@ -3924,7 +3924,7 @@ auto Vdp2::getColorRamAddressOffset(const u8 register_offset) const -> u16 {
             break;
         default: core::Log::warning(Logger::vdp2, core::tr("Can't calculate color RAM address offset."));
     }
-    return ((register_offset & register_mask) << displacement_8) * color_size;
+    return ((register_offset & register_mask) << 8) * color_size;
 };
 
 //--------------------------------------------------------------------------------------------------------------

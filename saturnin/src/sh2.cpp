@@ -899,7 +899,7 @@ void Sh2::start64bitsDivision() {
     const auto dvdnth = regs_.divu.dvdnth.data();
     const auto dvsr   = regs_.divu.dvsr.data();
 
-    const auto dividend = (static_cast<u64>(dvdnth) << number_of_bits_32) | dvdntl;
+    const auto dividend = (static_cast<u64>(dvdnth) << 32) | dvdntl;
 
     // Log::debug(Logger::sh2, "{} / {} {:x}", dividend, dvsr, pc_);
 
@@ -1228,11 +1228,9 @@ void Sh2::executeDmaOnChannel(Sh2DmaConfiguration& conf) {
                     break;
                 case sixteen_byte_unit:
                     modules_.memory()->write<u32>(destination, modules_.memory()->read<u32>(source));
-                    modules_.memory()->write<u32>(destination + displacement_4,
-                                                  modules_.memory()->read<u32>(source + displacement_4));
+                    modules_.memory()->write<u32>(destination + 4, modules_.memory()->read<u32>(source + 4));
                     modules_.memory()->write<u32>(destination + 8, modules_.memory()->read<u32>(source + 8));
-                    modules_.memory()->write<u32>(destination + displacement_12,
-                                                  modules_.memory()->read<u32>(source + displacement_12));
+                    modules_.memory()->write<u32>(destination + 12, modules_.memory()->read<u32>(source + 12));
                     transfer_size = transfer_byte_size_16;
                     counter -= 4;
                     break;
@@ -1358,22 +1356,22 @@ auto Sh2::getRegister(const Sh2Register reg) const -> u32 {
         case vbr: return vbr_; break;
         case gbr: return gbr_; break;
         case sr: return regs_.sr.data(); break;
-        case r0: return r_[index_0]; break;
-        case r1: return r_[index_1]; break;
-        case r2: return r_[index_2]; break;
-        case r3: return r_[index_3]; break;
-        case r4: return r_[index_4]; break;
-        case r5: return r_[index_5]; break;
-        case r6: return r_[index_6]; break;
-        case r7: return r_[index_7]; break;
-        case r8: return r_[index_8]; break;
-        case r9: return r_[index_9]; break;
-        case r10: return r_[index_10]; break;
-        case r11: return r_[index_11]; break;
-        case r12: return r_[index_12]; break;
-        case r13: return r_[index_13]; break;
-        case r14: return r_[index_14]; break;
-        case r15: return r_[index_15]; break;
+        case r0: return r_[0]; break;
+        case r1: return r_[1]; break;
+        case r2: return r_[2]; break;
+        case r3: return r_[3]; break;
+        case r4: return r_[4]; break;
+        case r5: return r_[5]; break;
+        case r6: return r_[6]; break;
+        case r7: return r_[7]; break;
+        case r8: return r_[8]; break;
+        case r9: return r_[9]; break;
+        case r10: return r_[10]; break;
+        case r11: return r_[11]; break;
+        case r12: return r_[12]; break;
+        case r13: return r_[13]; break;
+        case r14: return r_[14]; break;
+        case r15: return r_[15]; break;
     }
     return 0;
 }

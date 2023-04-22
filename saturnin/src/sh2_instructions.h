@@ -38,9 +38,9 @@ namespace saturnin::sh2 {
 
 /// \name Instruction split functions.
 //@{
-inline auto xn000(const u16 inst) -> u8 { return static_cast<u8>((inst & bitmask_F000) >> displacement_12); }
-inline auto x0n00(const u16 inst) -> u8 { return static_cast<u8>((inst & bitmask_0F00) >> displacement_8); }
-inline auto x00n0(const u16 inst) -> u8 { return static_cast<u8>((inst & bitmask_00F0) >> displacement_4); }
+inline auto xn000(const u16 inst) -> u8 { return static_cast<u8>((inst & bitmask_F000) >> 12); }
+inline auto x0n00(const u16 inst) -> u8 { return static_cast<u8>((inst & bitmask_0F00) >> 8); }
+inline auto x00n0(const u16 inst) -> u8 { return static_cast<u8>((inst & bitmask_00F0) >> 4); }
 inline auto x0nnn(const u16 inst) -> u16 { return (inst & bitmask_0FFF); }
 inline auto x00nn(const u16 inst) -> u8 { return static_cast<u8>(inst & bitmask_00FF); }
 inline auto x000n(const u16 inst) -> u8 { return static_cast<u8>(inst & bitmask_000F); }

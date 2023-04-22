@@ -387,9 +387,9 @@ struct RtcTime {
 
   private:
     static auto concat(std::bitset<4> upper, std::bitset<4> lower) -> u8 {
-        std::bitset<number_of_bits_8> left = upper.to_ulong();
+        std::bitset<8> left = upper.to_ulong();
         left <<= 4;
-        std::bitset<number_of_bits_8> right = lower.to_ulong();
+        std::bitset<8> right = lower.to_ulong();
         left |= right;
         return static_cast<u8>(left.to_ulong());
     }

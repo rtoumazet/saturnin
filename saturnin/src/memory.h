@@ -442,7 +442,7 @@ class Memory {
     template<typename T>
     auto read(const u32 addr) -> T {
         auto& handler = std::get<ReadHandler<T>&>(std::tie(read_8_handler_, read_16_handler_, read_32_handler_));
-        return handler[addr >> number_of_bits_16](*this, addr);
+        return handler[addr >> 16](*this, addr);
     }
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn template<typename T> void Memory::write(const u32 addr, const T data);
@@ -461,7 +461,7 @@ class Memory {
     void write(const u32 addr, const T data) {
         // if (addr == 0x6000248) DebugBreak();
         auto& handler = std::get<WriteHandler<T>&>(std::tie(write_8_handler_, write_16_handler_, write_32_handler_));
-        handler[addr >> number_of_bits_16](*this, addr, data);
+        handler[addr >> 16](*this, addr, data);
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -615,8 +615,8 @@ class Memory {
 
     template<typename T>
     void initializeHandler(AddressRange ar, ReadType<T> func) {
-        ar.start >>= number_of_bits_16;
-        ar.end >>= number_of_bits_16;
+        ar.start >>= 16;
+        ar.end >>= 16;
 
         auto t = std::tie(read_8_handler_, read_16_handler_, read_32_handler_);
         for (u32 current = ar.start; current <= ar.end; ++current) {
@@ -637,8 +637,8 @@ class Memory {
 
     template<typename T>
     void initializeHandler(AddressRange ar, WriteType<T> func) {
-        ar.start >>= number_of_bits_16;
-        ar.end >>= number_of_bits_16;
+        ar.start >>= 16;
+        ar.end >>= 16;
 
         auto t = std::tie(write_8_handler_, write_16_handler_, write_32_handler_);
         for (u32 current = ar.start; current <= ar.end; ++current) {
@@ -760,7 +760,7 @@ template<typename T, typename U, size_t N>
 auto rawRead(const std::array<U, N>& arr, u32 addr) -> T {
     T return_value{arr[addr]};
     for (u8 i = 1; i < sizeof(T); ++i) {
-        return_value <<= number_of_bits_8;
+        return_value <<= 8;
         return_value |= arr[addr + i];
     }
     return return_value;
@@ -872,7 +872,7 @@ template<typename T>
 struct readSmpc {
     operator Memory::ReadType<T>() const {
         return [](const Memory& m, const u32 addr) -> T {
-            Log::warning(Logger::memory, core::tr("SMPC read ({}) access {:#0x}"), sizeof(T) * number_of_bits_8, addr);
+            Log::warning(Logger::memory, core::tr("SMPC read ({}) access {:#0x}"), sizeof(T) * 8, addr);
             return rawRead<T>(m.smpc_, addr & smpc_memory_mask);
         };
     }
@@ -907,7 +907,7 @@ struct writeSmpc {
         return [](Memory& m, const u32 addr, const T data) {
             Log::warning(Logger::memory,
                          core::tr("SMPC write ({}) access {:#0x} : {:#x}"),
-                         sizeof(T) * number_of_bits_8,
+                         sizeof(T) * 8,
                          addr,
                          data);
             // rawWrite<T>(m.smpc_, addr & smpc_memory_mask, data);
@@ -1690,7 +1690,7 @@ struct writeMasterSh2Frt {
             // m.interrupt_signal_is_sent_from_master_sh2_ = true;
             Log::warning(Logger::memory,
                          core::tr("{}bits write to the master SH2 FRT memory area !"),
-                         sizeof(T) * number_of_bits_8);
+                         sizeof(T) * 8);
         };
     }
 };
@@ -1721,7 +1721,7 @@ struct writeSlaveSh2Frt {
             // m.interrupt_signal_is_sent_from_slave_sh2_ = true;
             Log::warning(Logger::memory,
                          core::tr("{}bits write to the slave SH2 FRT memory area !"),
-                         sizeof(T) * number_of_bits_8);
+                         sizeof(T) * 8);
         };
     }
 };

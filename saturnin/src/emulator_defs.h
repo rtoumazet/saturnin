@@ -52,20 +52,6 @@ using AddressToNameMap = std::map<u32, std::string>;
 using Mutex       = std::mutex;
 using SharedMutex = std::shared_mutex;
 
-constexpr auto register_size = u8{32};
-
-constexpr auto number_of_bits_32 = u8{32};
-constexpr auto number_of_bits_16 = u8{16};
-constexpr auto number_of_bits_8  = u8{8};
-
-constexpr auto displacement_4  = u8{4};
-constexpr auto displacement_6  = u8{6};
-constexpr auto displacement_8  = u8{8};
-constexpr auto displacement_12 = u8{12};
-constexpr auto displacement_16 = u8{16};
-constexpr auto displacement_24 = u8{24};
-constexpr auto displacement_32 = u8{32};
-
 constexpr auto bitmask_FFFFFFFF00000000 = u64{0xFFFFFFFF00000000};
 constexpr auto bitmask_0000000F         = u32{0x0000000F};
 constexpr auto bitmask_000000FF         = u32{0x000000FF};
@@ -109,39 +95,6 @@ constexpr auto u31_max             = u32{0x7FFFFFFF};
 constexpr auto u30_max             = u32{0x3FFFFFFF};
 constexpr auto u16_max             = u16{UINT16_MAX};
 constexpr auto u8_max              = u8{UINT8_MAX};
-
-constexpr auto index_0  = u8{0};
-constexpr auto index_1  = u8{1};
-constexpr auto index_2  = u8{2};
-constexpr auto index_3  = u8{3};
-constexpr auto index_4  = u8{4};
-constexpr auto index_5  = u8{5};
-constexpr auto index_6  = u8{6};
-constexpr auto index_7  = u8{7};
-constexpr auto index_8  = u8{8};
-constexpr auto index_9  = u8{9};
-constexpr auto index_10 = u8{10};
-constexpr auto index_11 = u8{11};
-constexpr auto index_12 = u8{12};
-constexpr auto index_13 = u8{13};
-constexpr auto index_14 = u8{14};
-constexpr auto index_15 = u8{15};
-constexpr auto index_16 = u8{16};
-constexpr auto index_17 = u8{17};
-constexpr auto index_18 = u8{18};
-constexpr auto index_19 = u8{19};
-constexpr auto index_20 = u8{20};
-constexpr auto index_21 = u8{21};
-constexpr auto index_22 = u8{22};
-constexpr auto index_23 = u8{23};
-constexpr auto index_24 = u8{24};
-constexpr auto index_25 = u8{25};
-constexpr auto index_26 = u8{26};
-constexpr auto index_27 = u8{27};
-constexpr auto index_28 = u8{28};
-constexpr auto index_29 = u8{29};
-constexpr auto index_30 = u8{30};
-constexpr auto index_31 = u8{31};
 
 constexpr auto bits_in_a_byte = u8{8};
 
