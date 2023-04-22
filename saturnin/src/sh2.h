@@ -32,7 +32,7 @@
 #include <saturnin/src/emulator_modules.h>
 #include <saturnin/src/log.h>
 #include <saturnin/src/memory.h>
-#include <saturnin/src/sh2_registers.h>
+#include <saturnin/src/sh2/sh2_registers.h>
 
 // Forward declarations
 namespace saturnin::core {

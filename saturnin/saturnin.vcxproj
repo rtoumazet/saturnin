@@ -482,7 +482,7 @@
     <ClInclude Include="src\sh2.h" />
     <ClInclude Include="src\sh2_disasm.h" />
     <ClInclude Include="src\sh2_instructions.h" />
-    <ClInclude Include="src\sh2_registers.h" />
+    <ClInclude Include="src\sh2\sh2_registers.h" />
     <ClInclude Include="src\smpc.h" />
     <ClInclude Include="src\smpc_registers.h" />
     <ClInclude Include="src\sound\scsp.h" />
