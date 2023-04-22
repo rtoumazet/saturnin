@@ -257,11 +257,11 @@ void Scu::executeDma(DmaConfiguration& dc) {
                     // auto source_array = modules_.memory()->getArray(read_address);
 
                     while (byte_counter < dc.transfer_byte_number) {
-                        data = modules_.memory()->read<u8>((read_address & bitmask_7FFFFFFF) + read_offset
+                        data = modules_.memory()->read<u8>((read_address & 0x7FFFFFFFu) + read_offset
                                                            + long_counter * read_address_add);
                         modules_.memory()->write<u8>(write_address + read_offset + long_counter * write_address_add, data);
 
-                        // auto source = (read_address & bitmask_7FFFFFFF) + read_offset + long_counter * read_address_add;
+                        // auto source = (read_address & 0x7FFFFFFFu) + read_offset + long_counter * read_address_add;
                         // auto dest   = write_address + read_offset + long_counter * write_address_add;
                         // break;
                         ++read_offset;
@@ -293,7 +293,7 @@ void Scu::executeDma(DmaConfiguration& dc) {
                         modules_.memory()->burstCopy(read_address, write_address, dc.transfer_byte_number);
                     } else {
                         while (byte_counter < dc.transfer_byte_number) {
-                            data = modules_.memory()->read<u8>((read_address & bitmask_7FFFFFFF) + read_offset
+                            data = modules_.memory()->read<u8>((read_address & 0x7FFFFFFFu) + read_offset
                                                                + long_counter * read_address_add);
                             modules_.memory()->write<u8>(write_address + write_offset + word_counter * write_address_add, data);
 
@@ -325,7 +325,7 @@ void Scu::executeDma(DmaConfiguration& dc) {
                     write_address_add = 4;
 
                     while (byte_counter < dc.transfer_byte_number) {
-                        data = modules_.memory()->read<u8>((read_address & bitmask_7FFFFFFF) + read_offset
+                        data = modules_.memory()->read<u8>((read_address & 0x7FFFFFFFu) + read_offset
                                                            + long_counter * read_address_add);
                         modules_.memory()->write<u8>(write_address + read_offset + long_counter * write_address_add, data);
 
@@ -432,7 +432,7 @@ void Scu::executeDma(DmaConfiguration& dc) {
                         }
 
                         while (byte_counter < count) {
-                            data = modules_.memory()->read<u8>((read_address & bitmask_7FFFFFFF) + read_offset
+                            data = modules_.memory()->read<u8>((read_address & 0x7FFFFFFFu) + read_offset
                                                                + long_counter * read_address_add);
                             modules_.memory()->write<u8>(write_address + read_offset + long_counter * write_address_add, data);
 
@@ -461,7 +461,7 @@ void Scu::executeDma(DmaConfiguration& dc) {
                         u32 write_offset{};
 
                         while (byte_counter < count) {
-                            data = modules_.memory()->read<u8>((read_address & bitmask_7FFFFFFF) + read_offset
+                            data = modules_.memory()->read<u8>((read_address & 0x7FFFFFFFu) + read_offset
                                                                + long_counter * read_address_add);
                             modules_.memory()->write<u8>(write_address + write_offset + word_counter * write_address_add, data);
 
@@ -492,7 +492,7 @@ void Scu::executeDma(DmaConfiguration& dc) {
                         write_address_add = 4;
 
                         while (byte_counter < count) {
-                            data = modules_.memory()->read<u8>((read_address & bitmask_7FFFFFFF) + read_offset
+                            data = modules_.memory()->read<u8>((read_address & 0x7FFFFFFFu) + read_offset
                                                                + long_counter * read_address_add);
                             modules_.memory()->write<u8>(write_address + read_offset + long_counter * write_address_add, data);
 
@@ -785,7 +785,7 @@ void Scu::activateDma() {
 
 /* static */
 auto Scu::getDmaBus(const u32 address) -> DmaBus {
-    const auto a = u32{address & bitmask_0FFFFFFF};
+    const auto a = u32{address & 0xFFFFFFF};
 
     switch (getScuRegion(a)) {
         using enum ScuRegion;
@@ -816,7 +816,7 @@ auto Scu::getDmaBus(const u32 address) -> DmaBus {
 
 /* static */
 auto Scu::getScuRegion(const u32 address) -> ScuRegion {
-    const auto a = u32{address & bitmask_0FFFFFFF};
+    const auto a = u32{address & 0xFFFFFFF};
 
     constexpr auto rom_start = u32{0};
     constexpr auto rom_end   = u32{0x80000};

@@ -390,7 +390,7 @@ void cmpstr(Sh2& s) {
     auto rn = u32{s.r_[x0n0(s)]};
 
     ((rm & 0xFF000000) == (rn & 0xFF000000) || (rm & 0x00FF0000) == (rn & 0x00FF0000)
-     || (rm & bitmask_0000FF00) == (rn & bitmask_0000FF00) || (rm & 0xFF) == (rn & 0xFF))
+     || (rm & 0xFF00u) == (rn & 0xFF00u) || (rm & 0xFF) == (rn & 0xFF))
         ? s.regs_.sr.set(Sh2Regs::StatusRegister::t)
         : s.regs_.sr.clr(Sh2Regs::StatusRegister::t);
 

@@ -296,7 +296,7 @@ class Sh2 {
 
     template<typename T>
     [[nodiscard]] auto readCacheAddresses(const u32 addr) const -> T {
-        return rawRead<T>(cache_addresses_, addr & bitmask_03FF);
+        return rawRead<T>(cache_addresses_, addr & 0x3FF);
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -314,7 +314,7 @@ class Sh2 {
 
     template<typename T>
     void writeCacheAddresses(const u32 addr, const T data) {
-        rawWrite<T>(cache_addresses_, addr & bitmask_03FF, data);
+        rawWrite<T>(cache_addresses_, addr & 0x3FF, data);
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -333,7 +333,7 @@ class Sh2 {
 
     template<typename T>
     [[nodiscard]] auto readCacheData(const u32 addr) const -> T {
-        return rawRead<T>(cache_data_, addr & bitmask_0FFF);
+        return rawRead<T>(cache_data_, addr & 0xFFF);
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -351,7 +351,7 @@ class Sh2 {
 
     template<typename T>
     void writeCacheData(const u32 addr, const T data) {
-        rawWrite<T>(cache_data_, addr & bitmask_0FFF, data);
+        rawWrite<T>(cache_data_, addr & 0xFFF, data);
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////

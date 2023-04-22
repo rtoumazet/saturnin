@@ -47,6 +47,9 @@ using util::toUnderlying;
 using LockGuard = std::lock_guard<Mutex>;
 
 constexpr auto use_concurrent_read_for_cells = bool{false};
+constexpr auto vdp2_vram_4mb_mask            = u16{0x3FFF};
+constexpr auto vdp2_vram_8mb_mask            = u16{0x7FFF};
+constexpr auto bits_in_a_byte                = u8{8};
 
 //--------------------------------------------------------------------------------------------------------------
 // PUBLIC section
@@ -961,7 +964,7 @@ void Vdp2::write16(const u32 addr, const u16 data) {
 // NOLINTNEXTLINE(readability-convert-member-functions-to-static)
 void Vdp2::write32(const u32 addr, const u32 data) {
     const auto h = static_cast<u16>(data >> 16);
-    const auto l = static_cast<u16>(data & bitmask_FFFF);
+    const auto l = static_cast<u16>(data & 0xFFFF);
     switch (addr & core::vdp2_registers_memory_mask) {
         case vram_cycle_pattern_bank_a0_lower:
             regs_.cyca0l = h;
@@ -3556,7 +3559,7 @@ void Vdp2::readPageData(const ScrollScreenStatus& screen, const u32 page_address
     };
 
     const auto character_number_mask
-        = (ram_status_.vram_size == Vrsize::VramSize::size_4_mbits) ? bitmask_vdp2_vram_4mb : bitmask_vdp2_vram_8mb;
+        = (ram_status_.vram_size == Vrsize::VramSize::size_4_mbits) ? vdp2_vram_4mb_mask : vdp2_vram_8mb_mask;
 
     for (u32 i = 0; i < cp_number; ++i) {
         const auto raw_data

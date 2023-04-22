@@ -621,7 +621,7 @@ class Memory {
         auto t = std::tie(read_8_handler_, read_16_handler_, read_32_handler_);
         for (u32 current = ar.start; current <= ar.end; ++current) {
             auto& handler                   = std::get<ReadHandler<T>&>(t);
-            handler[current & bitmask_FFFF] = func;
+            handler[current & 0xFFFF] = func;
         }
     }
 
@@ -643,7 +643,7 @@ class Memory {
         auto t = std::tie(write_8_handler_, write_16_handler_, write_32_handler_);
         for (u32 current = ar.start; current <= ar.end; ++current) {
             auto& handler                   = std::get<WriteHandler<T>&>(t);
-            handler[current & bitmask_FFFF] = func;
+            handler[current & 0xFFFF] = func;
         }
     }
 
@@ -789,7 +789,7 @@ void rawWrite(std::array<U, N>& arr, const u32 addr, const T value) {
     constexpr u8 bits_by_byte{std::numeric_limits<u8>::digits};
     constexpr u8 offset{std::numeric_limits<T>::digits};
     for (u8 i = 0; i <= sizeof(T) - 1; ++i) {
-        arr[addr + i] = (value >> (offset - (bits_by_byte * i + bits_by_byte))) & bitmask_000000FF;
+        arr[addr + i] = (value >> (offset - (bits_by_byte * i + bits_by_byte))) & 0xFF;
     }
 }
 
@@ -1020,7 +1020,7 @@ struct readStvIo<u8> {
         return [](const Memory& m, const u32 addr) -> u8 {
             // WIP use gainput/glfw3 to manage inputs
             auto data = u8{};
-            switch (addr & bitmask_00FFFFFF) {
+            switch (addr & 0xFFFFFF) {
                 case stv_io_port_a: {
                     const auto p1 = m.modules_.smpc()->getStvPeripheralMapping().player_1;
                     if (isKeyPressed(p1.button_1, m.modules_.context()->openglWindow())) {
@@ -1178,7 +1178,7 @@ struct readCart<u32> {
             const auto relative_addr = calculateRelativeCartAddress(addr);
             auto       data          = u32{rawRead<u32>(m.cart_, relative_addr)};
 
-            if ((addr & bitmask_0FFFFFFF) == stv_protection_register_address) {
+            if ((addr & 0xFFFFFFF) == stv_protection_register_address) {
                 if (m.HardwareMode_ == HardwareMode::stv) { data = m.readStvProtection(addr, data); }
             }
             return data;
@@ -1213,7 +1213,7 @@ struct writeCart<u8> {
     operator Memory::WriteType<u8>() const {
         return [](Memory& m, const u32 addr, const u8 data) {
             if (m.HardwareMode_ == HardwareMode::stv) {
-                if ((addr & bitmask_0FFFFFFF) == stv_protection_enabled) {
+                if ((addr & 0xFFFFFFF) == stv_protection_enabled) {
                     if (data == 0x1) { // Is the protection enabled ?
                         m.writeStvProtection(addr, data);
                     }
