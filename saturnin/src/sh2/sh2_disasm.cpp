@@ -18,10 +18,10 @@
 //
 
 #include <saturnin/src/pch.h>
-#include <saturnin/src/sh2_disasm.h>
+#include <saturnin/src/sh2/sh2_disasm.h>
 #include <istream>
 #include <fmt/format.h>
-#include <saturnin/src/sh2_instructions.h>
+#include <saturnin/src/sh2/sh2_instructions.h>
 #include <saturnin/src/utilities.h> // format
 
 namespace uti = saturnin::utilities;
@@ -265,11 +265,7 @@ auto movwi_d(const u32 pc, const u16 opcode) -> std::string {
 };
 auto movli_d(const u32 pc, const u16 opcode) -> std::string {
     auto disp = u32{(0xFFu & x00nn(opcode))};
-    return uti::format("{:#010x} {:#06x} MOV.L @({:#x}),R{:d}",
-                       pc,
-                       opcode,
-                       (pc & 0xFFFFFFFCu) + (disp << 2) + 4,
-                       x0n00(opcode));
+    return uti::format("{:#010x} {:#06x} MOV.L @({:#x}),R{:d}", pc, opcode, (pc & 0xFFFFFFFCu) + (disp << 2) + 4, x0n00(opcode));
 };
 auto movblg_d(const u32 pc, const u16 opcode) -> std::string {
     return uti::format("{:#010x} {:#06x} MOV.B @({:#x},GBR)", pc, opcode, x000n(opcode));

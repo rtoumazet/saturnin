@@ -18,16 +18,16 @@
 //
 
 #include <saturnin/src/pch.h>
-#include <saturnin/src/sh2_instructions.h>
+#include <saturnin/src/sh2/sh2_instructions.h>
 #include <istream>
 #include <saturnin/src/emulator_context.h> // EmulatorContext
 #include <saturnin/src/emulator_defs.h>
-#include <saturnin/src/emulator_enums.h> // DebugStatus
+#include <saturnin/src/emulator_enums.h>   // DebugStatus
 #include <saturnin/src/interrupt_sources.h>
 #include <saturnin/src/log.h>
 #include <saturnin/src/memory.h>
 #include <saturnin/src/scu.h>
-#include <saturnin/src/sh2.h> // Sh2, Sh2Type
+#include <saturnin/src/sh2/sh2.h> // Sh2, Sh2Type
 
 namespace is = saturnin::core::interrupt_source;
 
@@ -95,7 +95,7 @@ void add(Sh2& s) {
 void addi(Sh2& s) {
     // Rn + imm -> Rn
     if ((x0nn(s) & 0x80) == 0) {
-        s.r_[xn00(s)] += (0xFF & static_cast<u32>(x0nn(s))); // #imm positive, 32bits sign extension
+        s.r_[xn00(s)] += (0xFF & static_cast<u32>(x0nn(s)));       // #imm positive, 32bits sign extension
     } else {
         s.r_[xn00(s)] += (0xFFFFFF00 | static_cast<u32>(x0nn(s))); // #imm negative, 32bits sign extension
     }
@@ -389,8 +389,8 @@ void cmpstr(Sh2& s) {
     auto rm = u32{s.r_[xn00(s)]};
     auto rn = u32{s.r_[x0n0(s)]};
 
-    ((rm & 0xFF000000) == (rn & 0xFF000000) || (rm & 0x00FF0000) == (rn & 0x00FF0000)
-     || (rm & 0xFF00u) == (rn & 0xFF00u) || (rm & 0xFF) == (rn & 0xFF))
+    ((rm & 0xFF000000) == (rn & 0xFF000000) || (rm & 0x00FF0000) == (rn & 0x00FF0000) || (rm & 0xFF00u) == (rn & 0xFF00u)
+     || (rm & 0xFF) == (rn & 0xFF))
         ? s.regs_.sr.set(Sh2Regs::StatusRegister::t)
         : s.regs_.sr.clr(Sh2Regs::StatusRegister::t);
 

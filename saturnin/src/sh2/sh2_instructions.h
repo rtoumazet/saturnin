@@ -28,8 +28,8 @@
 #include <array>  // array
 #include <string> // string
 #include <saturnin/src/emulator_defs.h>
-#include <saturnin/src/sh2.h>
-#include <saturnin/src/sh2_disasm.h>
+#include <saturnin/src/sh2/sh2.h>
+#include <saturnin/src/sh2/sh2_disasm.h>
 
 namespace saturnin::sh2 {
 
@@ -207,11 +207,11 @@ inline void xorm(Sh2& s);
 inline void xtrct(Sh2& s);
 //@}
 
-constexpr auto instructions_number = u8{142};      ///< Total number of SH2 instructions used.
-constexpr auto opcodes_lut_size    = u32{0x10000}; ///< Size of the opcodes lookup table
+constexpr auto instructions_number = u8{142};                    ///< Total number of SH2 instructions used.
+constexpr auto opcodes_lut_size    = u32{0x10000};               ///< Size of the opcodes lookup table
 
-using ExecuteType = void (*)(Sh2&);                             ///< Type of execute functions
-using DisasmType  = auto(*)(u32 pc, u16 opcode) -> std::string; ///< Type of disassembly functions
+using ExecuteType = void (*)(Sh2&);                              ///< Type of execute functions
+using DisasmType  = auto (*)(u32 pc, u16 opcode) -> std::string; ///< Type of disassembly functions
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \struct	Sh2Instruction
@@ -233,7 +233,7 @@ struct Sh2Instruction {
 
 static std::array<ExecuteType, opcodes_lut_size> opcodes_lut; ///< The opcodes LUT, used for instruction fast fetching
 static std::array<DisasmType, opcodes_lut_size>
-    opcodes_disasm_lut; ///< The opcodes disasm LUT, used for instruction fast fetching
+    opcodes_disasm_lut;                                       ///< The opcodes disasm LUT, used for instruction fast fetching
 
 static std::array<bool, opcodes_lut_size>
     illegal_instruction_lut; ///< The illegal instruction LUT, used for instruction fast fetching
