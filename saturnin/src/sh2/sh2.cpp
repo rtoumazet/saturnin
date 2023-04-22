@@ -24,7 +24,7 @@
 #include <saturnin/src/interrupt_controller.h> //Interrupt
 #include <saturnin/src/interrupt_sources.h>
 #include <saturnin/src/scu.h>
-#include <saturnin/src/sh2/sh2_instructions.h>
+#include <saturnin/src/sh2/basic_interpreter/sh2_instructions.h>
 #include <saturnin/src/utilities.h>
 
 namespace is = saturnin::core::interrupt_source;

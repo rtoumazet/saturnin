@@ -27,7 +27,7 @@
 #include <saturnin/src/emulator_enums.h>              // EmulationStatus
 #include <saturnin/src/locale.h>                      // tr
 #include <saturnin/src/log.h>                         // Log
-#include <saturnin/src/sh2/sh2_instructions.h>
+#include <saturnin/src/sh2/basic_interpreter/sh2_instructions.h>
 #include <saturnin/src/smpc.h>                        // SaturnDigitalPad, PeripheralKey
 #include <saturnin/src/tests.h>
 #include <saturnin/src/thread_pool.h>                 // ThreadPool

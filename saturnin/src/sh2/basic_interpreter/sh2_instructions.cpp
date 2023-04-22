@@ -18,7 +18,7 @@
 //
 
 #include <saturnin/src/pch.h>
-#include <saturnin/src/sh2/sh2_instructions.h>
+#include <saturnin/src/sh2/basic_interpreter/sh2_instructions.h>
 #include <istream>
 #include <saturnin/src/emulator_context.h> // EmulatorContext
 #include <saturnin/src/emulator_defs.h>
