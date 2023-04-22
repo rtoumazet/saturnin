@@ -329,16 +329,16 @@ struct SmpcRegs {
         static constexpr auto resd_pos  = PosType(6); // Defines Reset Status (OREG0).
         static constexpr auto ste_pos   = PosType(7); // Defines Set Time (OREG0).
 
-        static constexpr auto bit_0 = BitsType(1, bit_0_pos);
-        static constexpr auto bit_1 = BitsType(1, bit_1_pos);
-        static constexpr auto bit_2 = BitsType(1, bit_2_pos);
-        static constexpr auto bit_3 = BitsType(1, bit_3_pos);
-        static constexpr auto bit_4 = BitsType(1, bit_4_pos);
-        static constexpr auto bit_5 = BitsType(1, bit_5_pos);
-        static constexpr auto bit_6 = BitsType(1, bit_6_pos);
-        static constexpr auto bit_7 = BitsType(1, bit_7_pos);
-        static constexpr auto resd  = BitsType(1, resd_pos);
-        static constexpr auto ste   = BitsType(1, ste_pos);
+        static constexpr auto bit_0    = BitsType(1, bit_0_pos);
+        static constexpr auto bit_1    = BitsType(1, bit_1_pos);
+        static constexpr auto bit_2    = BitsType(1, bit_2_pos);
+        static constexpr auto bit_3    = BitsType(1, bit_3_pos);
+        static constexpr auto bit_4    = BitsType(1, bit_4_pos);
+        static constexpr auto bit_5    = BitsType(1, bit_5_pos);
+        static constexpr auto bit_6    = BitsType(1, bit_6_pos);
+        static constexpr auto bit_7    = BitsType(1, bit_7_pos);
+        static constexpr auto resd = BitsType(1, resd_pos);
+        static constexpr auto ste  = BitsType(1, ste_pos);
 
         static constexpr auto ste_mask            = std::byte{0x01};
         static constexpr auto sound_on_mask       = std::byte{0x01};

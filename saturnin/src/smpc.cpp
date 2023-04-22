@@ -672,7 +672,7 @@ void Smpc::getStatus() {
     regs_.oreg[10].clr(Oreg::bit_1); // SYSRES is never triggered by software
     regs_.oreg[10].upd(Oreg::soundOn(is_sound_on_));
 
-    //  oreg_[index_11][bit_6] = is_cd_on_;
+    //  oreg_[index_11][6] = is_cd_on_;
     regs_.oreg[11].clr(Oreg::bit_6);
 
     regs_.oreg[12] = smem_[0];
@@ -767,7 +767,7 @@ void Smpc::getPeripheralData() {
         using enum PortMode;
         case mode_0_byte: break; // no data returned
         case mode_15_byte:
-        case mode_255_byte: // no difference between 15 byte and 255 byte for now
+        case mode_255_byte:      // no difference between 15 byte and 255 byte for now
         {
             auto port_2_data = PortData{};
             switch (port_2_status_) {

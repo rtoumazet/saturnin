@@ -143,15 +143,6 @@ constexpr auto index_29 = u8{29};
 constexpr auto index_30 = u8{30};
 constexpr auto index_31 = u8{31};
 
-constexpr auto bit_0 = u8{0};
-constexpr auto bit_1 = u8{1};
-constexpr auto bit_2 = u8{2};
-constexpr auto bit_3 = u8{3};
-constexpr auto bit_4 = u8{4};
-constexpr auto bit_5 = u8{5};
-constexpr auto bit_6 = u8{6};
-constexpr auto bit_7 = u8{7};
-
 constexpr auto bits_in_a_byte = u8{8};
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
