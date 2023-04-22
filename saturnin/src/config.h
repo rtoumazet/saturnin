@@ -24,7 +24,7 @@
 
 #pragma once
 
-#pragma warning(disable : 4275) // libconfig specific warning disable
+#pragma warning(disable : 4275)       // libconfig specific warning disable
 #include <libconfig.h++>
 #include <any>                        // any
 #include <map>                        // map
@@ -36,10 +36,12 @@
 #include <saturnin/src/smpc.h>        // for AreaCode, PeripheralKey, PortStatus
 #include <saturnin/src/utilities.h>   // toUnderlying
 #include <saturnin/src/cdrom/cdrom.h> // CdromAccessMethod
+#include <saturnin/src/sh2/sh2.h>     // Sh2Core
 #include <saturnin/src/video/vdp2.h>  // TvStandard
 
 namespace libcfg = libconfig;
 namespace cdrom  = saturnin::cdrom;
+namespace sh2    = saturnin::sh2;
 namespace util   = saturnin::utilities;
 namespace video  = saturnin::video;
 
@@ -84,6 +86,7 @@ enum class AccessKeys {
     cfg_log_smpc,
     cfg_log_scsp,
     cfg_log_unimplemented,
+    cfg_advanced_sh2_core,
     stv_game_name,
     stv_zip_name,
     stv_parent_set,
@@ -101,8 +104,9 @@ using MapHardwareMode = std::map<const std::string, const HardwareMode>;        
 using MapCdromAccess  = std::map<const std::string, const cdrom::CdromAccessMethod>; ///< MapCdromAccess alias definition.
 using MapTvStandard   = std::map<const std::string, const video::TvStandard>;        ///< MapHardwareMode alias definition.
 using MapAreaCode     = std::map<const std::string, const AreaCode>;                 ///< MapAreaCode alias definition.
-using MapPortStatus   = std::map<const std::string, const PortStatus>; ///< MapPeripheralConnection alias definition.
-using MapLogLevel     = std::map<const std::string, const LogLevel>;   ///< MapLogLevel alias definition.
+using MapPortStatus   = std::map<const std::string, const PortStatus>;   ///< MapPeripheralConnection alias definition.
+using MapLogLevel     = std::map<const std::string, const LogLevel>;     ///< MapLogLevel alias definition.
+using MapSh2Core      = std::map<const std::string, const sh2::Sh2Core>; ///< MapSh2Core alias definition.
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \class  Config
@@ -435,6 +439,19 @@ class Config {
     auto listLogLevels() const -> std::vector<std::string>;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn	auto Config::listSh2Cores() const -> std::vector<std::string>;
+    ///
+    /// \brief	Returns a vector populated with the different SH2 cores.
+    ///
+    /// \author	Runik
+    /// \date	22/04/2023
+    ///
+    /// \returns	A std::vector&lt;std::string&gt;
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    auto listSh2Cores() const -> std::vector<std::string>;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn	auto Config::configToPortStatus(const std::string& value) -> PortStatus;
     ///
     /// \brief	Configuration entry to port status
@@ -743,9 +760,9 @@ class Config {
 
     auto getLogLevel(const std::string& key) -> LogLevel;
 
-    std::string filename_; ///< Name of the configuration file used
+    std::string filename_;        ///< Name of the configuration file used
 
-    libconfig::Config cfg_; ///< Internal configuration object
+    libconfig::Config cfg_;       ///< Internal configuration object
 
     MapKeys        full_keys_;    ///< Link between access keys enumerators and string keys.
     MapKeysDefault default_keys_; ///< Link between access keys enumerators and default values.
@@ -759,6 +776,7 @@ class Config {
     MapAreaCode   area_code_;   ///< Link between the area code string value defined in the config file and the AreaCode type.
     MapPortStatus port_status_; ///< Link between the port status string value defined in the config file and the PortStatus type.
     MapLogLevel   log_level_;   ///< Link between the log level string value defined in the config file and the LogLevel type.
+    MapSh2Core    sh2_core_;    ///< Link between the sh2 core string value defined in the config file and the Sh2Core type.
 };
 
 }; // namespace saturnin::core

@@ -21,13 +21,14 @@
 #include <saturnin/src/config.h>
 #include <GLFW/glfw3.h> // GLFW_KEYS
 #include <filesystem>
-#include <iostream> // cout
+#include <iostream>     // cout
 #include <saturnin/src/log.h>
 
 namespace libcfg = libconfig;
 namespace fs     = std::filesystem;
 namespace cdrom  = saturnin::cdrom;
 namespace uti    = saturnin::utilities;
+namespace sh2    = saturnin::sh2;
 
 namespace saturnin::core {
 
@@ -68,6 +69,7 @@ Config::Config(std::string_view configuration_filename) : filename_(configuratio
                   {cfg_log_vdp1, "logs.vdp1"},
                   {cfg_log_vdp2, "logs.vdp2"},
                   {cfg_log_unimplemented, "logs.unimplemented"},
+                  {cfg_advanced_sh2_core, "advanced.sh2_core"},
                   {stv_game_name, "game_name"},
                   {stv_zip_name, "zip_name"},
                   {stv_parent_set, "parent_set"},
@@ -77,62 +79,65 @@ Config::Config(std::string_view configuration_filename) : filename_(configuratio
                   {stv_files, "files"}};
 
     default_keys_ = {{cfg_global_language, std::string("en")},
-                     {cfg_global_hardware_mode, std::string("SATURN")},
-                     {cfg_global_area_code, std::string("EUROPE_PAL")},
+                     {cfg_global_hardware_mode, std::string("saturn")},
+                     {cfg_global_area_code, std::string("europe_pal")},
                      {cfg_global_set_time, true},
                      {cfg_global_stv_bios_bypass, true},
-                     {cfg_rendering_tv_standard, std::string("PAL")},
+                     {cfg_rendering_tv_standard, std::string("pal")},
                      {cfg_rendering_legacy_opengl, false},
                      {cfg_paths_roms_stv, std::string("")},
                      {cfg_paths_bios_stv, std::string("")},
                      {cfg_paths_bios_saturn, std::string("")},
                      {cfg_cdrom_drive, std::string("-1:-1:-1")},
-                     {cfg_cdrom_access_method, std::string("SPTI")},
+                     {cfg_cdrom_access_method, std::string("spti")},
                      {cfg_sound_soundcard, std::string("")},
                      {cfg_sound_disabled, false},
-                     {cfg_controls_saturn_player_1_connection, std::string("DIRECT")},
-                     {cfg_controls_saturn_player_2_connection, std::string("NONE")},
-                     {cfg_log_cdrom, std::string("INFO")},
-                     {cfg_log_config, std::string("INFO")},
-                     {cfg_log_main, std::string("INFO")},
-                     {cfg_log_memory, std::string("INFO")},
-                     {cfg_log_sh2, std::string("INFO")},
-                     {cfg_log_scsp, std::string("INFO")},
-                     {cfg_log_scu, std::string("INFO")},
-                     {cfg_log_smpc, std::string("INFO")},
-                     {cfg_log_vdp1, std::string("INFO")},
-                     {cfg_log_vdp2, std::string("INFO")},
-                     {cfg_log_unimplemented, std::string("INFO")}
+                     {cfg_controls_saturn_player_1_connection, std::string("direct")},
+                     {cfg_controls_saturn_player_2_connection, std::string("none")},
+                     {cfg_log_cdrom, std::string("info")},
+                     {cfg_log_config, std::string("info")},
+                     {cfg_log_main, std::string("info")},
+                     {cfg_log_memory, std::string("info")},
+                     {cfg_log_sh2, std::string("info")},
+                     {cfg_log_scsp, std::string("info")},
+                     {cfg_log_scu, std::string("info")},
+                     {cfg_log_smpc, std::string("info")},
+                     {cfg_log_vdp1, std::string("info")},
+                     {cfg_log_vdp2, std::string("info")},
+                     {cfg_log_unimplemented, std::string("info")},
+                     {cfg_advanced_sh2_core, std::string("basic_interpreter")}
 
     };
 
-    rom_load_ = {{"NOT_INTERLEAVED", RomLoad::not_interleaved},
-                 {"ODD_INTERLEAVED", RomLoad::odd_interleaved},
-                 {"EVEN_INTERLEAVED", RomLoad::even_interleaved}};
+    rom_load_ = {{"not_interleaved", RomLoad::not_interleaved},
+                 {"odd_interleaved", RomLoad::odd_interleaved},
+                 {"even_interleaved", RomLoad::even_interleaved}};
 
-    rom_type_ = {{"PROGRAM", RomType::program}, {"GRAPHIC", RomType::graphic}, {"BIOS", RomType::bios}};
+    rom_type_ = {{"program", RomType::program}, {"graphic", RomType::graphic}, {"bios", RomType::bios}};
 
-    cdrom_access_ = {{"ASPI", cdrom::CdromAccessMethod::aspi}, {"SPTI", cdrom::CdromAccessMethod::spti}};
+    cdrom_access_ = {{"aspi", cdrom::CdromAccessMethod::aspi}, {"spti", cdrom::CdromAccessMethod::spti}};
 
-    hardware_mode_ = {{"SATURN", HardwareMode::saturn}, {"STV", HardwareMode::stv}};
+    hardware_mode_ = {{"saturn", HardwareMode::saturn}, {"stv", HardwareMode::stv}};
 
-    tv_standard_ = {{"PAL", video::TvStandard::pal}, {"NTSC", video::TvStandard::ntsc}};
+    tv_standard_ = {{"pal", video::TvStandard::pal}, {"ntsc", video::TvStandard::ntsc}};
 
-    area_code_ = {{"JAPAN", AreaCode::japan},
-                  {"ASIA_NTSC", AreaCode::asia_ntsc},
-                  {"NORTH_AMERICA", AreaCode::north_america},
-                  {"CENTRAL_SOUTH_AMERICA_NTSC", AreaCode::central_south_america_ntsc},
-                  {"KOREA", AreaCode::korea},
-                  {"ASIA_PAL", AreaCode::asia_pal},
-                  {"EUROPE_PAL", AreaCode::europe_pal},
-                  {"CENTRAL_SOUTH_AMERICA_PAL", AreaCode::central_south_america_pal}};
+    area_code_ = {{"japan", AreaCode::japan},
+                  {"asia_ntsc", AreaCode::asia_ntsc},
+                  {"north_america", AreaCode::north_america},
+                  {"central_south_america_ntsc", AreaCode::central_south_america_ntsc},
+                  {"korea", AreaCode::korea},
+                  {"asia_pal", AreaCode::asia_pal},
+                  {"europe_pal", AreaCode::europe_pal},
+                  {"central_south_america_pal", AreaCode::central_south_america_pal}};
 
-    port_status_ = {{"NONE", PortStatus::not_connected},
-                    {"DIRECT", PortStatus::direct_connection},
-                    {"SEGATAP", PortStatus::sega_tap},
-                    {"MULTITAP", PortStatus::saturn_6p_multitap}};
+    port_status_ = {{"none", PortStatus::not_connected},
+                    {"direct", PortStatus::direct_connection},
+                    {"segatap", PortStatus::sega_tap},
+                    {"multitap", PortStatus::saturn_6p_multitap}};
 
-    log_level_ = {{"OFF", LogLevel::off}, {"INFO", LogLevel::info}, {"DEBUG", LogLevel::debug}};
+    log_level_ = {{"off", LogLevel::off}, {"info", LogLevel::info}, {"debug", LogLevel::debug}};
+
+    sh2_core_ = {{"basic_interpreter", sh2::Sh2Core::basic_interpreter}};
 };
 
 void Config::writeFile() { cfg_.writeFile(this->filename_.c_str()); }
@@ -193,6 +198,7 @@ void Config::generateConfigurationTree(const bool isModernOpenglCapable) {
     add(full_keys_[cfg_log_vdp1],                           std::any_cast<const std::string&>(default_keys_[cfg_log_vdp1]));
     add(full_keys_[cfg_log_vdp2],                           std::any_cast<const std::string&>(default_keys_[cfg_log_vdp2]));
     add(full_keys_[cfg_log_unimplemented],                  std::any_cast<const std::string&>(default_keys_[cfg_log_unimplemented]));
+    add(full_keys_[cfg_advanced_sh2_core],                  std::any_cast<const std::string&>(default_keys_[cfg_advanced_sh2_core]));
     // clang-format on
 }
 
@@ -280,7 +286,8 @@ void Config::createDefault(const AccessKeys& key) {
             {cfg_controls_saturn_player_2, createSaturnControlEmpty},
             {cfg_controls_stv_board, createStvBoardControlDefault},
             {cfg_controls_stv_player_1, createStvPlayerControlDefault},
-            {cfg_controls_stv_player_2, createStvPlayerControlEmpty}};
+            {cfg_controls_stv_player_2, createStvPlayerControlEmpty},
+            {cfg_advanced_sh2_core, createStringDefault}};
         keyToLambda.contains(key)) {
         keyToLambda[key]();
     } else {
@@ -387,6 +394,14 @@ auto Config::listLogLevels() const -> std::vector<std::string> {
         levels.push_back(key);
     }
     return levels;
+}
+
+auto Config::listSh2Cores() const -> std::vector<std::string> {
+    auto cores = std::vector<std::string>{};
+    for (const auto& [key, value] : sh2_core_) {
+        cores.push_back(key);
+    }
+    return cores;
 }
 
 auto Config::configToPortStatus(const std::string& value) -> PortStatus { return port_status_[value]; }

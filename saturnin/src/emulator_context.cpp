@@ -29,8 +29,8 @@
 #include <saturnin/src/log.h>
 #include <saturnin/src/memory.h>
 #include <saturnin/src/scu.h>
-#include <saturnin/src/sh2_instructions.h>
-#include <saturnin/src/sh2.h>
+#include <saturnin/src/sh2/sh2_instructions.h>
+#include <saturnin/src/sh2/sh2.h>
 #include <saturnin/src/smpc.h>
 #include <saturnin/src/cdrom/cdrom.h>
 #include <saturnin/src/cdrom/scsi.h>

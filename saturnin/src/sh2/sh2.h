@@ -74,6 +74,9 @@ constexpr auto frt_clock_divisor_mask_32  = u8{0b00011111};
 constexpr auto frt_clock_divisor_mask_128 = u8{0b01111111};
 
 constexpr auto breakpoints_number = u8{5};
+
+enum class Sh2Core { basic_interpreter };
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \enum   Sh2Type
 ///
@@ -907,10 +910,10 @@ class Sh2 {
     friend void badOpcode(Sh2& s);
     friend void execute(Sh2& s);
 
-    std::array<u8, cache_address_size>   cache_addresses_; ///< Cache addresses (1KB).
-    std::array<u8, cache_data_size>      cache_data_;      ///< Cache data (4KB).
-    std::array<u8, io_registers_size>    io_registers_;    ///< I/O registers (512B).
-    Sh2Type                              sh2_type_;        ///< Type of the SH2.
+    std::array<u8, cache_address_size>   cache_addresses_;          ///< Cache addresses (1KB).
+    std::array<u8, cache_data_size>      cache_data_;               ///< Cache data (4KB).
+    std::array<u8, io_registers_size>    io_registers_;             ///< I/O registers (512B).
+    Sh2Type                              sh2_type_;                 ///< Type of the SH2.
     std::map<const Sh2Type, const char*> sh2_type_name_
         = {{Sh2Type::master, "Master"}, {Sh2Type::slave, "Slave"}}; ///< Name of the SH2 type, used for logging.
 
@@ -926,13 +929,13 @@ class Sh2 {
     std::array<u32, general_registers_number> r_;    ///< General registers, last one is the stack pointer (SP) (0x5C)
     //@}
 
-    u8  cycles_elapsed_; ///< CPU cycles used by the last instruction.
-    u16 current_opcode_; ///< Opcode to be executed.
+    u8  cycles_elapsed_;                ///< CPU cycles used by the last instruction.
+    u16 current_opcode_;                ///< Opcode to be executed.
 
     bool is_binary_file_loaded_{false}; ///< True if a binary file has been loaded.
     u32  binary_file_start_address_{};  ///< Start address of the binary file if any.
 
-    std::mutex sh2_mutex_; ///< Handles class data when accessed from another thread.
+    std::mutex sh2_mutex_;              ///< Handles class data when accessed from another thread.
 
     /// \name Interrupt management
     //@{
@@ -970,7 +973,7 @@ class Sh2 {
     size_t                              step_over_subroutine_depth_{}; ///< Subroutine depth, used with DebugStatus::step_over
     std::array<u32, breakpoints_number> breakpoints_;                  ///< Breakpoints on current CPU program counter.
 
-    bool is_nmi_registered_{false}; ///< True if a Non Maskable Interrupt is registered
+    bool is_nmi_registered_{false};                                    ///< True if a Non Maskable Interrupt is registered
 };
 
 } // namespace saturnin::sh2

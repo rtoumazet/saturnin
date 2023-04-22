@@ -25,7 +25,7 @@
 #include <saturnin/src/config.h>
 #include <saturnin/src/emulator_context.h>
 #include <saturnin/src/locale.h>
-#include <saturnin/src/sh2.h>
+#include <saturnin/src/sh2/sh2.h>
 #include <saturnin/src/sound/scsp.h>
 
 namespace saturnin::core {
@@ -46,7 +46,8 @@ enum class PortMode : u8 {
 };
 
 using MapKeyboardLayout    = std::map<PeripheralKey, const std::string>;
-const auto keyboard_layout = MapKeyboardLayout{{PeripheralKey::key_space, "space"},
+const auto keyboard_layout = MapKeyboardLayout{{PeripheralKey::key_unknown, "unknown"},
+                                               {PeripheralKey::key_space, "space"},
                                                {PeripheralKey::key_apostrophe, "'"},
                                                {PeripheralKey::key_comma, ","},
                                                {PeripheralKey::key_minus, "-"},
@@ -399,43 +400,6 @@ void Smpc::setCommandDuration() {
     }
 
     Log::warning(Logger::smpc, tr("Unknown SMPC command '{}'"), regs_.comreg.data());
-
-    // if (regs_.comreg.is(SmpcRegs::CommandRegister::master_sh2_on) || regs_.comreg.is(SmpcRegs::CommandRegister::slave_sh2_on)
-    //     || regs_.comreg.is(SmpcRegs::CommandRegister::slave_sh2_off) || regs_.comreg.is(SmpcRegs::CommandRegister::sound_on)
-    //     || regs_.comreg.is(SmpcRegs::CommandRegister::sound_off) || regs_.comreg.is(SmpcRegs::CommandRegister::nmi_request)
-    //     || regs_.comreg.is(SmpcRegs::CommandRegister::reset_enable)
-    //     || regs_.comreg.is(SmpcRegs::CommandRegister::reset_disable)) {
-    //     constexpr auto duration   = micro(30);
-    //     command_remaining_cycles_ = calculateCyclesNumber(duration);
-    //     return;
-
-    //} else if (regs_.comreg.is(SmpcRegs::CommandRegister::cd_on) || regs_.comreg.is(SmpcRegs::CommandRegister::cd_off)
-    //           || regs_.comreg.is(SmpcRegs::CommandRegister::smpc_memory_setting)) {
-    //    constexpr auto duration   = micro(40);
-    //    command_remaining_cycles_ = calculateCyclesNumber(duration);
-    //    return;
-
-    //} else if (regs_.comreg.is(SmpcRegs::CommandRegister::reset_entire_system)
-    //           || regs_.comreg.is(SmpcRegs::CommandRegister::clock_change_320)
-    //           || regs_.comreg.is(SmpcRegs::CommandRegister::clock_change_352)) {
-    //    // Alpha is fixed to 0
-    //    constexpr auto duration   = milli(100);
-    //    command_remaining_cycles_ = calculateCyclesNumber(duration);
-    //    return;
-    //} else if (regs_.comreg.is(SmpcRegs::CommandRegister::time_setting)) {
-    //    constexpr auto duration   = micro(70);
-    //    command_remaining_cycles_ = calculateCyclesNumber(duration);
-    //    return;
-    //} else if (regs_.comreg.is(SmpcRegs::CommandRegister::interrupt_back)) {
-    //    // Values are from previous Saturnin version, not sure how accurate they are ...
-    //    constexpr auto intback_duration = micro(50);
-    //    constexpr auto normal_duration  = micro(1500);
-    //    command_remaining_cycles_
-    //        = is_intback_processing_ ? calculateCyclesNumber(intback_duration) : calculateCyclesNumber(normal_duration);
-    //    return;
-    //}
-
-    // Log::warning(Logger::smpc, tr("Unknown SMPC command '{}'"), regs_.comreg.data());
 }
 
 void Smpc::executeCommand() {

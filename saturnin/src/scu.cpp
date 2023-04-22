@@ -24,7 +24,7 @@
 #include <saturnin/src/locale.h>
 #include <saturnin/src/memory.h>
 #include <saturnin/src/scu_registers.h>
-#include <saturnin/src/sh2.h>
+#include <saturnin/src/sh2/sh2.h>
 #include <saturnin/src/utilities.h> // format
 
 namespace uti = saturnin::utilities;
