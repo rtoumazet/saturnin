@@ -159,6 +159,9 @@
     <ClCompile Include="src\sh2\sh2.cpp">
       <Filter>Fichiers sources\sh2</Filter>
     </ClCompile>
+    <ClCompile Include="src\sh2\fast_interpreter\sh2_opcodes.cpp">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\config.h">
@@ -328,6 +331,9 @@
     </ClInclude>
     <ClInclude Include="src\sh2\sh2_registers.h">
       <Filter>Fichiers sources\sh2</Filter>
+    </ClInclude>
+    <ClInclude Include="src\sh2\fast_interpreter\sh2_opcodes.h">
+      <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

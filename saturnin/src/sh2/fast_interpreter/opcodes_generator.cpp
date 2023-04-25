@@ -25,10 +25,14 @@ namespace uti = saturnin::utilities;
 
 namespace saturnin::sh2 {
 
-constexpr auto call_max    = 0x10000;
-constexpr auto counter_max = 0x10;
-auto           generateOpcodes() -> bool {
+auto generateOpcodes() -> bool {
+    // Functions generation.
+    std::string functions{};
+    functions += generateFunctions<FunctionType::anmd>(std::string_view("add"), {3, 0xc});
+
     // Lookup table generation.
+    constexpr auto    call_max    = 0x10000;
+    constexpr auto    counter_max = 0x10;
     std::string       calls{};
     std::array<u8, 4> counters{};
     for (int call_counter = 0; call_counter < call_max; ++call_counter) {
@@ -52,7 +56,7 @@ auto           generateOpcodes() -> bool {
         }
     }
 
-    std::string content{uti::format("std::array<OpcodeFunc, 2> opcodes_func{{ {0} }};", calls)};
+    std::string content{uti::format("{0}\n std::array<OpcodeFunc, 2> opcodes_func{{ {1} }};", functions, calls)};
 
     // Write to the file.
     const auto path = std::string{"./sh2_opcodes.inc"};
@@ -62,4 +66,45 @@ auto           generateOpcodes() -> bool {
 
     return true;
 }
+
+template<FunctionType Type>
+auto generateFunctions(std::string_view func_name, const std::vector<int>& args) -> std::string {
+    std::string generated{};
+    switch (Type) {
+        using enum FunctionType;
+        case anmd: {
+            // 3xxC
+            if (args.size() != 2) {
+                generated = uti::format("Wrong number of arguments for {}", func_name);
+                break;
+            }
+
+            constexpr auto    func_nb_max = 0x100;
+            constexpr auto    counter_max = 0x10;
+            std::array<u8, 2> counters{};
+
+            const auto a = args[0];
+            const auto d = args[1];
+
+            auto func_template = R"(
+void call_{0:x}_{1:x}_{2:x}_{3:x}(Sh2& s){{
+    {4}(s,{1:x},{2:x});
+}})";
+
+            for (int func_counter = 0; func_counter < func_nb_max; ++func_counter) {
+                generated += uti::format(func_template, a, counters[0], counters[1], d, func_name);
+                ++counters[1];
+                if (counters[1] == counter_max) {
+                    counters[1] = 0;
+                    ++counters[0];
+                }
+            }
+
+            break;
+        }
+            // default:
+    }
+    return generated;
+}
+
 }; // namespace saturnin::sh2
