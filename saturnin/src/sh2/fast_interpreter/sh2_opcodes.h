@@ -30,7 +30,4 @@
 #include <saturnin/src/emulator_defs.h>
 #include <saturnin/src/sh2/sh2.h>
 
-namespace saturnin::sh2::fast_interpreter {
-// void add(Sh2& s, const int m, const int n);
-
-}
+namespace saturnin::sh2::fast_interpreter {}
