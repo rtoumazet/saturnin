@@ -2,7 +2,7 @@ name: MSBuild
 
 on:
   push:
-    branches: [ "master" ]
+    branches: [ "master", "sh2-perfs" ]
   pull_request:
     branches: [ "master" ]
 
