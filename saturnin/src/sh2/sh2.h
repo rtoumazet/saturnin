@@ -910,13 +910,13 @@ class Sh2 {
     friend void badOpcode(Sh2& s);
     friend void execute(Sh2& s);
 
-    friend void add(Sh2& s, const int m, const int n);  // AnmD
+    friend void add(Sh2& s, const int n, const int m);  // AnmD
     friend void addi(Sh2& s, const int n, const int i); // Anii
-    friend void addc(Sh2& s, const int m, const int n); // AnmD
-    friend void addv(Sh2& s, const int m, const int n); // AnmD
-    // friend void and_op(Sh2& s);
-    // friend void andi(Sh2& s);
-    // friend void andm(Sh2& s);
+    friend void addc(Sh2& s, const int n, const int m); // AnmD
+    friend void addv(Sh2& s, const int n, const int m); // AnmD
+    friend void and_op(Sh2& s, const int n, const int m);
+    friend void andi(Sh2& s);
+    friend void andm(Sh2& s);
     // friend void bf(Sh2& s);
     // friend void bfs(Sh2& s);
     // friend void bra(Sh2& s);

@@ -28,7 +28,7 @@ namespace saturnin::sh2 {
 auto generateOpcodes() -> bool {
     // Functions generation.
     std::string functions{};
-    functions += generateFunctions<FunctionType::anmd>(std::string_view("add"), {3, 0xc});
+    functions += generateFunctions<FunctionType::frrf>(std::string_view("add"), {3, 0xc});
 
     // Lookup table generation.
     constexpr auto    call_max    = 0x10000;
@@ -72,7 +72,7 @@ auto generateFunctions(std::string_view func_name, const std::vector<int>& args)
     std::string generated{};
     switch (Type) {
         using enum FunctionType;
-        case anmd: {
+        case frrf: {
             // 3xxC
             if (args.size() != 2) {
                 generated = uti::format("Wrong number of arguments for {}", func_name);

@@ -28,7 +28,7 @@
 #include <saturnin/src/sh2/sh2.h> // Sh2, Sh2Type
 
 namespace saturnin::sh2 {
-void add(Sh2& s, const int m, const int n) {
+void add(Sh2& s, const int n, const int m) {
     // Rm + Rn -> Rn
     s.r_[n] += s.r_[m];
 
@@ -47,7 +47,7 @@ void addi(Sh2& s, const int n, const int i) {
     s.cycles_elapsed_ = 1;
 }
 
-void addc(Sh2& s, const int m, const int n) {
+void addc(Sh2& s, const int n, const int m) {
     // Rn + Rm + T -> Rn, carry -> T
 
     const auto tmp1 = static_cast<s32>(s.r_[n] + s.r_[m]);
@@ -61,7 +61,7 @@ void addc(Sh2& s, const int m, const int n) {
     s.cycles_elapsed_ = 1;
 }
 
-void addv(Sh2& s, const int m, const int n) {
+void addv(Sh2& s, const int n, const int m) {
     // Rn + Rm -> Rn, overflow -> T
 
     const auto dest = s32{(static_cast<s32>(s.r_[n]) >= 0) ? 0 : 1};
@@ -81,4 +81,28 @@ void addv(Sh2& s, const int m, const int n) {
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
 }
+
+void and_op(Sh2& s, const int n, const int m) {
+    // Rn & Rm -> Rn
+    s.r_[n] &= s.r_[m];
+    s.pc_ += 2;
+    s.cycles_elapsed_ = 1;
+}
+
+// void andi(Sh2& s) {
+//     // R0 & imm -> R0
+//     s.r_[0] &= (0xFF & x0nn(s));
+//     s.pc_ += 2;
+//     s.cycles_elapsed_ = 1;
+// }
+//
+// void andm(Sh2& s) {
+//     //(R0 + GBR) & imm -> (R0 + GBR)
+//
+//     auto temp = u32{s.modules_.memory()->read<u8>(s.gbr_ + s.r_[0])};
+//     temp &= (0xFF & x0nn(s));
+//     s.modules_.memory()->write<u8>(s.gbr_ + s.r_[0], static_cast<u8>(temp));
+//     s.pc_ += 2;
+//     s.cycles_elapsed_ = 3;
+// }
 } // namespace saturnin::sh2
