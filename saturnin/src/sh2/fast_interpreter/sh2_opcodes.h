@@ -51,4 +51,13 @@ void bt(Sh2& s, const u32 d);
 void bts(Sh2& s, const u32 d);
 void clrmac(Sh2& s);
 void clrt(Sh2& s);
+void cmpeq(Sh2& s, const u32 n, const u32 m);
+void cmpge(Sh2& s, const u32 n, const u32 m);
+void cmpgt(Sh2& s, const u32 n, const u32 m);
+void cmphi(Sh2& s, const u32 n, const u32 m);
+void cmphs(Sh2& s, const u32 n, const u32 m);
+void cmppl(Sh2& s, const u32 n);
+void cmppz(Sh2& s, const u32 n);
+void cmpstr(Sh2& s, const u32 n, const u32 m);
+void cmpim(Sh2& s, const u32 i);
 } // namespace saturnin::sh2::fast_interpreter

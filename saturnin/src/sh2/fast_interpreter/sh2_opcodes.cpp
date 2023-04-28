@@ -189,7 +189,7 @@ void bsrf(Sh2& s, const u32 m) {
     s.pr_ = s.pc_ + 4;
 
     const auto old_pc = u32{s.pc_};
-    const auto old_r  = u32{s.r_[xn00(s)]};
+    const auto old_r  = u32{s.r_[m]};
     delaySlot(s, s.pc_ + 2);
     s.pc_             = old_pc + 4 + old_r;
     s.cycles_elapsed_ = 2;
@@ -239,6 +239,89 @@ void clrmac(Sh2& s) {
 void clrt(Sh2& s) {
     // 0 -> T
     s.regs_.sr.clr(Sh2Regs::StatusRegister::t);
+
+    s.pc_ += 2;
+    s.cycles_elapsed_ = 1;
+}
+
+void cmpeq(Sh2& s, const u32 n, const u32 m) {
+    // If Rn = Rm, T=1
+    (s.r_[n] == s.r_[m]) ? s.regs_.sr.set(Sh2Regs::StatusRegister::t) : s.regs_.sr.clr(Sh2Regs::StatusRegister::t);
+
+    s.pc_ += 2;
+    s.cycles_elapsed_ = 1;
+}
+
+void cmpge(Sh2& s, const u32 n, const u32 m) {
+    // If Rn >= Rm with sign, T=1
+    (static_cast<s32>(s.r_[n]) >= static_cast<s32>(s.r_[m])) ? s.regs_.sr.set(Sh2Regs::StatusRegister::t)
+                                                             : s.regs_.sr.clr(Sh2Regs::StatusRegister::t);
+
+    s.pc_ += 2;
+    s.cycles_elapsed_ = 1;
+}
+
+void cmpgt(Sh2& s, const u32 n, const u32 m) {
+    // If Rn > Rm with sign, T=1
+    (static_cast<s32>(s.r_[n]) > static_cast<s32>(s.r_[m])) ? s.regs_.sr.set(Sh2Regs::StatusRegister::t)
+                                                            : s.regs_.sr.clr(Sh2Regs::StatusRegister::t);
+
+    s.pc_ += 2;
+    s.cycles_elapsed_ = 1;
+}
+
+void cmphi(Sh2& s, const u32 n, const u32 m) {
+    // If Rn > Rm without sign, T=1
+    (s.r_[n] > s.r_[m]) ? s.regs_.sr.set(Sh2Regs::StatusRegister::t) : s.regs_.sr.clr(Sh2Regs::StatusRegister::t);
+
+    s.pc_ += 2;
+    s.cycles_elapsed_ = 1;
+}
+
+void cmphs(Sh2& s, const u32 n, const u32 m) {
+    // If Rn > Rm without sign, T=1
+    (s.r_[n] >= s.r_[m]) ? s.regs_.sr.set(Sh2Regs::StatusRegister::t) : s.regs_.sr.clr(Sh2Regs::StatusRegister::t);
+
+    s.pc_ += 2;
+    s.cycles_elapsed_ = 1;
+}
+
+void cmppl(Sh2& s, const u32 n) {
+    // If Rn > 0, T=1
+    (static_cast<s32>(s.r_[n]) > 0) ? s.regs_.sr.set(Sh2Regs::StatusRegister::t) : s.regs_.sr.clr(Sh2Regs::StatusRegister::t);
+
+    s.pc_ += 2;
+    s.cycles_elapsed_ = 1;
+}
+
+void cmppz(Sh2& s, const u32 n) {
+    // If Rn >= 0, T=1
+    (static_cast<s32>(s.r_[n]) >= 0) ? s.regs_.sr.set(Sh2Regs::StatusRegister::t) : s.regs_.sr.clr(Sh2Regs::StatusRegister::t);
+
+    s.pc_ += 2;
+    s.cycles_elapsed_ = 1;
+}
+
+void cmpstr(Sh2& s, const u32 n, const u32 m) {
+    // If one byte of Rn = one byte of Rm then T=1
+
+    auto rm = u32{s.r_[n]};
+    auto rn = u32{s.r_[m]};
+
+    ((rm & 0xFF000000) == (rn & 0xFF000000) || (rm & 0x00FF0000) == (rn & 0x00FF0000) || (rm & 0xFF00u) == (rn & 0xFF00u)
+     || (rm & 0xFF) == (rn & 0xFF))
+        ? s.regs_.sr.set(Sh2Regs::StatusRegister::t)
+        : s.regs_.sr.clr(Sh2Regs::StatusRegister::t);
+
+    s.pc_ += 2;
+    s.cycles_elapsed_ = 1;
+}
+
+void cmpim(Sh2& s, const u32 i) {
+    // ex: If R0 = imm, T=1
+
+    auto imm = static_cast<s32>(static_cast<u8>(i));
+    (s.r_[0] == imm) ? s.regs_.sr.set(Sh2Regs::StatusRegister::t) : s.regs_.sr.clr(Sh2Regs::StatusRegister::t);
 
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;

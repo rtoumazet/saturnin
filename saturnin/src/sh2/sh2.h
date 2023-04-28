@@ -928,15 +928,15 @@ class Sh2 {
     friend void fast_interpreter::bts(Sh2& s, const u32 d);                 // ffdd
     friend void fast_interpreter::clrmac(Sh2& s);                           // ffff
     friend void fast_interpreter::clrt(Sh2& s);                             // ffff
-    // friend void cmpeq(Sh2& s);
-    // friend void cmpge(Sh2& s);
-    // friend void cmpgt(Sh2& s);
-    // friend void cmphi(Sh2& s);
-    // friend void cmphs(Sh2& s);
-    // friend void cmppl(Sh2& s);
-    // friend void cmppz(Sh2& s);
-    // friend void cmpstr(Sh2& s);
-    // friend void cmpim(Sh2& s);
+    friend void fast_interpreter::cmpeq(Sh2& s, const u32 n, const u32 m);  // fnmf
+    friend void fast_interpreter::cmpge(Sh2& s, const u32 n, const u32 m);  // fnmf
+    friend void fast_interpreter::cmpgt(Sh2& s, const u32 n, const u32 m);  // fnmf
+    friend void fast_interpreter::cmphi(Sh2& s, const u32 n, const u32 m);  // fnmf
+    friend void fast_interpreter::cmphs(Sh2& s, const u32 n, const u32 m);  // fnmf
+    friend void fast_interpreter::cmppl(Sh2& s, const u32 n);               // fnff
+    friend void fast_interpreter::cmppz(Sh2& s, const u32 n);               // fnff
+    friend void fast_interpreter::cmpstr(Sh2& s, const u32 n, const u32 m); // fnmf
+    friend void fast_interpreter::cmpim(Sh2& s, const u32 i);               // ffii
     // friend void div0s(Sh2& s);
     // friend void div0u(Sh2& s);
     // friend void div1(Sh2& s);
