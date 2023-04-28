@@ -28,7 +28,7 @@
 #include <saturnin/src/sh2/sh2.h> // Sh2, Sh2Type
 
 namespace saturnin::sh2 {
-void add(Sh2& s, const int n, const int m) {
+void add(Sh2& s, const u32 n, const u32 m) {
     // Rm + Rn -> Rn
     s.r_[n] += s.r_[m];
 
@@ -36,18 +36,18 @@ void add(Sh2& s, const int n, const int m) {
     s.cycles_elapsed_ = 1;
 }
 
-void addi(Sh2& s, const int n, const int i) {
+void addi(Sh2& s, const u32 n, const u32 i) {
     // Rn + imm -> Rn
     if ((i & 0x80) == 0) {
-        s.r_[n] += (0xFF & static_cast<u32>(i));       // #imm positive, 32bits sign extension
+        s.r_[n] += (0xFF & i);       // #imm positive, 32bits sign extension
     } else {
-        s.r_[n] += (0xFFFFFF00 | static_cast<u32>(i)); // #imm negative, 32bits sign extension
+        s.r_[n] += (0xFFFFFF00 | i); // #imm negative, 32bits sign extension
     }
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
 }
 
-void addc(Sh2& s, const int n, const int m) {
+void addc(Sh2& s, const u32 n, const u32 m) {
     // Rn + Rm + T -> Rn, carry -> T
 
     const auto tmp1 = static_cast<s32>(s.r_[n] + s.r_[m]);
@@ -61,7 +61,7 @@ void addc(Sh2& s, const int n, const int m) {
     s.cycles_elapsed_ = 1;
 }
 
-void addv(Sh2& s, const int n, const int m) {
+void addv(Sh2& s, const u32 n, const u32 m) {
     // Rn + Rm -> Rn, overflow -> T
 
     const auto dest = s32{(static_cast<s32>(s.r_[n]) >= 0) ? 0 : 1};
@@ -82,27 +82,86 @@ void addv(Sh2& s, const int n, const int m) {
     s.cycles_elapsed_ = 1;
 }
 
-void and_op(Sh2& s, const int n, const int m) {
+void and_op(Sh2& s, const u32 n, const u32 m) {
     // Rn & Rm -> Rn
     s.r_[n] &= s.r_[m];
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
 }
 
-// void andi(Sh2& s) {
-//     // R0 & imm -> R0
-//     s.r_[0] &= (0xFF & x0nn(s));
-//     s.pc_ += 2;
-//     s.cycles_elapsed_ = 1;
-// }
-//
-// void andm(Sh2& s) {
-//     //(R0 + GBR) & imm -> (R0 + GBR)
-//
-//     auto temp = u32{s.modules_.memory()->read<u8>(s.gbr_ + s.r_[0])};
-//     temp &= (0xFF & x0nn(s));
-//     s.modules_.memory()->write<u8>(s.gbr_ + s.r_[0], static_cast<u8>(temp));
-//     s.pc_ += 2;
-//     s.cycles_elapsed_ = 3;
-// }
+void andi(Sh2& s, const u32 i) {
+    // R0 & imm -> R0
+    s.r_[0] &= (0xFF & i);
+    s.pc_ += 2;
+    s.cycles_elapsed_ = 1;
+}
+
+void andm(Sh2& s, const u32 i) {
+    //(R0 + GBR) & imm -> (R0 + GBR)
+
+    auto temp = u32{s.modules_.memory()->read<u8>(s.gbr_ + s.r_[0])};
+    temp &= (0xFF & i);
+    s.modules_.memory()->write<u8>(s.gbr_ + s.r_[0], static_cast<u8>(temp));
+    s.pc_ += 2;
+    s.cycles_elapsed_ = 3;
+}
+
+void bf(Sh2& s, const u32 d) {
+    // If T = 0, disp*2 + PC -> PC
+    // If T = 1, nop
+
+    if (!s.regs_.sr.any(Sh2Regs::StatusRegister::t)) {
+        auto disp = static_cast<s32>(static_cast<u8>(d));
+
+        s.pc_             = s.pc_ + (disp << 1) + 4;
+        s.cycles_elapsed_ = 3;
+    } else {
+        s.pc_ += 2;
+        s.cycles_elapsed_ = 1;
+    }
+}
+
+void bfs(Sh2& s, const u32 d) {
+    // If T=0, disp*2 + PC -> PC
+    // If T=1, nop
+    // Modified using SH4 manual
+
+    if (!s.regs_.sr.any(Sh2Regs::StatusRegister::t)) {
+        auto disp = static_cast<s32>(static_cast<u8>(d));
+
+        const auto saved_pc = u32{s.pc_};
+        delaySlot(s, s.pc_ + 2);
+        s.pc_             = saved_pc + (disp << 1) + 4;
+        s.cycles_elapsed_ = 2;
+    } else {
+        s.pc_ += 2;
+        s.cycles_elapsed_ = 1;
+    }
+}
+
+void bra(Sh2& s, const u32 d) {
+    // disp*2 + PC -> PC
+    // Modified using SH4 manual
+
+    auto disp = u32{d};
+    if ((d & sign_bit_12_mask) != 0) { disp = 0xFFFFF000 | d; }
+
+    const auto saved_pc = u32{s.pc_};
+    delaySlot(s, s.pc_ + 2);
+    s.pc_             = saved_pc + (disp << 1) + 4;
+    s.cycles_elapsed_ = 2;
+}
+
+void braf(Sh2& s, const u32 m) {
+    // Rm + PC +4 -> PC
+    // Modified using SH4 manual + correction
+    // Registers save for the delay slot
+    const auto old_pc = u32{s.pc_};
+    const auto old_r  = u32{s.r_[m]};
+
+    delaySlot(s, s.pc_ + 2);
+    s.pc_             = old_pc + old_r + 4;
+    s.cycles_elapsed_ = 2;
+}
+
 } // namespace saturnin::sh2

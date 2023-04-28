@@ -910,17 +910,17 @@ class Sh2 {
     friend void badOpcode(Sh2& s);
     friend void execute(Sh2& s);
 
-    friend void add(Sh2& s, const int n, const int m);  // AnmD
-    friend void addi(Sh2& s, const int n, const int i); // Anii
-    friend void addc(Sh2& s, const int n, const int m); // AnmD
-    friend void addv(Sh2& s, const int n, const int m); // AnmD
-    friend void and_op(Sh2& s, const int n, const int m);
-    friend void andi(Sh2& s);
-    friend void andm(Sh2& s);
-    // friend void bf(Sh2& s);
-    // friend void bfs(Sh2& s);
-    // friend void bra(Sh2& s);
-    // friend void braf(Sh2& s);
+    friend void add(Sh2& s, const u32 n, const u32 m);    // fnmf
+    friend void addi(Sh2& s, const u32 n, const u32 i);   // fnii
+    friend void addc(Sh2& s, const u32 n, const u32 m);   // fnmf
+    friend void addv(Sh2& s, const u32 n, const u32 m);   // fnmf
+    friend void and_op(Sh2& s, const u32 n, const u32 m); // fnmf
+    friend void andi(Sh2& s, const u32 i);                // ffii
+    friend void andm(Sh2& s, const u32 i);                // ffii
+    friend void bf(Sh2& s, const u32 d);                  // ffdd
+    friend void bfs(Sh2& s, const u32 d);                 // ffdd
+    friend void bra(Sh2& s, const u32 d);                 // fddd
+    friend void braf(Sh2& s, const u32 m);                // fmff
     // friend void bsr(Sh2& s);
     // friend void bsrf(Sh2& s);
     // friend void bt(Sh2& s);
