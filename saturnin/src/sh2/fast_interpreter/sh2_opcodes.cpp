@@ -606,4 +606,72 @@ void ldsmpr(Sh2& s, const u32 m) {
     s.cycles_elapsed_ = 1;
 }
 
+void mac(Sh2& s, const u32 n, const u32 m) {
+    // Signed operation, (Rn)*(Rm) + MAC -> MAC
+    // Arranged using SH4 manual
+
+    const auto src_n = static_cast<s64>(static_cast<s32>(s.modules_.memory()->read<u32>(s.r_[n])));
+    s.r_[n] += 4;
+    const auto src_m = static_cast<s64>(static_cast<s32>(s.modules_.memory()->read<u32>(s.r_[m])));
+    s.r_[m] += 4;
+
+    const auto mul = s64{src_m * src_n};
+
+    auto mac = s64{s.mach_};
+    mac <<= 32;
+    mac |= s.macl_;
+    mac += mul;
+
+    if (s.regs_.sr.any(Sh2Regs::StatusRegister::s)) {
+        if (mac < u47_min_64_extended) { mac = u47_min_64_extended; }
+        if (mac > 0x800000000000) { mac = u47_max; }
+    }
+    s.mach_ = static_cast<u32>(mac >> 32);
+    s.macl_ = static_cast<u32>(mac & u32_max);
+
+    s.pc_ += 2;
+    s.cycles_elapsed_ = 3;
+}
+
+void macw(Sh2& s, const u32 n, const u32 m) {
+    // Signed operation, (Rn) * (Rm) + MAC -> MAC
+    // Arranged using SH4 manual
+
+    const auto src_n = static_cast<s64>(static_cast<s32>(s.modules_.memory()->read<u32>(s.r_[n])));
+    s.r_[n] += 2;
+    const auto src_m = static_cast<s64>(static_cast<s32>(s.modules_.memory()->read<u32>(s.r_[m])));
+    s.r_[m] += 2;
+
+    const auto mul = s64{src_m * src_n};
+    auto       mac = s64{};
+    if (!s.regs_.sr.any(Sh2Regs::StatusRegister::s)) {
+        mac = s.mach_;
+        mac <<= 32;
+        mac |= s.macl_;
+        mac += mul;
+        s.mach_ = static_cast<u32>(mac >> 32);
+        s.macl_ = static_cast<u32>(mac & u32_max);
+    } else {
+        if ((s.macl_ & 0x80000000) > 0) {
+            mac = static_cast<s64>(s.macl_ | 0xFFFFFFFF00000000);
+        } else {
+            mac = static_cast<s64>(s.macl_ & u32_max);
+        }
+        mac += mul;
+        if (mac > u31_max) {
+            s.mach_ |= 0x00000001;
+            s.macl_ = u31_max;
+        } else if (mac < u31_min_64_extended) {
+            s.mach_ |= 0x00000001;
+            s.macl_ = 0x80000000;
+        } else {
+            s.mach_ &= 0xFFFFFFFE;
+            s.macl_ = static_cast<u32>(mac & u32_max);
+        }
+    }
+
+    s.pc_ += 2;
+    s.cycles_elapsed_ = 3;
+}
+
 } // namespace saturnin::sh2::fast_interpreter

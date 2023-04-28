@@ -961,8 +961,8 @@ class Sh2 {
     friend void fast_interpreter::ldsmmach(Sh2& s, const u32 m);            // fmff
     friend void fast_interpreter::ldsmmacl(Sh2& s, const u32 m);            // fmff
     friend void fast_interpreter::ldsmpr(Sh2& s, const u32 m);              // fmff
-    // friend void mac(Sh2& s);
-    // friend void macw(Sh2& s);
+    friend void fast_interpreter::mac(Sh2& s, const u32 n, const u32 m);    // fnmf
+    friend void fast_interpreter::macw(Sh2& s, const u32 n, const u32 m);   // fnmf
     // friend void mov(Sh2& s);
     // friend void movbs(Sh2& s);
     // friend void movws(Sh2& s);

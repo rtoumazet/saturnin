@@ -78,10 +78,12 @@ void ldcvbr(Sh2& s, const u32 m);
 void ldcmsr(Sh2& s, const u32 m);
 void ldcmgbr(Sh2& s, const u32 m);
 void ldcmvbr(Sh2& s, const u32 m);
-void ldsmach(Sh2& s, const u32 m);  // fmff
-void ldsmacl(Sh2& s, const u32 m);  // fmff
-void ldspr(Sh2& s, const u32 m);    // fmff
-void ldsmmach(Sh2& s, const u32 m); // fmff
-void ldsmmacl(Sh2& s, const u32 m); // fmff
-void ldsmpr(Sh2& s, const u32 m);   // fmff
+void ldsmach(Sh2& s, const u32 m);
+void ldsmacl(Sh2& s, const u32 m);
+void ldspr(Sh2& s, const u32 m);
+void ldsmmach(Sh2& s, const u32 m);
+void ldsmmacl(Sh2& s, const u32 m);
+void ldsmpr(Sh2& s, const u32 m);
+void mac(Sh2& s, const u32 n, const u32 m);
+void macw(Sh2& s, const u32 n, const u32 m);
 } // namespace saturnin::sh2::fast_interpreter
