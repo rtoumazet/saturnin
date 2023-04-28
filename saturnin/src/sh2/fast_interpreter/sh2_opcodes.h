@@ -60,4 +60,28 @@ void cmppl(Sh2& s, const u32 n);
 void cmppz(Sh2& s, const u32 n);
 void cmpstr(Sh2& s, const u32 n, const u32 m);
 void cmpim(Sh2& s, const u32 i);
+void div0s(Sh2& s, const u32 n, const u32 m);
+void div0u(Sh2& s);
+void div1(Sh2& s, const u32 n, const u32 m);
+void dmuls(Sh2& s, const u32 n, const u32 m);
+void dmulu(Sh2& s, const u32 n, const u32 m);
+void dt(Sh2& s, const u32 n);
+void extsb(Sh2& s, const u32 n, const u32 m);
+void extsw(Sh2& s, const u32 n, const u32 m);
+void extub(Sh2& s, const u32 n, const u32 m);
+void extuw(Sh2& s, const u32 n, const u32 m);
+void jmp(Sh2& s, const u32 m);
+void jsr(Sh2& s, const u32 m);
+void ldcsr(Sh2& s, const u32 m);
+void ldcgbr(Sh2& s, const u32 m);
+void ldcvbr(Sh2& s, const u32 m);
+void ldcmsr(Sh2& s, const u32 m);
+void ldcmgbr(Sh2& s, const u32 m);
+void ldcmvbr(Sh2& s, const u32 m);
+void ldsmach(Sh2& s, const u32 m);  // fmff
+void ldsmacl(Sh2& s, const u32 m);  // fmff
+void ldspr(Sh2& s, const u32 m);    // fmff
+void ldsmmach(Sh2& s, const u32 m); // fmff
+void ldsmmacl(Sh2& s, const u32 m); // fmff
+void ldsmpr(Sh2& s, const u32 m);   // fmff
 } // namespace saturnin::sh2::fast_interpreter

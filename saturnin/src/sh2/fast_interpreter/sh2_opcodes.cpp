@@ -39,11 +39,9 @@ void add(Sh2& s, const u32 n, const u32 m) {
 
 void addi(Sh2& s, const u32 n, const u32 i) {
     // Rn + imm -> Rn
-    if ((i & 0x80) == 0) {
-        s.r_[n] += (0xFF & i);       // #imm positive, 32bits sign extension
-    } else {
-        s.r_[n] += (0xFFFFFF00 | i); // #imm negative, 32bits sign extension
-    }
+    auto imm = static_cast<s32>(static_cast<u8>(i));
+    s.r_[n] += imm;
+
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
 }
@@ -128,7 +126,7 @@ void bfs(Sh2& s, const u32 d) {
     // Modified using SH4 manual
 
     if (!s.regs_.sr.any(Sh2Regs::StatusRegister::t)) {
-        auto disp = static_cast<s32>(static_cast<u8>(d));
+        auto disp = static_cast<s32>(static_cast<s8>(d));
 
         const auto saved_pc = u32{s.pc_};
         delaySlot(s, s.pc_ + 2);
@@ -202,7 +200,7 @@ void bt(Sh2& s, const u32 d) {
     // If T=0=, nop
 
     if (s.regs_.sr.any(Sh2Regs::StatusRegister::t)) {
-        auto disp         = static_cast<s32>(static_cast<u8>(d));
+        auto disp         = static_cast<s32>(static_cast<s8>(d));
         s.pc_             = s.pc_ + (disp << 1) + 4;
         s.cycles_elapsed_ = 3;
     } else {
@@ -216,7 +214,7 @@ void bts(Sh2& s, const u32 d) {
     // If T=0, nop
     // Modified using SH4 manual
     if (s.regs_.sr.any(Sh2Regs::StatusRegister::t)) {
-        auto       disp   = static_cast<s32>(static_cast<u8>(d));
+        auto       disp   = static_cast<s32>(static_cast<s8>(d));
         const auto old_pc = u32{s.pc_};
         delaySlot(s, s.pc_ + 2);
         s.pc_             = old_pc + (disp << 1) + 4;
@@ -320,10 +318,292 @@ void cmpstr(Sh2& s, const u32 n, const u32 m) {
 void cmpim(Sh2& s, const u32 i) {
     // ex: If R0 = imm, T=1
 
-    auto imm = static_cast<s32>(static_cast<u8>(i));
+    auto imm = static_cast<s32>(static_cast<s8>(i));
     (s.r_[0] == imm) ? s.regs_.sr.set(Sh2Regs::StatusRegister::t) : s.regs_.sr.clr(Sh2Regs::StatusRegister::t);
 
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
 }
+
+void div0s(Sh2& s, const u32 n, const u32 m) {
+    // Rn MSB -> Q, Rm MSB -> M, M^Q -> T
+    ((s.r_[n] & sign_bit_32_mask) == 0) ? s.regs_.sr.clr(Sh2Regs::StatusRegister::q) : s.regs_.sr.set(Sh2Regs::StatusRegister::q);
+    ((s.r_[m] & sign_bit_32_mask) == 0) ? s.regs_.sr.clr(Sh2Regs::StatusRegister::m) : s.regs_.sr.set(Sh2Regs::StatusRegister::m);
+    ((s.regs_.sr >> Sh2Regs::StatusRegister::m_shft) == (s.regs_.sr >> Sh2Regs::StatusRegister::q_shft))
+        ? s.regs_.sr.clr(Sh2Regs::StatusRegister::t)
+        : s.regs_.sr.set(Sh2Regs::StatusRegister::t);
+
+    s.pc_ += 2;
+    s.cycles_elapsed_ = 1;
+}
+
+void div0u(Sh2& s) {
+    // 0 -> M/Q/T
+    s.regs_.sr.clr(Sh2Regs::StatusRegister::m);
+    s.regs_.sr.clr(Sh2Regs::StatusRegister::q);
+    s.regs_.sr.clr(Sh2Regs::StatusRegister::t);
+
+    s.pc_ += 2;
+    s.cycles_elapsed_ = 1;
+}
+
+void div1(Sh2& s, const u32 n, const u32 m) {
+    // Division done in one pass (Rn + Rm)
+    auto tmp0 = u32{};
+    auto tmp1 = bool{};
+
+    const auto old_q = s.regs_.sr.any(Sh2Regs::StatusRegister::q);
+    ((sign_bit_32_mask & s.r_[n]) != 0) ? s.regs_.sr.set(Sh2Regs::StatusRegister::q) : s.regs_.sr.clr(Sh2Regs::StatusRegister::q);
+
+    s.r_[n] <<= 1;
+    s.r_[n] |= (s.regs_.sr >> Sh2Regs::StatusRegister::t_shft);
+
+    if (old_q) {
+        if (s.regs_.sr.any(Sh2Regs::StatusRegister::m)) {
+            tmp0 = s.r_[n];
+            s.r_[n] -= s.r_[m];
+            tmp1 = (s.r_[n] > tmp0);
+
+            if (s.regs_.sr.any(Sh2Regs::StatusRegister::q)) {
+                tmp1 ? s.regs_.sr.set(Sh2Regs::StatusRegister::q) : s.regs_.sr.clr(Sh2Regs::StatusRegister::q);
+            } else {
+                (!tmp1) ? s.regs_.sr.set(Sh2Regs::StatusRegister::q) : s.regs_.sr.clr(Sh2Regs::StatusRegister::q);
+            }
+
+        } else {
+            tmp0 = s.r_[n];
+            s.r_[n] += s.r_[m];
+            tmp1 = s.r_[n] < tmp0;
+
+            if (s.regs_.sr.any(Sh2Regs::StatusRegister::q)) {
+                (!tmp1) ? s.regs_.sr.set(Sh2Regs::StatusRegister::q) : s.regs_.sr.clr(Sh2Regs::StatusRegister::q);
+            } else {
+                tmp1 ? s.regs_.sr.set(Sh2Regs::StatusRegister::q) : s.regs_.sr.clr(Sh2Regs::StatusRegister::q);
+            }
+        }
+    } else {
+        if (s.regs_.sr.any(Sh2Regs::StatusRegister::m)) {
+            tmp0 = s.r_[n];
+            s.r_[n] += s.r_[m];
+            tmp1 = (s.r_[n]) < tmp0;
+
+            if (s.regs_.sr.any(Sh2Regs::StatusRegister::q)) {
+                tmp1 ? s.regs_.sr.set(Sh2Regs::StatusRegister::q) : s.regs_.sr.clr(Sh2Regs::StatusRegister::q);
+            } else {
+                (!tmp1) ? s.regs_.sr.set(Sh2Regs::StatusRegister::q) : s.regs_.sr.clr(Sh2Regs::StatusRegister::q);
+            }
+
+        } else {
+            tmp0 = s.r_[n];
+            s.r_[n] -= s.r_[m];
+            tmp1 = (s.r_[m]) > tmp0;
+
+            if (s.regs_.sr.any(Sh2Regs::StatusRegister::q)) {
+                (!tmp1) ? s.regs_.sr.set(Sh2Regs::StatusRegister::q) : s.regs_.sr.clr(Sh2Regs::StatusRegister::q);
+            } else {
+                tmp1 ? s.regs_.sr.set(Sh2Regs::StatusRegister::q) : s.regs_.sr.clr(Sh2Regs::StatusRegister::q);
+            }
+        }
+    }
+
+    ((s.regs_.sr >> Sh2Regs::StatusRegister::m_shft) == (s.regs_.sr >> Sh2Regs::StatusRegister::q_shft))
+        ? s.regs_.sr.set(Sh2Regs::StatusRegister::t)
+        : s.regs_.sr.clr(Sh2Regs::StatusRegister::t);
+
+    s.pc_ += 2;
+    s.cycles_elapsed_ = 1;
+}
+
+void dmuls(Sh2& s, const u32 n, const u32 m) {
+    // With sign, Rn * Rm -> MACH,MACL
+
+    // Arranged using SH4 manual
+    const auto result = static_cast<s64>(static_cast<s32>(s.r_[m])) * static_cast<s32>(s.r_[n]);
+    s.mach_           = result >> 32;
+    s.macl_           = static_cast<u32>(result);
+
+    s.pc_ += 2;
+    s.cycles_elapsed_ = 2;
+}
+
+void dmulu(Sh2& s, const u32 n, const u32 m) {
+    // Without sign, Rm * Rn -> MACH, MACL
+
+    // MIGHT BE WRONG
+
+    // Arranged using SH4 manual
+    const auto result = u64{static_cast<u64>(s.r_[m]) * static_cast<u64>(s.r_[n])};
+    s.mach_           = static_cast<u32>(result >> 32);
+    s.macl_           = static_cast<u32>(result & u32_max);
+
+    s.pc_ += 2;
+    s.cycles_elapsed_ = 2;
+}
+
+void dt(Sh2& s, const u32 n) {
+    // Rn - 1 -> Rn;
+    // Si R[n] = 0, T=1
+    // Sinon T=0
+    --s.r_[n];
+    (s.r_[n] == 0) ? s.regs_.sr.set(Sh2Regs::StatusRegister::t) : s.regs_.sr.clr(Sh2Regs::StatusRegister::t);
+
+    s.pc_ += 2;
+    s.cycles_elapsed_ = 1;
+}
+
+void extsb(Sh2& s, const u32 n, const u32 m) {
+    // Rm sign extension (byte) -> Rn
+    s.r_[n] = static_cast<s32>(static_cast<s8>(s.r_[m]));
+    s.pc_ += 2;
+    s.cycles_elapsed_ = 1;
+}
+
+void extsw(Sh2& s, const u32 n, const u32 m) {
+    // Rm sign extension (word) -> Rn
+    s.r_[n] = static_cast<s32>(static_cast<s16>(s.r_[m]));
+    s.pc_ += 2;
+    s.cycles_elapsed_ = 1;
+}
+
+void extub(Sh2& s, const u32 n, const u32 m) {
+    // Rm is 0 extended (byte) -> Rn
+    s.r_[n] = static_cast<u32>(static_cast<u8>(s.r_[m]));
+    s.pc_ += 2;
+    s.cycles_elapsed_ = 1;
+}
+
+void extuw(Sh2& s, const u32 n, const u32 m) {
+    // Rm is 0 extended (word) -> Rn
+    s.r_[n] = static_cast<u32>(static_cast<u16>(s.r_[m]));
+    s.pc_ += 2;
+    s.cycles_elapsed_ = 1;
+}
+
+void jmp(Sh2& s, const u32 m) {
+    // Rm -> PC
+    // Arranged and fixed using SH4 manual
+
+    const auto old_r = u32{s.r_[m]};
+    delaySlot(s, s.pc_ + 2);
+
+    s.pc_             = old_r;
+    s.cycles_elapsed_ = 2;
+}
+
+void jsr(Sh2& s, const u32 m) {
+    // PC -> PR, Rm -> PC
+    // Arranged and fixed using SH4 manual
+
+    const auto old_r = u32{s.r_[m]};
+    s.pr_            = s.pc_ + 4;
+    delaySlot(s, s.pc_ + 2);
+
+    s.addToCallstack(s.pc_, s.pr_);
+
+    s.pc_             = old_r;
+    s.cycles_elapsed_ = 2;
+}
+
+void ldcsr(Sh2& s, const u32 m) {
+    // Rm -> SR
+    s.regs_.sr = (s.r_[m] & 0x000003f3);
+
+    s.pc_ += 2;
+    s.cycles_elapsed_ = 1;
+}
+
+void ldcgbr(Sh2& s, const u32 m) {
+    // Rm -> GBR
+    s.gbr_ = s.r_[m];
+
+    s.pc_ += 2;
+    s.cycles_elapsed_ = 1;
+}
+
+void ldcvbr(Sh2& s, const u32 m) {
+    // Rm -> VBR
+    s.vbr_ = s.r_[m];
+
+    s.pc_ += 2;
+    s.cycles_elapsed_ = 1;
+}
+
+void ldcmsr(Sh2& s, const u32 m) {
+    // (Rm) -> SR, Rm + 4 -> Rm
+    s.regs_.sr = static_cast<u16>(s.modules_.memory()->read<u32>(s.r_[m]) & 0x000003f3);
+    s.r_[m] += 4;
+
+    s.pc_ += 2;
+    s.cycles_elapsed_ = 3;
+}
+
+void ldcmgbr(Sh2& s, const u32 m) {
+    // (Rm) -> GBR, Rm + 4 -> Rm
+    s.gbr_ = s.modules_.memory()->read<u32>(s.r_[m]);
+    s.r_[m] += 4;
+
+    s.pc_ += 2;
+    s.cycles_elapsed_ = 3;
+}
+
+void ldcmvbr(Sh2& s, const u32 m) {
+    // (Rm) -> VBR, Rm + 4 -> Rm
+    s.vbr_ = s.modules_.memory()->read<u32>(s.r_[m]);
+    s.r_[m] += 4;
+
+    s.pc_ += 2;
+    s.cycles_elapsed_ = 3;
+}
+
+void ldsmach(Sh2& s, const u32 m) {
+    // Rm -> MACH
+    s.mach_ = s.r_[m];
+
+    s.pc_ += 2;
+    s.cycles_elapsed_ = 1;
+}
+
+void ldsmacl(Sh2& s, const u32 m) {
+    // Rm -> MACL
+    s.mach_ = s.r_[m];
+
+    s.pc_ += 2;
+    s.cycles_elapsed_ = 1;
+}
+
+void ldspr(Sh2& s, const u32 m) {
+    // Rm -> PR
+    s.pr_ = s.r_[m];
+
+    s.pc_ += 2;
+    s.cycles_elapsed_ = 1;
+}
+
+void ldsmmach(Sh2& s, const u32 m) {
+    //(Rm) -> MACH, Rm + 4 -> Rm
+    s.mach_ = s.modules_.memory()->read<u32>(s.r_[m]);
+    s.r_[m] += 4;
+
+    s.pc_ += 2;
+    s.cycles_elapsed_ = 1;
+}
+
+void ldsmmacl(Sh2& s, const u32 m) {
+    //(Rm) -> MACL, Rm + 4 -> Rm
+    s.macl_ = s.modules_.memory()->read<u32>(s.r_[m]);
+    s.r_[m] += 4;
+
+    s.pc_ += 2;
+    s.cycles_elapsed_ = 1;
+}
+
+void ldsmpr(Sh2& s, const u32 m) {
+    //(Rm) -> PR, Rm + 4 -> Rm
+    s.pr_ = s.modules_.memory()->read<u32>(s.r_[m]);
+    s.r_[m] += 4;
+
+    s.pc_ += 2;
+    s.cycles_elapsed_ = 1;
+}
+
 } // namespace saturnin::sh2::fast_interpreter
