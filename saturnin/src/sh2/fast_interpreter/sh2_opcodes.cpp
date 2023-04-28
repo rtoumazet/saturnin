@@ -18,6 +18,7 @@
 //
 
 #include <saturnin/src/pch.h>
+#include <saturnin/src/sh2/fast_interpreter/sh2_opcodes.h>
 #include <saturnin/src/emulator_context.h> // EmulatorContext
 #include <saturnin/src/emulator_defs.h>
 #include <saturnin/src/emulator_enums.h>   // DebugStatus
@@ -27,7 +28,7 @@
 #include <saturnin/src/scu.h>
 #include <saturnin/src/sh2/sh2.h> // Sh2, Sh2Type
 
-namespace saturnin::sh2 {
+namespace saturnin::sh2::fast_interpreter {
 void add(Sh2& s, const u32 n, const u32 m) {
     // Rm + Rn -> Rn
     s.r_[n] += s.r_[m];
@@ -164,4 +165,82 @@ void braf(Sh2& s, const u32 m) {
     s.cycles_elapsed_ = 2;
 }
 
-} // namespace saturnin::sh2
+void bsr(Sh2& s, const u32 d) {
+    // PC -> PR, disp*2 + PC -> PC
+    // Modified using SH4 manual + correction
+
+    auto disp = u32{d};
+    if ((d & sign_bit_12_mask) != 0) { disp = 0xFFFFF000 | d; }
+
+    s.pr_             = s.pc_ + 4;
+    const auto old_pc = u32{s.pc_};
+    delaySlot(s, s.pc_ + 2);
+    s.pc_             = old_pc + (disp << 1) + 4;
+    s.cycles_elapsed_ = 2;
+
+    s.addToCallstack(old_pc, s.pr_);
+}
+
+void bsrf(Sh2& s, const u32 m) {
+    // PC -> PR, Rm + PC -> PC
+    // Modified using SH4 manual + correction
+    // Registers save for the delay slot
+
+    s.pr_ = s.pc_ + 4;
+
+    const auto old_pc = u32{s.pc_};
+    const auto old_r  = u32{s.r_[xn00(s)]};
+    delaySlot(s, s.pc_ + 2);
+    s.pc_             = old_pc + 4 + old_r;
+    s.cycles_elapsed_ = 2;
+
+    s.addToCallstack(old_pc, s.pr_);
+}
+
+void bt(Sh2& s, const u32 d) {
+    // If T=1, disp*2 + PC -> PC;
+    // If T=0=, nop
+
+    if (s.regs_.sr.any(Sh2Regs::StatusRegister::t)) {
+        auto disp         = static_cast<s32>(static_cast<u8>(d));
+        s.pc_             = s.pc_ + (disp << 1) + 4;
+        s.cycles_elapsed_ = 3;
+    } else {
+        s.pc_ += 2;
+        s.cycles_elapsed_ = 1;
+    }
+}
+
+void bts(Sh2& s, const u32 d) {
+    // If T=1, disp*2 + PC -> PC
+    // If T=0, nop
+    // Modified using SH4 manual
+    if (s.regs_.sr.any(Sh2Regs::StatusRegister::t)) {
+        auto       disp   = static_cast<s32>(static_cast<u8>(d));
+        const auto old_pc = u32{s.pc_};
+        delaySlot(s, s.pc_ + 2);
+        s.pc_             = old_pc + (disp << 1) + 4;
+        s.cycles_elapsed_ = 2;
+    } else {
+        s.pc_ += 2;
+        s.cycles_elapsed_ = 1;
+    }
+}
+
+void clrmac(Sh2& s) {
+    // 0 -> MACH,MACL
+    s.mach_ = 0;
+    s.macl_ = 0;
+
+    s.pc_ += 2;
+    s.cycles_elapsed_ = 1;
+}
+
+void clrt(Sh2& s) {
+    // 0 -> T
+    s.regs_.sr.clr(Sh2Regs::StatusRegister::t);
+
+    s.pc_ += 2;
+    s.cycles_elapsed_ = 1;
+}
+} // namespace saturnin::sh2::fast_interpreter

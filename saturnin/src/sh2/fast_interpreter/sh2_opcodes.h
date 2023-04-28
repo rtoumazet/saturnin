@@ -28,6 +28,27 @@
 #include <array>  // array
 #include <string> // string
 #include <saturnin/src/emulator_defs.h>
-#include <saturnin/src/sh2/sh2.h>
 
-namespace saturnin::sh2::fast_interpreter {}
+namespace saturnin::sh2 {
+class Sh2;
+}
+
+namespace saturnin::sh2::fast_interpreter {
+void add(Sh2& s, const u32 n, const u32 m);
+void addi(Sh2& s, const u32 n, const u32 i);
+void addc(Sh2& s, const u32 n, const u32 m);
+void addv(Sh2& s, const u32 n, const u32 m);
+void and_op(Sh2& s, const u32 n, const u32 m);
+void andi(Sh2& s, const u32 i);
+void andm(Sh2& s, const u32 i);
+void bf(Sh2& s, const u32 d);
+void bfs(Sh2& s, const u32 d);
+void bra(Sh2& s, const u32 d);
+void braf(Sh2& s, const u32 m);
+void bsr(Sh2& s, const u32 d);
+void bsrf(Sh2& s, const u32 m);
+void bt(Sh2& s, const u32 d);
+void bts(Sh2& s, const u32 d);
+void clrmac(Sh2& s);
+void clrt(Sh2& s);
+} // namespace saturnin::sh2::fast_interpreter

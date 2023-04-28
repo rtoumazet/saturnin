@@ -33,6 +33,7 @@
 #include <saturnin/src/log.h>
 #include <saturnin/src/memory.h>
 #include <saturnin/src/sh2/sh2_registers.h>
+#include <saturnin/src/sh2/fast_interpreter/sh2_opcodes.h>
 
 // Forward declarations
 namespace saturnin::core {
@@ -910,23 +911,23 @@ class Sh2 {
     friend void badOpcode(Sh2& s);
     friend void execute(Sh2& s);
 
-    friend void add(Sh2& s, const u32 n, const u32 m);    // fnmf
-    friend void addi(Sh2& s, const u32 n, const u32 i);   // fnii
-    friend void addc(Sh2& s, const u32 n, const u32 m);   // fnmf
-    friend void addv(Sh2& s, const u32 n, const u32 m);   // fnmf
-    friend void and_op(Sh2& s, const u32 n, const u32 m); // fnmf
-    friend void andi(Sh2& s, const u32 i);                // ffii
-    friend void andm(Sh2& s, const u32 i);                // ffii
-    friend void bf(Sh2& s, const u32 d);                  // ffdd
-    friend void bfs(Sh2& s, const u32 d);                 // ffdd
-    friend void bra(Sh2& s, const u32 d);                 // fddd
-    friend void braf(Sh2& s, const u32 m);                // fmff
-    // friend void bsr(Sh2& s);
-    // friend void bsrf(Sh2& s);
-    // friend void bt(Sh2& s);
-    // friend void bts(Sh2& s);
-    // friend void clrmac(Sh2& s);
-    // friend void clrt(Sh2& s);
+    friend void fast_interpreter::add(Sh2& s, const u32 n, const u32 m);    // fnmf
+    friend void fast_interpreter::addi(Sh2& s, const u32 n, const u32 i);   // fnii
+    friend void fast_interpreter::addc(Sh2& s, const u32 n, const u32 m);   // fnmf
+    friend void fast_interpreter::addv(Sh2& s, const u32 n, const u32 m);   // fnmf
+    friend void fast_interpreter::and_op(Sh2& s, const u32 n, const u32 m); // fnmf
+    friend void fast_interpreter::andi(Sh2& s, const u32 i);                // ffii
+    friend void fast_interpreter::andm(Sh2& s, const u32 i);                // ffii
+    friend void fast_interpreter::bf(Sh2& s, const u32 d);                  // ffdd
+    friend void fast_interpreter::bfs(Sh2& s, const u32 d);                 // ffdd
+    friend void fast_interpreter::bra(Sh2& s, const u32 d);                 // fddd
+    friend void fast_interpreter::braf(Sh2& s, const u32 m);                // fmff
+    friend void fast_interpreter::bsr(Sh2& s, const u32 d);                 // fddd
+    friend void fast_interpreter::bsrf(Sh2& s, const u32 m);                // fmff
+    friend void fast_interpreter::bt(Sh2& s, const u32 d);                  // ffdd
+    friend void fast_interpreter::bts(Sh2& s, const u32 d);                 // ffdd
+    friend void fast_interpreter::clrmac(Sh2& s);                           // ffff
+    friend void fast_interpreter::clrt(Sh2& s);                             // ffff
     // friend void cmpeq(Sh2& s);
     // friend void cmpge(Sh2& s);
     // friend void cmpgt(Sh2& s);
