@@ -856,4 +856,52 @@ void movli(Sh2& s, const u32 n, const u32 d) {
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
 }
+
+void movblg(Sh2& s, const u32 d) {
+    //(disp + GBR) -> sign extension -> R0
+    s.r_[0] = static_cast<s32>(static_cast<s8>(s.modules_.memory()->read<u8>(s.gbr_ + d)));
+
+    s.pc_ += 2;
+    s.cycles_elapsed_ = 1;
+}
+
+void movwlg(Sh2& s, const u32 d) {
+    // (disp *2 + GBR) -> sign extension -> R0
+    s.r_[0] = static_cast<s32>(static_cast<s16>(s.modules_.memory()->read<u16>(s.gbr_ + (d << 1))));
+
+    s.pc_ += 2;
+    s.cycles_elapsed_ = 1;
+}
+
+void movllg(Sh2& s, const u32 d) {
+    // (disp *4 + GBR) -> R0
+    s.r_[0] = s.modules_.memory()->read<u32>(s.gbr_ + (d << 2));
+
+    s.pc_ += 2;
+    s.cycles_elapsed_ = 1;
+}
+
+void movbsg(Sh2& s, const u32 d) {
+    // R0 -> (disp + GBR)
+    s.modules_.memory()->write<u8>(s.gbr_ + d, static_cast<u8>(s.r_[0]));
+
+    s.pc_ += 2;
+    s.cycles_elapsed_ = 1;
+}
+
+void movwsg(Sh2& s, const u32 d) {
+    // R0 -> (disp *2 + GBR)
+    s.modules_.memory()->write<u16>(s.gbr_ + (d << 1), static_cast<u16>(s.r_[0]));
+
+    s.pc_ += 2;
+    s.cycles_elapsed_ = 1;
+}
+
+void movlsg(Sh2& s, const u32 d) {
+    // R0 -> (disp *4 + GBR)
+    s.modules_.memory()->write<u32>(s.gbr_ + (d << 2), s.r_[0]);
+
+    s.pc_ += 2;
+    s.cycles_elapsed_ = 1;
+}
 } // namespace saturnin::sh2::fast_interpreter

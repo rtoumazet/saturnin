@@ -985,12 +985,12 @@ class Sh2 {
     friend void fast_interpreter::movi(Sh2& s, const u32 n, const u32 i);   // fnii
     friend void fast_interpreter::movwi(Sh2& s, const u32 n, const u32 d);  // fndd
     friend void fast_interpreter::movli(Sh2& s, const u32 n, const u32 d);  // fndd
-    // friend void movblg(Sh2& s);
-    // friend void movwlg(Sh2& s);
-    // friend void movllg(Sh2& s);
-    // friend void movbsg(Sh2& s);
-    // friend void movwsg(Sh2& s);
-    // friend void movlsg(Sh2& s);
+    friend void fast_interpreter::movblg(Sh2& s, const u32 d);              // ffdd
+    friend void fast_interpreter::movwlg(Sh2& s, const u32 d);              // ffdd
+    friend void fast_interpreter::movllg(Sh2& s, const u32 d);              // ffdd
+    friend void fast_interpreter::movbsg(Sh2& s, const u32 d);              // ffdd
+    friend void fast_interpreter::movwsg(Sh2& s, const u32 d);              // ffdd
+    friend void fast_interpreter::movlsg(Sh2& s, const u32 d);              // ffdd
     // friend void movbs4(Sh2& s);
     // friend void movws4(Sh2& s);
     // friend void movls4(Sh2& s);

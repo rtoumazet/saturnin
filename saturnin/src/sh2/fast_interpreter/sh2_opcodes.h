@@ -86,26 +86,32 @@ void ldsmmacl(Sh2& s, const u32 m);
 void ldsmpr(Sh2& s, const u32 m);
 void mac(Sh2& s, const u32 n, const u32 m);
 void macw(Sh2& s, const u32 n, const u32 m);
-void mov(Sh2& s, const u32 n, const u32 m);    // fnmf
-void movbs(Sh2& s, const u32 n, const u32 m);  // fnmf
-void movws(Sh2& s, const u32 n, const u32 m);  // fnmf
-void movls(Sh2& s, const u32 n, const u32 m);  // fnmf
-void movbl(Sh2& s, const u32 n, const u32 m);  // fnmf
-void movwl(Sh2& s, const u32 n, const u32 m);  // fnmf
-void movll(Sh2& s, const u32 n, const u32 m);  // fnmf
-void movbm(Sh2& s, const u32 n, const u32 m);  // fnmf
-void movwm(Sh2& s, const u32 n, const u32 m);  // fnmf
-void movlm(Sh2& s, const u32 n, const u32 m);  // fnmf
-void movbp(Sh2& s, const u32 n, const u32 m);  // fnmf
-void movwp(Sh2& s, const u32 n, const u32 m);  // fnmf
-void movlp(Sh2& s, const u32 n, const u32 m);  // fnmf
-void movbs0(Sh2& s, const u32 n, const u32 m); // fnmf
-void movws0(Sh2& s, const u32 n, const u32 m); // fnmf
-void movls0(Sh2& s, const u32 n, const u32 m); // fnmf
-void movbl0(Sh2& s, const u32 n, const u32 m); // fnmf
-void movwl0(Sh2& s, const u32 n, const u32 m); // fnmf
-void movll0(Sh2& s, const u32 n, const u32 m); // fnmf
-void movi(Sh2& s, const u32 n, const u32 i);   // fnii
-void movwi(Sh2& s, const u32 n, const u32 d);  // fndd
-void movli(Sh2& s, const u32 n, const u32 d);  // fndd
+void mov(Sh2& s, const u32 n, const u32 m);
+void movbs(Sh2& s, const u32 n, const u32 m);
+void movws(Sh2& s, const u32 n, const u32 m);
+void movls(Sh2& s, const u32 n, const u32 m);
+void movbl(Sh2& s, const u32 n, const u32 m);
+void movwl(Sh2& s, const u32 n, const u32 m);
+void movll(Sh2& s, const u32 n, const u32 m);
+void movbm(Sh2& s, const u32 n, const u32 m);
+void movwm(Sh2& s, const u32 n, const u32 m);
+void movlm(Sh2& s, const u32 n, const u32 m);
+void movbp(Sh2& s, const u32 n, const u32 m);
+void movwp(Sh2& s, const u32 n, const u32 m);
+void movlp(Sh2& s, const u32 n, const u32 m);
+void movbs0(Sh2& s, const u32 n, const u32 m);
+void movws0(Sh2& s, const u32 n, const u32 m);
+void movls0(Sh2& s, const u32 n, const u32 m);
+void movbl0(Sh2& s, const u32 n, const u32 m);
+void movwl0(Sh2& s, const u32 n, const u32 m);
+void movll0(Sh2& s, const u32 n, const u32 m);
+void movi(Sh2& s, const u32 n, const u32 i);
+void movwi(Sh2& s, const u32 n, const u32 d);
+void movli(Sh2& s, const u32 n, const u32 d);
+void movblg(Sh2& s, const u32 d);
+void movwlg(Sh2& s, const u32 d);
+void movllg(Sh2& s, const u32 d);
+void movbsg(Sh2& s, const u32 d);
+void movwsg(Sh2& s, const u32 d);
+void movlsg(Sh2& s, const u32 d);
 } // namespace saturnin::sh2::fast_interpreter
