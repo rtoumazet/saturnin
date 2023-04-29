@@ -831,4 +831,29 @@ void movll0(Sh2& s, const u32 n, const u32 m) {
     s.cycles_elapsed_ = 1;
 }
 
+void movi(Sh2& s, const u32 n, const u32 i) {
+    // imm -> sign extension -> Rn
+    s.r_[n] = static_cast<s32>(static_cast<s8>(i));
+
+    s.pc_ += 2;
+    s.cycles_elapsed_ = 1;
+}
+
+void movwi(Sh2& s, const u32 n, const u32 d) {
+    //(disp * 2 + PC) -> sign extension -> Rn
+    auto disp = u32{d};
+    s.r_[n]   = static_cast<s32>(static_cast<s16>(s.modules_.memory()->read<u16>(s.pc_ + (disp << 1) + 4))); // +4 added
+
+    s.pc_ += 2;
+    s.cycles_elapsed_ = 1;
+}
+
+void movli(Sh2& s, const u32 n, const u32 d) {
+    //(disp * 4 + PC) -> Rn
+    auto disp = u32{d};
+    s.r_[n]   = s.modules_.memory()->read<u32>((s.pc_ & 0xFFFFFFFC) + (disp << 2) + 4); // + 4 added
+
+    s.pc_ += 2;
+    s.cycles_elapsed_ = 1;
+}
 } // namespace saturnin::sh2::fast_interpreter

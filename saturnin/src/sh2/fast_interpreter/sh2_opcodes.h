@@ -105,4 +105,7 @@ void movls0(Sh2& s, const u32 n, const u32 m); // fnmf
 void movbl0(Sh2& s, const u32 n, const u32 m); // fnmf
 void movwl0(Sh2& s, const u32 n, const u32 m); // fnmf
 void movll0(Sh2& s, const u32 n, const u32 m); // fnmf
+void movi(Sh2& s, const u32 n, const u32 i);   // fnii
+void movwi(Sh2& s, const u32 n, const u32 d);  // fndd
+void movli(Sh2& s, const u32 n, const u32 d);  // fndd
 } // namespace saturnin::sh2::fast_interpreter
