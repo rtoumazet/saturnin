@@ -911,92 +911,92 @@ class Sh2 {
     friend void badOpcode(Sh2& s);
     friend void execute(Sh2& s);
 
-    friend void fast_interpreter::add(Sh2& s, const u32 n, const u32 m);    // fnmf
-    friend void fast_interpreter::addi(Sh2& s, const u32 n, const u32 i);   // fnii
-    friend void fast_interpreter::addc(Sh2& s, const u32 n, const u32 m);   // fnmf
-    friend void fast_interpreter::addv(Sh2& s, const u32 n, const u32 m);   // fnmf
-    friend void fast_interpreter::and_op(Sh2& s, const u32 n, const u32 m); // fnmf
-    friend void fast_interpreter::andi(Sh2& s, const u32 i);                // ffii
-    friend void fast_interpreter::andm(Sh2& s, const u32 i);                // ffii
-    friend void fast_interpreter::bf(Sh2& s, const u32 d);                  // ffdd
-    friend void fast_interpreter::bfs(Sh2& s, const u32 d);                 // ffdd
-    friend void fast_interpreter::bra(Sh2& s, const u32 d);                 // fddd
-    friend void fast_interpreter::braf(Sh2& s, const u32 m);                // fmff
-    friend void fast_interpreter::bsr(Sh2& s, const u32 d);                 // fddd
-    friend void fast_interpreter::bsrf(Sh2& s, const u32 m);                // fmff
-    friend void fast_interpreter::bt(Sh2& s, const u32 d);                  // ffdd
-    friend void fast_interpreter::bts(Sh2& s, const u32 d);                 // ffdd
-    friend void fast_interpreter::clrmac(Sh2& s);                           // ffff
-    friend void fast_interpreter::clrt(Sh2& s);                             // ffff
-    friend void fast_interpreter::cmpeq(Sh2& s, const u32 n, const u32 m);  // fnmf
-    friend void fast_interpreter::cmpge(Sh2& s, const u32 n, const u32 m);  // fnmf
-    friend void fast_interpreter::cmpgt(Sh2& s, const u32 n, const u32 m);  // fnmf
-    friend void fast_interpreter::cmphi(Sh2& s, const u32 n, const u32 m);  // fnmf
-    friend void fast_interpreter::cmphs(Sh2& s, const u32 n, const u32 m);  // fnmf
-    friend void fast_interpreter::cmppl(Sh2& s, const u32 n);               // fnff
-    friend void fast_interpreter::cmppz(Sh2& s, const u32 n);               // fnff
-    friend void fast_interpreter::cmpstr(Sh2& s, const u32 n, const u32 m); // fnmf
-    friend void fast_interpreter::cmpim(Sh2& s, const u32 i);               // ffii
-    friend void fast_interpreter::div0s(Sh2& s, const u32 n, const u32 m);  // fnmf
-    friend void fast_interpreter::div0u(Sh2& s);                            // ffff
-    friend void fast_interpreter::div1(Sh2& s, const u32 n, const u32 m);   // fnmf
-    friend void fast_interpreter::dmuls(Sh2& s, const u32 n, const u32 m);  // fnmf
-    friend void fast_interpreter::dmulu(Sh2& s, const u32 n, const u32 m);  // fnmf
-    friend void fast_interpreter::dt(Sh2& s, const u32 n);                  // fnff
-    friend void fast_interpreter::extsb(Sh2& s, const u32 n, const u32 m);  // fnmf
-    friend void fast_interpreter::extsw(Sh2& s, const u32 n, const u32 m);  // fnmf
-    friend void fast_interpreter::extub(Sh2& s, const u32 n, const u32 m);  // fnmf
-    friend void fast_interpreter::extuw(Sh2& s, const u32 n, const u32 m);  // fnmf
-    friend void fast_interpreter::jmp(Sh2& s, const u32 m);                 // fmff
-    friend void fast_interpreter::jsr(Sh2& s, const u32 m);                 // fmff
-    friend void fast_interpreter::ldcsr(Sh2& s, const u32 m);               // fmff
-    friend void fast_interpreter::ldcgbr(Sh2& s, const u32 m);              // fmff
-    friend void fast_interpreter::ldcvbr(Sh2& s, const u32 m);              // fmff
-    friend void fast_interpreter::ldcmsr(Sh2& s, const u32 m);              // fmff
-    friend void fast_interpreter::ldcmgbr(Sh2& s, const u32 m);             // fmff
-    friend void fast_interpreter::ldcmvbr(Sh2& s, const u32 m);             // fmff
-    friend void fast_interpreter::ldsmach(Sh2& s, const u32 m);             // fmff
-    friend void fast_interpreter::ldsmacl(Sh2& s, const u32 m);             // fmff
-    friend void fast_interpreter::ldspr(Sh2& s, const u32 m);               // fmff
-    friend void fast_interpreter::ldsmmach(Sh2& s, const u32 m);            // fmff
-    friend void fast_interpreter::ldsmmacl(Sh2& s, const u32 m);            // fmff
-    friend void fast_interpreter::ldsmpr(Sh2& s, const u32 m);              // fmff
-    friend void fast_interpreter::mac(Sh2& s, const u32 n, const u32 m);    // fnmf
-    friend void fast_interpreter::macw(Sh2& s, const u32 n, const u32 m);   // fnmf
-    friend void fast_interpreter::mov(Sh2& s, const u32 n, const u32 m);    // fnmf
-    friend void fast_interpreter::movbs(Sh2& s, const u32 n, const u32 m);  // fnmf
-    friend void fast_interpreter::movws(Sh2& s, const u32 n, const u32 m);  // fnmf
-    friend void fast_interpreter::movls(Sh2& s, const u32 n, const u32 m);  // fnmf
-    friend void fast_interpreter::movbl(Sh2& s, const u32 n, const u32 m);  // fnmf
-    friend void fast_interpreter::movwl(Sh2& s, const u32 n, const u32 m);  // fnmf
-    friend void fast_interpreter::movll(Sh2& s, const u32 n, const u32 m);  // fnmf
-    friend void fast_interpreter::movbm(Sh2& s, const u32 n, const u32 m);  // fnmf
-    friend void fast_interpreter::movwm(Sh2& s, const u32 n, const u32 m);  // fnmf
-    friend void fast_interpreter::movlm(Sh2& s, const u32 n, const u32 m);  // fnmf
-    friend void fast_interpreter::movbp(Sh2& s, const u32 n, const u32 m);  // fnmf
-    friend void fast_interpreter::movwp(Sh2& s, const u32 n, const u32 m);  // fnmf
-    friend void fast_interpreter::movlp(Sh2& s, const u32 n, const u32 m);  // fnmf
-    friend void fast_interpreter::movbs0(Sh2& s, const u32 n, const u32 m); // fnmf
-    friend void fast_interpreter::movws0(Sh2& s, const u32 n, const u32 m); // fnmf
-    friend void fast_interpreter::movls0(Sh2& s, const u32 n, const u32 m); // fnmf
-    friend void fast_interpreter::movbl0(Sh2& s, const u32 n, const u32 m); // fnmf
-    friend void fast_interpreter::movwl0(Sh2& s, const u32 n, const u32 m); // fnmf
-    friend void fast_interpreter::movll0(Sh2& s, const u32 n, const u32 m); // fnmf
-    friend void fast_interpreter::movi(Sh2& s, const u32 n, const u32 i);   // fnii
-    friend void fast_interpreter::movwi(Sh2& s, const u32 n, const u32 d);  // fndd
-    friend void fast_interpreter::movli(Sh2& s, const u32 n, const u32 d);  // fndd
-    friend void fast_interpreter::movblg(Sh2& s, const u32 d);              // ffdd
-    friend void fast_interpreter::movwlg(Sh2& s, const u32 d);              // ffdd
-    friend void fast_interpreter::movllg(Sh2& s, const u32 d);              // ffdd
-    friend void fast_interpreter::movbsg(Sh2& s, const u32 d);              // ffdd
-    friend void fast_interpreter::movwsg(Sh2& s, const u32 d);              // ffdd
-    friend void fast_interpreter::movlsg(Sh2& s, const u32 d);              // ffdd
-    // friend void movbs4(Sh2& s);
-    // friend void movws4(Sh2& s);
-    // friend void movls4(Sh2& s);
-    // friend void movbl4(Sh2& s);
-    // friend void movwl4(Sh2& s);
-    // friend void movll4(Sh2& s);
+    friend void fast_interpreter::add(Sh2& s, const u32 n, const u32 m);                 // fnmf
+    friend void fast_interpreter::addi(Sh2& s, const u32 n, const u32 i);                // fnii
+    friend void fast_interpreter::addc(Sh2& s, const u32 n, const u32 m);                // fnmf
+    friend void fast_interpreter::addv(Sh2& s, const u32 n, const u32 m);                // fnmf
+    friend void fast_interpreter::and_op(Sh2& s, const u32 n, const u32 m);              // fnmf
+    friend void fast_interpreter::andi(Sh2& s, const u32 i);                             // ffii
+    friend void fast_interpreter::andm(Sh2& s, const u32 i);                             // ffii
+    friend void fast_interpreter::bf(Sh2& s, const u32 d);                               // ffdd
+    friend void fast_interpreter::bfs(Sh2& s, const u32 d);                              // ffdd
+    friend void fast_interpreter::bra(Sh2& s, const u32 d);                              // fddd
+    friend void fast_interpreter::braf(Sh2& s, const u32 m);                             // fmff
+    friend void fast_interpreter::bsr(Sh2& s, const u32 d);                              // fddd
+    friend void fast_interpreter::bsrf(Sh2& s, const u32 m);                             // fmff
+    friend void fast_interpreter::bt(Sh2& s, const u32 d);                               // ffdd
+    friend void fast_interpreter::bts(Sh2& s, const u32 d);                              // ffdd
+    friend void fast_interpreter::clrmac(Sh2& s);                                        // ffff
+    friend void fast_interpreter::clrt(Sh2& s);                                          // ffff
+    friend void fast_interpreter::cmpeq(Sh2& s, const u32 n, const u32 m);               // fnmf
+    friend void fast_interpreter::cmpge(Sh2& s, const u32 n, const u32 m);               // fnmf
+    friend void fast_interpreter::cmpgt(Sh2& s, const u32 n, const u32 m);               // fnmf
+    friend void fast_interpreter::cmphi(Sh2& s, const u32 n, const u32 m);               // fnmf
+    friend void fast_interpreter::cmphs(Sh2& s, const u32 n, const u32 m);               // fnmf
+    friend void fast_interpreter::cmppl(Sh2& s, const u32 n);                            // fnff
+    friend void fast_interpreter::cmppz(Sh2& s, const u32 n);                            // fnff
+    friend void fast_interpreter::cmpstr(Sh2& s, const u32 n, const u32 m);              // fnmf
+    friend void fast_interpreter::cmpim(Sh2& s, const u32 i);                            // ffii
+    friend void fast_interpreter::div0s(Sh2& s, const u32 n, const u32 m);               // fnmf
+    friend void fast_interpreter::div0u(Sh2& s);                                         // ffff
+    friend void fast_interpreter::div1(Sh2& s, const u32 n, const u32 m);                // fnmf
+    friend void fast_interpreter::dmuls(Sh2& s, const u32 n, const u32 m);               // fnmf
+    friend void fast_interpreter::dmulu(Sh2& s, const u32 n, const u32 m);               // fnmf
+    friend void fast_interpreter::dt(Sh2& s, const u32 n);                               // fnff
+    friend void fast_interpreter::extsb(Sh2& s, const u32 n, const u32 m);               // fnmf
+    friend void fast_interpreter::extsw(Sh2& s, const u32 n, const u32 m);               // fnmf
+    friend void fast_interpreter::extub(Sh2& s, const u32 n, const u32 m);               // fnmf
+    friend void fast_interpreter::extuw(Sh2& s, const u32 n, const u32 m);               // fnmf
+    friend void fast_interpreter::jmp(Sh2& s, const u32 m);                              // fmff
+    friend void fast_interpreter::jsr(Sh2& s, const u32 m);                              // fmff
+    friend void fast_interpreter::ldcsr(Sh2& s, const u32 m);                            // fmff
+    friend void fast_interpreter::ldcgbr(Sh2& s, const u32 m);                           // fmff
+    friend void fast_interpreter::ldcvbr(Sh2& s, const u32 m);                           // fmff
+    friend void fast_interpreter::ldcmsr(Sh2& s, const u32 m);                           // fmff
+    friend void fast_interpreter::ldcmgbr(Sh2& s, const u32 m);                          // fmff
+    friend void fast_interpreter::ldcmvbr(Sh2& s, const u32 m);                          // fmff
+    friend void fast_interpreter::ldsmach(Sh2& s, const u32 m);                          // fmff
+    friend void fast_interpreter::ldsmacl(Sh2& s, const u32 m);                          // fmff
+    friend void fast_interpreter::ldspr(Sh2& s, const u32 m);                            // fmff
+    friend void fast_interpreter::ldsmmach(Sh2& s, const u32 m);                         // fmff
+    friend void fast_interpreter::ldsmmacl(Sh2& s, const u32 m);                         // fmff
+    friend void fast_interpreter::ldsmpr(Sh2& s, const u32 m);                           // fmff
+    friend void fast_interpreter::mac(Sh2& s, const u32 n, const u32 m);                 // fnmf
+    friend void fast_interpreter::macw(Sh2& s, const u32 n, const u32 m);                // fnmf
+    friend void fast_interpreter::mov(Sh2& s, const u32 n, const u32 m);                 // fnmf
+    friend void fast_interpreter::movbs(Sh2& s, const u32 n, const u32 m);               // fnmf
+    friend void fast_interpreter::movws(Sh2& s, const u32 n, const u32 m);               // fnmf
+    friend void fast_interpreter::movls(Sh2& s, const u32 n, const u32 m);               // fnmf
+    friend void fast_interpreter::movbl(Sh2& s, const u32 n, const u32 m);               // fnmf
+    friend void fast_interpreter::movwl(Sh2& s, const u32 n, const u32 m);               // fnmf
+    friend void fast_interpreter::movll(Sh2& s, const u32 n, const u32 m);               // fnmf
+    friend void fast_interpreter::movbm(Sh2& s, const u32 n, const u32 m);               // fnmf
+    friend void fast_interpreter::movwm(Sh2& s, const u32 n, const u32 m);               // fnmf
+    friend void fast_interpreter::movlm(Sh2& s, const u32 n, const u32 m);               // fnmf
+    friend void fast_interpreter::movbp(Sh2& s, const u32 n, const u32 m);               // fnmf
+    friend void fast_interpreter::movwp(Sh2& s, const u32 n, const u32 m);               // fnmf
+    friend void fast_interpreter::movlp(Sh2& s, const u32 n, const u32 m);               // fnmf
+    friend void fast_interpreter::movbs0(Sh2& s, const u32 n, const u32 m);              // fnmf
+    friend void fast_interpreter::movws0(Sh2& s, const u32 n, const u32 m);              // fnmf
+    friend void fast_interpreter::movls0(Sh2& s, const u32 n, const u32 m);              // fnmf
+    friend void fast_interpreter::movbl0(Sh2& s, const u32 n, const u32 m);              // fnmf
+    friend void fast_interpreter::movwl0(Sh2& s, const u32 n, const u32 m);              // fnmf
+    friend void fast_interpreter::movll0(Sh2& s, const u32 n, const u32 m);              // fnmf
+    friend void fast_interpreter::movi(Sh2& s, const u32 n, const u32 i);                // fnii
+    friend void fast_interpreter::movwi(Sh2& s, const u32 n, const u32 d);               // fndd
+    friend void fast_interpreter::movli(Sh2& s, const u32 n, const u32 d);               // fndd
+    friend void fast_interpreter::movblg(Sh2& s, const u32 d);                           // ffdd
+    friend void fast_interpreter::movwlg(Sh2& s, const u32 d);                           // ffdd
+    friend void fast_interpreter::movllg(Sh2& s, const u32 d);                           // ffdd
+    friend void fast_interpreter::movbsg(Sh2& s, const u32 d);                           // ffdd
+    friend void fast_interpreter::movwsg(Sh2& s, const u32 d);                           // ffdd
+    friend void fast_interpreter::movlsg(Sh2& s, const u32 d);                           // ffdd
+    friend void fast_interpreter::movbs4(Sh2& s, const u32 n, const u32 d);              // ffnd
+    friend void fast_interpreter::movws4(Sh2& s, const u32 n, const u32 d);              // ffnd
+    friend void fast_interpreter::movls4(Sh2& s, const u32 n, const u32 m, const u32 d); // fnmd
+    friend void fast_interpreter::movbl4(Sh2& s, const u32 m, const u32 d);              // ffmd
+    friend void fast_interpreter::movwl4(Sh2& s, const u32 m, const u32 d);              // ffmd
+    friend void fast_interpreter::movll4(Sh2& s, const u32 m, const u32 d);              // ffmd
     // friend void mova(Sh2& s);
     // friend void movt(Sh2& s);
     // friend void mull(Sh2& s);

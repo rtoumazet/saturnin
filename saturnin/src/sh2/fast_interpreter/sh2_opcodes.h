@@ -114,4 +114,10 @@ void movllg(Sh2& s, const u32 d);
 void movbsg(Sh2& s, const u32 d);
 void movwsg(Sh2& s, const u32 d);
 void movlsg(Sh2& s, const u32 d);
+void movbs4(Sh2& s, const u32 n, const u32 d);
+void movws4(Sh2& s, const u32 n, const u32 d);
+void movls4(Sh2& s, const u32 n, const u32 m, const u32 d);
+void movbl4(Sh2& s, const u32 m, const u32 d);
+void movwl4(Sh2& s, const u32 m, const u32 d);
+void movll4(Sh2& s, const u32 m, const u32 d);
 } // namespace saturnin::sh2::fast_interpreter

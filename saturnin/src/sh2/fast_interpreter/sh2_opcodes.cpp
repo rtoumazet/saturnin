@@ -904,4 +904,52 @@ void movlsg(Sh2& s, const u32 d) {
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
 }
+
+inline void movbs4(Sh2& s, const u32 n, const u32 d) {
+    // R0 -> (disp + Rn)
+    s.modules_.memory()->write<u8>(s.r_[n] + d, static_cast<u8>(s.r_[0]));
+
+    s.pc_ += 2;
+    s.cycles_elapsed_ = 1;
+}
+
+void movws4(Sh2& s, const u32 n, const u32 d) {
+    // R0 -> (disp *2 + Rn)
+    s.modules_.memory()->write<u16>(s.r_[n] + (d << 1), static_cast<u16>(s.r_[0]));
+
+    s.pc_ += 2;
+    s.cycles_elapsed_ = 1;
+}
+
+void movls4(Sh2& s, const u32 n, const u32 m, const u32 d) {
+    // Rm -> (disp *4 + Rn)
+    s.modules_.memory()->write<u32>(s.r_[n] + (d << 2), s.r_[m]);
+
+    s.pc_ += 2;
+    s.cycles_elapsed_ = 1;
+}
+
+void movbl4(Sh2& s, const u32 m, const u32 d) {
+    // (disp + Rm)-> sign extension ->R0
+    s.r_[0] = static_cast<s32>(static_cast<s8>(s.modules_.memory()->read<u8>(s.r_[m] + d)));
+
+    s.pc_ += 2;
+    s.cycles_elapsed_ = 1;
+}
+
+void movwl4(Sh2& s, const u32 m, const u32 d) {
+    // (disp *2 + Rm)-> sign extension ->R0
+    s.r_[0] = static_cast<s32>(static_cast<s16>(s.modules_.memory()->read<u16>(s.r_[m] + (d << 1))));
+
+    s.pc_ += 2;
+    s.cycles_elapsed_ = 1;
+}
+
+void movll4(Sh2& s, const u32 m, const u32 d) {
+    // (disp *4 +Rm) -> Rn
+    s.r_[xn00(s)] = s.modules_.memory()->read<u32>(s.r_[m] + (d << 2));
+
+    s.pc_ += 2;
+    s.cycles_elapsed_ = 1;
+}
 } // namespace saturnin::sh2::fast_interpreter
