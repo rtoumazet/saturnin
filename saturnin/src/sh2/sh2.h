@@ -997,8 +997,8 @@ class Sh2 {
     friend void fast_interpreter::movbl4(Sh2& s, const u32 m, const u32 d);              // ffmd
     friend void fast_interpreter::movwl4(Sh2& s, const u32 m, const u32 d);              // ffmd
     friend void fast_interpreter::movll4(Sh2& s, const u32 m, const u32 d);              // ffmd
-    // friend void mova(Sh2& s);
-    // friend void movt(Sh2& s);
+    friend void fast_interpreter::mova(Sh2& s, const u32 d);                             // ffdd
+    friend void fast_interpreter::movt(Sh2& s, const u32 n);                             // fnff
     // friend void mull(Sh2& s);
     // friend void muls(Sh2& s);
     // friend void mulu(Sh2& s);

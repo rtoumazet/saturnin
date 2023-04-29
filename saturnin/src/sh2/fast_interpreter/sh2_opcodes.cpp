@@ -952,4 +952,20 @@ void movll4(Sh2& s, const u32 m, const u32 d) {
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
 }
+
+void mova(Sh2& s, const u32 d) {
+    // disp *4 + PC -> R0
+    s.r_[0] = (s.pc_ & 0xFFFFFFFC) + (d << 2) + 4; // + 4 added
+
+    s.pc_ += 2;
+    s.cycles_elapsed_ = 1;
+}
+
+void movt(Sh2& s, const u32 n) {
+    // T -> Rn
+    s.r_[n] = s.regs_.sr >> Sh2Regs::StatusRegister::t_shft;
+
+    s.pc_ += 2;
+    s.cycles_elapsed_ = 1;
+}
 } // namespace saturnin::sh2::fast_interpreter
