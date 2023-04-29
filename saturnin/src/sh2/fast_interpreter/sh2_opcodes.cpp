@@ -39,7 +39,7 @@ void add(Sh2& s, const u32 n, const u32 m) {
 
 void addi(Sh2& s, const u32 n, const u32 i) {
     // Rn + imm -> Rn
-    auto imm = static_cast<s32>(static_cast<u8>(i));
+    auto imm = static_cast<s32>(static_cast<s8>(i));
     s.r_[n] += imm;
 
     s.pc_ += 2;
@@ -110,7 +110,7 @@ void bf(Sh2& s, const u32 d) {
     // If T = 1, nop
 
     if (!s.regs_.sr.any(Sh2Regs::StatusRegister::t)) {
-        auto disp = static_cast<s32>(static_cast<u8>(d));
+        auto disp = static_cast<s32>(static_cast<s8>(d));
 
         s.pc_             = s.pc_ + (disp << 1) + 4;
         s.cycles_elapsed_ = 3;
@@ -672,6 +672,163 @@ void macw(Sh2& s, const u32 n, const u32 m) {
 
     s.pc_ += 2;
     s.cycles_elapsed_ = 3;
+}
+
+void mov(Sh2& s, const u32 n, const u32 m) {
+    // Rm -> Rn
+    s.r_[n] = s.r_[m];
+
+    s.pc_ += 2;
+    s.cycles_elapsed_ = 1;
+}
+
+void movbs(Sh2& s, const u32 n, const u32 m) {
+    // Rm -> (Rn)
+    s.modules_.memory()->write<u8>(s.r_[n], static_cast<u8>(s.r_[m]));
+
+    s.pc_ += 2;
+    s.cycles_elapsed_ = 1;
+}
+
+void movws(Sh2& s, const u32 n, const u32 m) {
+    // Rm -> (Rn)
+    s.modules_.memory()->write<u16>(s.r_[n], static_cast<u16>(s.r_[m]));
+
+    s.pc_ += 2;
+    s.cycles_elapsed_ = 1;
+}
+
+void movls(Sh2& s, const u32 n, const u32 m) {
+    // Rm -> (Rn)
+    s.modules_.memory()->write<u32>(s.r_[n], s.r_[m]);
+
+    s.pc_ += 2;
+    s.cycles_elapsed_ = 1;
+}
+
+void movbl(Sh2& s, const u32 n, const u32 m) {
+    // (Rm) -> sign extension -> Rn
+    s.r_[n] = static_cast<s32>(static_cast<s8>(s.modules_.memory()->read<u8>(s.r_[m])));
+
+    s.pc_ += 2;
+    s.cycles_elapsed_ = 1;
+}
+
+void movwl(Sh2& s, const u32 n, const u32 m) {
+    // (Rm) -> sign extension -> Rn
+    s.r_[n] = static_cast<s32>(static_cast<s16>(s.modules_.memory()->read<u16>(s.r_[m])));
+
+    s.pc_ += 2;
+    s.cycles_elapsed_ = 1;
+}
+
+void movll(Sh2& s, const u32 n, const u32 m) {
+    // (Rm) -> Rn
+    s.r_[n] = s.modules_.memory()->read<u32>(s.r_[m]);
+
+    s.pc_ += 2;
+    s.cycles_elapsed_ = 1;
+}
+
+void movbm(Sh2& s, const u32 n, const u32 m) {
+    // Rn - 1 -> Rn, Rm -> (Rn)
+    s.modules_.memory()->write<u8>(s.r_[n] - 1, static_cast<u8>(s.r_[m]));
+    s.r_[n] -= 1;
+
+    s.pc_ += 2;
+    s.cycles_elapsed_ = 1;
+}
+
+void movwm(Sh2& s, const u32 n, const u32 m) {
+    // Rn - 2 -> Rn, Rm -> (Rn)
+    s.modules_.memory()->write<u16>(s.r_[n] - 2, static_cast<u16>(s.r_[m]));
+    s.r_[n] -= 2;
+
+    s.pc_ += 2;
+    s.cycles_elapsed_ = 1;
+}
+
+void movlm(Sh2& s, const u32 n, const u32 m) {
+    // Rn - 4 -> Rn, Rm -> (Rn)
+    s.modules_.memory()->write<u32>(s.r_[n] - 4, s.r_[m]);
+    s.r_[n] -= 4;
+
+    s.pc_ += 2;
+    s.cycles_elapsed_ = 1;
+}
+
+void movbp(Sh2& s, const u32 n, const u32 m) {
+    // (Rm) -> sign extension -> Rn, Rm + 1 -> Rm
+    s.r_[n] = static_cast<s32>(static_cast<s8>(s.modules_.memory()->read<u8>(s.r_[m])));
+    if (n != m) { ++s.r_[m]; }
+
+    s.pc_ += 2;
+    s.cycles_elapsed_ = 1;
+}
+
+void movwp(Sh2& s, const u32 n, const u32 m) {
+    // (Rm) -> sign extension -> Rn, Rm + 2 -> Rm
+    s.r_[n] = static_cast<s32>(static_cast<s16>(s.modules_.memory()->read<u16>(s.r_[m])));
+    if (n != m) { s.r_[m] += 2; }
+
+    s.pc_ += 2;
+    s.cycles_elapsed_ = 1;
+}
+
+void movlp(Sh2& s, const u32 n, const u32 m) {
+    // (Rm) -> Rn, Rm + 4 -> Rm
+    s.r_[n] = s.modules_.memory()->read<u32>(s.r_[m]);
+    if (n != m) { s.r_[m] += 4; }
+    s.pc_ += 2;
+    s.cycles_elapsed_ = 1;
+}
+
+void movbs0(Sh2& s, const u32 n, const u32 m) {
+    // Rm -> (R0 + Rn)
+    s.modules_.memory()->write<u8>(s.r_[n] + s.r_[0], static_cast<u8>(s.r_[m]));
+
+    s.pc_ += 2;
+    s.cycles_elapsed_ = 1;
+}
+
+void movws0(Sh2& s, const u32 n, const u32 m) {
+    // Rm -> (R0 + Rn)
+    s.modules_.memory()->write<u16>(s.r_[n] + s.r_[0], static_cast<u16>(s.r_[m]));
+
+    s.pc_ += 2;
+    s.cycles_elapsed_ = 1;
+}
+
+void movls0(Sh2& s, const u32 n, const u32 m) {
+    // Rm -> (R0 + Rn)
+    s.modules_.memory()->write<u32>(s.r_[n] + s.r_[0], s.r_[m]);
+
+    s.pc_ += 2;
+    s.cycles_elapsed_ = 1;
+}
+
+void movbl0(Sh2& s, const u32 n, const u32 m) {
+    // (R0 + Rm) -> sign extension -> Rn
+    s.r_[n] = static_cast<s32>(static_cast<s8>(s.modules_.memory()->read<u8>(s.r_[m] + s.r_[0])));
+
+    s.pc_ += 2;
+    s.cycles_elapsed_ = 1;
+}
+
+void movwl0(Sh2& s, const u32 n, const u32 m) {
+    // (R0 + Rm) -> sign extension -> Rn
+    s.r_[n] = static_cast<s32>(static_cast<s16>(s.modules_.memory()->read<u16>(s.r_[m] + s.r_[0])));
+
+    s.pc_ += 2;
+    s.cycles_elapsed_ = 1;
+}
+
+void movll0(Sh2& s, const u32 n, const u32 m) {
+    // (R0 + Rm) -> Rn
+    s.r_[n] = s.modules_.memory()->read<u32>(s.r_[m] + s.r_[0]);
+
+    s.pc_ += 2;
+    s.cycles_elapsed_ = 1;
 }
 
 } // namespace saturnin::sh2::fast_interpreter
