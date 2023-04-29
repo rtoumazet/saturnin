@@ -945,9 +945,9 @@ void movwl4(Sh2& s, const u32 m, const u32 d) {
     s.cycles_elapsed_ = 1;
 }
 
-void movll4(Sh2& s, const u32 m, const u32 d) {
+void movll4(Sh2& s, const u32 n, const u32 m, const u32 d) {
     // (disp *4 +Rm) -> Rn
-    s.r_[xn00(s)] = s.modules_.memory()->read<u32>(s.r_[m] + (d << 2));
+    s.r_[n] = s.modules_.memory()->read<u32>(s.r_[m] + (d << 2));
 
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
@@ -964,6 +964,567 @@ void mova(Sh2& s, const u32 d) {
 void movt(Sh2& s, const u32 n) {
     // T -> Rn
     s.r_[n] = s.regs_.sr >> Sh2Regs::StatusRegister::t_shft;
+
+    s.pc_ += 2;
+    s.cycles_elapsed_ = 1;
+}
+
+void mull(Sh2& s, const u32 n, const u32 m) {
+    // Rn * Rm -> MACL
+    s.macl_ = s.r_[n] * s.r_[m];
+
+    s.pc_ += 2;
+    s.cycles_elapsed_ = 2; // 2 to 4
+}
+
+void muls(Sh2& s, const u32 n, const u32 m) {
+    // signed operation, Rn*Rm -> MACL
+    s.macl_ = (static_cast<s32>(static_cast<s16>(s.r_[n])) * static_cast<s32>(static_cast<s16>(s.r_[m])));
+
+    s.pc_ += 2;
+    s.cycles_elapsed_ = 1; // 1 to 3
+}
+
+void mulu(Sh2& s, const u32 n, const u32 m) {
+    // No sign, Rn+Rm -> MAC
+    s.macl_ = (static_cast<u32>(static_cast<u16>(s.r_[n])) * static_cast<u32>(static_cast<u16>(s.r_[m])));
+
+    s.pc_ += 2;
+    s.cycles_elapsed_ = 1; // 1 to 3
+}
+
+void neg(Sh2& s, const u32 n, const u32 m) {
+    // 0-Rm -> Rn
+    s.r_[n] = 0 - s.r_[m];
+
+    s.pc_ += 2;
+    s.cycles_elapsed_ = 1;
+}
+
+void negc(Sh2& s, const u32 n, const u32 m) {
+    auto temp = u32{0 - s.r_[m]};
+    s.r_[n]   = temp - (s.regs_.sr >> Sh2Regs::StatusRegister::t_shft);
+    (0 < temp) ? s.regs_.sr.set(Sh2Regs::StatusRegister::t) : s.regs_.sr.clr(Sh2Regs::StatusRegister::t);
+    if (temp < s.r_[n]) { s.regs_.sr.set(Sh2Regs::StatusRegister::t); }
+
+    s.pc_ += 2;
+    s.cycles_elapsed_ = 1;
+}
+
+void nop(Sh2& s) {
+    // No operation
+    s.pc_ += 2;
+    s.cycles_elapsed_ = 1;
+}
+
+void not_op(Sh2& s, const u32 n, const u32 m) {
+    // -Rm -> Rn
+    s.r_[n] = ~s.r_[m];
+
+    s.pc_ += 2;
+    s.cycles_elapsed_ = 1;
+}
+
+void or_op(Sh2& s, const u32 n, const u32 m) {
+    // Rn | Rm -> Rn
+    s.r_[n] |= s.r_[m];
+
+    s.pc_ += 2;
+    s.cycles_elapsed_ = 1;
+}
+
+void ori(Sh2& s, const u32 i) {
+    // R0 | imm -> R0
+    s.r_[0] |= i;
+
+    s.pc_ += 2;
+    s.cycles_elapsed_ = 1;
+}
+
+void orm(Sh2& s, const u32 i) {
+    // (R0 + GBR) | imm -> (R0 + GBR)
+    auto temp = u32{s.modules_.memory()->read<u8>(s.gbr_ + s.r_[0])};
+    temp |= i;
+    s.modules_.memory()->write<u8>(s.gbr_ + s.r_[0], static_cast<u8>(temp));
+
+    s.pc_ += 2;
+    s.cycles_elapsed_ = 3;
+}
+
+void rotcl(Sh2& s, const u32 n) {
+    // T <- Rn <- T
+    auto temp = s32{((s.r_[n] & 0x80000000) == 0) ? 0 : 1};
+    s.r_[n] <<= 1;
+    if (s.regs_.sr.any(Sh2Regs::StatusRegister::t)) {
+        s.r_[n] |= 0x00000001;
+    } else {
+        s.r_[n] &= 0xFFFFFFFE;
+    }
+    (temp == 1) ? s.regs_.sr.set(Sh2Regs::StatusRegister::t) : s.regs_.sr.clr(Sh2Regs::StatusRegister::t);
+
+    s.pc_ += 2;
+    s.cycles_elapsed_ = 1;
+}
+
+void rotcr(Sh2& s, const u32 n) {
+    // T -> Rn -> T
+    auto temp = s32{((s.r_[n] & 0x00000001) == 0) ? 0 : 1};
+    s.r_[n] >>= 1;
+    if (s.regs_.sr.any(Sh2Regs::StatusRegister::t)) {
+        s.r_[n] |= 0x80000000;
+    } else {
+        s.r_[n] &= u31_max;
+    }
+    (temp == 1) ? s.regs_.sr.set(Sh2Regs::StatusRegister::t) : s.regs_.sr.clr(Sh2Regs::StatusRegister::t);
+
+    s.pc_ += 2;
+    s.cycles_elapsed_ = 1;
+}
+
+void rotl(Sh2& s, const u32 n) {
+    // T <- Rn <- MSB
+    ((s.r_[n] & 0x80000000) == 0) ? s.regs_.sr.clr(Sh2Regs::StatusRegister::t) : s.regs_.sr.set(Sh2Regs::StatusRegister::t);
+    s.r_[n] <<= 1;
+    if (s.regs_.sr.any(Sh2Regs::StatusRegister::t)) {
+        s.r_[n] |= 0x00000001;
+    } else {
+        s.r_[n] &= 0xFFFFFFFE;
+    }
+    s.pc_ += 2;
+    s.cycles_elapsed_ = 1;
+}
+
+void rotr(Sh2& s, const u32 n) {
+    // LSB -> Rn -> T
+    ((s.r_[n] & 0x00000001) == 0) ? s.regs_.sr.clr(Sh2Regs::StatusRegister::t) : s.regs_.sr.set(Sh2Regs::StatusRegister::t);
+    s.r_[n] >>= 1;
+    if (s.regs_.sr.any(Sh2Regs::StatusRegister::t)) {
+        s.r_[n] |= 0x80000000;
+    } else {
+        s.r_[n] &= u31_max;
+    }
+    s.pc_ += 2;
+    s.cycles_elapsed_ = 1;
+}
+
+void rte(Sh2& s) {
+    // Stack -> PC/SR
+    // Fixed
+    delaySlot(s, s.pc_ + 2);
+    s.pc_ = s.modules_.memory()->read<u32>(s.r_[sp_register_index]);
+    s.r_[sp_register_index] += 4;
+    s.regs_.sr = static_cast<u16>(s.modules_.memory()->read<u16>(s.r_[sp_register_index] + 2) & 0x000003f3);
+    s.r_[sp_register_index] += 4;
+    s.cycles_elapsed_ = 4;
+
+    if (s.is_interrupted_) {
+        // Current sh2 is interrupted, we get back to regular flow
+        if (s.sh2_type_ == Sh2Type::master) {
+            using enum Logger;
+            s.modules_.scu()->clearInterruptFlag(s.current_interrupt_);
+            Log::debug(Logger::sh2, "*** Back from interrupt ***");
+            switch (s.current_interrupt_.vector) {
+                case is::vector_v_blank_in: Log::debug(sh2, "VBlank-In interrupt routine finished"); break;
+                case is::vector_v_blank_out: Log::debug(sh2, "VBlank-Out interrupt routine finished"); break;
+                case is::vector_h_blank_in: Log::debug(sh2, "HBlank-In interrupt routine finished"); break;
+                case is::vector_timer_0: Log::debug(sh2, "Timer 0 interrupt routine finished"); break;
+                case is::vector_timer_1: Log::debug(sh2, "Timer 1 interrupt routine finished"); break;
+                case is::vector_dsp_end: Log::debug(sh2, "DSP End interrupt routine finished"); break;
+                case is::vector_sound_request: Log::debug(sh2, "Sound Request interrupt routine finished"); break;
+                case is::vector_system_manager: Log::debug(sh2, "System Manager interrupt routine finished"); break;
+                case is::vector_pad_interrupt: Log::debug(sh2, "Pad interrupt routine finished"); break;
+                case is::vector_level_2_dma_end: Log::debug(sh2, "Level 2 DMA End interrupt routine finished"); break;
+                case is::vector_level_1_dma_end: Log::debug(sh2, "Level 1 DMA End interrupt routine finished"); break;
+                case is::vector_level_0_dma_end: Log::debug(sh2, "Level 0 DMA End interrupt routine finished"); break;
+                case is::vector_dma_illegal: Log::debug(sh2, "DMA Illegal interrupt routine finished"); break;
+                case is::vector_sprite_draw_end: Log::debug(sh2, "Sprite Draw End interrupt routine finished"); break;
+                default: Log::warning(sh2, "Unknow interrupt vector:{:#0x}", s.current_interrupt_.level);
+            }
+
+            Log::debug(sh2, "Level:{:#0x}", s.current_interrupt_.level);
+        }
+
+        s.is_interrupted_                                   = false;
+        s.current_interrupt_                                = is::undefined;
+        s.is_level_interrupted_[s.current_interrupt_.level] = false;
+    }
+}
+
+void rts(Sh2& s) {
+    // PR -> PC
+    // Arranged and fixed using SH4 manual
+    delaySlot(s, s.pc_ + 2);
+
+    s.popFromCallstack();
+    switch (s.modules_.context()->debugStatus()) {
+        using enum core::DebugStatus;
+        case step_out:
+        case wait_end_of_routine: {
+            if (s.subroutineDepth() == s.callstack().size()) { s.modules_.context()->debugStatus(paused); }
+            break;
+        }
+        default: break;
+    }
+
+    s.pc_             = s.pr_;
+    s.cycles_elapsed_ = 2;
+}
+
+void sett(Sh2& s) {
+    // 1 -> T
+    s.regs_.sr.set(Sh2Regs::StatusRegister::t);
+
+    s.pc_ += 2;
+    s.cycles_elapsed_ = 1;
+}
+
+void shal(Sh2& s, const u32 n) {
+    // T <- Rn <- 0
+    ((s.r_[n] & 0x80000000) == 0) ? s.regs_.sr.clr(Sh2Regs::StatusRegister::t) : s.regs_.sr.set(Sh2Regs::StatusRegister::t);
+    s.r_[n] <<= 1;
+
+    s.pc_ += 2;
+    s.cycles_elapsed_ = 1;
+}
+
+void shar(Sh2& s, const u32 n) {
+    // MSB -> Rn -> T
+    ((s.r_[n] & 0x0000001) == 0) ? s.regs_.sr.clr(Sh2Regs::StatusRegister::t) : s.regs_.sr.set(Sh2Regs::StatusRegister::t);
+    auto temp = s32{((s.r_[n] & 0x80000000) == 0) ? 0 : 1};
+    s.r_[n] >>= 1;
+    if (temp == 1) {
+        s.r_[n] |= 0x80000000;
+    } else {
+        s.r_[n] &= u31_max;
+    }
+    s.pc_ += 2;
+    s.cycles_elapsed_ = 1;
+}
+
+void shll(Sh2& s, const u32 n) {
+    // T <- Rn <- 0
+    ((s.r_[n] & 0x80000000) == 0) ? s.regs_.sr.clr(Sh2Regs::StatusRegister::t) : s.regs_.sr.set(Sh2Regs::StatusRegister::t);
+    s.r_[n] <<= 1;
+
+    s.pc_ += 2;
+    s.cycles_elapsed_ = 1;
+}
+
+void shll2(Sh2& s, const u32 n) {
+    // Rn << 2 -> Rn
+    s.r_[n] <<= 2;
+
+    s.pc_ += 2;
+    s.cycles_elapsed_ = 1;
+}
+
+void shll8(Sh2& s, const u32 n) {
+    // Rn << 8 -> Rn
+    s.r_[n] <<= 8;
+
+    s.pc_ += 2;
+    s.cycles_elapsed_ = 1;
+}
+
+void shll16(Sh2& s, const u32 n) {
+    // Rn << 16 -> Rn
+    s.r_[n] <<= 16;
+
+    s.pc_ += 2;
+    s.cycles_elapsed_ = 1;
+}
+
+void shlr(Sh2& s, const u32 n) {
+    // 0 -> Rn -> T
+    ((s.r_[n] & 0x00000001) == 0) ? s.regs_.sr.clr(Sh2Regs::StatusRegister::t) : s.regs_.sr.set(Sh2Regs::StatusRegister::t);
+    s.r_[n] >>= 1;
+    s.r_[n] &= u31_max;
+
+    s.pc_ += 2;
+    s.cycles_elapsed_ = 1;
+}
+
+void shlr2(Sh2& s, const u32 n) {
+    // Rn >> 2 -> Rn
+    s.r_[n] >>= 2;
+    s.r_[n] &= u30_max;
+
+    s.pc_ += 2;
+    s.cycles_elapsed_ = 1;
+}
+
+void shlr8(Sh2& s, const u32 n) {
+    // Rn >> 8 -> Rn
+    s.r_[n] >>= 8;
+    s.r_[n] &= 0x00FFFFFF;
+
+    s.pc_ += 2;
+    s.cycles_elapsed_ = 1;
+}
+
+void shlr16(Sh2& s, const u32 n) {
+    // Rn >> 16 -> Rn
+    s.r_[n] >>= 16;
+    s.r_[n] &= 0x0000FFFF;
+
+    s.pc_ += 2;
+    s.cycles_elapsed_ = 1;
+}
+
+void sleep(Sh2& s) {
+    // Sleep
+    // We'll see later how to implement this operation.
+    // It'll involve waiting until an interrupt is fired up
+    // Fixing needs some more researches on the Power Down Mode
+    // Maybe a SH2 boolean to update ?
+
+    if (s.is_nmi_registered_) {
+        s.sendInterrupt(is::nmi);
+        s.is_nmi_registered_ = false;
+    }
+
+    s.cycles_elapsed_ = 3;
+}
+
+void stcsr(Sh2& s, const u32 n) {
+    // SR -> Rn
+    s.r_[n] = s.regs_.sr.data();
+
+    s.pc_ += 2;
+    s.cycles_elapsed_ = 1;
+}
+
+void stcgbr(Sh2& s, const u32 n) {
+    // GBR -> Rn
+    s.r_[n] = s.gbr_;
+
+    s.pc_ += 2;
+    s.cycles_elapsed_ = 1;
+}
+
+void stcvbr(Sh2& s, const u32 n) {
+    // VBR -> Rn
+    s.r_[n] = s.vbr_;
+
+    s.pc_ += 2;
+    s.cycles_elapsed_ = 1;
+}
+
+void stcmsr(Sh2& s, const u32 n) {
+    // Rn-4 -> Rn, SR -> (Rn)
+    s.r_[n] -= 4;
+    s.modules_.memory()->write<u32>(s.r_[n], s.regs_.sr.data());
+
+    s.pc_ += 2;
+    s.cycles_elapsed_ = 2;
+}
+
+void stcmgbr(Sh2& s, const u32 n) {
+    // Rn-4 -> Rn, GBR -> (Rn)
+    s.r_[n] -= 4;
+    s.modules_.memory()->write<u32>(s.r_[n], s.gbr_);
+
+    s.pc_ += 2;
+    s.cycles_elapsed_ = 2;
+}
+
+void stcmvbr(Sh2& s, const u32 n) {
+    // Rn-4 -> Rn, VBR -> (Rn)
+    s.r_[n] -= 4;
+    s.modules_.memory()->write<u32>(s.r_[n], s.vbr_);
+
+    s.pc_ += 2;
+    s.cycles_elapsed_ = 2;
+}
+
+void stsmach(Sh2& s, const u32 n) {
+    // MACH -> Rn
+    s.r_[n] = s.mach_;
+
+    s.pc_ += 2;
+    s.cycles_elapsed_ = 1;
+}
+
+void stsmacl(Sh2& s, const u32 n) {
+    // MACL -> Rn
+    s.r_[n] = s.macl_;
+
+    s.pc_ += 2;
+    s.cycles_elapsed_ = 1;
+}
+
+void stspr(Sh2& s, const u32 n) {
+    // PR -> Rn
+    s.r_[n] = s.pr_;
+
+    s.pc_ += 2;
+    s.cycles_elapsed_ = 1;
+}
+
+void stsmmach(Sh2& s, const u32 n) {
+    // Rn - :4 -> Rn, MACH -> (Rn)
+    s.r_[n] -= 4;
+    s.modules_.memory()->write<u32>(s.r_[n], s.mach_);
+
+    s.pc_ += 2;
+    s.cycles_elapsed_ = 1;
+}
+
+void stsmmacl(Sh2& s, const u32 n) {
+    // Rn - :4 -> Rn, MACL -> (Rn)
+    s.r_[n] -= 4;
+    s.modules_.memory()->write<u32>(s.r_[n], s.macl_);
+
+    s.pc_ += 2;
+    s.cycles_elapsed_ = 1;
+}
+
+void stsmpr(Sh2& s, const u32 n) {
+    // Rn - :4 -> Rn, PR -> (Rn)
+    s.r_[n] -= 4;
+    s.modules_.memory()->write<u32>(s.r_[n], s.pr_);
+
+    s.pc_ += 2;
+    s.cycles_elapsed_ = 1;
+}
+
+void sub(Sh2& s, const u32 n, const u32 m) {
+    // Rn - Rm -> Rn
+    s.r_[n] -= s.r_[m];
+
+    s.pc_ += 2;
+    s.cycles_elapsed_ = 1;
+}
+
+void subc(Sh2& s, const u32 n, const u32 m) {
+    // Rn - Rm - T -> Rn, Carry -> T
+    const auto tmp1 = u32{s.r_[n] - s.r_[m]};
+    const auto tmp0 = u32{s.r_[n]};
+    s.r_[n]         = tmp1 - (s.regs_.sr >> Sh2Regs::StatusRegister::t_shft);
+    (tmp0 < tmp1) ? s.regs_.sr.set(Sh2Regs::StatusRegister::t) : s.regs_.sr.clr(Sh2Regs::StatusRegister::t);
+    if (tmp1 < s.r_[n]) { s.regs_.sr.set(Sh2Regs::StatusRegister::t); }
+    s.pc_ += 2;
+    s.cycles_elapsed_ = 1;
+}
+
+void subv(Sh2& s, const u32 n, const u32 m) {
+    // Rn - Rm -> Rn, underflow -> T
+    const auto dest = s32{(static_cast<s32>(s.r_[n]) >= 0) ? 0 : 1};
+    const auto src  = s32{(static_cast<s32>(s.r_[m]) >= 0) ? 0 : 1};
+
+    s.r_[n] -= s.r_[m];
+    auto ans = s32{(static_cast<s32>(s.r_[n]) >= 0) ? 0 : 1};
+    ans += dest;
+
+    if (src == 1) {
+        (ans == 1) ? s.regs_.sr.set(Sh2Regs::StatusRegister::t) : s.regs_.sr.clr(Sh2Regs::StatusRegister::t);
+    } else {
+        s.regs_.sr.clr(Sh2Regs::StatusRegister::t);
+    }
+    s.pc_ += 2;
+    s.cycles_elapsed_ = 1;
+}
+
+void swapb(Sh2& s, const u32 n, const u32 m) {
+    // Rm -> bytes swap -> Rn
+    const auto temp0 = u32{s.r_[m] & 0xFFFF0000};
+    const auto temp1 = u32{(s.r_[m] & 0xFF) << 8};
+    s.r_[n]          = (s.r_[m] >> 8) & 0xFF;
+    s.r_[n]          = s.r_[n] | temp1 | temp0;
+
+    s.pc_ += 2;
+    s.cycles_elapsed_ = 1;
+}
+
+void swapw(Sh2& s, const u32 n, const u32 m) {
+    // Rm -> words swap -> Rn
+    const auto temp = u32{(s.r_[m] >> 16) & 0x0000FFFF};
+    s.r_[n]         = s.r_[m] << 16;
+    s.r_[n] |= temp;
+
+    s.pc_ += 2;
+    s.cycles_elapsed_ = 1;
+}
+
+void tas(Sh2& s, const u32 n) {
+    // If (Rn) = 0, 1 -> T, 1 -> MSB of (Rn)
+    auto temp = u32{s.modules_.memory()->read<u8>(s.r_[n])};
+    (temp == 0) ? s.regs_.sr.set(Sh2Regs::StatusRegister::t) : s.regs_.sr.clr(Sh2Regs::StatusRegister::t);
+    temp |= 0x80;
+    s.modules_.memory()->write<u8>(s.r_[n], static_cast<u8>(temp));
+
+    s.pc_ += 2;
+    s.cycles_elapsed_ = 4;
+}
+
+void trapa(Sh2& s, const u32 i) {
+    // PC/SR -> stack, (imm*4 + VBR) -> PC
+    s.r_[sp_register_index] -= 4;
+    s.modules_.memory()->write<u32>(s.r_[sp_register_index], s.regs_.sr.data());
+    s.r_[sp_register_index] -= 4;
+    s.modules_.memory()->write<u32>(s.r_[sp_register_index], s.pc_ + 2);
+
+    s.pc_             = s.modules_.memory()->read<u32>(s.vbr_ + (i << 2));
+    s.cycles_elapsed_ = 8; // NOLINT(readability-magic-numbers)
+}
+
+void tst(Sh2& s, const u32 n, const u32 m) {
+    // Rn & Rm, if result = 0, 1 -> T
+    ((s.r_[n] & s.r_[m]) == 0) ? s.regs_.sr.set(Sh2Regs::StatusRegister::t) : s.regs_.sr.clr(Sh2Regs::StatusRegister::t);
+
+    s.pc_ += 2;
+    s.cycles_elapsed_ = 1;
+}
+
+void tsti(Sh2& s, const u32 i) {
+    // R0 & imm, if result is 0, 1 -> T
+    ((s.r_[0] & i) == 0) ? s.regs_.sr.set(Sh2Regs::StatusRegister::t) : s.regs_.sr.clr(Sh2Regs::StatusRegister::t);
+
+    s.pc_ += 2;
+    s.cycles_elapsed_ = 1;
+}
+
+void tstm(Sh2& s, const u32 i) {
+    // (R0 + GBR) & imm, if result is 0, 1 -> T
+    auto temp = u32{s.modules_.memory()->read<u8>(s.gbr_ + s.r_[0])};
+    temp &= i;
+    (temp == 0) ? s.regs_.sr.set(Sh2Regs::StatusRegister::t) : s.regs_.sr.clr(Sh2Regs::StatusRegister::t);
+
+    s.pc_ += 2;
+    s.cycles_elapsed_ = 3;
+}
+
+void xor_op(Sh2& s, const u32 n, const u32 m) {
+    // Rn^Rm -> Rn
+    s.r_[xn00(s)] ^= s.r_[x0n0(s)];
+
+    s.pc_ += 2;
+    s.cycles_elapsed_ = 1;
+}
+
+void xori(Sh2& s, const u32 i) {
+    // R0 ^imm -> R0
+    s.r_[0] ^= (0xFF & x0nn(s));
+
+    s.pc_ += 2;
+    s.cycles_elapsed_ = 1;
+}
+
+void xorm(Sh2& s, const u32 i) {
+    // (R0 + GBR)^imm -> (R0 + GBR)
+    auto temp = u32{s.modules_.memory()->read<u8>(s.gbr_ + s.r_[0])};
+    temp ^= (0xFF & x0nn(s));
+    s.modules_.memory()->write<u8>(s.gbr_ + s.r_[0], static_cast<u8>(temp));
+
+    s.pc_ += 2;
+    s.cycles_elapsed_ = 3;
+}
+
+void xtrct(Sh2& s, const u32 n, const u32 m) {
+    // Middle 32 bits of Rm and Rn -> Rn
+    const auto temp = u32{(s.r_[m] << 16) & 0xFFFF0000};
+    s.r_[n]         = (s.r_[n] >> 16) & 0x0000FFFF;
+    s.r_[n] |= temp;
 
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
