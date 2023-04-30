@@ -39,7 +39,6 @@ extern void badOpcode(Sh2& s);
 
 /// \name Instruction split functions.
 //@{
-inline auto xn000(const u16 inst) -> u8 { return static_cast<u8>((inst & 0xF000) >> 12); }
 inline auto x0n00(const u16 inst) -> u8 { return static_cast<u8>((inst & 0x0F00) >> 8); }
 inline auto x00n0(const u16 inst) -> u8 { return static_cast<u8>((inst & 0x00F0) >> 4); }
 inline auto x0nnn(const u16 inst) -> u16 { return (inst & 0xFFF); }
@@ -49,11 +48,11 @@ inline auto x000n(const u16 inst) -> u8 { return static_cast<u8>(inst & 0xF); }
 
 /// \name Opcode decoding helpers
 //@{
-inline auto xn00(Sh2& s) -> u16;
-inline auto x0n0(Sh2& s) -> u16;
-inline auto x00n(Sh2& s) -> u16;
-inline auto xnnn(Sh2& s) -> u16;
-inline auto x0nn(Sh2& s) -> u16;
+inline auto xn00(const Sh2& s) -> u16;
+inline auto x0n0(const Sh2& s) -> u16;
+inline auto x00n(const Sh2& s) -> u16;
+inline auto xnnn(const Sh2& s) -> u16;
+inline auto x0nn(const Sh2& s) -> u16;
 //@}
 
 /// \name SH2 instructions

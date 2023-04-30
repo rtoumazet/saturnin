@@ -36,11 +36,10 @@ namespace saturnin::sh2 {
 /// \brief	Values that represent function types.
 /// 		F: fixed data.
 /// 		R: M or N register.
-/// 		D: displacement.
-/// 		I: immediate data.
+/// 		X: displacement or immediate data.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class FunctionType { ffff, ffdd, ffii, ffrd, fddd, frdd, frii, frff, frrd, frrf };
+enum class FunctionType { ffff, ffxx, ffrx, fxxx, frxx, frff, frrx, frrf };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \fn	auto generateOpcodes() -> bool;
