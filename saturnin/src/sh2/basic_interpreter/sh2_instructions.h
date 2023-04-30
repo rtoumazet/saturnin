@@ -28,13 +28,14 @@
 #include <array>  // array
 #include <string> // string
 #include <saturnin/src/emulator_defs.h>
-#include <saturnin/src/sh2/sh2.h>
 #include <saturnin/src/sh2/sh2_disasm.h>
 
 namespace saturnin::sh2 {
 
 // Forward declarations
-// class Sh2;
+class Sh2;
+
+extern void badOpcode(Sh2& s);
 
 /// \name Instruction split functions.
 //@{
@@ -57,8 +58,7 @@ inline auto x0nn(Sh2& s) -> u16;
 
 /// \name SH2 instructions
 //@{
-inline void delaySlot(Sh2& s, u32 addr);
-inline auto isInstructionIllegal(u16 inst) -> bool;
+// inline void delaySlot(Sh2& s, u32 addr);
 inline void badOpcode(Sh2& s);
 inline void add(Sh2& s);
 inline void addi(Sh2& s);

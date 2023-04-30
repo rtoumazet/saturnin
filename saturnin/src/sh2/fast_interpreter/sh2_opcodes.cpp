@@ -29,6 +29,7 @@
 #include <saturnin/src/sh2/sh2.h> // Sh2, Sh2Type
 
 namespace saturnin::sh2::fast_interpreter {
+
 void add(Sh2& s, const u32 n, const u32 m) {
     // Rm + Rn -> Rn
     s.r_[n] += s.r_[m];
@@ -1496,7 +1497,7 @@ void tstm(Sh2& s, const u32 i) {
 
 void xor_op(Sh2& s, const u32 n, const u32 m) {
     // Rn^Rm -> Rn
-    s.r_[xn00(s)] ^= s.r_[x0n0(s)];
+    s.r_[n] ^= s.r_[m];
 
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
@@ -1504,7 +1505,7 @@ void xor_op(Sh2& s, const u32 n, const u32 m) {
 
 void xori(Sh2& s, const u32 i) {
     // R0 ^imm -> R0
-    s.r_[0] ^= (0xFF & x0nn(s));
+    s.r_[0] ^= i;
 
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
@@ -1513,7 +1514,7 @@ void xori(Sh2& s, const u32 i) {
 void xorm(Sh2& s, const u32 i) {
     // (R0 + GBR)^imm -> (R0 + GBR)
     auto temp = u32{s.modules_.memory()->read<u8>(s.gbr_ + s.r_[0])};
-    temp ^= (0xFF & x0nn(s));
+    temp ^= i;
     s.modules_.memory()->write<u8>(s.gbr_ + s.r_[0], static_cast<u8>(temp));
 
     s.pc_ += 2;
@@ -1529,4 +1530,5 @@ void xtrct(Sh2& s, const u32 n, const u32 m) {
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
 }
+
 } // namespace saturnin::sh2::fast_interpreter

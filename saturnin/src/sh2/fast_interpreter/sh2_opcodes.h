@@ -31,7 +31,9 @@
 
 namespace saturnin::sh2 {
 class Sh2;
-}
+
+extern void delaySlot(Sh2& s, u32 addr);
+} // namespace saturnin::sh2
 
 namespace saturnin::sh2::fast_interpreter {
 void add(Sh2& s, const u32 n, const u32 m);

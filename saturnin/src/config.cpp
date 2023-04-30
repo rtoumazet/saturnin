@@ -137,7 +137,7 @@ Config::Config(std::string_view configuration_filename) : filename_(configuratio
 
     log_level_ = {{"off", LogLevel::off}, {"info", LogLevel::info}, {"debug", LogLevel::debug}};
 
-    sh2_core_ = {{"basic_interpreter", sh2::Sh2Core::basic_interpreter}};
+    sh2_core_ = {{"basic_interpreter", sh2::Sh2Core::basic_interpreter}, {"fast_interpreter", sh2::Sh2Core::fast_interpreter}};
 };
 
 void Config::writeFile() { cfg_.writeFile(this->filename_.c_str()); }

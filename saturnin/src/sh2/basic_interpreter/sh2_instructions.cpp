@@ -36,7 +36,6 @@ namespace saturnin::sh2 {
 using core::Log;
 using core::Logger;
 
-constexpr u32 ignored_delay_slot_address{0x20000202};
 constexpr u32 sr_bitmask{0x3f3};
 
 auto xn00(Sh2& s) -> u16 { return (s.current_opcode_ & 0x0F00) >> 8; }
@@ -44,45 +43,6 @@ auto x0n0(Sh2& s) -> u16 { return (s.current_opcode_ & 0x00F0) >> 4; }
 auto x00n(Sh2& s) -> u16 { return s.current_opcode_ & 0x000F; }
 auto xnnn(Sh2& s) -> u16 { return s.current_opcode_ & 0x0FFF; }
 auto x0nn(Sh2& s) -> u16 { return s.current_opcode_ & 0x00FF; }
-
-void delaySlot(Sh2& s, const u32 addr) {
-    // Algorithm :
-    // Addr read and intruction fetch
-    // if the instruction is BF,BT,BRA,BSR,JMP,JSR,RTS,RTE,TRAPA,BF/S,BT/S,BRAF or BSRF then
-    //		-> illegal instruction slot
-    // else
-    //		Slot instruction execution
-    // end
-
-    auto current_inst_cycles = u32{s.cycles_elapsed_}; // We musn't forget the DS instruction count
-    if (addr != ignored_delay_slot_address) { // Delay slot isn't detected after the Power On Reset (to prevent the "illegal
-                                              // instruction slot")
-
-        s.current_opcode_ = s.modules_.memory()->read<u16>(addr);
-
-        if (isInstructionIllegal(s.current_opcode_)) {
-            Log::error(Logger::sh2, "Illegal instruction slot");
-            s.modules_.context()->emulationStatus(core::EmulationStatus::stopped);
-        } else {
-            // Delay slot instruction execution
-            execute(s);
-            s.cycles_elapsed_ += current_inst_cycles;
-        }
-    }
-}
-
-auto isInstructionIllegal(const u16 inst) -> bool {
-    // 'Illegal Slot' detection
-    // Returns true if an ISI (illegal slot instruction) is detected
-    return illegal_instruction_lut[inst];
-}
-
-void badOpcode(Sh2& s) {
-    const auto type = std::string{(s.sh2_type_ == Sh2Type::master) ? "Master" : "Slave"};
-    Log::error(Logger::sh2, "Unexpected opcode({} SH2). Opcode = {:#06x}. PC = {:#010x}", type, s.current_opcode_, s.pc_);
-
-    s.modules_.context()->debugStatus(core::DebugStatus::paused);
-}
 
 void add(Sh2& s) {
     // Rm + Rn -> Rn
