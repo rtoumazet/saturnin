@@ -27,127 +27,128 @@ namespace saturnin::sh2 {
 
 auto generateOpcodes() -> bool {
     // Functions generation.
+    using enum FunctionType;
     std::string functions{};
-    functions += generateFunctions<FunctionType::frrf>(std::string_view("add"), {3, 12});
-    functions += generateFunctions<FunctionType::frxx>(std::string_view("addi"), {7});
-    functions += generateFunctions<FunctionType::frrf>(std::string_view("addc"), {3, 14});
-    functions += generateFunctions<FunctionType::frrf>(std::string_view("addv"), {3, 15});
-    functions += generateFunctions<FunctionType::frrf>(std::string_view("and_op"), {2, 9});
-    functions += generateFunctions<FunctionType::ffxx>(std::string_view("andi"), {12, 9});
-    functions += generateFunctions<FunctionType::ffxx>(std::string_view("andm"), {12, 13});
-    functions += generateFunctions<FunctionType::ffxx>(std::string_view("bf"), {8, 11});
-    functions += generateFunctions<FunctionType::ffxx>(std::string_view("bfs"), {8, 15});
-    functions += generateFunctions<FunctionType::fxxx>(std::string_view("bra"), {10});
-    functions += generateFunctions<FunctionType::frff>(std::string_view("braf"), {0, 2, 3});
-    functions += generateFunctions<FunctionType::fxxx>(std::string_view("bsr"), {11});
-    functions += generateFunctions<FunctionType::frff>(std::string_view("bsrf"), {0, 0, 3});
-    functions += generateFunctions<FunctionType::ffxx>(std::string_view("bt"), {8, 9});
-    functions += generateFunctions<FunctionType::ffxx>(std::string_view("bts"), {8, 13});
-    functions += generateFunctions<FunctionType::ffff>(std::string_view("clrmac"), {0, 0, 2, 8});
-    functions += generateFunctions<FunctionType::ffff>(std::string_view("clrt"), {0, 0, 0, 8});
+    functions += generateFunctions<frrf>(std::string_view("add"), {3, 12});
+    functions += generateFunctions<frxx>(std::string_view("addi"), {7});
+    functions += generateFunctions<frrf>(std::string_view("addc"), {3, 14});
+    functions += generateFunctions<frrf>(std::string_view("addv"), {3, 15});
+    functions += generateFunctions<frrf>(std::string_view("and_op"), {2, 9});
+    functions += generateFunctions<ffxx>(std::string_view("andi"), {12, 9});
+    functions += generateFunctions<ffxx>(std::string_view("andm"), {12, 13});
+    functions += generateFunctions<ffxx>(std::string_view("bf"), {8, 11});
+    functions += generateFunctions<ffxx>(std::string_view("bfs"), {8, 15});
+    functions += generateFunctions<fxxx>(std::string_view("bra"), {10});
+    functions += generateFunctions<frff>(std::string_view("braf"), {0, 2, 3});
+    functions += generateFunctions<fxxx>(std::string_view("bsr"), {11});
+    functions += generateFunctions<frff>(std::string_view("bsrf"), {0, 0, 3});
+    functions += generateFunctions<ffxx>(std::string_view("bt"), {8, 9});
+    functions += generateFunctions<ffxx>(std::string_view("bts"), {8, 13});
+    functions += generateFunctions<ffff>(std::string_view("clrmac"), {0, 0, 2, 8});
+    functions += generateFunctions<ffff>(std::string_view("clrt"), {0, 0, 0, 8});
+    functions += generateFunctions<frrf>(std::string_view("cmpeq"), {3, 0});
+    functions += generateFunctions<frrf>(std::string_view("cmpge"), {3, 3});
+    functions += generateFunctions<frrf>(std::string_view("cmpgt"), {3, 7});
+    functions += generateFunctions<frrf>(std::string_view("cmphi"), {3, 6});
+    functions += generateFunctions<frrf>(std::string_view("cmphs"), {3, 2});
+    functions += generateFunctions<frff>(std::string_view("cmppl"), {4, 1, 5});
+    functions += generateFunctions<frff>(std::string_view("cmppz"), {4, 1, 1});
+    functions += generateFunctions<frrf>(std::string_view("cmpstr"), {2, 12});
+    functions += generateFunctions<ffxx>(std::string_view("cmpim"), {8, 8});
+    functions += generateFunctions<frrf>(std::string_view("div0s"), {2, 7});
+    functions += generateFunctions<ffff>(std::string_view("div0u"), {0, 0, 1, 9});
+    functions += generateFunctions<frrf>(std::string_view("div1"), {3, 4});
+    functions += generateFunctions<frrf>(std::string_view("dmuls"), {3, 13});
+    functions += generateFunctions<frrf>(std::string_view("dmulu"), {3, 5});
+    functions += generateFunctions<frff>(std::string_view("dt"), {4, 1, 0});
+    functions += generateFunctions<frrf>(std::string_view("extsb"), {6, 14});
+    functions += generateFunctions<frrf>(std::string_view("extsw"), {6, 15});
+    functions += generateFunctions<frrf>(std::string_view("extub"), {6, 12});
+    functions += generateFunctions<frrf>(std::string_view("extuw"), {6, 13});
+    functions += generateFunctions<frff>(std::string_view("jmp"), {4, 2, 11});
+    functions += generateFunctions<frff>(std::string_view("jsr"), {4, 0, 11});
+    functions += generateFunctions<frff>(std::string_view("ldcsr"), {4, 0, 14});
+    functions += generateFunctions<frff>(std::string_view("ldcgbr"), {4, 1, 14});
+    functions += generateFunctions<frff>(std::string_view("ldcvbr"), {4, 2, 14});
+    functions += generateFunctions<frff>(std::string_view("ldcmsr"), {4, 0, 7});
+    functions += generateFunctions<frff>(std::string_view("ldcmgbr"), {4, 1, 7});
+    functions += generateFunctions<frff>(std::string_view("ldcmvbr"), {4, 2, 7});
+    functions += generateFunctions<frff>(std::string_view("ldsmach"), {4, 0, 10});
+    functions += generateFunctions<frff>(std::string_view("ldsmacl"), {4, 1, 10});
+    functions += generateFunctions<frff>(std::string_view("ldspr"), {4, 2, 10});
+    functions += generateFunctions<frff>(std::string_view("ldsmmach"), {4, 0, 6});
+    functions += generateFunctions<frff>(std::string_view("ldsmmacl"), {4, 1, 6});
+    functions += generateFunctions<frff>(std::string_view("ldsmpr"), {4, 2, 6});
+    functions += generateFunctions<frrf>(std::string_view("mac"), {0, 15});
+    functions += generateFunctions<frrf>(std::string_view("macw"), {4, 15});
+    functions += generateFunctions<frrf>(std::string_view("mov"), {6, 3});
+    functions += generateFunctions<frrf>(std::string_view("movbs"), {2, 0});
+    functions += generateFunctions<frrf>(std::string_view("movws"), {2, 1});
+    functions += generateFunctions<frrf>(std::string_view("movls"), {2, 2});
+    functions += generateFunctions<frrf>(std::string_view("movbl"), {6, 0});
+    functions += generateFunctions<frrf>(std::string_view("movwl"), {6, 1});
+    functions += generateFunctions<frrf>(std::string_view("movll"), {6, 2});
+    functions += generateFunctions<frrf>(std::string_view("movbm"), {2, 4});
+    functions += generateFunctions<frrf>(std::string_view("movwm"), {2, 5});
+    functions += generateFunctions<frrf>(std::string_view("movlm"), {2, 6});
+    functions += generateFunctions<frrf>(std::string_view("movbp"), {6, 4});
+    functions += generateFunctions<frrf>(std::string_view("movwp"), {6, 5});
+    functions += generateFunctions<frrf>(std::string_view("movlp"), {6, 6});
+    functions += generateFunctions<frrf>(std::string_view("movbs0"), {0, 4});
+    functions += generateFunctions<frrf>(std::string_view("movws0"), {0, 5});
+    functions += generateFunctions<frrf>(std::string_view("movls0"), {0, 6});
+    functions += generateFunctions<frrf>(std::string_view("movbl0"), {0, 12});
+    functions += generateFunctions<frrf>(std::string_view("movwl0"), {0, 13});
+    functions += generateFunctions<frrf>(std::string_view("movll0"), {0, 14});
+    functions += generateFunctions<frxx>(std::string_view("movi"), {14});
+    functions += generateFunctions<frxx>(std::string_view("movwi"), {9});
+    functions += generateFunctions<frxx>(std::string_view("movli"), {13});
+    functions += generateFunctions<ffxx>(std::string_view("movblg"), {12, 4});
+    functions += generateFunctions<ffxx>(std::string_view("movwlg"), {12, 5});
+    functions += generateFunctions<ffxx>(std::string_view("movllg"), {12, 6});
+    functions += generateFunctions<ffxx>(std::string_view("movbsg"), {12, 0});
+    functions += generateFunctions<ffxx>(std::string_view("movwsg"), {12, 1});
+    functions += generateFunctions<ffxx>(std::string_view("movlsg"), {12, 2});
+    functions += generateFunctions<ffrx>(std::string_view("movbs4"), {8, 0});
+    functions += generateFunctions<ffrx>(std::string_view("movws4"), {8, 1});
+    functions += generateFunctions<frrx>(std::string_view("movls4"), {1});
+    functions += generateFunctions<ffrx>(std::string_view("movbl4"), {8, 4});
+    functions += generateFunctions<ffrx>(std::string_view("movwl4"), {8, 5});
+    functions += generateFunctions<frrx>(std::string_view("movll4"), {5});
+    functions += generateFunctions<ffxx>(std::string_view("mova"), {12, 7});
+    functions += generateFunctions<frff>(std::string_view("movt"), {0, 2, 9});
+    functions += generateFunctions<frrf>(std::string_view("mull"), {0, 7});
+    functions += generateFunctions<frrf>(std::string_view("muls"), {2, 15});
+    functions += generateFunctions<frrf>(std::string_view("mulu"), {2, 14});
+    functions += generateFunctions<frrf>(std::string_view("neg"), {6, 11});
+    functions += generateFunctions<frrf>(std::string_view("negc"), {6, 10});
+    functions += generateFunctions<ffff>(std::string_view("nop"), {0, 0, 0, 9});
+    functions += generateFunctions<frrf>(std::string_view("not_op"), {6, 7});
+    functions += generateFunctions<frrf>(std::string_view("or_op"), {2, 11});
+    functions += generateFunctions<ffxx>(std::string_view("ori"), {12, 11});
+    functions += generateFunctions<ffxx>(std::string_view("orm"), {12, 15});
+    functions += generateFunctions<frff>(std::string_view("rotcl"), {4, 2, 4});
+    functions += generateFunctions<frff>(std::string_view("rotcr"), {4, 2, 5});
+    functions += generateFunctions<frff>(std::string_view("rotl"), {4, 0, 4});
+    functions += generateFunctions<frff>(std::string_view("rotr"), {4, 0, 5});
+    functions += generateFunctions<ffff>(std::string_view("rte"), {0, 0, 2, 11});
+    functions += generateFunctions<ffff>(std::string_view("rts"), {0, 0, 0, 11});
+    functions += generateFunctions<ffff>(std::string_view("sett"), {0, 0, 1, 8});
+    functions += generateFunctions<frff>(std::string_view("shal"), {4, 2, 0});
+    functions += generateFunctions<frff>(std::string_view("shar"), {4, 2, 1});
+    functions += generateFunctions<frff>(std::string_view("shll"), {4, 0, 0});
+    functions += generateFunctions<frff>(std::string_view("shll2"), {4, 0, 8});
+    functions += generateFunctions<frff>(std::string_view("shll8"), {4, 1, 8});
+    functions += generateFunctions<frff>(std::string_view("shll16"), {4, 2, 8});
+    functions += generateFunctions<frff>(std::string_view("shlr"), {4, 0, 1});
+    functions += generateFunctions<frff>(std::string_view("shlr2"), {4, 0, 9});
+    functions += generateFunctions<frff>(std::string_view("shlr8"), {4, 1, 9});
+    functions += generateFunctions<frff>(std::string_view("shlr16"), {4, 2, 9});
+    functions += generateFunctions<ffff>(std::string_view("sleep"), {0, 0, 1, 11});
+    functions += generateFunctions<frff>(std::string_view("stcsr"), {0, 0, 2});
+    functions += generateFunctions<frff>(std::string_view("stcgbr"), {0, 1, 2});
+    functions += generateFunctions<frff>(std::string_view("stcvbr"), {0, 2, 2});
 
-    // cmpeq(Sh2 & s, const u32 n, const u32 m);               // frrf
-    // cmpge(Sh2 & s, const u32 n, const u32 m);               // frrf
-    // cmpgt(Sh2 & s, const u32 n, const u32 m);               // frrf
-    // cmphi(Sh2 & s, const u32 n, const u32 m);               // frrf
-    // cmphs(Sh2 & s, const u32 n, const u32 m);               // frrf
-    // cmppl(Sh2 & s, const u32 n);                            // frff
-    // cmppz(Sh2 & s, const u32 n);                            // frff
-    // cmpstr(Sh2 & s, const u32 n, const u32 m);              // frrf
-    // cmpim(Sh2 & s, const u32 i);                            // ffxx
-    // div0s(Sh2 & s, const u32 n, const u32 m);               // frrf
-    // div0u(Sh2 & s);                                         // ffff
-    // div1(Sh2 & s, const u32 n, const u32 m);                // frrf
-    // dmuls(Sh2 & s, const u32 n, const u32 m);               // frrf
-    // dmulu(Sh2 & s, const u32 n, const u32 m);               // frrf
-    // dt(Sh2 & s, const u32 n);                               // frff
-    // extsb(Sh2 & s, const u32 n, const u32 m);               // frrf
-    // extsw(Sh2 & s, const u32 n, const u32 m);               // frrf
-    // extub(Sh2 & s, const u32 n, const u32 m);               // frrf
-    // extuw(Sh2 & s, const u32 n, const u32 m);               // frrf
-    // jmp(Sh2 & s, const u32 m);                              // frff
-    // jsr(Sh2 & s, const u32 m);                              // frff
-    // ldcsr(Sh2 & s, const u32 m);                            // frff
-    // ldcgbr(Sh2 & s, const u32 m);                           // frff
-    // ldcvbr(Sh2 & s, const u32 m);                           // frff
-    // ldcmsr(Sh2 & s, const u32 m);                           // frff
-    // ldcmgbr(Sh2 & s, const u32 m);                          // frff
-    // ldcmvbr(Sh2 & s, const u32 m);                          // frff
-    // ldsmach(Sh2 & s, const u32 m);                          // frff
-    // ldsmacl(Sh2 & s, const u32 m);                          // frff
-    // ldspr(Sh2 & s, const u32 m);                            // frff
-    // ldsmmach(Sh2 & s, const u32 m);                         // frff
-    // ldsmmacl(Sh2 & s, const u32 m);                         // frff
-    // ldsmpr(Sh2 & s, const u32 m);                           // frff
-    // mac(Sh2 & s, const u32 n, const u32 m);                 // frrf
-    // macw(Sh2 & s, const u32 n, const u32 m);                // frrf
-    // mov(Sh2 & s, const u32 n, const u32 m);                 // frrf
-    // movbs(Sh2 & s, const u32 n, const u32 m);               // frrf
-    // movws(Sh2 & s, const u32 n, const u32 m);               // frrf
-    // movls(Sh2 & s, const u32 n, const u32 m);               // frrf
-    // movbl(Sh2 & s, const u32 n, const u32 m);               // frrf
-    // movwl(Sh2 & s, const u32 n, const u32 m);               // frrf
-    // movll(Sh2 & s, const u32 n, const u32 m);               // frrf
-    // movbm(Sh2 & s, const u32 n, const u32 m);               // frrf
-    // movwm(Sh2 & s, const u32 n, const u32 m);               // frrf
-    // movlm(Sh2 & s, const u32 n, const u32 m);               // frrf
-    // movbp(Sh2 & s, const u32 n, const u32 m);               // frrf
-    // movwp(Sh2 & s, const u32 n, const u32 m);               // frrf
-    // movlp(Sh2 & s, const u32 n, const u32 m);               // frrf
-    // movbs0(Sh2 & s, const u32 n, const u32 m);              // frrf
-    // movws0(Sh2 & s, const u32 n, const u32 m);              // frrf
-    // movls0(Sh2 & s, const u32 n, const u32 m);              // frrf
-    // movbl0(Sh2 & s, const u32 n, const u32 m);              // frrf
-    // movwl0(Sh2 & s, const u32 n, const u32 m);              // frrf
-    // movll0(Sh2 & s, const u32 n, const u32 m);              // frrf
-    // movi(Sh2 & s, const u32 n, const u32 i);                // frxx
-    // movwi(Sh2 & s, const u32 n, const u32 d);               // frxx
-    // movli(Sh2 & s, const u32 n, const u32 d);               // frxx
-    // movblg(Sh2 & s, const u32 d);                           // ffxx
-    // movwlg(Sh2 & s, const u32 d);                           // ffxx
-    // movllg(Sh2 & s, const u32 d);                           // ffxx
-    // movbsg(Sh2 & s, const u32 d);                           // ffxx
-    // movwsg(Sh2 & s, const u32 d);                           // ffxx
-    // movlsg(Sh2 & s, const u32 d);                           // ffxx
-    // movbs4(Sh2 & s, const u32 n, const u32 d);              // ffrx
-    // movws4(Sh2 & s, const u32 n, const u32 d);              // ffrx
-    // movls4(Sh2 & s, const u32 n, const u32 m, const u32 d); // frrx
-    // movbl4(Sh2 & s, const u32 m, const u32 d);              // ffrx
-    // movwl4(Sh2 & s, const u32 m, const u32 d);              // ffrx
-    // movll4(Sh2 & s, const u32 n, const u32 m, const u32 d); // frrx
-    // mova(Sh2 & s, const u32 d);                             // ffxx
-    // movt(Sh2 & s, const u32 n);                             // frff
-    // mull(Sh2 & s, const u32 n, const u32 m);                // frrf
-    // muls(Sh2 & s, const u32 n, const u32 m);                // frrf
-    // mulu(Sh2 & s, const u32 n, const u32 m);                // frrf
-    // neg(Sh2 & s, const u32 n, const u32 m);                 // frrf
-    // negc(Sh2 & s, const u32 n, const u32 m);                // frrf
-    // nop(Sh2 & s);                                           // ffff
-    // not_op(Sh2 & s, const u32 n, const u32 m);              // frrf
-    // or_op(Sh2 & s, const u32 n, const u32 m);               // frrf
-    // ori(Sh2 & s, const u32 i);                              // ffxx
-    // orm(Sh2 & s, const u32 i);                              // ffxx
-    // rotcl(Sh2 & s, const u32 n);                            // frff
-    // rotcr(Sh2 & s, const u32 n);                            // frff
-    // rotl(Sh2 & s, const u32 n);                             // frff
-    // rotr(Sh2 & s, const u32 n);                             // frff
-    // rte(Sh2 & s);                                           // ffff
-    // rts(Sh2 & s);                                           // ffff
-    // sett(Sh2 & s);                                          // ffff
-    // shal(Sh2 & s, const u32 n);                             // frff
-    // shar(Sh2 & s, const u32 n);                             // frff
-    // shll(Sh2 & s, const u32 n);                             // frff
-    // shll2(Sh2 & s, const u32 n);                            // frff
-    // shll8(Sh2 & s, const u32 n);                            // frff
-    // shll16(Sh2 & s, const u32 n);                           // frff
-    // shlr(Sh2 & s, const u32 n);                             // frff
-    // shlr2(Sh2 & s, const u32 n);                            // frff
-    // shlr8(Sh2 & s, const u32 n);                            // frff
-    // shlr16(Sh2 & s, const u32 n);                           // frff
-    // sleep(Sh2 & s);                                         // ffff
-    // stcsr(Sh2 & s, const u32 n);                            // frff
-    // stcgbr(Sh2 & s, const u32 n);                           // frff
-    // stcvbr(Sh2 & s, const u32 n);                           // frff
     // stcmsr(Sh2 & s, const u32 n);                           // frff
     // stcmgbr(Sh2 & s, const u32 n);                          // frff
     // stcmvbr(Sh2 & s, const u32 n);                          // frff
