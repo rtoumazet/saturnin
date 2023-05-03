@@ -148,30 +148,29 @@ auto generateOpcodes() -> bool {
     functions += generateFunctions<frff>(std::string_view("stcsr"), {0, 0, 2});
     functions += generateFunctions<frff>(std::string_view("stcgbr"), {0, 1, 2});
     functions += generateFunctions<frff>(std::string_view("stcvbr"), {0, 2, 2});
-
-    // stcmsr(Sh2 & s, const u32 n);                           // frff
-    // stcmgbr(Sh2 & s, const u32 n);                          // frff
-    // stcmvbr(Sh2 & s, const u32 n);                          // frff
-    // stsmach(Sh2 & s, const u32 n);                          // frff
-    // stsmacl(Sh2 & s, const u32 n);                          // frff
-    // stspr(Sh2 & s, const u32 n);                            // frff
-    // stsmmach(Sh2 & s, const u32 n);                         // frff
-    // stsmmacl(Sh2 & s, const u32 n);                         // frff
-    // stsmpr(Sh2 & s, const u32 n);                           // frff
-    // sub(Sh2 & s, const u32 n, const u32 m);                 // frrf
-    // subc(Sh2 & s, const u32 n, const u32 m);                // frrf
-    // subv(Sh2 & s, const u32 n, const u32 m);                // frrf
-    // swapb(Sh2 & s, const u32 n, const u32 m);               // frrf
-    // swapw(Sh2 & s, const u32 n, const u32 m);               // frrf
-    // tas(Sh2 & s, const u32 n);                              // frff
-    // trapa(Sh2 & s, const u32 i);                            // ffxx
-    // tst(Sh2 & s, const u32 n, const u32 m);                 // frrf
-    // tsti(Sh2 & s, const u32 i);                             // ffxx
-    // tstm(Sh2 & s, const u32 i);                             // ffxx
-    // xor_op(Sh2 & s, const u32 n, const u32 m);              // frrf
-    // xori(Sh2 & s, const u32 i);                             // ffxx
-    // xorm(Sh2 & s, const u32 i);                             // ffxx
-    // xtrct(Sh2 & s, const u32 n, const u32 m);               // frrf
+    functions += generateFunctions<frff>(std::string_view("stcmsr"), {4, 0, 3});
+    functions += generateFunctions<frff>(std::string_view("stcmgbr"), {4, 1, 3});
+    functions += generateFunctions<frff>(std::string_view("stcmvbr"), {4, 2, 3});
+    functions += generateFunctions<frff>(std::string_view("stsmach"), {0, 0, 10});
+    functions += generateFunctions<frff>(std::string_view("stsmacl"), {0, 1, 10});
+    functions += generateFunctions<frff>(std::string_view("stspr"), {0, 2, 10});
+    functions += generateFunctions<frff>(std::string_view("stsmmach"), {4, 0, 2});
+    functions += generateFunctions<frff>(std::string_view("stsmmacl"), {4, 1, 2});
+    functions += generateFunctions<frff>(std::string_view("stsmpr"), {4, 2, 2});
+    functions += generateFunctions<frrf>(std::string_view("sub"), {3, 8});
+    functions += generateFunctions<frrf>(std::string_view("subc"), {3, 10});
+    functions += generateFunctions<frrf>(std::string_view("subv"), {3, 11});
+    functions += generateFunctions<frrf>(std::string_view("swapb"), {6, 8});
+    functions += generateFunctions<frrf>(std::string_view("swapw"), {6, 9});
+    functions += generateFunctions<frff>(std::string_view("tas"), {4, 1, 11});
+    functions += generateFunctions<ffxx>(std::string_view("trapa"), {12, 3});
+    functions += generateFunctions<frrf>(std::string_view("tst"), {2, 8});
+    functions += generateFunctions<ffxx>(std::string_view("tsti"), {12, 8});
+    functions += generateFunctions<ffxx>(std::string_view("tstm"), {12, 12});
+    functions += generateFunctions<frrf>(std::string_view("xor_op"), {2, 10});
+    functions += generateFunctions<ffxx>(std::string_view("xori"), {12, 10});
+    functions += generateFunctions<ffxx>(std::string_view("xorm"), {12, 14});
+    functions += generateFunctions<frrf>(std::string_view("xtrct"), {2, 13});
 
     // Lookup table generation.
     constexpr auto    call_max    = 0x10000;
@@ -216,6 +215,7 @@ auto generateFunctions(std::string_view func_name, const std::vector<int>& args)
     switch (Type) {
         using enum FunctionType;
         case ffff: {
+            // Opcode is directly specified.
             if (args.size() != 4) {
                 generated = uti::format("Wrong number of arguments for {}", func_name);
                 break;
@@ -224,11 +224,36 @@ auto generateFunctions(std::string_view func_name, const std::vector<int>& args)
 void call_{0:x}_{1:x}_{2:x}_{3:x}(Sh2& s){{
     {4}(s);
 }})";
+            generated += uti::format(func_template, args[0], args[1], args[2], args[3], func_name);
 
             break;
         }
+        case ffxx: {
+            // Part 1 & 2 are fixed, 2 & 4 variables.
+            if (args.size() != 2) {
+                generated = uti::format("Wrong number of arguments for {}", func_name);
+                break;
+            }
+
+            break;
+        }
+        case ffrx: {
+            break;
+        }
+        case fxxx: {
+            break;
+        }
+        case frxx: {
+            break;
+        }
+        case frff: {
+            break;
+        }
+        case frrx: {
+            break;
+        }
         case frrf: {
-            // 3xxC
+            // Part 1 & 4 are fixed, 2 & 3 variables.
             if (args.size() != 2) {
                 generated = uti::format("Wrong number of arguments for {}", func_name);
                 break;
@@ -238,16 +263,13 @@ void call_{0:x}_{1:x}_{2:x}_{3:x}(Sh2& s){{
             constexpr auto    counter_max = 0x10;
             std::array<u8, 2> counters{};
 
-            const auto a = args[0];
-            const auto d = args[1];
-
             auto func_template = R"(
 void call_{0:x}_{1:x}_{2:x}_{3:x}(Sh2& s){{
     {4}(s,{1:x},{2:x});
 }})";
 
             for (int func_counter = 0; func_counter < func_nb_max; ++func_counter) {
-                generated += uti::format(func_template, a, counters[0], counters[1], d, func_name);
+                generated += uti::format(func_template, args[0], counters[0], counters[1], args[1], func_name);
                 ++counters[1];
                 if (counters[1] == counter_max) {
                     counters[1] = 0;
@@ -257,6 +279,7 @@ void call_{0:x}_{1:x}_{2:x}_{3:x}(Sh2& s){{
 
             break;
         }
+
             // default:
     }
     return generated;
