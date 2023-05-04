@@ -221,35 +221,176 @@ auto generateFunctions(std::string_view func_name, const std::vector<int>& args)
                 break;
             }
             auto func_template = R"(
-void call_{0:x}_{1:x}_{2:x}_{3:x}(Sh2& s){{
-    {4}(s);
-}})";
+             void call_{0:x}_{1:x}_{2:x}_{3:x}(Sh2& s){{
+                {4}(s);
+            }})";
             generated += uti::format(func_template, args[0], args[1], args[2], args[3], func_name);
 
             break;
         }
         case ffxx: {
-            // Part 1 & 2 are fixed, 2 & 4 variables.
+            // Part 1 & 2 are fixed, 3 & 4 variables.
             if (args.size() != 2) {
                 generated = uti::format("Wrong number of arguments for {}", func_name);
                 break;
             }
 
+            constexpr auto    func_nb_max = 0x100;
+            constexpr auto    counter_max = 0x10;
+            std::array<u8, 2> counters{};
+
+            auto func_template = R"(
+             void call_{0:x}_{1:x}_{2:x}_{3:x}(Sh2& s){{
+                {4}(s, 0x{2:x}{3:x});
+            }})";
+
+            for (int func_counter = 0; func_counter < func_nb_max; ++func_counter) {
+                generated += uti::format(func_template, args[0], args[1], counters[0], counters[1], func_name);
+                ++counters[1];
+                if (counters[1] == counter_max) {
+                    counters[1] = 0;
+                    ++counters[0];
+                }
+            }
+
             break;
         }
         case ffrx: {
+            // Part 1 & 2 are fixed, 3 & 4 variables.
+            if (args.size() != 2) {
+                generated = uti::format("Wrong number of arguments for {}", func_name);
+                break;
+            }
+
+            constexpr auto    func_nb_max = 0x100;
+            constexpr auto    counter_max = 0x10;
+            std::array<u8, 2> counters{};
+
+            auto func_template = R"(
+             void call_{0:x}_{1:x}_{2:x}_{3:x}(Sh2& s){{
+                {4}(s, 0x{2:x}, 0x{3:x});
+            }})";
+
+            for (int func_counter = 0; func_counter < func_nb_max; ++func_counter) {
+                generated += uti::format(func_template, args[0], args[1], counters[0], counters[1], func_name);
+                ++counters[1];
+                if (counters[1] == counter_max) {
+                    counters[1] = 0;
+                    ++counters[0];
+                }
+            }
+
             break;
         }
         case fxxx: {
+            // Part 1 is fixed, 2, 3 & 4 are variables.
+            if (args.size() != 1) {
+                generated = uti::format("Wrong number of arguments for {}", func_name);
+                break;
+            }
+
+            constexpr auto    func_nb_max = 0x1000;
+            constexpr auto    counter_max = 0x10;
+            std::array<u8, 3> counters{};
+
+            auto func_template = R"(
+             void call_{0:x}_{1:x}_{2:x}_{3:x}(Sh2& s){{
+                {4}(s, 0x{1:x}{2:x}{3:x});
+            }})";
+
+            for (int func_counter = 0; func_counter < func_nb_max; ++func_counter) {
+                generated += uti::format(func_template, args[0], counters[0], counters[1], counters[2], func_name);
+                ++counters[2];
+                if (counters[2] == counter_max) {
+                    counters[2] = 0;
+                    ++counters[1];
+                }
+                if (counters[1] == counter_max) {
+                    counters[1] = 0;
+                    ++counters[0];
+                }
+            }
             break;
         }
         case frxx: {
+            // Part 1 is fixed, 2, 3 & 4 are variables.
+            if (args.size() != 1) {
+                generated = uti::format("Wrong number of arguments for {}", func_name);
+                break;
+            }
+
+            constexpr auto    func_nb_max = 0x1000;
+            constexpr auto    counter_max = 0x10;
+            std::array<u8, 3> counters{};
+
+            auto func_template = R"(
+             void call_{0:x}_{1:x}_{2:x}_{3:x}(Sh2& s){{
+                {4}(s, 0x{1:x}, 0x{2:x}{3:x});
+            }})";
+
+            for (int func_counter = 0; func_counter < func_nb_max; ++func_counter) {
+                generated += uti::format(func_template, args[0], counters[0], counters[1], counters[2], func_name);
+                ++counters[2];
+                if (counters[2] == counter_max) {
+                    counters[2] = 0;
+                    ++counters[1];
+                }
+                if (counters[1] == counter_max) {
+                    counters[1] = 0;
+                    ++counters[0];
+                }
+            }
             break;
         }
         case frff: {
+            // Part 1,3 & 4 are fixed, 2 is variable.
+            if (args.size() != 3) {
+                generated = uti::format("Wrong number of arguments for {}", func_name);
+                break;
+            }
+
+            constexpr auto func_nb_max = 0x10;
+            auto           counter     = u8{};
+
+            auto func_template = R"(
+             void call_{0:x}_{1:x}_{2:x}_{3:x}(Sh2& s){{
+                {4}(s, 0x{1:x}, 0x{2:x}{3:x});
+            }})";
+
+            for (int func_counter = 0; func_counter < func_nb_max; ++func_counter) {
+                generated += uti::format(func_template, args[0], counter, args[1], args[2], func_name);
+                ++counter;
+            }
             break;
         }
         case frrx: {
+            // Part 1 is fixed, 2, 3 & 4 are variables.
+            if (args.size() != 1) {
+                generated = uti::format("Wrong number of arguments for {}", func_name);
+                break;
+            }
+
+            constexpr auto    func_nb_max = 0x1000;
+            constexpr auto    counter_max = 0x10;
+            std::array<u8, 3> counters{};
+
+            auto func_template = R"(
+                 void call_{0:x}_{1:x}_{2:x}_{3:x}(Sh2& s){{
+                    {4}(s, 0x{1:x}, 0x{2:x}, 0x{3:x});
+                }})";
+
+            for (int func_counter = 0; func_counter < func_nb_max; ++func_counter) {
+                generated += uti::format(func_template, args[0], counters[0], counters[1], counters[2], func_name);
+                ++counters[2];
+                if (counters[2] == counter_max) {
+                    counters[2] = 0;
+                    ++counters[1];
+                }
+                if (counters[1] == counter_max) {
+                    counters[1] = 0;
+                    ++counters[0];
+                }
+            }
             break;
         }
         case frrf: {
@@ -264,9 +405,9 @@ void call_{0:x}_{1:x}_{2:x}_{3:x}(Sh2& s){{
             std::array<u8, 2> counters{};
 
             auto func_template = R"(
-void call_{0:x}_{1:x}_{2:x}_{3:x}(Sh2& s){{
-    {4}(s,{1:x},{2:x});
-}})";
+             void call_{0:x}_{1:x}_{2:x}_{3:x}(Sh2& s){{
+                {4}(s, 0x{1:x}, 0x{2:x});
+            }})";
 
             for (int func_counter = 0; func_counter < func_nb_max; ++func_counter) {
                 generated += uti::format(func_template, args[0], counters[0], counters[1], args[1], func_name);
