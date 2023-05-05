@@ -226,7 +226,7 @@ void bts(Sh2& s, const u32 d) {
     }
 }
 
-void clrmac(Sh2& s) {
+void clrmac(Sh2& s, [[maybe_unused]] const u32 dummy) {
     // 0 -> MACH,MACL
     s.mach_ = 0;
     s.macl_ = 0;
@@ -235,7 +235,7 @@ void clrmac(Sh2& s) {
     s.cycles_elapsed_ = 1;
 }
 
-void clrt(Sh2& s) {
+void clrt(Sh2& s, [[maybe_unused]] const u32 dummy) {
     // 0 -> T
     s.regs_.sr.clr(Sh2Regs::StatusRegister::t);
 
@@ -338,7 +338,7 @@ void div0s(Sh2& s, const u32 n, const u32 m) {
     s.cycles_elapsed_ = 1;
 }
 
-void div0u(Sh2& s) {
+void div0u(Sh2& s, [[maybe_unused]] const u32 dummy) {
     // 0 -> M/Q/T
     s.regs_.sr.clr(Sh2Regs::StatusRegister::m);
     s.regs_.sr.clr(Sh2Regs::StatusRegister::q);
@@ -1012,7 +1012,7 @@ void negc(Sh2& s, const u32 n, const u32 m) {
     s.cycles_elapsed_ = 1;
 }
 
-void nop(Sh2& s) {
+void nop(Sh2& s, [[maybe_unused]] const u32 dummy) {
     // No operation
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
@@ -1108,7 +1108,7 @@ void rotr(Sh2& s, const u32 n) {
     s.cycles_elapsed_ = 1;
 }
 
-void rte(Sh2& s) {
+void rte(Sh2& s, [[maybe_unused]] const u32 dummy) {
     // Stack -> PC/SR
     // Fixed
     delaySlot(s, s.pc_ + 2);
@@ -1151,7 +1151,7 @@ void rte(Sh2& s) {
     }
 }
 
-void rts(Sh2& s) {
+void rts(Sh2& s, [[maybe_unused]] const u32 dummy) {
     // PR -> PC
     // Arranged and fixed using SH4 manual
     delaySlot(s, s.pc_ + 2);
@@ -1171,7 +1171,7 @@ void rts(Sh2& s) {
     s.cycles_elapsed_ = 2;
 }
 
-void sett(Sh2& s) {
+void sett(Sh2& s, [[maybe_unused]] const u32 dummy) {
     // 1 -> T
     s.regs_.sr.set(Sh2Regs::StatusRegister::t);
 
@@ -1272,7 +1272,7 @@ void shlr16(Sh2& s, const u32 n) {
     s.cycles_elapsed_ = 1;
 }
 
-void sleep(Sh2& s) {
+void sleep(Sh2& s, [[maybe_unused]] const u32 dummy) {
     // Sleep
     // We'll see later how to implement this operation.
     // It'll involve waiting until an interrupt is fired up

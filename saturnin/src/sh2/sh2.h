@@ -928,8 +928,8 @@ class Sh2 {
     friend void fast_interpreter::bsrf(Sh2& s, const u32 m);                             // frff
     friend void fast_interpreter::bt(Sh2& s, const u32 d);                               // ffdd
     friend void fast_interpreter::bts(Sh2& s, const u32 d);                              // ffdd
-    friend void fast_interpreter::clrmac(Sh2& s);                                        // ffff
-    friend void fast_interpreter::clrt(Sh2& s);                                          // ffff
+    friend void fast_interpreter::clrmac(Sh2& s, const u32 dummy);                       // ffff
+    friend void fast_interpreter::clrt(Sh2& s, const u32 dummy);                         // ffff
     friend void fast_interpreter::cmpeq(Sh2& s, const u32 n, const u32 m);               // frrf
     friend void fast_interpreter::cmpge(Sh2& s, const u32 n, const u32 m);               // frrf
     friend void fast_interpreter::cmpgt(Sh2& s, const u32 n, const u32 m);               // frrf
@@ -940,7 +940,7 @@ class Sh2 {
     friend void fast_interpreter::cmpstr(Sh2& s, const u32 n, const u32 m);              // frrf
     friend void fast_interpreter::cmpim(Sh2& s, const u32 i);                            // ffii
     friend void fast_interpreter::div0s(Sh2& s, const u32 n, const u32 m);               // frrf
-    friend void fast_interpreter::div0u(Sh2& s);                                         // ffff
+    friend void fast_interpreter::div0u(Sh2& s, const u32 dummy);                        // ffff
     friend void fast_interpreter::div1(Sh2& s, const u32 n, const u32 m);                // frrf
     friend void fast_interpreter::dmuls(Sh2& s, const u32 n, const u32 m);               // frrf
     friend void fast_interpreter::dmulu(Sh2& s, const u32 n, const u32 m);               // frrf
@@ -1006,7 +1006,7 @@ class Sh2 {
     friend void fast_interpreter::mulu(Sh2& s, const u32 n, const u32 m);                // frrf
     friend void fast_interpreter::neg(Sh2& s, const u32 n, const u32 m);                 // frrf
     friend void fast_interpreter::negc(Sh2& s, const u32 n, const u32 m);                // frrf
-    friend void fast_interpreter::nop(Sh2& s);                                           // ffff
+    friend void fast_interpreter::nop(Sh2& s, const u32 dummy);                          // ffff
     friend void fast_interpreter::not_op(Sh2& s, const u32 n, const u32 m);              // frrf
     friend void fast_interpreter::or_op(Sh2& s, const u32 n, const u32 m);               // frrf
     friend void fast_interpreter::ori(Sh2& s, const u32 i);                              // ffii
@@ -1015,9 +1015,9 @@ class Sh2 {
     friend void fast_interpreter::rotcr(Sh2& s, const u32 n);                            // frff
     friend void fast_interpreter::rotl(Sh2& s, const u32 n);                             // frff
     friend void fast_interpreter::rotr(Sh2& s, const u32 n);                             // frff
-    friend void fast_interpreter::rte(Sh2& s);                                           // ffff
-    friend void fast_interpreter::rts(Sh2& s);                                           // ffff
-    friend void fast_interpreter::sett(Sh2& s);                                          // ffff
+    friend void fast_interpreter::rte(Sh2& s, const u32 dummy);                          // ffff
+    friend void fast_interpreter::rts(Sh2& s, const u32 dummy);                          // ffff
+    friend void fast_interpreter::sett(Sh2& s, const u32 dummy);                         // ffff
     friend void fast_interpreter::shal(Sh2& s, const u32 n);                             // frff
     friend void fast_interpreter::shar(Sh2& s, const u32 n);                             // frff
     friend void fast_interpreter::shll(Sh2& s, const u32 n);                             // frff
@@ -1028,7 +1028,7 @@ class Sh2 {
     friend void fast_interpreter::shlr2(Sh2& s, const u32 n);                            // frff
     friend void fast_interpreter::shlr8(Sh2& s, const u32 n);                            // frff
     friend void fast_interpreter::shlr16(Sh2& s, const u32 n);                           // frff
-    friend void fast_interpreter::sleep(Sh2& s);                                         // ffff
+    friend void fast_interpreter::sleep(Sh2& s, const u32 dummy);                        // ffff
     friend void fast_interpreter::stcsr(Sh2& s, const u32 n);                            // frff
     friend void fast_interpreter::stcgbr(Sh2& s, const u32 n);                           // frff
     friend void fast_interpreter::stcvbr(Sh2& s, const u32 n);                           // frff
