@@ -59,7 +59,7 @@ auto generateOpcodes() -> bool;
 /// \fn	template<FunctionType Type> auto generateFunctions(std::string_view func_name, const std::initializer_list<int>& args) ->
 /// std::string;
 ///
-/// \brief	Generates all the possible calls for the function of the specified type.
+/// \brief	Generates all the possible calls for the function of the specified type using template specialization.
 ///
 /// \tparam	Type	    Type of the function to generate.
 /// \param 	func_name	Name of the function to generate.
@@ -70,4 +70,5 @@ auto generateOpcodes() -> bool;
 
 template<FunctionType Type>
 auto generateFunctions(std::string_view func_name, const std::vector<int>& args) -> std::string;
+
 }; // namespace saturnin::sh2
