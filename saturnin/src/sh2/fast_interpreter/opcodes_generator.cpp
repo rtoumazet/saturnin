@@ -25,11 +25,66 @@ namespace uti = saturnin::utilities;
 
 namespace saturnin::sh2 {
 
+auto isArgsNumberCorrect(std::string_view func_name, const size_t args_nb, const size_t expected_args_nb)
+    -> std::optional<std::string> {
+    if (args_nb != expected_args_nb) {
+        return std::optional<std::string>(uti::format("Wrong number of arguments for {}", func_name));
+    }
+    return std::nullopt;
+}
+
+auto generateFunctionsWithParams2To3(std::string_view func_template, std::string_view func_name, const std::vector<int>& args) {
+    // Part 1 & 2 are fixed, 3 & 4 variables.
+
+    if (auto error = isArgsNumberCorrect(func_name, args.size(), 2); error.has_value()) { return *error; }
+
+    constexpr auto    func_nb_max = 0x100;
+    constexpr auto    counter_max = 0x10;
+    std::array<u8, 2> counters{};
+
+    auto generated = std::string{};
+    for (int func_counter = 0; func_counter < func_nb_max; ++func_counter) {
+        generated += uti::format(func_template, args[0], args[1], counters[0], counters[1], func_name);
+        ++counters[1];
+        if (counters[1] == counter_max) {
+            counters[1] = 0;
+            ++counters[0];
+        }
+    }
+    return generated;
+}
+
+auto generateFunctionsWithParams1To3(std::string_view func_template, std::string_view func_name, const std::vector<int>& args) {
+    // Part 1 is fixed, 2, 3 & 4 are variables.
+
+    if (auto error = isArgsNumberCorrect(func_name, args.size(), 1); error.has_value()) { return *error; }
+
+    constexpr auto    func_nb_max = 0x1000;
+    constexpr auto    counter_max = 0x10;
+    std::array<u8, 3> counters{};
+
+    auto generated = std::string{};
+    for (int func_counter = 0; func_counter < func_nb_max; ++func_counter) {
+        generated += uti::format(func_template, args[0], counters[0], counters[1], counters[2], func_name);
+        ++counters[2];
+        if (counters[2] == counter_max) {
+            counters[2] = 0;
+            ++counters[1];
+        }
+        if (counters[1] == counter_max) {
+            counters[1] = 0;
+            ++counters[0];
+        }
+    }
+    return generated;
+}
+
 template<>
 auto generateFunctions<FunctionType::ffff>(std::string_view func_name, const std::vector<int>& args) -> std::string {
     // Opcode is directly specified.
 
-    if (args.size() != 4) { return uti::format("Wrong number of arguments for {}", func_name); }
+    if (auto error = isArgsNumberCorrect(func_name, args.size(), 4); error.has_value()) { return *error; }
+
     auto func_template = R"(
 void call_{0:x}_{1:x}_{2:x}_{3:x}(Sh2& s){{
     {4}(s);
@@ -41,117 +96,47 @@ void call_{0:x}_{1:x}_{2:x}_{3:x}(Sh2& s){{
 template<>
 auto generateFunctions<FunctionType::ffxx>(std::string_view func_name, const std::vector<int>& args) -> std::string {
     // Part 1 & 2 are fixed, 3 & 4 variables.
+    const auto func_template = R"(
+     void call_{0:x}_{1:x}_{2:x}_{3:x}(Sh2& s){{
+        {4}(s, 0x{2:x}{3:x});
+    }})";
 
-    if (args.size() != 2) { return uti::format("Wrong number of arguments for {}", func_name); }
-
-    constexpr auto    func_nb_max = 0x100;
-    constexpr auto    counter_max = 0x10;
-    std::array<u8, 2> counters{};
-
-    auto func_template = R"(
-void call_{0:x}_{1:x}_{2:x}_{3:x}(Sh2& s){{
-    {4}(s, 0x{2:x}{3:x});
-}})";
-
-    auto generated = std::string{};
-    for (int func_counter = 0; func_counter < func_nb_max; ++func_counter) {
-        generated += uti::format(func_template, args[0], args[1], counters[0], counters[1], func_name);
-        ++counters[1];
-        if (counters[1] == counter_max) {
-            counters[1] = 0;
-            ++counters[0];
-        }
-    }
-    return generated;
+    return generateFunctionsWithParams2To3(func_template, func_name, args);
 }
 
 template<>
 auto generateFunctions<FunctionType::ffrx>(std::string_view func_name, const std::vector<int>& args) -> std::string {
     // Part 1 & 2 are fixed, 3 & 4 variables.
-
-    if (args.size() != 2) { return uti::format("Wrong number of arguments for {}", func_name); }
-
-    constexpr auto    func_nb_max = 0x100;
-    constexpr auto    counter_max = 0x10;
-    std::array<u8, 2> counters{};
-
     auto func_template = R"(
 void call_{0:x}_{1:x}_{2:x}_{3:x}(Sh2& s){{
     {4}(s, 0x{2:x}, 0x{3:x});
 }})";
 
-    auto generated = std::string{};
-    for (int func_counter = 0; func_counter < func_nb_max; ++func_counter) {
-        generated += uti::format(func_template, args[0], args[1], counters[0], counters[1], func_name);
-        ++counters[1];
-        if (counters[1] == counter_max) {
-            counters[1] = 0;
-            ++counters[0];
-        }
-    }
-    return generated;
+    return generateFunctionsWithParams2To3(func_template, func_name, args);
 }
 
 template<>
 auto generateFunctions<FunctionType::fxxx>(std::string_view func_name, const std::vector<int>& args) -> std::string {
     // Part 1 is fixed, 2, 3 & 4 are variables.
 
-    if (args.size() != 1) { return uti::format("Wrong number of arguments for {}", func_name); }
-
-    constexpr auto    func_nb_max = 0x1000;
-    constexpr auto    counter_max = 0x10;
-    std::array<u8, 3> counters{};
-
     auto func_template = R"(
 void call_{0:x}_{1:x}_{2:x}_{3:x}(Sh2& s){{
     {4}(s, 0x{1:x}{2:x}{3:x});
 }})";
 
-    auto generated = std::string{};
-    for (int func_counter = 0; func_counter < func_nb_max; ++func_counter) {
-        generated += uti::format(func_template, args[0], counters[0], counters[1], counters[2], func_name);
-        ++counters[2];
-        if (counters[2] == counter_max) {
-            counters[2] = 0;
-            ++counters[1];
-        }
-        if (counters[1] == counter_max) {
-            counters[1] = 0;
-            ++counters[0];
-        }
-    }
-    return generated;
+    return generateFunctionsWithParams1To3(func_template, func_name, args);
 }
 
 template<>
 auto generateFunctions<FunctionType::frxx>(std::string_view func_name, const std::vector<int>& args) -> std::string {
     // Part 1 is fixed, 2, 3 & 4 are variables.
 
-    if (args.size() != 1) { return uti::format("Wrong number of arguments for {}", func_name); }
-
-    constexpr auto    func_nb_max = 0x1000;
-    constexpr auto    counter_max = 0x10;
-    std::array<u8, 3> counters{};
-
     auto func_template = R"(
 void call_{0:x}_{1:x}_{2:x}_{3:x}(Sh2& s){{
     {4}(s, 0x{1:x}, 0x{2:x}{3:x});
 }})";
 
-    auto generated = std::string{};
-    for (int func_counter = 0; func_counter < func_nb_max; ++func_counter) {
-        generated += uti::format(func_template, args[0], counters[0], counters[1], counters[2], func_name);
-        ++counters[2];
-        if (counters[2] == counter_max) {
-            counters[2] = 0;
-            ++counters[1];
-        }
-        if (counters[1] == counter_max) {
-            counters[1] = 0;
-            ++counters[0];
-        }
-    }
-    return generated;
+    return generateFunctionsWithParams1To3(func_template, func_name, args);
 }
 
 template<>
@@ -181,32 +166,12 @@ template<>
 auto generateFunctions<FunctionType::frrx>(std::string_view func_name, const std::vector<int>& args) -> std::string {
     // Part 1 is fixed, 2, 3 & 4 are variables.
 
-    if (args.size() != 1) { return uti::format("Wrong number of arguments for {}", func_name); }
-
-    constexpr auto    func_nb_max = 0x1000;
-    constexpr auto    counter_max = 0x10;
-    std::array<u8, 3> counters{};
-
     auto func_template = R"(
 void call_{0:x}_{1:x}_{2:x}_{3:x}(Sh2& s){{
     {4}(s, 0x{1:x}, 0x{2:x}, 0x{3:x});
 }})";
 
-    auto generated = std::string{};
-    for (int func_counter = 0; func_counter < func_nb_max; ++func_counter) {
-        generated += uti::format(func_template, args[0], counters[0], counters[1], counters[2], func_name);
-        ++counters[2];
-        if (counters[2] == counter_max) {
-            counters[2] = 0;
-            ++counters[1];
-        }
-        if (counters[1] == counter_max) {
-            counters[1] = 0;
-            ++counters[0];
-        }
-    }
-
-    return generated;
+    return generateFunctionsWithParams1To3(func_template, func_name, args);
 }
 
 template<>
