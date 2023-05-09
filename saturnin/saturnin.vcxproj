@@ -500,6 +500,9 @@
     <ClInclude Include="src\video\vdp2_part.h" />
     <ClInclude Include="src\video\vdp2_registers.h" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="src\sh2\fast_interpreter\sh2_opcodes.inc" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

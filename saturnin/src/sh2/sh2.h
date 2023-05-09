@@ -909,9 +909,6 @@ class Sh2 {
     friend void xori(Sh2& s);
     friend void xorm(Sh2& s);
     friend void xtrct(Sh2& s);
-    friend void delaySlot(Sh2& s, u32 addr);
-    friend void badOpcode(Sh2& s);
-    friend void execute(Sh2& s);
 
     friend void fast_interpreter::add(Sh2& s, const u32 n, const u32 m);                 // frrf
     friend void fast_interpreter::addi(Sh2& s, const u32 n, const u32 i);                // frii
@@ -1059,6 +1056,10 @@ class Sh2 {
     // friend void badOpcode(Sh2& s);
     // friend void execute(Sh2& s);
 
+    friend void delaySlot(Sh2& s, u32 addr);
+    friend void badOpcode(Sh2& s);
+    friend void execute(Sh2& s);
+
     std::array<u8, cache_address_size>   cache_addresses_;          ///< Cache addresses (1KB).
     std::array<u8, cache_data_size>      cache_data_;               ///< Cache data (4KB).
     std::array<u8, io_registers_size>    io_registers_;             ///< I/O registers (512B).
@@ -1128,5 +1129,7 @@ class Sh2 {
 inline auto isInstructionIllegal(u16 inst) -> bool;
 
 inline void delaySlot(Sh2& s, u32 addr);
+
+inline void badOpcode(Sh2& s);
 
 } // namespace saturnin::sh2

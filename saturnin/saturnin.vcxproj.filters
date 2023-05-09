@@ -336,4 +336,9 @@
       <Filter>Fichiers sources\sh2\fast_interpreter</Filter>
     </ClInclude>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="src\sh2\fast_interpreter\sh2_opcodes.inc">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </None>
+  </ItemGroup>
 </Project>

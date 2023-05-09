@@ -1531,4 +1531,6 @@ void xtrct(Sh2& s, const u32 n, const u32 m) {
     s.cycles_elapsed_ = 1;
 }
 
+#include <saturnin/src/sh2/fast_interpreter/sh2_opcodes.inc>
+
 } // namespace saturnin::sh2::fast_interpreter

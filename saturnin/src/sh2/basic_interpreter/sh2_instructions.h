@@ -58,7 +58,7 @@ inline auto x0nn(const Sh2& s) -> u16;
 /// \name SH2 instructions
 //@{
 // inline void delaySlot(Sh2& s, u32 addr);
-inline void badOpcode(Sh2& s);
+// inline void badOpcode(Sh2& s);
 inline void add(Sh2& s);
 inline void addi(Sh2& s);
 inline void addc(Sh2& s);

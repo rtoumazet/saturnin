@@ -30,6 +30,8 @@
 
 namespace saturnin::sh2 {
 
+using GeneratedArray = std::array<std::array<std::array<std::array<bool, 0x10>, 0x10>, 0x10>, 0x10>;
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \enum	FunctionType
 ///
@@ -69,6 +71,21 @@ auto generateOpcodes() -> bool;
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 template<FunctionType Type>
-auto generateFunctions(std::string_view func_name, const std::vector<int>& args) -> std::string;
+auto generateFunctions(std::string_view func_name, GeneratedArray& arr, const std::vector<int>& args) -> std::string;
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \fn	auto generateBadOpcodes(GeneratedArray& arr) -> std::string;
+///
+/// \brief	Generates the calls for functions identified as invalid opcodes.
+///
+/// \author	Runik
+/// \date	07/05/2023
+///
+/// \param [in,out]	arr	The array.
+///
+/// \returns	The bad opcodes.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+auto generateBadOpcodes(GeneratedArray& arr) -> std::string;
 
 }; // namespace saturnin::sh2
