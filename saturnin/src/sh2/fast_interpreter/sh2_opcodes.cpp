@@ -26,7 +26,8 @@
 #include <saturnin/src/log.h>
 #include <saturnin/src/memory.h>
 #include <saturnin/src/scu.h>
-#include <saturnin/src/sh2/sh2.h> // Sh2, Sh2Type
+#include <saturnin/src/sh2/sh2.h>                            // Sh2, Sh2Type
+#include <saturnin/src/sh2/fast_interpreter/sh2_opcodes.inc> // generated functions
 
 namespace saturnin::sh2::fast_interpreter {
 
@@ -1531,6 +1532,32 @@ void xtrct(Sh2& s, const u32 n, const u32 m) {
     s.cycles_elapsed_ = 1;
 }
 
-#include <saturnin/src/sh2/fast_interpreter/sh2_opcodes.inc>
+void execute(Sh2& s) {
+    // switch (s.modules_.context()->debugStatus()) {
+    //     using enum core::DebugStatus;
+    //     case step_over: {
+    //         if (!calls_subroutine_lut[s.current_opcode_]) {
+    //             //
+    //             s.modules_.context()->debugStatus(core::DebugStatus::paused);
+    //         } else {
+    //             s.modules_.context()->debugStatus(core::DebugStatus::wait_end_of_routine);
+    //             s.initializeSubroutineDepth();
+    //         }
+    //         break;
+    //     }
+    //     case step_into: {
+    //         s.modules_.context()->debugStatus(core::DebugStatus::paused);
+    //         break;
+    //     }
+    //     default: break;
+    // }
+
+    // opcodes_lut[s.current_opcode_](s);
+
+    // if (std::ranges::any_of(s.breakpoints_, [&s](const u32 bp) { return s.getRegister(Sh2Register::pc) == bp; })) {
+    //     s.modules_.context()->debugStatus(core::DebugStatus::paused);
+    //     Log::info(Logger::sh2, core::tr("Breakpoint reached !"));
+    // }
+}
 
 } // namespace saturnin::sh2::fast_interpreter

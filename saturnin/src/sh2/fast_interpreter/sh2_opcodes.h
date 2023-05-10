@@ -180,4 +180,6 @@ void xor_op(Sh2& s, const u32 n, const u32 m);
 void xori(Sh2& s, const u32 i);
 void xorm(Sh2& s, const u32 i);
 void xtrct(Sh2& s, const u32 n, const u32 m);
+
+void execute(Sh2& s);
 } // namespace saturnin::sh2::fast_interpreter

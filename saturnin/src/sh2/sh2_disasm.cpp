@@ -26,7 +26,7 @@
 
 namespace uti = saturnin::utilities;
 
-namespace saturnin::sh2 {
+namespace saturnin::sh2::basic_interpreter {
 
 auto badOpcode_d(const u32 pc, const u16 opcode) -> std::string {
     return uti::format("{:#010x} {:#06x} Unknown opcode", pc, opcode);
@@ -472,4 +472,4 @@ auto xtrct_d(const u32 pc, const u16 opcode) -> std::string {
     return uti::format("{:#010x} {:#06x} XTRCT R{:d},R{:d}", pc, opcode, x00n0(opcode), x0n00(opcode));
 };
 
-}; // namespace saturnin::sh2
+}; // namespace saturnin::sh2::basic_interpreter

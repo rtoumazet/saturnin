@@ -180,7 +180,7 @@ void EmulatorContext::pauseEmulation() { debugStatus(DebugStatus::paused); }
 void EmulatorContext::emulationSetup() {
     memory()->initialize(hardware_mode_);
 
-    sh2::initializeOpcodesLut();
+    sh2::basic_interpreter::initializeOpcodesLut();
     masterSh2()->powerOnReset();
     slaveSh2()->powerOnReset();
     smpc()->initialize();

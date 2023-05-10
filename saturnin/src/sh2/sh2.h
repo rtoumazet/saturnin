@@ -45,6 +45,8 @@ struct Interrupt;
 
 namespace saturnin::sh2 {
 
+using ExecuteFunc = void(Sh2&);
+
 using saturnin::core::EmulatorContext;
 using saturnin::core::EmulatorModules;
 using saturnin::core::Interrupt;
@@ -1131,5 +1133,7 @@ inline auto isInstructionIllegal(u16 inst) -> bool;
 inline void delaySlot(Sh2& s, u32 addr);
 
 inline void badOpcode(Sh2& s);
+
+std::function<ExecuteFunc> execute;
 
 } // namespace saturnin::sh2

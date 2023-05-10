@@ -30,7 +30,7 @@
 #include <saturnin/src/emulator_defs.h>
 #include <saturnin/src/sh2/sh2_disasm.h>
 
-namespace saturnin::sh2 {
+namespace saturnin::sh2::basic_interpreter {
 
 // Forward declarations
 class Sh2;
@@ -393,4 +393,4 @@ void execute(Sh2& s);
 
 auto disasm(u32 pc, u16 opcode) -> std::string;
 
-} // namespace saturnin::sh2
+} // namespace saturnin::sh2::basic_interpreter

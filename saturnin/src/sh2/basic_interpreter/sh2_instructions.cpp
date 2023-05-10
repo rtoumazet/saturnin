@@ -31,10 +31,11 @@
 
 namespace is = saturnin::core::interrupt_source;
 
-namespace saturnin::sh2 {
+namespace saturnin::sh2::basic_interpreter {
 
 using core::Log;
 using core::Logger;
+using saturnin::sh2::Sh2;
 
 constexpr u32 sr_bitmask{0x3f3};
 
@@ -1729,4 +1730,4 @@ void execute(Sh2& s) {
 
 auto disasm(const u32 pc, const u16 opcode) -> std::string { return opcodes_disasm_lut[opcode](pc, opcode); }
 
-} // namespace saturnin::sh2
+} // namespace saturnin::sh2::basic_interpreter
