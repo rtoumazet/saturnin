@@ -96,7 +96,7 @@ auto generateFunctions<FunctionType::ffff>(std::string_view func_name, Generated
 
     auto func_template                      = R"(
 void call_{0:x}_{1:x}_{2:x}_{3:x}(Sh2& s){{
-    {4}(s);
+    FastInterpreter::{4}(s);
 }})";
     arr[args[0]][args[1]][args[2]][args[3]] = true;
     return uti::format(func_template, args[0], args[1], args[2], args[3], func_name);
@@ -107,9 +107,9 @@ auto generateFunctions<FunctionType::ffxx>(std::string_view func_name, Generated
     -> std::string {
     // Part 1 & 2 are fixed, 3 & 4 variables.
     const auto func_template = R"(
-     void call_{0:x}_{1:x}_{2:x}_{3:x}(Sh2& s){{
-        {4}(s, 0x{2:x}{3:x});
-    }})";
+void call_{0:x}_{1:x}_{2:x}_{3:x}(Sh2& s){{
+    FastInterpreter::{4}(s, 0x{2:x}{3:x});
+}})";
 
     return generateFunctionsWithParams2To3(func_template, func_name, arr, args);
 }
@@ -120,7 +120,7 @@ auto generateFunctions<FunctionType::ffrx>(std::string_view func_name, Generated
     // Part 1 & 2 are fixed, 3 & 4 variables.
     auto func_template = R"(
 void call_{0:x}_{1:x}_{2:x}_{3:x}(Sh2& s){{
-    {4}(s, 0x{2:x}, 0x{3:x});
+    FastInterpreter::{4}(s, 0x{2:x}, 0x{3:x});
 }})";
 
     return generateFunctionsWithParams2To3(func_template, func_name, arr, args);
@@ -133,7 +133,7 @@ auto generateFunctions<FunctionType::fxxx>(std::string_view func_name, Generated
 
     auto func_template = R"(
 void call_{0:x}_{1:x}_{2:x}_{3:x}(Sh2& s){{
-    {4}(s, 0x{1:x}{2:x}{3:x});
+    FastInterpreter::{4}(s, 0x{1:x}{2:x}{3:x});
 }})";
 
     return generateFunctionsWithParams1To3(func_template, func_name, arr, args);
@@ -146,7 +146,7 @@ auto generateFunctions<FunctionType::frxx>(std::string_view func_name, Generated
 
     auto func_template = R"(
 void call_{0:x}_{1:x}_{2:x}_{3:x}(Sh2& s){{
-    {4}(s, 0x{1:x}, 0x{2:x}{3:x});
+    FastInterpreter::{4}(s, 0x{1:x}, 0x{2:x}{3:x});
 }})";
 
     return generateFunctionsWithParams1To3(func_template, func_name, arr, args);
@@ -164,7 +164,7 @@ auto generateFunctions<FunctionType::frff>(std::string_view func_name, Generated
 
     auto func_template = R"(
 void call_{0:x}_{1:x}_{2:x}_{3:x}(Sh2& s){{
-    {4}(s, 0x{1:x});
+    FastInterpreter::{4}(s, 0x{1:x});
 }})";
 
     auto generated = std::string{};
@@ -184,7 +184,7 @@ auto generateFunctions<FunctionType::frrx>(std::string_view func_name, Generated
 
     auto func_template = R"(
 void call_{0:x}_{1:x}_{2:x}_{3:x}(Sh2& s){{
-    {4}(s, 0x{1:x}, 0x{2:x}, 0x{3:x});
+    FastInterpreter::{4}(s, 0x{1:x}, 0x{2:x}, 0x{3:x});
 }})";
 
     return generateFunctionsWithParams1To3(func_template, func_name, arr, args);
@@ -203,7 +203,7 @@ auto generateFunctions<FunctionType::frrf>(std::string_view func_name, Generated
 
     auto func_template = R"(
 void call_{0:x}_{1:x}_{2:x}_{3:x}(Sh2& s){{
-    {4}(s, 0x{1:x}, 0x{2:x});
+    FastInterpreter::{4}(s, 0x{1:x}, 0x{2:x});
 }})";
 
     auto generated = std::string{};
