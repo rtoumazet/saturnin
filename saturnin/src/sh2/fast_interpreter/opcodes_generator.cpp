@@ -404,7 +404,13 @@ auto generateOpcodes() -> bool {
         }
     }
 
-    std::string content{uti::format("{0}\n std::array<OpcodeFunc, 0x10000> opcodes_func{{ {1} }};", functions, calls)};
+    std::string content{uti::format(R"(
+namespace saturnin::sh2::fast_interpreter{{
+{0}
+std::array<OpcodeFunc, 0x10000> opcodes_func{{ {1} }};
+}})",
+                                    functions,
+                                    calls)};
 
     // Write to the file.
     const auto path = std::string{"./sh2_opcodes.inc"};

@@ -28,7 +28,7 @@
 #include <string>
 #include <saturnin/src/emulator_defs.h>
 
-namespace saturnin::sh2 {
+namespace saturnin::sh2::basic_interpreter {
 
 /// \name SH2 debug instructions
 //@{
@@ -177,4 +177,4 @@ auto xorm_d(u32 pc, u16 opcode) -> std::string;
 auto xtrct_d(u32 pc, u16 opcode) -> std::string;
 //@}
 
-} // namespace saturnin::sh2
+} // namespace saturnin::sh2::basic_interpreter

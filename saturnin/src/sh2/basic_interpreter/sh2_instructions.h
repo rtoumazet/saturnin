@@ -30,10 +30,12 @@
 #include <saturnin/src/emulator_defs.h>
 #include <saturnin/src/sh2/sh2_disasm.h>
 
-namespace saturnin::sh2::basic_interpreter {
-
+namespace saturnin::sh2 {
 // Forward declarations
 class Sh2;
+} // namespace saturnin::sh2
+
+namespace saturnin::sh2::basic_interpreter {
 
 extern void badOpcode(Sh2& s);
 

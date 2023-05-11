@@ -35,15 +35,14 @@ namespace saturnin::sh2::basic_interpreter {
 
 using core::Log;
 using core::Logger;
-using saturnin::sh2::Sh2;
 
 constexpr u32 sr_bitmask{0x3f3};
 
-auto xn00(Sh2& s) -> u16 { return (s.current_opcode_ & 0x0F00) >> 8; }
-auto x0n0(Sh2& s) -> u16 { return (s.current_opcode_ & 0x00F0) >> 4; }
-auto x00n(Sh2& s) -> u16 { return s.current_opcode_ & 0x000F; }
-auto xnnn(Sh2& s) -> u16 { return s.current_opcode_ & 0x0FFF; }
-auto x0nn(Sh2& s) -> u16 { return s.current_opcode_ & 0x00FF; }
+auto xn00(const Sh2& s) -> u16 { return (s.current_opcode_ & 0x0F00) >> 8; }
+auto x0n0(const Sh2& s) -> u16 { return (s.current_opcode_ & 0x00F0) >> 4; }
+auto x00n(const Sh2& s) -> u16 { return s.current_opcode_ & 0x000F; }
+auto xnnn(const Sh2& s) -> u16 { return s.current_opcode_ & 0x0FFF; }
+auto x0nn(const Sh2& s) -> u16 { return s.current_opcode_ & 0x00FF; }
 
 void add(Sh2& s) {
     // Rm + Rn -> Rn
@@ -1668,7 +1667,7 @@ void initializeOpcodesLut() {
                 calls_subroutine_lut[counter]    = opcodes_table[i].is_subroutine_call;
                 break;
             }
-            opcodes_lut[counter]             = &badOpcode;
+            opcodes_lut[counter]             = &sh2::badOpcode;
             opcodes_disasm_lut[counter]      = &badOpcode_d;
             illegal_instruction_lut[counter] = false;
             calls_subroutine_lut[counter]    = false;

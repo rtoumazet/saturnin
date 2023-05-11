@@ -1340,7 +1340,7 @@ auto Sh2::run() -> u8 {
     modules_.memory()->sh2_in_operation_ = sh2_type_;
     runInterruptController();
     current_opcode_ = modules_.memory()->read<u16>(pc_);
-    execute(*this);
+    basic_interpreter::execute(*this);
     // runDivisionUnit(cycles_elapsed_);
     runFreeRunningTimer(cycles_elapsed_);
     return cycles_elapsed_;
@@ -1399,7 +1399,7 @@ void Sh2::setBinaryFileStartAddress(const u32 val) {
 auto isInstructionIllegal(const u16 inst) -> bool {
     // 'Illegal Slot' detection
     // Returns true if an ISI (illegal slot instruction) is detected
-    return illegal_instruction_lut[inst];
+    return basic_interpreter::illegal_instruction_lut[inst];
 }
 
 void delaySlot(Sh2& s, const u32 addr) {
@@ -1422,7 +1422,7 @@ void delaySlot(Sh2& s, const u32 addr) {
             s.modules_.context()->emulationStatus(core::EmulationStatus::stopped);
         } else {
             // Delay slot instruction execution
-            execute(s);
+            basic_interpreter::execute(s);
             s.cycles_elapsed_ += current_inst_cycles;
         }
     }
