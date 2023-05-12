@@ -28,7 +28,6 @@
 #include <saturnin/src/memory.h>
 #include <saturnin/src/scu.h>
 #include <saturnin/src/sh2/sh2.h> // Sh2, Sh2Type
-#include <saturnin/src/sh2/sh2_utils.h>
 
 namespace is = saturnin::core::interrupt_source;
 
@@ -1740,7 +1739,5 @@ void execute(Sh2& s) {
     // s.modules_.context()->debugStatus(core::DebugStatus::paused);
     // if (s.modules_.context()->memory()->vdp1_vram_[0xc] == 0x03) s.modules_.context()->debugStatus(core::DebugStatus::paused);
 }
-
-auto disasm(const u32 pc, const u16 opcode) -> std::string { return opcodes_disasm_lut[opcode](pc, opcode); }
 
 } // namespace saturnin::sh2::basic_interpreter

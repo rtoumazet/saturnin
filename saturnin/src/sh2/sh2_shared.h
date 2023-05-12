@@ -1,5 +1,5 @@
 //
-// sh2_utils.h
+// sh2_shared.h
 // Saturnin
 //
 // Copyright (c) 2023 Renaud Toumazet
@@ -18,9 +18,9 @@
 //
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \file	sh2_utils.h
+/// \file	sh2_shared.h
 ///
-/// \brief	SH2 utilities functions.
+/// \brief	SH2 shared definitions and functions.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #pragma once
@@ -28,6 +28,8 @@
 #include <saturnin/src/emulator_defs.h>
 
 namespace saturnin::sh2 {
+
+constexpr auto opcodes_lut_size = u32{0x10000}; ///< Size of the opcodes lookup table
 
 /// \name Opcode decoding helpers
 //@{

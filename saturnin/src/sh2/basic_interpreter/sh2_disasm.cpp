@@ -21,7 +21,7 @@
 #include <saturnin/src/sh2/basic_interpreter/sh2_disasm.h>
 #include <istream>
 #include <fmt/format.h>
-#include <saturnin/src/sh2/sh2_utils.h>
+#include <saturnin/src/sh2/sh2_shared.h>
 #include <saturnin/src/utilities.h> // format
 
 namespace uti = saturnin::utilities;
@@ -461,5 +461,7 @@ auto xorm_d(const u32 pc, const u16 opcode) -> std::string {
 auto xtrct_d(const u32 pc, const u16 opcode) -> std::string {
     return uti::format("{:#010x} {:#06x} XTRCT R{:d},R{:d}", pc, opcode, x0n0(opcode), xn00(opcode));
 };
+
+auto disasm(const u32 pc, const u16 opcode) -> std::string { return opcodes_disasm_lut[opcode](pc, opcode); }
 
 }; // namespace saturnin::sh2::basic_interpreter

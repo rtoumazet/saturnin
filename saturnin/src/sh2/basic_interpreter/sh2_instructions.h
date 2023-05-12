@@ -28,6 +28,8 @@
 #include <array>  // array
 #include <string> // string
 #include <saturnin/src/emulator_defs.h>
+#include <saturnin/src/sh2/sh2_shared.h>
+
 #include <saturnin/src/sh2/basic_interpreter/sh2_disasm.h>
 
 namespace saturnin::sh2 {
@@ -38,15 +40,6 @@ class Sh2;
 namespace saturnin::sh2::basic_interpreter {
 
 extern void badOpcode(Sh2& s);
-
-/// \name Opcode decoding helpers
-//@{
-// inline auto xn00(const u16 inst) -> u8;
-// inline auto x0n0(const u16 inst) -> u8;
-// inline auto xnnn(const u16 inst) -> u16;
-// inline auto x0nn(const u16 inst) -> u8;
-// inline auto x00n(const u16 inst) -> u8;
-//@}
 
 struct BasicInterpreter {
     /// \name SH2 instructions
@@ -201,11 +194,10 @@ struct BasicInterpreter {
     //@}
 };
 
-constexpr auto instructions_number = u8{142};                    ///< Total number of SH2 instructions used.
-constexpr auto opcodes_lut_size    = u32{0x10000};               ///< Size of the opcodes lookup table
+constexpr auto instructions_number = u8{142}; ///< Total number of SH2 instructions used.
+// constexpr auto opcodes_lut_size    = u32{0x10000}; ///< Size of the opcodes lookup table
 
-using ExecuteType = void (*)(Sh2&);                              ///< Type of execute functions
-using DisasmType  = auto (*)(u32 pc, u16 opcode) -> std::string; ///< Type of disassembly functions
+using ExecuteType = void (*)(Sh2&); ///< Type of execute functions
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \struct	Sh2Instruction
@@ -226,8 +218,6 @@ struct Sh2Instruction {
 };
 
 static std::array<ExecuteType, opcodes_lut_size> opcodes_lut; ///< The opcodes LUT, used for instruction fast fetching
-static std::array<DisasmType, opcodes_lut_size>
-    opcodes_disasm_lut;                                       ///< The opcodes disasm LUT, used for instruction fast fetching
 
 static std::array<bool, opcodes_lut_size>
     illegal_instruction_lut; ///< The illegal instruction LUT, used for instruction fast fetching
@@ -385,7 +375,5 @@ static const auto opcodes_table=std::array<Sh2Instruction, instructions_number>
 void initializeOpcodesLut();
 
 void execute(Sh2& s);
-
-auto disasm(u32 pc, u16 opcode) -> std::string;
 
 } // namespace saturnin::sh2::basic_interpreter
