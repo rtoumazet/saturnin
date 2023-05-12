@@ -18,7 +18,7 @@
 //
 
 #include <saturnin/src/pch.h>
-#include <saturnin/src/sh2/sh2_disasm.h>
+#include <saturnin/src/sh2/basic_interpreter/sh2_disasm.h>
 #include <istream>
 #include <fmt/format.h>
 #include <saturnin/src/sh2/basic_interpreter/sh2_instructions.h>
