@@ -39,15 +39,6 @@ namespace saturnin::sh2::basic_interpreter {
 
 extern void badOpcode(Sh2& s);
 
-/// \name Instruction split functions.
-//@{
-inline auto x0n00(const u16 inst) -> u8 { return static_cast<u8>((inst & 0x0F00) >> 8); }
-inline auto x00n0(const u16 inst) -> u8 { return static_cast<u8>((inst & 0x00F0) >> 4); }
-inline auto x0nnn(const u16 inst) -> u16 { return (inst & 0xFFF); }
-inline auto x00nn(const u16 inst) -> u8 { return static_cast<u8>(inst & 0xFFu); }
-inline auto x000n(const u16 inst) -> u8 { return static_cast<u8>(inst & 0xF); }
-//@}
-
 /// \name Opcode decoding helpers
 //@{
 inline auto xn00(const Sh2& s) -> u16;

@@ -28,6 +28,12 @@ namespace uti = saturnin::utilities;
 
 namespace saturnin::sh2::basic_interpreter {
 
+inline auto x0n00(const u16 inst) -> u8 { return static_cast<u8>((inst & 0x0F00) >> 8); }
+inline auto x00n0(const u16 inst) -> u8 { return static_cast<u8>((inst & 0x00F0) >> 4); }
+inline auto x0nnn(const u16 inst) -> u16 { return (inst & 0xFFF); }
+inline auto x00nn(const u16 inst) -> u8 { return static_cast<u8>(inst & 0xFFu); }
+inline auto x000n(const u16 inst) -> u8 { return static_cast<u8>(inst & 0xF); }
+
 auto badOpcode_d(const u32 pc, const u16 opcode) -> std::string {
     return uti::format("{:#010x} {:#06x} Unknown opcode", pc, opcode);
 };
