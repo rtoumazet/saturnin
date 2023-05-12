@@ -41,11 +41,11 @@ extern void badOpcode(Sh2& s);
 
 /// \name Opcode decoding helpers
 //@{
-inline auto xn00(const Sh2& s) -> u16;
-inline auto x0n0(const Sh2& s) -> u16;
-inline auto x00n(const Sh2& s) -> u16;
-inline auto xnnn(const Sh2& s) -> u16;
-inline auto x0nn(const Sh2& s) -> u16;
+// inline auto xn00(const u16 inst) -> u8;
+// inline auto x0n0(const u16 inst) -> u8;
+// inline auto xnnn(const u16 inst) -> u16;
+// inline auto x0nn(const u16 inst) -> u8;
+// inline auto x00n(const u16 inst) -> u8;
 //@}
 
 struct BasicInterpreter {

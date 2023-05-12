@@ -764,12 +764,6 @@ class Sh2 {
 
     void runFreeRunningTimer(u8 cycles_to_run);
 
-    friend auto basic_interpreter::xn00(const Sh2& s) -> u16;
-    friend auto basic_interpreter::x0n0(const Sh2& s) -> u16;
-    friend auto basic_interpreter::x00n(const Sh2& s) -> u16;
-    friend auto basic_interpreter::xnnn(const Sh2& s) -> u16;
-    friend auto basic_interpreter::x0nn(const Sh2& s) -> u16;
-
     friend struct basic_interpreter::BasicInterpreter;
     friend struct fast_interpreter::FastInterpreter;
 
