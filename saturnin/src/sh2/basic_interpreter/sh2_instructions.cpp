@@ -44,7 +44,7 @@ auto x00n(const Sh2& s) -> u16 { return s.current_opcode_ & 0x000F; }
 auto xnnn(const Sh2& s) -> u16 { return s.current_opcode_ & 0x0FFF; }
 auto x0nn(const Sh2& s) -> u16 { return s.current_opcode_ & 0x00FF; }
 
-void add(Sh2& s) {
+void BasicInterpreter::add(Sh2& s) {
     // Rm + Rn -> Rn
     s.r_[xn00(s)] += s.r_[x0n0(s)];
 
@@ -52,7 +52,7 @@ void add(Sh2& s) {
     s.cycles_elapsed_ = 1;
 }
 
-void addi(Sh2& s) {
+void BasicInterpreter::addi(Sh2& s) {
     // Rn + imm -> Rn
     if ((x0nn(s) & 0x80) == 0) {
         s.r_[xn00(s)] += (0xFF & static_cast<u32>(x0nn(s)));       // #imm positive, 32bits sign extension
@@ -63,7 +63,7 @@ void addi(Sh2& s) {
     s.cycles_elapsed_ = 1;
 }
 
-void addc(Sh2& s) {
+void BasicInterpreter::addc(Sh2& s) {
     // Rn + Rm + T -> Rn, carry -> T
 
     const auto tmp1 = static_cast<s32>(s.r_[xn00(s)] + s.r_[x0n0(s)]);
@@ -77,7 +77,7 @@ void addc(Sh2& s) {
     s.cycles_elapsed_ = 1;
 }
 
-void addv(Sh2& s) {
+void BasicInterpreter::addv(Sh2& s) {
     // Rn + Rm -> Rn, overflow -> T
 
     const auto dest = s32{(static_cast<s32>(s.r_[xn00(s)]) >= 0) ? 0 : 1};
@@ -98,21 +98,21 @@ void addv(Sh2& s) {
     s.cycles_elapsed_ = 1;
 }
 
-void and_op(Sh2& s) {
+void BasicInterpreter::and_op(Sh2& s) {
     // Rn & Rm -> Rn
     s.r_[xn00(s)] &= s.r_[x0n0(s)];
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
 }
 
-void andi(Sh2& s) {
+void BasicInterpreter::andi(Sh2& s) {
     // R0 & imm -> R0
     s.r_[0] &= (0xFF & x0nn(s));
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
 }
 
-void andm(Sh2& s) {
+void BasicInterpreter::andm(Sh2& s) {
     //(R0 + GBR) & imm -> (R0 + GBR)
 
     auto temp = u32{s.modules_.memory()->read<u8>(s.gbr_ + s.r_[0])};
@@ -122,7 +122,7 @@ void andm(Sh2& s) {
     s.cycles_elapsed_ = 3;
 }
 
-void bf(Sh2& s) {
+void BasicInterpreter::bf(Sh2& s) {
     // If T = 0, disp*2 + PC -> PC
     // If T = 1, nop
 
@@ -141,7 +141,7 @@ void bf(Sh2& s) {
     }
 }
 
-void bfs(Sh2& s) {
+void BasicInterpreter::bfs(Sh2& s) {
     // If T=0, disp*2 + PC -> PC
     // If T=1, nop
     // Modified using SH4 manual
@@ -163,7 +163,7 @@ void bfs(Sh2& s) {
     }
 }
 
-void bra(Sh2& s) {
+void BasicInterpreter::bra(Sh2& s) {
     // disp*2 + PC -> PC
     // Modified using SH4 manual
 
@@ -179,7 +179,7 @@ void bra(Sh2& s) {
     s.cycles_elapsed_ = 2;
 }
 
-void braf(Sh2& s) {
+void BasicInterpreter::braf(Sh2& s) {
     // Rm + PC +4 -> PC
     // Modified using SH4 manual + correction
     // Registers save for the delay slot
@@ -191,7 +191,7 @@ void braf(Sh2& s) {
     s.cycles_elapsed_ = 2;
 }
 
-void bsr(Sh2& s) {
+void BasicInterpreter::bsr(Sh2& s) {
     // PC -> PR, disp*2 + PC -> PC
     // Modified using SH4 manual + correction
 
@@ -210,7 +210,7 @@ void bsr(Sh2& s) {
     s.addToCallstack(old_pc, s.pr_);
 }
 
-void bsrf(Sh2& s) {
+void BasicInterpreter::bsrf(Sh2& s) {
     // PC -> PR, Rm + PC -> PC
     // Modified using SH4 manual + correction
     // Registers save for the delay slot
@@ -226,7 +226,7 @@ void bsrf(Sh2& s) {
     s.addToCallstack(old_pc, s.pr_);
 }
 
-void bt(Sh2& s) {
+void BasicInterpreter::bt(Sh2& s) {
     // If T=1, disp*2 + PC -> PC;
     // If T=0=, nop
 
@@ -245,7 +245,7 @@ void bt(Sh2& s) {
     }
 }
 
-void bts(Sh2& s) {
+void BasicInterpreter::bts(Sh2& s) {
     // If T=1, disp*2 + PC -> PC
     // If T=0, nop
     // Modified using SH4 manual
@@ -266,7 +266,7 @@ void bts(Sh2& s) {
     }
 }
 
-void clrmac(Sh2& s) {
+void BasicInterpreter::clrmac(Sh2& s) {
     // 0 -> MACH,MACL
     s.mach_ = 0;
     s.macl_ = 0;
@@ -275,7 +275,7 @@ void clrmac(Sh2& s) {
     s.cycles_elapsed_ = 1;
 }
 
-void clrt(Sh2& s) {
+void BasicInterpreter::clrt(Sh2& s) {
     // 0 -> T
     s.regs_.sr.clr(Sh2Regs::StatusRegister::t);
 
@@ -283,7 +283,7 @@ void clrt(Sh2& s) {
     s.cycles_elapsed_ = 1;
 }
 
-void cmpeq(Sh2& s) {
+void BasicInterpreter::cmpeq(Sh2& s) {
     // If Rn = Rm, T=1
     (s.r_[xn00(s)] == s.r_[x0n0(s)]) ? s.regs_.sr.set(Sh2Regs::StatusRegister::t) : s.regs_.sr.clr(Sh2Regs::StatusRegister::t);
 
@@ -291,7 +291,7 @@ void cmpeq(Sh2& s) {
     s.cycles_elapsed_ = 1;
 }
 
-void cmpge(Sh2& s) {
+void BasicInterpreter::cmpge(Sh2& s) {
     // If Rn >= Rm with sign, T=1
     (static_cast<s32>(s.r_[xn00(s)]) >= static_cast<s32>(s.r_[x0n0(s)])) ? s.regs_.sr.set(Sh2Regs::StatusRegister::t)
                                                                          : s.regs_.sr.clr(Sh2Regs::StatusRegister::t);
@@ -300,7 +300,7 @@ void cmpge(Sh2& s) {
     s.cycles_elapsed_ = 1;
 }
 
-void cmpgt(Sh2& s) {
+void BasicInterpreter::cmpgt(Sh2& s) {
     // If Rn > Rm with sign, T=1
     (static_cast<s32>(s.r_[xn00(s)]) > static_cast<s32>(s.r_[x0n0(s)])) ? s.regs_.sr.set(Sh2Regs::StatusRegister::t)
                                                                         : s.regs_.sr.clr(Sh2Regs::StatusRegister::t);
@@ -309,7 +309,7 @@ void cmpgt(Sh2& s) {
     s.cycles_elapsed_ = 1;
 }
 
-void cmphi(Sh2& s) {
+void BasicInterpreter::cmphi(Sh2& s) {
     // If Rn > Rm without sign, T=1
     (s.r_[xn00(s)] > s.r_[x0n0(s)]) ? s.regs_.sr.set(Sh2Regs::StatusRegister::t) : s.regs_.sr.clr(Sh2Regs::StatusRegister::t);
 
@@ -317,7 +317,7 @@ void cmphi(Sh2& s) {
     s.cycles_elapsed_ = 1;
 }
 
-void cmphs(Sh2& s) {
+void BasicInterpreter::cmphs(Sh2& s) {
     // If Rn > Rm without sign, T=1
     (s.r_[xn00(s)] >= s.r_[x0n0(s)]) ? s.regs_.sr.set(Sh2Regs::StatusRegister::t) : s.regs_.sr.clr(Sh2Regs::StatusRegister::t);
 
@@ -325,7 +325,7 @@ void cmphs(Sh2& s) {
     s.cycles_elapsed_ = 1;
 }
 
-void cmppl(Sh2& s) {
+void BasicInterpreter::cmppl(Sh2& s) {
     // If Rn > 0, T=1
     (static_cast<s32>(s.r_[xn00(s)]) > 0) ? s.regs_.sr.set(Sh2Regs::StatusRegister::t)
                                           : s.regs_.sr.clr(Sh2Regs::StatusRegister::t);
@@ -334,7 +334,7 @@ void cmppl(Sh2& s) {
     s.cycles_elapsed_ = 1;
 }
 
-void cmppz(Sh2& s) {
+void BasicInterpreter::cmppz(Sh2& s) {
     // If Rn >= 0, T=1
     (static_cast<s32>(s.r_[xn00(s)]) >= 0) ? s.regs_.sr.set(Sh2Regs::StatusRegister::t)
                                            : s.regs_.sr.clr(Sh2Regs::StatusRegister::t);
@@ -343,7 +343,7 @@ void cmppz(Sh2& s) {
     s.cycles_elapsed_ = 1;
 }
 
-void cmpstr(Sh2& s) {
+void BasicInterpreter::cmpstr(Sh2& s) {
     // If one byte of Rn = one byte of Rm then T=1
 
     auto rm = u32{s.r_[xn00(s)]};
@@ -358,7 +358,7 @@ void cmpstr(Sh2& s) {
     s.cycles_elapsed_ = 1;
 }
 
-void cmpim(Sh2& s) {
+void BasicInterpreter::cmpim(Sh2& s) {
     // ex: If R0 = imm, T=1
 
     auto imm = u32{};
@@ -373,7 +373,7 @@ void cmpim(Sh2& s) {
     s.cycles_elapsed_ = 1;
 }
 
-void div0s(Sh2& s) {
+void BasicInterpreter::div0s(Sh2& s) {
     // Rn MSB -> Q, Rm MSB -> M, M^Q -> T
     ((s.r_[xn00(s)] & sign_bit_32_mask) == 0) ? s.regs_.sr.clr(Sh2Regs::StatusRegister::q)
                                               : s.regs_.sr.set(Sh2Regs::StatusRegister::q);
@@ -387,7 +387,7 @@ void div0s(Sh2& s) {
     s.cycles_elapsed_ = 1;
 }
 
-void div0u(Sh2& s) {
+void BasicInterpreter::div0u(Sh2& s) {
     // 0 -> M/Q/T
     s.regs_.sr.clr(Sh2Regs::StatusRegister::m);
     s.regs_.sr.clr(Sh2Regs::StatusRegister::q);
@@ -397,7 +397,7 @@ void div0u(Sh2& s) {
     s.cycles_elapsed_ = 1;
 }
 
-void div1(Sh2& s) {
+void BasicInterpreter::div1(Sh2& s) {
     // Division done in one pass (Rn + Rm)
     auto tmp0 = u32{};
     auto tmp1 = bool{};
@@ -465,7 +465,7 @@ void div1(Sh2& s) {
     s.cycles_elapsed_ = 1;
 }
 
-void dmuls(Sh2& s) {
+void BasicInterpreter::dmuls(Sh2& s) {
     // With sign, Rn * Rm -> MACH,MACL
 
     // Arranged using SH4 manual
@@ -477,7 +477,7 @@ void dmuls(Sh2& s) {
     s.cycles_elapsed_ = 2;
 }
 
-void dmulu(Sh2& s) {
+void BasicInterpreter::dmulu(Sh2& s) {
     // Without sign, Rm * Rn -> MACH, MACL
 
     // MIGHT BE WRONG
@@ -491,7 +491,7 @@ void dmulu(Sh2& s) {
     s.cycles_elapsed_ = 2;
 }
 
-void dt(Sh2& s) {
+void BasicInterpreter::dt(Sh2& s) {
     // Rn - 1 -> Rn;
     // Si R[n] = 0, T=1
     // Sinon T=0
@@ -502,7 +502,7 @@ void dt(Sh2& s) {
     s.cycles_elapsed_ = 1;
 }
 
-void extsb(Sh2& s) {
+void BasicInterpreter::extsb(Sh2& s) {
     // Rm sign extension (byte) -> Rn
     s.r_[xn00(s)] = s.r_[x0n0(s)];
     if ((s.r_[x0n0(s)] & 0x80) == 0) {
@@ -514,7 +514,7 @@ void extsb(Sh2& s) {
     s.cycles_elapsed_ = 1;
 }
 
-void extsw(Sh2& s) {
+void BasicInterpreter::extsw(Sh2& s) {
     // Rm sign extension (word) -> Rn
     s.r_[xn00(s)] = s.r_[x0n0(s)];
     if ((s.r_[x0n0(s)] & 0x8000) == 0) {
@@ -526,7 +526,7 @@ void extsw(Sh2& s) {
     s.cycles_elapsed_ = 1;
 }
 
-void extub(Sh2& s) {
+void BasicInterpreter::extub(Sh2& s) {
     // Rm is 0 extended (byte) -> Rn
     s.r_[xn00(s)] = s.r_[x0n0(s)];
     s.r_[xn00(s)] &= 0xFF;
@@ -535,7 +535,7 @@ void extub(Sh2& s) {
     s.cycles_elapsed_ = 1;
 }
 
-void extuw(Sh2& s) {
+void BasicInterpreter::extuw(Sh2& s) {
     // Rm is 0 extended (word) -> Rn
     s.r_[xn00(s)] = s.r_[x0n0(s)];
     s.r_[xn00(s)] &= 0x0000FFFF;
@@ -544,7 +544,7 @@ void extuw(Sh2& s) {
     s.cycles_elapsed_ = 1;
 }
 
-void jmp(Sh2& s) {
+void BasicInterpreter::jmp(Sh2& s) {
     // Rm -> PC
     // Arranged and fixed using SH4 manual
 
@@ -555,7 +555,7 @@ void jmp(Sh2& s) {
     s.cycles_elapsed_ = 2;
 }
 
-void jsr(Sh2& s) {
+void BasicInterpreter::jsr(Sh2& s) {
     // PC -> PR, Rm -> PC
     // Arranged and fixed using SH4 manual
 
@@ -569,7 +569,7 @@ void jsr(Sh2& s) {
     s.cycles_elapsed_ = 2;
 }
 
-void ldcsr(Sh2& s) {
+void BasicInterpreter::ldcsr(Sh2& s) {
     // Rm -> SR
     s.regs_.sr = (s.r_[xn00(s)] & sr_bitmask);
 
@@ -577,7 +577,7 @@ void ldcsr(Sh2& s) {
     s.cycles_elapsed_ = 1;
 }
 
-void ldcgbr(Sh2& s) {
+void BasicInterpreter::ldcgbr(Sh2& s) {
     // Rm -> GBR
     s.gbr_ = s.r_[xn00(s)];
 
@@ -585,7 +585,7 @@ void ldcgbr(Sh2& s) {
     s.cycles_elapsed_ = 1;
 }
 
-void ldcvbr(Sh2& s) {
+void BasicInterpreter::ldcvbr(Sh2& s) {
     // Rm -> VBR
     s.vbr_ = s.r_[xn00(s)];
 
@@ -593,7 +593,7 @@ void ldcvbr(Sh2& s) {
     s.cycles_elapsed_ = 1;
 }
 
-void ldcmsr(Sh2& s) {
+void BasicInterpreter::ldcmsr(Sh2& s) {
     // (Rm) -> SR, Rm + 4 -> Rm
     s.regs_.sr = static_cast<u16>(s.modules_.memory()->read<u32>(s.r_[xn00(s)]) & sr_bitmask);
     s.r_[xn00(s)] += 4;
@@ -602,7 +602,7 @@ void ldcmsr(Sh2& s) {
     s.cycles_elapsed_ = 3;
 }
 
-void ldcmgbr(Sh2& s) {
+void BasicInterpreter::ldcmgbr(Sh2& s) {
     // (Rm) -> GBR, Rm + 4 -> Rm
     s.gbr_ = s.modules_.memory()->read<u32>(s.r_[xn00(s)]);
     s.r_[xn00(s)] += 4;
@@ -611,7 +611,7 @@ void ldcmgbr(Sh2& s) {
     s.cycles_elapsed_ = 3;
 }
 
-void ldcmvbr(Sh2& s) {
+void BasicInterpreter::ldcmvbr(Sh2& s) {
     // (Rm) -> VBR, Rm + 4 -> Rm
     s.vbr_ = s.modules_.memory()->read<u32>(s.r_[xn00(s)]);
     s.r_[xn00(s)] += 4;
@@ -620,7 +620,7 @@ void ldcmvbr(Sh2& s) {
     s.cycles_elapsed_ = 3;
 }
 
-void ldsmach(Sh2& s) {
+void BasicInterpreter::ldsmach(Sh2& s) {
     // Rm -> MACH
     s.mach_ = s.r_[xn00(s)];
 
@@ -628,7 +628,7 @@ void ldsmach(Sh2& s) {
     s.cycles_elapsed_ = 1;
 }
 
-void ldsmacl(Sh2& s) {
+void BasicInterpreter::ldsmacl(Sh2& s) {
     // Rm -> MACL
     s.mach_ = s.r_[xn00(s)];
 
@@ -636,7 +636,7 @@ void ldsmacl(Sh2& s) {
     s.cycles_elapsed_ = 1;
 }
 
-void ldspr(Sh2& s) {
+void BasicInterpreter::ldspr(Sh2& s) {
     // Rm -> PR
     s.pr_ = s.r_[xn00(s)];
 
@@ -644,7 +644,7 @@ void ldspr(Sh2& s) {
     s.cycles_elapsed_ = 1;
 }
 
-void ldsmmach(Sh2& s) {
+void BasicInterpreter::ldsmmach(Sh2& s) {
     //(Rm) -> MACH, Rm + 4 -> Rm
     s.mach_ = s.modules_.memory()->read<u32>(s.r_[xn00(s)]);
     s.r_[xn00(s)] += 4;
@@ -653,7 +653,7 @@ void ldsmmach(Sh2& s) {
     s.cycles_elapsed_ = 1;
 }
 
-void ldsmmacl(Sh2& s) {
+void BasicInterpreter::ldsmmacl(Sh2& s) {
     //(Rm) -> MACL, Rm + 4 -> Rm
     s.macl_ = s.modules_.memory()->read<u32>(s.r_[xn00(s)]);
     s.r_[xn00(s)] += 4;
@@ -662,7 +662,7 @@ void ldsmmacl(Sh2& s) {
     s.cycles_elapsed_ = 1;
 }
 
-void ldsmpr(Sh2& s) {
+void BasicInterpreter::ldsmpr(Sh2& s) {
     //(Rm) -> PR, Rm + 4 -> Rm
     s.pr_ = s.modules_.memory()->read<u32>(s.r_[xn00(s)]);
     s.r_[xn00(s)] += 4;
@@ -671,7 +671,7 @@ void ldsmpr(Sh2& s) {
     s.cycles_elapsed_ = 1;
 }
 
-void mac(Sh2& s) {
+void BasicInterpreter::mac(Sh2& s) {
     // Signed operation, (Rn)*(Rm) + MAC -> MAC
     // Arranged using SH4 manual
 
@@ -698,7 +698,7 @@ void mac(Sh2& s) {
     s.cycles_elapsed_ = 3;
 }
 
-void macw(Sh2& s) {
+void BasicInterpreter::macw(Sh2& s) {
     // Signed operation, (Rn) * (Rm) + MAC -> MAC
     // Arranged using SH4 manual
 
@@ -739,7 +739,7 @@ void macw(Sh2& s) {
     s.cycles_elapsed_ = 3;
 } // namespace saturnin::sh2
 
-void mov(Sh2& s) {
+void BasicInterpreter::mov(Sh2& s) {
     // Rm -> Rn
     s.r_[xn00(s)] = s.r_[x0n0(s)];
 
@@ -747,7 +747,7 @@ void mov(Sh2& s) {
     s.cycles_elapsed_ = 1;
 }
 
-void movbs(Sh2& s) {
+void BasicInterpreter::movbs(Sh2& s) {
     // Rm -> (Rn)
     s.modules_.memory()->write<u8>(s.r_[xn00(s)], static_cast<u8>(s.r_[x0n0(s)]));
 
@@ -755,7 +755,7 @@ void movbs(Sh2& s) {
     s.cycles_elapsed_ = 1;
 }
 
-void movws(Sh2& s) {
+void BasicInterpreter::movws(Sh2& s) {
     // Rm -> (Rn)
     s.modules_.memory()->write<u16>(s.r_[xn00(s)], static_cast<u16>(s.r_[x0n0(s)]));
 
@@ -763,7 +763,7 @@ void movws(Sh2& s) {
     s.cycles_elapsed_ = 1;
 }
 
-void movls(Sh2& s) {
+void BasicInterpreter::movls(Sh2& s) {
     // Rm -> (Rn)
     s.modules_.memory()->write<u32>(s.r_[xn00(s)], s.r_[x0n0(s)]);
 
@@ -771,7 +771,7 @@ void movls(Sh2& s) {
     s.cycles_elapsed_ = 1;
 }
 
-void movbl(Sh2& s) {
+void BasicInterpreter::movbl(Sh2& s) {
     // (Rm) -> sign extension -> Rn
     s.r_[xn00(s)] = s.modules_.memory()->read<u8>(s.r_[x0n0(s)]);
     if ((s.r_[xn00(s)] & 0x80) == 0) {
@@ -783,7 +783,7 @@ void movbl(Sh2& s) {
     s.cycles_elapsed_ = 1;
 }
 
-void movwl(Sh2& s) {
+void BasicInterpreter::movwl(Sh2& s) {
     // (Rm) -> sign extension -> Rn
     s.r_[xn00(s)] = s.modules_.memory()->read<u16>(s.r_[x0n0(s)]);
     if ((s.r_[xn00(s)] & 0x8000) == 0) {
@@ -795,7 +795,7 @@ void movwl(Sh2& s) {
     s.cycles_elapsed_ = 1;
 }
 
-void movll(Sh2& s) {
+void BasicInterpreter::movll(Sh2& s) {
     // (Rm) -> Rn
     s.r_[xn00(s)] = s.modules_.memory()->read<u32>(s.r_[x0n0(s)]);
 
@@ -803,7 +803,7 @@ void movll(Sh2& s) {
     s.cycles_elapsed_ = 1;
 }
 
-void movbm(Sh2& s) {
+void BasicInterpreter::movbm(Sh2& s) {
     // Rn - 1 -> Rn, Rm -> (Rn)
     s.modules_.memory()->write<u8>(s.r_[xn00(s)] - 1, static_cast<u8>(s.r_[x0n0(s)]));
     s.r_[xn00(s)] -= 1;
@@ -812,7 +812,7 @@ void movbm(Sh2& s) {
     s.cycles_elapsed_ = 1;
 }
 
-void movwm(Sh2& s) {
+void BasicInterpreter::movwm(Sh2& s) {
     // Rn - 2 -> Rn, Rm -> (Rn)
     s.modules_.memory()->write<u16>(s.r_[xn00(s)] - 2, static_cast<u16>(s.r_[x0n0(s)]));
     s.r_[xn00(s)] -= 2;
@@ -821,7 +821,7 @@ void movwm(Sh2& s) {
     s.cycles_elapsed_ = 1;
 }
 
-void movlm(Sh2& s) {
+void BasicInterpreter::movlm(Sh2& s) {
     // Rn - 4 -> Rn, Rm -> (Rn)
     s.modules_.memory()->write<u32>(s.r_[xn00(s)] - 4, s.r_[x0n0(s)]);
     s.r_[xn00(s)] -= 4;
@@ -830,7 +830,7 @@ void movlm(Sh2& s) {
     s.cycles_elapsed_ = 1;
 }
 
-void movbp(Sh2& s) {
+void BasicInterpreter::movbp(Sh2& s) {
     // (Rm) -> sign extension -> Rn, Rm + 1 -> Rm
     s.r_[xn00(s)] = s.modules_.memory()->read<u8>(s.r_[x0n0(s)]);
     if ((s.r_[xn00(s)] & 0x80) == 0) {
@@ -843,7 +843,7 @@ void movbp(Sh2& s) {
     s.cycles_elapsed_ = 1;
 }
 
-void movwp(Sh2& s) {
+void BasicInterpreter::movwp(Sh2& s) {
     // (Rm) -> sign extension -> Rn, Rm + 2 -> Rm
     s.r_[xn00(s)] = s.modules_.memory()->read<u16>(s.r_[x0n0(s)]);
     if ((s.r_[xn00(s)] & 0x8000) == 0) {
@@ -856,7 +856,7 @@ void movwp(Sh2& s) {
     s.cycles_elapsed_ = 1;
 }
 
-void movlp(Sh2& s) {
+void BasicInterpreter::movlp(Sh2& s) {
     // (Rm) -> Rn, Rm + 4 -> Rm
     s.r_[xn00(s)] = s.modules_.memory()->read<u32>(s.r_[x0n0(s)]);
     if (xn00(s) != x0n0(s)) { s.r_[x0n0(s)] += 4; }
@@ -864,7 +864,7 @@ void movlp(Sh2& s) {
     s.cycles_elapsed_ = 1;
 }
 
-void movbs0(Sh2& s) {
+void BasicInterpreter::movbs0(Sh2& s) {
     // Rm -> (R0 + Rn)
     s.modules_.memory()->write<u8>(s.r_[xn00(s)] + s.r_[0], static_cast<u8>(s.r_[x0n0(s)]));
 
@@ -872,7 +872,7 @@ void movbs0(Sh2& s) {
     s.cycles_elapsed_ = 1;
 }
 
-void movws0(Sh2& s) {
+void BasicInterpreter::movws0(Sh2& s) {
     // Rm -> (R0 + Rn)
     s.modules_.memory()->write<u16>(s.r_[xn00(s)] + s.r_[0], static_cast<uint16_t>(s.r_[x0n0(s)]));
 
@@ -880,7 +880,7 @@ void movws0(Sh2& s) {
     s.cycles_elapsed_ = 1;
 }
 
-void movls0(Sh2& s) {
+void BasicInterpreter::movls0(Sh2& s) {
     // Rm -> (R0 + Rn)
     s.modules_.memory()->write<u32>(s.r_[xn00(s)] + s.r_[0], s.r_[x0n0(s)]);
 
@@ -888,7 +888,7 @@ void movls0(Sh2& s) {
     s.cycles_elapsed_ = 1;
 }
 
-void movbl0(Sh2& s) {
+void BasicInterpreter::movbl0(Sh2& s) {
     // (R0 + Rm) -> sign extension -> Rn
     s.r_[xn00(s)] = s.modules_.memory()->read<u8>(s.r_[x0n0(s)] + s.r_[0]);
     if ((s.r_[xn00(s)] & 0x80) == 0) {
@@ -900,7 +900,7 @@ void movbl0(Sh2& s) {
     s.cycles_elapsed_ = 1;
 }
 
-void movwl0(Sh2& s) {
+void BasicInterpreter::movwl0(Sh2& s) {
     // (R0 + Rm) -> sign extension -> Rn
     s.r_[xn00(s)] = s.modules_.memory()->read<u16>(s.r_[x0n0(s)] + s.r_[0]);
     if ((s.r_[xn00(s)] & 0x8000) == 0) {
@@ -912,7 +912,7 @@ void movwl0(Sh2& s) {
     s.cycles_elapsed_ = 1;
 }
 
-void movll0(Sh2& s) {
+void BasicInterpreter::movll0(Sh2& s) {
     // (R0 + Rm) -> Rn
     s.r_[xn00(s)] = s.modules_.memory()->read<u32>(s.r_[x0n0(s)] + s.r_[0]);
 
@@ -920,7 +920,7 @@ void movll0(Sh2& s) {
     s.cycles_elapsed_ = 1;
 }
 
-void movi(Sh2& s) {
+void BasicInterpreter::movi(Sh2& s) {
     // imm -> sign extension -> Rn
     if ((x0nn(s) & 0x80) == 0) {
         s.r_[xn00(s)] = (0xFF & x0nn(s));
@@ -931,7 +931,7 @@ void movi(Sh2& s) {
     s.cycles_elapsed_ = 1;
 }
 
-void movwi(Sh2& s) {
+void BasicInterpreter::movwi(Sh2& s) {
     //(disp * 2 + PC) -> sign extension -> Rn
     auto disp     = u32{(0xFFu & x0nn(s))};
     s.r_[xn00(s)] = s.modules_.memory()->read<u16>(s.pc_ + (disp << 1) + 4); // + 4 added
@@ -944,7 +944,7 @@ void movwi(Sh2& s) {
     s.cycles_elapsed_ = 1;
 }
 
-void movli(Sh2& s) {
+void BasicInterpreter::movli(Sh2& s) {
     //(disp * 4 + PC) -> Rn
     auto disp     = u32{(0xFFu & x0nn(s))};
     s.r_[xn00(s)] = s.modules_.memory()->read<u32>((s.pc_ & 0xFFFFFFFC) + (disp << 2) + 4); // + 4 added
@@ -953,7 +953,7 @@ void movli(Sh2& s) {
     s.cycles_elapsed_ = 1;
 }
 
-void movblg(Sh2& s) {
+void BasicInterpreter::movblg(Sh2& s) {
     //(disp + GBR) -> sign extension -> R0
     auto disp = u32{(0xFFu & x0nn(s))};
     s.r_[0]   = s.modules_.memory()->read<u8>(s.gbr_ + disp);
@@ -966,7 +966,7 @@ void movblg(Sh2& s) {
     s.cycles_elapsed_ = 1;
 }
 
-void movwlg(Sh2& s) {
+void BasicInterpreter::movwlg(Sh2& s) {
     // (disp *2 + BGR) -> sign extension -> R0
     auto disp = u32{(0xFFu & x0nn(s))};
     s.r_[0]   = s.modules_.memory()->read<u16>(s.gbr_ + (disp << 1));
@@ -979,7 +979,7 @@ void movwlg(Sh2& s) {
     s.cycles_elapsed_ = 1;
 }
 
-void movllg(Sh2& s) {
+void BasicInterpreter::movllg(Sh2& s) {
     // (disp *4 + GBR) -> R0
     auto disp = u32{(0xFFu & x0nn(s))};
     s.r_[0]   = s.modules_.memory()->read<u32>(s.gbr_ + (disp << 2));
@@ -988,7 +988,7 @@ void movllg(Sh2& s) {
     s.cycles_elapsed_ = 1;
 }
 
-void movbsg(Sh2& s) {
+void BasicInterpreter::movbsg(Sh2& s) {
     // R0 -> (disp + GBR)
     auto disp = u32{(0xFFu & x0nn(s))};
     s.modules_.memory()->write<u8>(s.gbr_ + disp, static_cast<u8>(s.r_[0]));
@@ -997,7 +997,7 @@ void movbsg(Sh2& s) {
     s.cycles_elapsed_ = 1;
 }
 
-void movwsg(Sh2& s) {
+void BasicInterpreter::movwsg(Sh2& s) {
     // R0 -> (disp *2 + GBR)
     auto disp = u32{(0xFFu & x0nn(s))};
     s.modules_.memory()->write<u16>(s.gbr_ + (disp << 1), static_cast<u16>(s.r_[0]));
@@ -1006,7 +1006,7 @@ void movwsg(Sh2& s) {
     s.cycles_elapsed_ = 1;
 }
 
-void movlsg(Sh2& s) {
+void BasicInterpreter::movlsg(Sh2& s) {
     // R0 -> (disp *4 + GBR)
     auto disp = u32{(0xFFu & x0nn(s))};
     s.modules_.memory()->write<u32>(s.gbr_ + (disp << 2), s.r_[0]);
@@ -1015,7 +1015,7 @@ void movlsg(Sh2& s) {
     s.cycles_elapsed_ = 1;
 }
 
-inline void movbs4(Sh2& s) {
+inline void BasicInterpreter::movbs4(Sh2& s) {
     // R0 -> (disp + Rn)
     auto disp = u32{(0xFu & x00n(s))};
     s.modules_.memory()->write<u8>(s.r_[x0n0(s)] + disp, static_cast<u8>(s.r_[0]));
@@ -1024,7 +1024,7 @@ inline void movbs4(Sh2& s) {
     s.cycles_elapsed_ = 1;
 }
 
-void movws4(Sh2& s) {
+void BasicInterpreter::movws4(Sh2& s) {
     // R0 -> (disp *2 + Rn)
     auto disp = u32{(0xFu & x00n(s))};
     s.modules_.memory()->write<u16>(s.r_[x0n0(s)] + (disp << 1), static_cast<u16>(s.r_[0]));
@@ -1033,7 +1033,7 @@ void movws4(Sh2& s) {
     s.cycles_elapsed_ = 1;
 }
 
-void movls4(Sh2& s) {
+void BasicInterpreter::movls4(Sh2& s) {
     // Rm -> (disp *4 + Rn)
     auto disp = u32{(0xFu & x00n(s))};
     s.modules_.memory()->write<u32>(s.r_[xn00(s)] + (disp << 2), s.r_[x0n0(s)]);
@@ -1042,7 +1042,7 @@ void movls4(Sh2& s) {
     s.cycles_elapsed_ = 1;
 }
 
-void movbl4(Sh2& s) {
+void BasicInterpreter::movbl4(Sh2& s) {
     // (disp + Rm)-> sign extension ->R0
     auto disp = u32{0xFu & x00n(s)};
     s.r_[0]   = s.modules_.memory()->read<u8>(s.r_[x0n0(s)] + disp);
@@ -1055,7 +1055,7 @@ void movbl4(Sh2& s) {
     s.cycles_elapsed_ = 1;
 }
 
-void movwl4(Sh2& s) {
+void BasicInterpreter::movwl4(Sh2& s) {
     // (disp *2 + Rm)-> sign extension ->R0
     auto disp = u32{0xFu & x00n(s)};
     s.r_[0]   = s.modules_.memory()->read<u16>(s.r_[x0n0(s)] + (disp << 1));
@@ -1068,7 +1068,7 @@ void movwl4(Sh2& s) {
     s.cycles_elapsed_ = 1;
 }
 
-void movll4(Sh2& s) {
+void BasicInterpreter::movll4(Sh2& s) {
     // (disp *4 +Rm) -> Rn
     auto disp     = u32{0xFu & x00n(s)};
     s.r_[xn00(s)] = s.modules_.memory()->read<u32>(s.r_[x0n0(s)] + (disp << 2));
@@ -1077,7 +1077,7 @@ void movll4(Sh2& s) {
     s.cycles_elapsed_ = 1;
 }
 
-void mova(Sh2& s) {
+void BasicInterpreter::mova(Sh2& s) {
     // disp *4 + PC -> R0
     auto disp = u32{0xFFu & x0nn(s)};
     s.r_[0]   = (s.pc_ & 0xFFFFFFFC) + (disp << 2) + 4; // + 4 added
@@ -1086,7 +1086,7 @@ void mova(Sh2& s) {
     s.cycles_elapsed_ = 1;
 }
 
-void movt(Sh2& s) {
+void BasicInterpreter::movt(Sh2& s) {
     // T -> Rn
     s.r_[xn00(s)] = s.regs_.sr >> Sh2Regs::StatusRegister::t_shft;
 
@@ -1094,7 +1094,7 @@ void movt(Sh2& s) {
     s.cycles_elapsed_ = 1;
 }
 
-void mull(Sh2& s) {
+void BasicInterpreter::mull(Sh2& s) {
     // Rn * Rm -> MACL
     s.macl_ = s.r_[xn00(s)] * s.r_[x0n0(s)];
 
@@ -1102,7 +1102,7 @@ void mull(Sh2& s) {
     s.cycles_elapsed_ = 2; // 2 to 4
 }
 
-void muls(Sh2& s) {
+void BasicInterpreter::muls(Sh2& s) {
     // signed operation, Rn*Rm -> MACL
     s.macl_ = (static_cast<s32>(static_cast<s16>(s.r_[xn00(s)])) * static_cast<s32>(static_cast<s16>(s.r_[x0n0(s)])));
 
@@ -1110,7 +1110,7 @@ void muls(Sh2& s) {
     s.cycles_elapsed_ = 1; // 1 to 3
 }
 
-void mulu(Sh2& s) {
+void BasicInterpreter::mulu(Sh2& s) {
     // No sign, Rn+Rm -> MAC
     s.macl_ = (static_cast<u32>(static_cast<u16>(s.r_[xn00(s)])) * static_cast<u32>(static_cast<u16>(s.r_[x0n0(s)])));
 
@@ -1118,7 +1118,7 @@ void mulu(Sh2& s) {
     s.cycles_elapsed_ = 1; // 1 to 3
 }
 
-void neg(Sh2& s) {
+void BasicInterpreter::neg(Sh2& s) {
     // 0-Rm -> Rn
     s.r_[xn00(s)] = 0 - s.r_[x0n0(s)];
 
@@ -1126,7 +1126,7 @@ void neg(Sh2& s) {
     s.cycles_elapsed_ = 1;
 }
 
-void negc(Sh2& s) {
+void BasicInterpreter::negc(Sh2& s) {
     auto temp     = u32{0 - s.r_[x0n0(s)]};
     s.r_[xn00(s)] = temp - (s.regs_.sr >> Sh2Regs::StatusRegister::t_shft);
     (0 < temp) ? s.regs_.sr.set(Sh2Regs::StatusRegister::t) : s.regs_.sr.clr(Sh2Regs::StatusRegister::t);
@@ -1135,13 +1135,13 @@ void negc(Sh2& s) {
     s.cycles_elapsed_ = 1;
 }
 
-void nop(Sh2& s) {
+void BasicInterpreter::nop(Sh2& s) {
     // No operation
     s.pc_ += 2;
     s.cycles_elapsed_ = 1;
 }
 
-void not_op(Sh2& s) {
+void BasicInterpreter::not_op(Sh2& s) {
     // -Rm -> Rn
     s.r_[xn00(s)] = ~s.r_[x0n0(s)];
 
@@ -1149,7 +1149,7 @@ void not_op(Sh2& s) {
     s.cycles_elapsed_ = 1;
 }
 
-void or_op(Sh2& s) {
+void BasicInterpreter::or_op(Sh2& s) {
     // Rn | Rm -> Rn
     s.r_[xn00(s)] |= s.r_[x0n0(s)];
 
@@ -1157,7 +1157,7 @@ void or_op(Sh2& s) {
     s.cycles_elapsed_ = 1;
 }
 
-void ori(Sh2& s) {
+void BasicInterpreter::ori(Sh2& s) {
     // R0 | imm -> R0
     s.r_[0] |= (0xFF & x0nn(s));
 
@@ -1165,7 +1165,7 @@ void ori(Sh2& s) {
     s.cycles_elapsed_ = 1;
 }
 
-void orm(Sh2& s) {
+void BasicInterpreter::orm(Sh2& s) {
     // (R0 + GBR) | imm -> (R0 + GBR)
     auto temp = u32{s.modules_.memory()->read<u8>(s.gbr_ + s.r_[0])};
     temp |= (0xFF & x0nn(s));
@@ -1175,7 +1175,7 @@ void orm(Sh2& s) {
     s.cycles_elapsed_ = 3;
 }
 
-void rotcl(Sh2& s) {
+void BasicInterpreter::rotcl(Sh2& s) {
     // T <- Rn <- T
     auto temp = s32{((s.r_[xn00(s)] & 0x80000000) == 0) ? 0 : 1};
     s.r_[xn00(s)] <<= 1;
@@ -1190,7 +1190,7 @@ void rotcl(Sh2& s) {
     s.cycles_elapsed_ = 1;
 }
 
-void rotcr(Sh2& s) {
+void BasicInterpreter::rotcr(Sh2& s) {
     // T -> Rn -> T
     auto temp = s32{((s.r_[xn00(s)] & 0x00000001) == 0) ? 0 : 1};
     s.r_[xn00(s)] >>= 1;
@@ -1205,7 +1205,7 @@ void rotcr(Sh2& s) {
     s.cycles_elapsed_ = 1;
 }
 
-void rotl(Sh2& s) {
+void BasicInterpreter::rotl(Sh2& s) {
     // T <- Rn <- MSB
     ((s.r_[xn00(s)] & 0x80000000) == 0) ? s.regs_.sr.clr(Sh2Regs::StatusRegister::t) : s.regs_.sr.set(Sh2Regs::StatusRegister::t);
     s.r_[xn00(s)] <<= 1;
@@ -1218,7 +1218,7 @@ void rotl(Sh2& s) {
     s.cycles_elapsed_ = 1;
 }
 
-void rotr(Sh2& s) {
+void BasicInterpreter::rotr(Sh2& s) {
     // LSB -> Rn -> T
     ((s.r_[xn00(s)] & 0x00000001) == 0) ? s.regs_.sr.clr(Sh2Regs::StatusRegister::t) : s.regs_.sr.set(Sh2Regs::StatusRegister::t);
     s.r_[xn00(s)] >>= 1;
@@ -1231,7 +1231,7 @@ void rotr(Sh2& s) {
     s.cycles_elapsed_ = 1;
 }
 
-void rte(Sh2& s) {
+void BasicInterpreter::rte(Sh2& s) {
     // Stack -> PC/SR
     // Fixed
     delaySlot(s, s.pc_ + 2);
@@ -1274,7 +1274,7 @@ void rte(Sh2& s) {
     }
 }
 
-void rts(Sh2& s) {
+void BasicInterpreter::rts(Sh2& s) {
     // PR -> PC
     // Arranged and fixed using SH4 manual
     delaySlot(s, s.pc_ + 2);
@@ -1294,7 +1294,7 @@ void rts(Sh2& s) {
     s.cycles_elapsed_ = 2;
 }
 
-void sett(Sh2& s) {
+void BasicInterpreter::sett(Sh2& s) {
     // 1 -> T
     s.regs_.sr.set(Sh2Regs::StatusRegister::t);
 
@@ -1302,7 +1302,7 @@ void sett(Sh2& s) {
     s.cycles_elapsed_ = 1;
 }
 
-void shal(Sh2& s) {
+void BasicInterpreter::shal(Sh2& s) {
     // T <- Rn <- 0
     ((s.r_[xn00(s)] & 0x80000000) == 0) ? s.regs_.sr.clr(Sh2Regs::StatusRegister::t) : s.regs_.sr.set(Sh2Regs::StatusRegister::t);
     s.r_[xn00(s)] <<= 1;
@@ -1311,7 +1311,7 @@ void shal(Sh2& s) {
     s.cycles_elapsed_ = 1;
 }
 
-void shar(Sh2& s) {
+void BasicInterpreter::shar(Sh2& s) {
     // MSB -> Rn -> T
     ((s.r_[xn00(s)] & 0x0000001) == 0) ? s.regs_.sr.clr(Sh2Regs::StatusRegister::t) : s.regs_.sr.set(Sh2Regs::StatusRegister::t);
     auto temp = s32{((s.r_[xn00(s)] & 0x80000000) == 0) ? 0 : 1};
@@ -1325,7 +1325,7 @@ void shar(Sh2& s) {
     s.cycles_elapsed_ = 1;
 }
 
-void shll(Sh2& s) {
+void BasicInterpreter::shll(Sh2& s) {
     // T <- Rn <- 0
     ((s.r_[xn00(s)] & 0x80000000) == 0) ? s.regs_.sr.clr(Sh2Regs::StatusRegister::t) : s.regs_.sr.set(Sh2Regs::StatusRegister::t);
     s.r_[xn00(s)] <<= 1;
@@ -1334,7 +1334,7 @@ void shll(Sh2& s) {
     s.cycles_elapsed_ = 1;
 }
 
-void shll2(Sh2& s) {
+void BasicInterpreter::shll2(Sh2& s) {
     // Rn << 2 -> Rn
     s.r_[xn00(s)] <<= 2;
 
@@ -1342,7 +1342,7 @@ void shll2(Sh2& s) {
     s.cycles_elapsed_ = 1;
 }
 
-void shll8(Sh2& s) {
+void BasicInterpreter::shll8(Sh2& s) {
     // Rn << 8 -> Rn
     s.r_[xn00(s)] <<= 8;
 
@@ -1350,7 +1350,7 @@ void shll8(Sh2& s) {
     s.cycles_elapsed_ = 1;
 }
 
-void shll16(Sh2& s) {
+void BasicInterpreter::shll16(Sh2& s) {
     // Rn << 16 -> Rn
     s.r_[xn00(s)] <<= 16;
 
@@ -1358,7 +1358,7 @@ void shll16(Sh2& s) {
     s.cycles_elapsed_ = 1;
 }
 
-void shlr(Sh2& s) {
+void BasicInterpreter::shlr(Sh2& s) {
     // 0 -> Rn -> T
     ((s.r_[xn00(s)] & 0x00000001) == 0) ? s.regs_.sr.clr(Sh2Regs::StatusRegister::t) : s.regs_.sr.set(Sh2Regs::StatusRegister::t);
     s.r_[xn00(s)] >>= 1;
@@ -1368,7 +1368,7 @@ void shlr(Sh2& s) {
     s.cycles_elapsed_ = 1;
 }
 
-void shlr2(Sh2& s) {
+void BasicInterpreter::shlr2(Sh2& s) {
     // Rn >> 2 -> Rn
     s.r_[xn00(s)] >>= 2;
     s.r_[xn00(s)] &= u30_max;
@@ -1377,7 +1377,7 @@ void shlr2(Sh2& s) {
     s.cycles_elapsed_ = 1;
 }
 
-void shlr8(Sh2& s) {
+void BasicInterpreter::shlr8(Sh2& s) {
     // Rn >> 8 -> Rn
     s.r_[xn00(s)] >>= 8;
     s.r_[xn00(s)] &= 0x00FFFFFF;
@@ -1386,7 +1386,7 @@ void shlr8(Sh2& s) {
     s.cycles_elapsed_ = 1;
 }
 
-void shlr16(Sh2& s) {
+void BasicInterpreter::shlr16(Sh2& s) {
     // Rn >> 16 -> Rn
     s.r_[xn00(s)] >>= 16;
     s.r_[xn00(s)] &= 0x0000FFFF;
@@ -1395,7 +1395,7 @@ void shlr16(Sh2& s) {
     s.cycles_elapsed_ = 1;
 }
 
-void sleep(Sh2& s) {
+void BasicInterpreter::sleep(Sh2& s) {
     // Sleep
     // We'll see later how to implement this operation.
     // It'll involve waiting until an interrupt is fired up
@@ -1410,7 +1410,7 @@ void sleep(Sh2& s) {
     s.cycles_elapsed_ = 3;
 }
 
-void stcsr(Sh2& s) {
+void BasicInterpreter::stcsr(Sh2& s) {
     // SR -> Rn
     s.r_[xn00(s)] = s.regs_.sr.data();
 
@@ -1418,7 +1418,7 @@ void stcsr(Sh2& s) {
     s.cycles_elapsed_ = 1;
 }
 
-void stcgbr(Sh2& s) {
+void BasicInterpreter::stcgbr(Sh2& s) {
     // GBR -> Rn
     s.r_[xn00(s)] = s.gbr_;
 
@@ -1426,7 +1426,7 @@ void stcgbr(Sh2& s) {
     s.cycles_elapsed_ = 1;
 }
 
-void stcvbr(Sh2& s) {
+void BasicInterpreter::stcvbr(Sh2& s) {
     // VBR -> Rn
     s.r_[xn00(s)] = s.vbr_;
 
@@ -1434,7 +1434,7 @@ void stcvbr(Sh2& s) {
     s.cycles_elapsed_ = 1;
 }
 
-void stcmsr(Sh2& s) {
+void BasicInterpreter::stcmsr(Sh2& s) {
     // Rn-4 -> Rn, SR -> (Rn)
     s.r_[xn00(s)] -= 4;
     s.modules_.memory()->write<u32>(s.r_[xn00(s)], s.regs_.sr.data());
@@ -1443,7 +1443,7 @@ void stcmsr(Sh2& s) {
     s.cycles_elapsed_ = 2;
 }
 
-void stcmgbr(Sh2& s) {
+void BasicInterpreter::stcmgbr(Sh2& s) {
     // Rn-4 -> Rn, GBR -> (Rn)
     s.r_[xn00(s)] -= 4;
     s.modules_.memory()->write<u32>(s.r_[xn00(s)], s.gbr_);
@@ -1452,7 +1452,7 @@ void stcmgbr(Sh2& s) {
     s.cycles_elapsed_ = 2;
 }
 
-void stcmvbr(Sh2& s) {
+void BasicInterpreter::stcmvbr(Sh2& s) {
     // Rn-4 -> Rn, VBR -> (Rn)
     s.r_[xn00(s)] -= 4;
     s.modules_.memory()->write<u32>(s.r_[xn00(s)], s.vbr_);
@@ -1461,7 +1461,7 @@ void stcmvbr(Sh2& s) {
     s.cycles_elapsed_ = 2;
 }
 
-void stsmach(Sh2& s) {
+void BasicInterpreter::stsmach(Sh2& s) {
     // MACH -> Rn
     s.r_[xn00(s)] = s.mach_;
 
@@ -1469,7 +1469,7 @@ void stsmach(Sh2& s) {
     s.cycles_elapsed_ = 1;
 }
 
-void stsmacl(Sh2& s) {
+void BasicInterpreter::stsmacl(Sh2& s) {
     // MACL -> Rn
     s.r_[xn00(s)] = s.macl_;
 
@@ -1477,7 +1477,7 @@ void stsmacl(Sh2& s) {
     s.cycles_elapsed_ = 1;
 }
 
-void stspr(Sh2& s) {
+void BasicInterpreter::stspr(Sh2& s) {
     // PR -> Rn
     s.r_[xn00(s)] = s.pr_;
 
@@ -1485,7 +1485,7 @@ void stspr(Sh2& s) {
     s.cycles_elapsed_ = 1;
 }
 
-void stsmmach(Sh2& s) {
+void BasicInterpreter::stsmmach(Sh2& s) {
     // Rn - :4 -> Rn, MACH -> (Rn)
     s.r_[xn00(s)] -= 4;
     s.modules_.memory()->write<u32>(s.r_[xn00(s)], s.mach_);
@@ -1494,7 +1494,7 @@ void stsmmach(Sh2& s) {
     s.cycles_elapsed_ = 1;
 }
 
-void stsmmacl(Sh2& s) {
+void BasicInterpreter::stsmmacl(Sh2& s) {
     // Rn - :4 -> Rn, MACL -> (Rn)
     s.r_[xn00(s)] -= 4;
     s.modules_.memory()->write<u32>(s.r_[xn00(s)], s.macl_);
@@ -1503,7 +1503,7 @@ void stsmmacl(Sh2& s) {
     s.cycles_elapsed_ = 1;
 }
 
-void stsmpr(Sh2& s) {
+void BasicInterpreter::stsmpr(Sh2& s) {
     // Rn - :4 -> Rn, PR -> (Rn)
     s.r_[xn00(s)] -= 4;
     s.modules_.memory()->write<u32>(s.r_[xn00(s)], s.pr_);
@@ -1512,7 +1512,7 @@ void stsmpr(Sh2& s) {
     s.cycles_elapsed_ = 1;
 }
 
-void sub(Sh2& s) {
+void BasicInterpreter::sub(Sh2& s) {
     // Rn - Rm -> Rn
     s.r_[xn00(s)] -= s.r_[x0n0(s)];
 
@@ -1520,7 +1520,7 @@ void sub(Sh2& s) {
     s.cycles_elapsed_ = 1;
 }
 
-void subc(Sh2& s) {
+void BasicInterpreter::subc(Sh2& s) {
     // Rn - Rm - T -> Rn, Carry -> T
     const auto tmp1 = u32{s.r_[xn00(s)] - s.r_[x0n0(s)]};
     const auto tmp0 = u32{s.r_[xn00(s)]};
@@ -1531,7 +1531,7 @@ void subc(Sh2& s) {
     s.cycles_elapsed_ = 1;
 }
 
-void subv(Sh2& s) {
+void BasicInterpreter::subv(Sh2& s) {
     // Rn - Rm -> Rn, underflow -> T
     const auto dest = s32{(static_cast<s32>(s.r_[xn00(s)]) >= 0) ? 0 : 1};
     const auto src  = s32{(static_cast<s32>(s.r_[x0n0(s)]) >= 0) ? 0 : 1};
@@ -1549,7 +1549,7 @@ void subv(Sh2& s) {
     s.cycles_elapsed_ = 1;
 }
 
-void swapb(Sh2& s) {
+void BasicInterpreter::swapb(Sh2& s) {
     // Rm -> bytes swap -> Rn
     const auto temp0 = u32{s.r_[x0n0(s)] & 0xFFFF0000};
     const auto temp1 = u32{(s.r_[x0n0(s)] & 0xFF) << 8};
@@ -1560,7 +1560,7 @@ void swapb(Sh2& s) {
     s.cycles_elapsed_ = 1;
 }
 
-void swapw(Sh2& s) {
+void BasicInterpreter::swapw(Sh2& s) {
     // Rm -> words swap -> Rn
     const auto temp = u32{(s.r_[x0n0(s)] >> 16) & 0x0000FFFF};
     s.r_[xn00(s)]   = s.r_[x0n0(s)] << 16;
@@ -1570,7 +1570,7 @@ void swapw(Sh2& s) {
     s.cycles_elapsed_ = 1;
 }
 
-void tas(Sh2& s) {
+void BasicInterpreter::tas(Sh2& s) {
     // If (Rn) = 0, 1 -> T, 1 -> MSB of (Rn)
     auto temp = u32{s.modules_.memory()->read<u8>(s.r_[xn00(s)])};
     (temp == 0) ? s.regs_.sr.set(Sh2Regs::StatusRegister::t) : s.regs_.sr.clr(Sh2Regs::StatusRegister::t);
@@ -1581,7 +1581,7 @@ void tas(Sh2& s) {
     s.cycles_elapsed_ = 4;
 }
 
-void trapa(Sh2& s) {
+void BasicInterpreter::trapa(Sh2& s) {
     // PC/SR -> stack, (imm*4 + VBR) -> PC
     const auto imm = u32{(0xFFu & x0nn(s))};
     s.r_[sp_register_index] -= 4;
@@ -1593,7 +1593,7 @@ void trapa(Sh2& s) {
     s.cycles_elapsed_ = 8; // NOLINT(readability-magic-numbers)
 }
 
-void tst(Sh2& s) {
+void BasicInterpreter::tst(Sh2& s) {
     // Rn & Rm, if result = 0, 1 -> T
     ((s.r_[xn00(s)] & s.r_[x0n0(s)]) == 0) ? s.regs_.sr.set(Sh2Regs::StatusRegister::t)
                                            : s.regs_.sr.clr(Sh2Regs::StatusRegister::t);
@@ -1602,7 +1602,7 @@ void tst(Sh2& s) {
     s.cycles_elapsed_ = 1;
 }
 
-void tsti(Sh2& s) {
+void BasicInterpreter::tsti(Sh2& s) {
     // R0 & imm, if result is 0, 1 -> T
     ((s.r_[0] & (0xFF & x0nn(s))) == 0) ? s.regs_.sr.set(Sh2Regs::StatusRegister::t) : s.regs_.sr.clr(Sh2Regs::StatusRegister::t);
 
@@ -1610,7 +1610,7 @@ void tsti(Sh2& s) {
     s.cycles_elapsed_ = 1;
 }
 
-void tstm(Sh2& s) {
+void BasicInterpreter::tstm(Sh2& s) {
     // (R0 + GBR) & imm, if result is 0, 1 -> T
     auto temp = u32{s.modules_.memory()->read<u8>(s.gbr_ + s.r_[0])};
     temp &= (0xFF & x0nn(s));
@@ -1620,7 +1620,7 @@ void tstm(Sh2& s) {
     s.cycles_elapsed_ = 3;
 }
 
-void xor_op(Sh2& s) {
+void BasicInterpreter::xor_op(Sh2& s) {
     // Rn^Rm -> Rn
     s.r_[xn00(s)] ^= s.r_[x0n0(s)];
 
@@ -1628,7 +1628,7 @@ void xor_op(Sh2& s) {
     s.cycles_elapsed_ = 1;
 }
 
-void xori(Sh2& s) {
+void BasicInterpreter::xori(Sh2& s) {
     // R0 ^imm -> R0
     s.r_[0] ^= (0xFF & x0nn(s));
 
@@ -1636,7 +1636,7 @@ void xori(Sh2& s) {
     s.cycles_elapsed_ = 1;
 }
 
-void xorm(Sh2& s) {
+void BasicInterpreter::xorm(Sh2& s) {
     // (R0 + GBR)^imm -> (R0 + GBR)
     auto temp = u32{s.modules_.memory()->read<u8>(s.gbr_ + s.r_[0])};
     temp ^= (0xFF & x0nn(s));
@@ -1646,7 +1646,7 @@ void xorm(Sh2& s) {
     s.cycles_elapsed_ = 3;
 }
 
-void xtrct(Sh2& s) {
+void BasicInterpreter::xtrct(Sh2& s) {
     // Middle 32 bits of Rm and Rn -> Rn
     const auto temp = u32{(s.r_[x0n0(s)] << 16) & 0xFFFF0000};
     s.r_[xn00(s)]   = (s.r_[xn00(s)] >> 16) & 0x0000FFFF;
