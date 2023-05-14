@@ -162,6 +162,9 @@
     <ClCompile Include="src\sh2\basic_interpreter\sh2_disasm.cpp">
       <Filter>Fichiers sources\sh2\basic_interpreter</Filter>
     </ClCompile>
+    <ClCompile Include="src\sh2\sh2_shared.cpp">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\config.h">
@@ -335,10 +338,13 @@
     <ClInclude Include="src\sh2\basic_interpreter\sh2_disasm.h">
       <Filter>Fichiers sources\sh2\basic_interpreter</Filter>
     </ClInclude>
+    <ClInclude Include="src\sh2\sh2_shared.h">
+      <Filter>Fichiers sources\sh2</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="src\sh2\fast_interpreter\sh2_opcodes.inc">
-      <Filter>Fichiers d%27en-tête</Filter>
+      <Filter>Fichiers sources\sh2\fast_interpreter</Filter>
     </None>
   </ItemGroup>
 </Project>

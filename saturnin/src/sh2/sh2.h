@@ -38,6 +38,7 @@
 
 // Forward declarations
 namespace saturnin::core {
+class Config;
 class EmulatorContext;
 class EmulatorModules;
 class Scu;
@@ -837,11 +838,24 @@ class Sh2 {
     bool is_nmi_registered_{false};                                    ///< True if a Non Maskable Interrupt is registered
 };
 
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \fn	bool sh2CoreSetup(core::Config* config);
+///
+/// \brief	Sets up data needed by the current Sh2 core.
+///
+/// \author	Runik
+/// \date	13/05/2023
+///
+/// \param [in,out]	config	Pointer to the configuration object.
+///
+/// \returns	True if it succeeds, false if it fails.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+bool sh2CoreSetup(core::Config* config);
+
 inline auto isInstructionIllegal(u16 inst) -> bool;
 
 inline void delaySlot(Sh2& s, u32 addr);
-
-void badOpcode(Sh2& s);
 
 // std::function<ExecuteFunc> execute;
 

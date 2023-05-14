@@ -345,6 +345,11 @@ auto Config::getAreaCodeKey(const AreaCode value) const -> std::optional<std::st
     return std::nullopt;
 }
 
+auto Config::getCurrentSh2Core() -> sh2::Sh2Core {
+    const std::string key = readValue(core::AccessKeys::cfg_advanced_sh2_core);
+    return sh2_core_[key];
+}
+
 void Config::updateLogLevel() {
     using enum AccessKeys;
     Log::setLogLevel("cdrom", getLogLevel(readValue(cfg_log_cdrom)));

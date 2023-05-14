@@ -29,7 +29,6 @@
 #include <string> // string
 #include <saturnin/src/emulator_defs.h>
 #include <saturnin/src/sh2/sh2_shared.h>
-
 #include <saturnin/src/sh2/basic_interpreter/sh2_disasm.h>
 
 namespace saturnin::sh2 {

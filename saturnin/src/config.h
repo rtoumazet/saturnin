@@ -705,6 +705,19 @@ class Config {
     auto getAreaCodeKey(const AreaCode value) const -> std::optional<std::string>;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn	auto Config::getCurrentSh2Core() -> sh2::Sh2Core;
+    ///
+    /// \brief	Returns the SH2 core saved in the configuration.
+    ///
+    /// \author	Runik
+    /// \date	13/05/2023
+    ///
+    /// \returns	The SH2 core.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    auto getCurrentSh2Core() -> sh2::Sh2Core;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn void Config::updateLogLevel();
     ///
     /// \brief  Updates the log level of the various loggers.

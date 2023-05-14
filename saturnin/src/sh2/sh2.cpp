@@ -20,6 +20,7 @@
 #include <saturnin/src/pch.h>
 #include <istream>
 #include <saturnin/src/sh2/sh2.h>
+#include <saturnin/src/config.h>
 #include <saturnin/src/emulator_context.h>
 #include <saturnin/src/interrupt_controller.h> //Interrupt
 #include <saturnin/src/interrupt_sources.h>
@@ -31,6 +32,7 @@ namespace is = saturnin::core::interrupt_source;
 
 namespace saturnin::sh2 {
 
+using core::Config;
 using core::Log;
 using core::Logger;
 
@@ -1396,6 +1398,24 @@ void Sh2::setBinaryFileStartAddress(const u32 val) {
     binary_file_start_address_ = val;
 }
 
+bool sh2CoreSetup(core::Config* config) {
+    switch (config->getCurrentSh2Core()) {
+        using enum Sh2Core;
+        case basic_interpreter: {
+            sh2::basic_interpreter::initializeOpcodesLut();
+            break;
+        }
+        case fast_interpreter: {
+            break;
+        }
+        default: {
+            Log::warning(Logger::sh2, "Unknown SH2 core !");
+        }
+    }
+
+    return true;
+}
+
 auto isInstructionIllegal(const u16 inst) -> bool {
     // 'Illegal Slot' detection
     // Returns true if an ISI (illegal slot instruction) is detected
@@ -1426,13 +1446,6 @@ void delaySlot(Sh2& s, const u32 addr) {
             s.cycles_elapsed_ += current_inst_cycles;
         }
     }
-}
-
-void badOpcode(Sh2& s) {
-    const auto type = std::string{(s.sh2_type_ == Sh2Type::master) ? "Master" : "Slave"};
-    Log::error(Logger::sh2, "Unexpected opcode({} SH2). Opcode = {:#06x}. PC = {:#010x}", type, s.current_opcode_, s.pc_);
-
-    s.modules_.context()->debugStatus(core::DebugStatus::paused);
 }
 
 } // namespace saturnin::sh2

@@ -366,6 +366,7 @@
     <ClInclude Include="src\exceptions.h" />
     <ClCompile Include="src\sh2\fast_interpreter\opcodes_generator.cpp" />
     <ClCompile Include="src\sh2\fast_interpreter\sh2_opcodes.cpp" />
+    <ClCompile Include="src\sh2\sh2_shared.cpp" />
     <ClCompile Include="src\sound\scsp.cpp" />
     <ClCompile Include="src\tests.cpp" />
     <ClCompile Include="src\thread_pool.cpp" />

@@ -96,7 +96,7 @@ auto EmulatorContext::initialize(int argc, char* argv[]) -> bool {
         {"set-pc", {"-s", "--set-pc"}, tr("Address to set the PC after loading the binary file, in hex. Default is 0x6004000."), 1},
         {"load-address", {"-l", "--load-address"}, tr("Saturn memory address to load the binary file to, in hex. Default is 0x6004000."), 1},
         {"auto-start", {"-a", "--auto-start"}, tr("Will auto start the emulator after loading when present."),},
-        {"generate-sh2-opcodes", {"-g", "--generate-sh2-opcodes"}, tr("Generates an file containing SH2 opcodes."),}
+        {"generate-sh2-opcodes", {"-g", "--generate-sh2-opcodes"}, tr("Generates a file containing SH2 opcodes."),}
 
     }};
     // clang-format on
@@ -180,7 +180,7 @@ void EmulatorContext::pauseEmulation() { debugStatus(DebugStatus::paused); }
 void EmulatorContext::emulationSetup() {
     memory()->initialize(hardware_mode_);
 
-    sh2::basic_interpreter::initializeOpcodesLut();
+    sh2::sh2CoreSetup(config());
     masterSh2()->powerOnReset();
     slaveSh2()->powerOnReset();
     smpc()->initialize();

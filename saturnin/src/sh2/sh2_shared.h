@@ -29,6 +29,9 @@
 
 namespace saturnin::sh2 {
 
+// Forward declaration
+class Sh2;
+
 constexpr auto opcodes_lut_size = u32{0x10000}; ///< Size of the opcodes lookup table
 
 /// \name Opcode decoding helpers
@@ -39,4 +42,17 @@ inline auto xnnn(const u16 inst) -> u16 { return (inst & 0xFFF); }
 inline auto x0nn(const u16 inst) -> u8 { return static_cast<u8>(inst & 0xFFu); }
 inline auto x00n(const u16 inst) -> u8 { return static_cast<u8>(inst & 0xF); }
 //@}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \fn	void badOpcode(Sh2& s);
+///
+/// \brief	Function called when an invalid opcode is reached.
+///
+/// \author	Runik
+/// \date	13/05/2023
+///
+/// \param [in,out]	s	Sh2 processor to process.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void badOpcode(Sh2& s);
 } // namespace saturnin::sh2
