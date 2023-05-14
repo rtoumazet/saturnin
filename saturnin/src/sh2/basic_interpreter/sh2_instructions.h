@@ -191,6 +191,8 @@ struct BasicInterpreter {
     static void xorm(Sh2& s);
     static void xtrct(Sh2& s);
     //@}
+
+    static void delaySlot(Sh2& s, u32 addr);
 };
 
 constexpr auto instructions_number = u8{142}; ///< Total number of SH2 instructions used.
@@ -372,6 +374,8 @@ static const auto opcodes_table=std::array<Sh2Instruction, instructions_number>
 // clang-format on
 
 void initializeOpcodesLut();
+
+inline auto isInstructionIllegal(u16 inst) -> bool;
 
 void execute(Sh2& s);
 

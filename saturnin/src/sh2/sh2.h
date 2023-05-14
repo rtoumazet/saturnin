@@ -765,6 +765,8 @@ class Sh2 {
 
     void runFreeRunningTimer(u8 cycles_to_run);
 
+    static std::function<ExecuteFunc> execute;
+
     friend struct basic_interpreter::BasicInterpreter;
     friend struct fast_interpreter::FastInterpreter;
 
@@ -853,9 +855,9 @@ class Sh2 {
 
 bool sh2CoreSetup(core::Config* config);
 
-inline auto isInstructionIllegal(u16 inst) -> bool;
+// inline auto isInstructionIllegal(u16 inst) -> bool;
 
-inline void delaySlot(Sh2& s, u32 addr);
+// inline void delaySlot(Sh2& s, u32 addr);
 
 // std::function<ExecuteFunc> execute;
 

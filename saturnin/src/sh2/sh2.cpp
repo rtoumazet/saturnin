@@ -1416,36 +1416,36 @@ bool sh2CoreSetup(core::Config* config) {
     return true;
 }
 
-auto isInstructionIllegal(const u16 inst) -> bool {
-    // 'Illegal Slot' detection
-    // Returns true if an ISI (illegal slot instruction) is detected
-    return basic_interpreter::illegal_instruction_lut[inst];
-}
+// auto isInstructionIllegal(const u16 inst) -> bool {
+//     // 'Illegal Slot' detection
+//     // Returns true if an ISI (illegal slot instruction) is detected
+//     return basic_interpreter::illegal_instruction_lut[inst];
+// }
 
-void delaySlot(Sh2& s, const u32 addr) {
-    // Algorithm :
-    // Addr read and intruction fetch
-    // if the instruction is BF,BT,BRA,BSR,JMP,JSR,RTS,RTE,TRAPA,BF/S,BT/S,BRAF or BSRF then
-    //		-> illegal instruction slot
-    // else
-    //		Slot instruction execution
-    // end
-
-    auto current_inst_cycles = u32{s.cycles_elapsed_}; // We musn't forget the DS instruction count
-    if (addr != ignored_delay_slot_address) { // Delay slot isn't detected after the Power On Reset (to prevent the "illegal
-                                              // instruction slot")
-
-        s.current_opcode_ = s.modules_.memory()->read<u16>(addr);
-
-        if (isInstructionIllegal(s.current_opcode_)) {
-            Log::error(Logger::sh2, "Illegal instruction slot");
-            s.modules_.context()->emulationStatus(core::EmulationStatus::stopped);
-        } else {
-            // Delay slot instruction execution
-            basic_interpreter::execute(s);
-            s.cycles_elapsed_ += current_inst_cycles;
-        }
-    }
-}
+// void delaySlot(Sh2& s, const u32 addr) {
+//     // Algorithm :
+//     // Addr read and intruction fetch
+//     // if the instruction is BF,BT,BRA,BSR,JMP,JSR,RTS,RTE,TRAPA,BF/S,BT/S,BRAF or BSRF then
+//     //		-> illegal instruction slot
+//     // else
+//     //		Slot instruction execution
+//     // end
+//
+//     auto current_inst_cycles = u32{s.cycles_elapsed_}; // We musn't forget the DS instruction count
+//     if (addr != ignored_delay_slot_address) { // Delay slot isn't detected after the Power On Reset (to prevent the "illegal
+//                                               // instruction slot")
+//
+//         s.current_opcode_ = s.modules_.memory()->read<u16>(addr);
+//
+//         if (isInstructionIllegal(s.current_opcode_)) {
+//             Log::error(Logger::sh2, "Illegal instruction slot");
+//             s.modules_.context()->emulationStatus(core::EmulationStatus::stopped);
+//         } else {
+//             // Delay slot instruction execution
+//             basic_interpreter::execute(s);
+//             s.cycles_elapsed_ += current_inst_cycles;
+//         }
+//     }
+// }
 
 } // namespace saturnin::sh2

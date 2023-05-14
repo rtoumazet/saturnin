@@ -34,7 +34,7 @@ class Sh2;
 
 using OpcodeFunc = void (*)(Sh2&);
 
-extern void delaySlot(Sh2& s, u32 addr);
+// extern void delaySlot(Sh2& s, u32 addr);
 } // namespace saturnin::sh2
 
 namespace saturnin::sh2::fast_interpreter {
@@ -184,5 +184,10 @@ struct FastInterpreter {
     static void xtrct(Sh2& s, const u32 n, const u32 m);
 
     static void execute(Sh2& s);
+
+    static void delaySlot(Sh2& s, u32 addr);
 };
+
+inline auto isInstructionIllegal(u16 inst) -> bool;
+
 } // namespace saturnin::sh2::fast_interpreter
