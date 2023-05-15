@@ -186,6 +186,19 @@ struct FastInterpreter {
     static void execute(Sh2& s);
 
     static void delaySlot(Sh2& s, u32 addr);
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn	void badOpcode(Sh2& s);
+    ///
+    /// \brief	Function called when an invalid opcode is reached.
+    ///
+    /// \author	Runik
+    /// \date	13/05/2023
+    ///
+    /// \param [in,out]	s	Sh2 processor to process.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    static void badOpcode(Sh2& s);
 };
 
 inline auto isInstructionIllegal(u16 inst) -> bool;

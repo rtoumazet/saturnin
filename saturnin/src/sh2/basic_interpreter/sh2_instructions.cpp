@@ -1695,6 +1695,13 @@ void BasicInterpreter::delaySlot(Sh2& s, const u32 addr) {
     }
 }
 
+void BasicInterpreter::badOpcode(Sh2& s) {
+    const auto type = std::string{(s.sh2_type_ == Sh2Type::master) ? "Master" : "Slave"};
+    Log::error(Logger::sh2, "Unexpected opcode({} SH2). Opcode = {:#06x}. PC = {:#010x}", type, s.current_opcode_, s.pc_);
+
+    s.modules_.context()->debugStatus(core::DebugStatus::paused);
+}
+
 auto isInstructionIllegal(const u16 inst) -> bool {
     // 'Illegal Slot' detection
     // Returns true if an ISI (illegal slot instruction) is detected
@@ -1712,7 +1719,7 @@ void initializeOpcodesLut() {
                 calls_subroutine_lut[counter]    = opcodes_table[i].is_subroutine_call;
                 break;
             }
-            opcodes_lut[counter]             = &sh2::badOpcode;
+            opcodes_lut[counter]             = &BasicInterpreter::badOpcode;
             opcodes_disasm_lut[counter]      = &badOpcode_d;
             illegal_instruction_lut[counter] = false;
             calls_subroutine_lut[counter]    = false;

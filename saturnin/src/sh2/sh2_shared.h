@@ -54,5 +54,5 @@ inline auto x00n(const u16 inst) -> u8 { return static_cast<u8>(inst & 0xF); }
 /// \param [in,out]	s	Sh2 processor to process.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void badOpcode(Sh2& s);
+// void badOpcode(Sh2& s);
 } // namespace saturnin::sh2

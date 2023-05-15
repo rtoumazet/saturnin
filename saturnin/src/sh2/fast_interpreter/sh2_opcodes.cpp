@@ -1586,6 +1586,13 @@ void FastInterpreter::delaySlot(Sh2& s, const u32 addr) {
     }
 }
 
+void FastInterpreter::badOpcode(Sh2& s) {
+    const auto type = std::string{(s.sh2_type_ == Sh2Type::master) ? "Master" : "Slave"};
+    Log::error(Logger::sh2, "Unexpected opcode({} SH2). Opcode = {:#06x}. PC = {:#010x}", type, s.current_opcode_, s.pc_);
+
+    s.modules_.context()->debugStatus(core::DebugStatus::paused);
+}
+
 auto isInstructionIllegal(const u16 inst) -> bool {
     // 'Illegal Slot' detection
     // Returns true if an ISI (illegal slot instruction) is detected

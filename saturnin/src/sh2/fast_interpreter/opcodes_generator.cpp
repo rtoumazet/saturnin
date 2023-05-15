@@ -430,7 +430,7 @@ auto generateBadOpcodes(GeneratedArray& arr) -> std::string {
     std::array<u8, 4> counters{};
     auto              func_template = R"(
 void call_{0:x}_{1:x}_{2:x}_{3:x}(Sh2& s){{
-    badOpcode(s);
+    FastInterpreter::badOpcode(s);
 }})";
     for (int call_counter = 0; call_counter < call_max; ++call_counter) {
         if (!arr[counters[0]][counters[1]][counters[2]][counters[3]]) {

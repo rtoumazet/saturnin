@@ -25,9 +25,10 @@
 
 #pragma once
 
-#include <array>  // array
-#include <mutex>  // mutex
-#include <vector> // vector
+#include <array>      // array
+#include <functional> // function
+#include <mutex>      // mutex
+#include <vector>     // vector
 #include <saturnin/src/emulator_defs.h>
 #include <saturnin/src/emulator_modules.h>
 #include <saturnin/src/log.h>
@@ -528,6 +529,8 @@ class Sh2 {
 
     void setBinaryFileStartAddress(const u32 val);
 
+    inline static std::function<ExecuteFunc> execute{};
+
     EmulatorModules modules_; ///< Modules of the emulator
 
   private:
@@ -765,13 +768,9 @@ class Sh2 {
 
     void runFreeRunningTimer(u8 cycles_to_run);
 
-    static std::function<ExecuteFunc> execute;
-
     friend struct basic_interpreter::BasicInterpreter;
     friend struct fast_interpreter::FastInterpreter;
 
-    friend void delaySlot(Sh2& s, u32 addr);
-    friend void badOpcode(Sh2& s);
     friend void basic_interpreter::execute(Sh2& s);
 
     std::array<u8, cache_address_size>   cache_addresses_;          ///< Cache addresses (1KB).
@@ -854,11 +853,5 @@ class Sh2 {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 bool sh2CoreSetup(core::Config* config);
-
-// inline auto isInstructionIllegal(u16 inst) -> bool;
-
-// inline void delaySlot(Sh2& s, u32 addr);
-
-// std::function<ExecuteFunc> execute;
 
 } // namespace saturnin::sh2

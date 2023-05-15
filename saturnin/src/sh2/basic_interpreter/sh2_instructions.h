@@ -193,6 +193,19 @@ struct BasicInterpreter {
     //@}
 
     static void delaySlot(Sh2& s, u32 addr);
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn	void badOpcode(Sh2& s);
+    ///
+    /// \brief	Function called when an invalid opcode is reached.
+    ///
+    /// \author	Runik
+    /// \date	13/05/2023
+    ///
+    /// \param [in,out]	s	Sh2 processor to process.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    static void badOpcode(Sh2& s);
 };
 
 constexpr auto instructions_number = u8{142}; ///< Total number of SH2 instructions used.
