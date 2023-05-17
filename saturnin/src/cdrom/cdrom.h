@@ -137,7 +137,7 @@ constexpr auto SLEN_2352 = u8{3};
 
 constexpr auto FILTER_NOT_CONNECTED = u8{0xFF}; ///< No filter connexion.
 
-constexpr auto INVALID_FAD = u32{0xFFFFFF}; ///< Invalid FAD.
+constexpr auto INVALID_FAD = u32{0xFFFFFF};     ///< Invalid FAD.
 
 /// \name Number of cycles to read a sector
 //@{
@@ -451,7 +451,7 @@ class Cdrom {
 
     void run(u8 cycles);
 
-    auto getRegisters() -> std::vector<std::string>;
+    auto getRegisters() const -> std::vector<std::string>;
 
     //--------------------------------------------------------------------------------------------------------------
     // PRIVATE section

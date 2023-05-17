@@ -23,7 +23,7 @@
 #include <istream>
 #include <saturnin/src/emulator_context.h>
 #include <saturnin/src/locale.h>
-#include <saturnin/src/log.h> // Log
+#include <saturnin/src/log.h>       // Log
 #include <saturnin/src/smpc.h>
 #include <saturnin/src/utilities.h> // toUnderlying, format
 #include <saturnin/src/cdrom/scsi.h>
@@ -71,7 +71,7 @@ std::vector<std::string> Cdrom::scsi_drives_list = {};
 
 /* static */
 auto Cdrom::getDriveIndice(const s8 path, const s8 target, const s8 lun) -> u8 {
-    const auto it = std::find_if(di_list.begin(), di_list.end(), [path, target, lun](const ScsiDriveInfo& di) {
+    const auto it = std::ranges::find_if(di_list, [path, target, lun](const ScsiDriveInfo& di) {
         return (di.path == path) && (di.target == target) && (di.lun == lun);
     });
     return static_cast<u8>(it - di_list.begin()); // returns the indice
@@ -958,10 +958,6 @@ void Cdrom::executeCommand() {
         // MessageBox(NULL,L"CalculateActualSize: numberOfSectors==0xFFFF",L"unimplemented",MB_ICONWARNING);
         //
         //			actualSize=0;
-        //			/*for (int32_t i=sectorPosInBuffer;i<(sectorPosInBuffer+numberOfSectors);i++)
-        //			{
-        //				if (bufferPartitions[buffer].sectors[i]) actualSize+=bufferPartitions[buffer].sectors[i]->size;
-        //			}*/
         //
         //			// Is the range included in one partition
         //			int32_t i;
@@ -1943,7 +1939,7 @@ void Cdrom::run(const u8 cycles) {
     }
 }
 
-auto Cdrom::getRegisters() -> std::vector<std::string> {
+auto Cdrom::getRegisters() const -> std::vector<std::string> {
     std::vector<std::string> registers;
     registers.emplace_back(uti::format("HIrq Status Register : {:#06x}", regs_.hirqreq.data()));
     registers.emplace_back(uti::format("HIrq Mask Register : {:#06x}", regs_.hirqmask.data()));
@@ -2107,7 +2103,7 @@ void Cdrom::reset() {
 
     regs_.hirqmask = {u16_max};
 
-    constexpr auto cr1_default = u8{0x43}; // 'C'
+    constexpr auto cr1_default = u8{0x43};    // 'C'
     regs_.cr1.upd(Cr::loByte(cr1_default));
     constexpr auto cr2_default = u16{0x4442}; // 'DB'
     regs_.cr2                  = cr2_default;
@@ -2345,9 +2341,9 @@ void Cdrom::abortFile() {
 
 void Cdrom::getCopyError() {
     // Status(8) | Copy error value (8)
-    // 0x0000
-    // 0x0000
-    // 0x0000
+    // Zero
+    // Zero
+    // Zero
 
     regs_.cr1.upd(Cr::status_enum, cd_drive_status_);
     regs_.cr1.upd(Cr::loByte(0));
