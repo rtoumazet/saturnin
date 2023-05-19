@@ -1689,7 +1689,7 @@ void BasicInterpreter::delaySlot(Sh2& s, const u32 addr) {
             s.modules_.context()->emulationStatus(core::EmulationStatus::stopped);
         } else {
             // Delay slot instruction execution
-            basic_interpreter::execute(s);
+            execute(s);
             s.cycles_elapsed_ += current_inst_cycles;
         }
     }
@@ -1728,7 +1728,7 @@ void initializeOpcodesLut() {
     }
 }
 
-void execute(Sh2& s) {
+void BasicInterpreter::execute(Sh2& s) {
     switch (s.modules_.context()->debugStatus()) {
         using enum core::DebugStatus;
         case step_over: {

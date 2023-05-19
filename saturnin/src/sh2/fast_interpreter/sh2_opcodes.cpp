@@ -1533,31 +1533,37 @@ void FastInterpreter::xtrct(Sh2& s, const u32 n, const u32 m) {
 }
 
 void FastInterpreter::execute(Sh2& s) {
-    // switch (s.modules_.context()->debugStatus()) {
-    //     using enum core::DebugStatus;
-    //     case step_over: {
-    //         if (!calls_subroutine_lut[s.current_opcode_]) {
-    //             //
-    //             s.modules_.context()->debugStatus(core::DebugStatus::paused);
-    //         } else {
-    //             s.modules_.context()->debugStatus(core::DebugStatus::wait_end_of_routine);
-    //             s.initializeSubroutineDepth();
-    //         }
-    //         break;
-    //     }
-    //     case step_into: {
-    //         s.modules_.context()->debugStatus(core::DebugStatus::paused);
-    //         break;
-    //     }
-    //     default: break;
-    // }
+    switch (s.modules_.context()->debugStatus()) {
+        using enum core::DebugStatus;
+        // case step_over: {
+        //     if (!calls_subroutine_lut[s.current_opcode_]) {
+        //         //
+        //         s.modules_.context()->debugStatus(core::DebugStatus::paused);
+        //     } else {
+        //         s.modules_.context()->debugStatus(core::DebugStatus::wait_end_of_routine);
+        //         s.initializeSubroutineDepth();
+        //     }
+        //     break;
+        // }
+        case step_into: {
+            s.modules_.context()->debugStatus(core::DebugStatus::paused);
+            break;
+        }
+        default: break;
+    }
 
-    // opcodes_lut[s.current_opcode_](s);
+    constexpr auto cycles_to_execute = u8{20};
+    auto           executed_cycles   = u8{};
+    while (executed_cycles <= cycles_to_execute) {
+        opcodes_func[s.current_opcode_](s);
+        executed_cycles += s.cycles_elapsed_;
+    }
+    s.cycles_elapsed_ = executed_cycles;
 
-    // if (std::ranges::any_of(s.breakpoints_, [&s](const u32 bp) { return s.getRegister(Sh2Register::pc) == bp; })) {
-    //     s.modules_.context()->debugStatus(core::DebugStatus::paused);
-    //     Log::info(Logger::sh2, core::tr("Breakpoint reached !"));
-    // }
+    if (std::ranges::any_of(s.breakpoints_, [&s](const u32 bp) { return s.getRegister(Sh2Register::pc) == bp; })) {
+        s.modules_.context()->debugStatus(core::DebugStatus::paused);
+        Log::info(Logger::sh2, core::tr("Breakpoint reached !"));
+    }
 }
 
 void FastInterpreter::delaySlot(Sh2& s, const u32 addr) {

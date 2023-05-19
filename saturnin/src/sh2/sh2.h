@@ -771,7 +771,7 @@ class Sh2 {
     friend struct basic_interpreter::BasicInterpreter;
     friend struct fast_interpreter::FastInterpreter;
 
-    friend void basic_interpreter::execute(Sh2& s);
+    // friend void basic_interpreter::execute(Sh2& s);
 
     std::array<u8, cache_address_size>   cache_addresses_;          ///< Cache addresses (1KB).
     std::array<u8, cache_data_size>      cache_data_;               ///< Cache data (4KB).

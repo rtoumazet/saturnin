@@ -206,6 +206,8 @@ struct BasicInterpreter {
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     static void badOpcode(Sh2& s);
+
+    static void execute(Sh2& s);
 };
 
 constexpr auto instructions_number = u8{142}; ///< Total number of SH2 instructions used.
@@ -389,7 +391,5 @@ static const auto opcodes_table=std::array<Sh2Instruction, instructions_number>
 void initializeOpcodesLut();
 
 inline auto isInstructionIllegal(u16 inst) -> bool;
-
-void execute(Sh2& s);
 
 } // namespace saturnin::sh2::basic_interpreter

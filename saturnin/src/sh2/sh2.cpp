@@ -26,6 +26,7 @@
 #include <saturnin/src/interrupt_sources.h>
 #include <saturnin/src/scu.h>
 #include <saturnin/src/sh2/basic_interpreter/sh2_instructions.h>
+#include <saturnin/src/sh2/fast_interpreter/sh2_opcodes.h>
 #include <saturnin/src/utilities.h>
 
 namespace is = saturnin::core::interrupt_source;
@@ -1403,11 +1404,12 @@ bool sh2CoreSetup(core::Config* config) {
     switch (config->getCurrentSh2Core()) {
         using enum Sh2Core;
         case basic_interpreter: {
-            Sh2::execute = &basic_interpreter::execute;
+            Sh2::execute = &basic_interpreter::BasicInterpreter::execute;
             basic_interpreter::initializeOpcodesLut();
             break;
         }
         case fast_interpreter: {
+            Sh2::execute = &fast_interpreter::FastInterpreter::execute;
             break;
         }
         default: {
