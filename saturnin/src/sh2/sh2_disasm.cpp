@@ -18,7 +18,7 @@
 //
 
 #include <saturnin/src/pch.h>
-#include <saturnin/src/sh2/basic_interpreter/sh2_disasm.h>
+#include <saturnin/src/sh2/sh2_disasm.h>
 #include <istream>
 #include <fmt/format.h>
 #include <saturnin/src/sh2/sh2_shared.h>
@@ -26,7 +26,9 @@
 
 namespace uti = saturnin::utilities;
 
-namespace saturnin::sh2::basic_interpreter {
+namespace saturnin::sh2 {
+
+// std::array<DisasmType, opcodes_lut_size> opcodes_disasm_lut; ///< The opcodes disasm LUT, used for instruction fast fetching
 
 auto badOpcode_d(const u32 pc, const u16 opcode) -> std::string {
     return uti::format("{:#010x} {:#06x} Unknown opcode", pc, opcode);
@@ -462,6 +464,6 @@ auto xtrct_d(const u32 pc, const u16 opcode) -> std::string {
     return uti::format("{:#010x} {:#06x} XTRCT R{:d},R{:d}", pc, opcode, x0n0(opcode), xn00(opcode));
 };
 
-auto disasm(const u32 pc, const u16 opcode) -> std::string { return opcodes_disasm_lut[opcode](pc, opcode); }
+// auto disasm(const u32 pc, const u16 opcode) -> std::string { return opcodes_disasm_lut[opcode](pc, opcode); }
 
-}; // namespace saturnin::sh2::basic_interpreter
+}; // namespace saturnin::sh2

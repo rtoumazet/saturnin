@@ -29,12 +29,12 @@
 #include <saturnin/src/emulator_defs.h>
 #include <saturnin/src/sh2/sh2_shared.h>
 
-namespace saturnin::sh2::basic_interpreter {
+namespace saturnin::sh2 {
 
 using DisasmType = auto (*)(u32 pc, u16 opcode) -> std::string; ///< Type of disassembly functions
 
-static std::array<DisasmType, opcodes_lut_size>
-    opcodes_disasm_lut; ///< The opcodes disasm LUT, used for instruction fast fetching
+// extern std::array<DisasmType, opcodes_lut_size>
+//     opcodes_disasm_lut; ///< The opcodes disasm LUT, used for instruction fast fetching
 
 /// \name SH2 debug instructions
 //@{
@@ -183,6 +183,6 @@ auto xorm_d(u32 pc, u16 opcode) -> std::string;
 auto xtrct_d(u32 pc, u16 opcode) -> std::string;
 //@}
 
-auto disasm(u32 pc, u16 opcode) -> std::string;
+// auto disasm(u32 pc, u16 opcode) -> std::string;
 
-} // namespace saturnin::sh2::basic_interpreter
+} // namespace saturnin::sh2

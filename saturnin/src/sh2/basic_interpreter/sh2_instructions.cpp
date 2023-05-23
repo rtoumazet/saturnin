@@ -1713,14 +1713,14 @@ void initializeOpcodesLut() {
     while (counter < opcodes_lut_size) {
         for (u32 i = 0; i < instructions_number; ++i) {
             if ((opcodes_table[i].opcode & opcodes_table[i].mask) == (counter & opcodes_table[i].mask)) {
-                opcodes_lut[counter]             = opcodes_table[i].execute;
-                opcodes_disasm_lut[counter]      = opcodes_table[i].disasm;
+                opcodes_lut[counter] = opcodes_table[i].execute;
+                // opcodes_disasm_lut[counter]      = opcodes_table[i].disasm;
                 illegal_instruction_lut[counter] = opcodes_table[i].illegal_instruction_slot;
                 calls_subroutine_lut[counter]    = opcodes_table[i].is_subroutine_call;
                 break;
             }
-            opcodes_lut[counter]             = &BasicInterpreter::badOpcode;
-            opcodes_disasm_lut[counter]      = &badOpcode_d;
+            opcodes_lut[counter] = &BasicInterpreter::badOpcode;
+            // opcodes_disasm_lut[counter]      = &badOpcode_d;
             illegal_instruction_lut[counter] = false;
             calls_subroutine_lut[counter]    = false;
         }

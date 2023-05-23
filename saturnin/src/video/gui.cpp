@@ -1180,9 +1180,9 @@ void showDebugSh2Window(core::EmulatorContext& state, bool* opened) {
                 const auto opcode = state.memory()->read<u16>(i);
                 if (i == current_pc) {
                     const auto color = ImVec4(0.5f, 0.5f, 1.0f, 1.0f);
-                    ImGui::TextColored(color, sh2::basic_interpreter::disasm(i, opcode).c_str());
+                    ImGui::TextColored(color, sh2::Sh2::disasm(i, opcode).c_str());
                 } else {
-                    ImGui::TextUnformatted(sh2::basic_interpreter::disasm(i, opcode).c_str());
+                    ImGui::TextUnformatted(sh2::Sh2::disasm(i, opcode).c_str());
                 }
             }
 

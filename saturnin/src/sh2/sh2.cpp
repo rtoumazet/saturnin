@@ -27,6 +27,7 @@
 #include <saturnin/src/scu.h>
 #include <saturnin/src/sh2/basic_interpreter/sh2_instructions.h>
 #include <saturnin/src/sh2/fast_interpreter/sh2_opcodes.h>
+#include <saturnin/src/sh2/sh2_shared.h>
 #include <saturnin/src/utilities.h>
 
 namespace is = saturnin::core::interrupt_source;
@@ -1382,12 +1383,12 @@ auto Sh2::getRegister(const Sh2Register reg) const -> u32 {
 
 void Sh2::addToCallstack(const u32 call_addr, const u32 return_addr) {
     callstack_.emplace_back(call_addr, return_addr);
-    // if (emulatorContext()->debugStatus() == core::DebugStatus::wait_end_of_routine) { ++step_over_subroutine_depth_; }
+    if (modules_.context()->debugStatus() == core::DebugStatus::wait_end_of_routine) { ++step_over_subroutine_depth_; }
 }
 
 void Sh2::popFromCallstack() {
     callstack_.pop_back();
-    // if (emulatorContext()->debugStatus() == core::DebugStatus::wait_end_of_routine) { --step_over_subroutine_depth_; }
+    if (modules_.context()->debugStatus() == core::DebugStatus::wait_end_of_routine) { --step_over_subroutine_depth_; }
 };
 
 auto Sh2::callstack() -> std::vector<CallstackItem> {
@@ -1398,6 +1399,22 @@ auto Sh2::callstack() -> std::vector<CallstackItem> {
 void Sh2::setBinaryFileStartAddress(const u32 val) {
     is_binary_file_loaded_     = true;
     binary_file_start_address_ = val;
+}
+
+auto Sh2::disasm(const u32 pc, const u16 opcode) -> std::string { return opcodes_disasm_lut_[opcode](pc, opcode); }
+
+void Sh2::initializeDisasmLut() {
+    auto counter = u32{};
+    while (counter < opcodes_lut_size) {
+        for (u32 i = 0; i < instructions_number; ++i) {
+            if ((opcodes_table[i].opcode & opcodes_table[i].mask) == (counter & opcodes_table[i].mask)) {
+                // opcodes_disasm_lut[counter]      = opcodes_table[i].disasm;
+                break;
+            }
+            // opcodes_disasm_lut[counter]      = &badOpcode_d;
+        }
+        ++counter;
+    }
 }
 
 bool sh2CoreSetup(core::Config* config) {

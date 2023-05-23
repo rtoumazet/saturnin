@@ -529,6 +529,10 @@ class Sh2 {
 
     void setBinaryFileStartAddress(const u32 val);
 
+    static void initializeDisasmLut();
+
+    static auto disasm(u32 pc, u16 opcode) -> std::string;
+
     inline static std::function<ExecuteFunc> execute{};
 
     EmulatorModules modules_; ///< Modules of the emulator
@@ -771,8 +775,6 @@ class Sh2 {
     friend struct basic_interpreter::BasicInterpreter;
     friend struct fast_interpreter::FastInterpreter;
 
-    // friend void basic_interpreter::execute(Sh2& s);
-
     std::array<u8, cache_address_size>   cache_addresses_;          ///< Cache addresses (1KB).
     std::array<u8, cache_data_size>      cache_data_;               ///< Cache data (4KB).
     std::array<u8, io_registers_size>    io_registers_;             ///< I/O registers (512B).
@@ -837,6 +839,9 @@ class Sh2 {
     std::array<u32, breakpoints_number> breakpoints_;                  ///< Breakpoints on current CPU program counter.
 
     bool is_nmi_registered_{false};                                    ///< True if a Non Maskable Interrupt is registered
+
+    inline static std::array<DisasmType, opcodes_lut_size>
+        opcodes_disasm_lut_; ///< The opcodes disasm LUT, used for instruction fast fetching
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -853,5 +858,7 @@ class Sh2 {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 bool sh2CoreSetup(core::Config* config);
+
+// clang-format on
 
 } // namespace saturnin::sh2
