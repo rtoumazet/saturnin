@@ -213,21 +213,16 @@ struct BasicInterpreter {
 using ExecuteType = void (*)(Sh2&); ///< Type of execute functions
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \struct	Sh2Instruction
+/// \struct	InstructionToFunction
 ///
-/// \brief	Defines a SH2 instruction.
+/// \brief	Defines a link between a SH2 instruction and its corresponding function.
 ///
 /// \author	Runik
-/// \date	23/09/2019
+/// \date	24/05/2023
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-struct Sh2Instruction {
-    u16         mask;                     ///< Instruction mask.
-    u16         opcode;                   ///< Instruction opcode.
-    bool        is_simple;                ///< True if this instruction isn't a jump or doesn't modify system registers.
-    bool        illegal_instruction_slot; ///< True if the instruction can't be used in a delay slot.
-    bool        is_subroutine_call;       ///< True if the instruction calls a subroutine.
-    ExecuteType execute;                  ///< Link to the corresponding function.
-    DisasmType  disasm;                   ///< Link to the disassembly formatting function.
+struct InstructionToFunction {
+    Sh2Instruction instruction;
+    ExecuteType    execute; ///< Link to the corresponding function.
 };
 
 static std::array<ExecuteType, opcodes_lut_size> opcodes_lut; ///< The opcodes LUT, used for instruction fast fetching
@@ -238,151 +233,161 @@ static std::array<bool, opcodes_lut_size>
 static std::array<bool, opcodes_lut_size> calls_subroutine_lut;
 
 // clang-format off
-static const auto opcodes_table=std::array<Sh2Instruction, instructions_number>
-{ {
-    { 0xFFFF, 0x0009, true,  false, false, &BasicInterpreter::nop, &nop_d},
-    { 0xF00F, 0x300C, true,  false, false, &BasicInterpreter::add, &add_d},
-    { 0xF000, 0x7000, true,  false, false, &BasicInterpreter::addi, &addi_d},
-    { 0xF00F, 0x300E, true,  false, false, &BasicInterpreter::addc, &addc_d},
-    { 0xF00F, 0x300F, true,  false, false, &BasicInterpreter::addv, &addv_d},
-    { 0xF00F, 0x2009, true,  false, false, &BasicInterpreter::and_op, &and_op_d},
-    { 0xFF00, 0xC900, true,  false, false, &BasicInterpreter::andi, &andi_d},
-    { 0xFF00, 0xCD00, false, false, false, &BasicInterpreter::andm, &andm_d}, // R0GBR
-    { 0xFF00, 0x8B00, false, true,  false, &BasicInterpreter::bf, &bf_d},
-    { 0xFF00, 0x8F00, false, true,  false, &BasicInterpreter::bfs, &bfs_d},
-    { 0xFF00, 0x8900, false, true,  false, &BasicInterpreter::bt, &bt_d},
-    { 0xFF00, 0x8D00, false, true,  false, &BasicInterpreter::bts, &bts_d},
-    { 0xFFFF, 0x0028, true,  false, false, &BasicInterpreter::clrmac, &clrmac_d},
-    { 0xFFFF, 0x0008, true,  false, false, &BasicInterpreter::clrt, &clrt_d},
-    { 0xFFFF, 0x0018, true,  false, false, &BasicInterpreter::sett, &sett_d},
-    { 0xF00F, 0x3000, true,  false, false, &BasicInterpreter::cmpeq,    &cmpeq_d},
-    { 0xF00F, 0x3003, true,  false, false, &BasicInterpreter::cmpge,    &cmpge_d},
-    { 0xF00F, 0x3007, true,  false, false, &BasicInterpreter::cmpgt,     &cmpgt_d},
-    { 0xF00F, 0x3006, true,  false, false, &BasicInterpreter::cmphi,    &cmphi_d},
-    { 0xF00F, 0x3002, true,  false, false, &BasicInterpreter::cmphs,    &cmphs_d},
-    { 0xF0FF, 0x4015, true,  false, false, &BasicInterpreter::cmppl,    &cmppl_d},
-    { 0xF0FF, 0x4011, true,  false, false, &BasicInterpreter::cmppz,    &cmppz_d},
-    { 0xF00F, 0x200C, true,  false, false, &BasicInterpreter::cmpstr,   &cmpstr_d},
-    { 0xFF00, 0x8800, true,  false, false, &BasicInterpreter::cmpim,    &cmpim_d},
-    { 0xF00F, 0x2007, true,  false, false, &BasicInterpreter::div0s,    &div0s_d},
-    { 0xFFFF, 0x0019, true,  false, false, &BasicInterpreter::div0u,    &div0u_d},
-    { 0xF00F, 0x3004, true,  false, false, &BasicInterpreter::div1,     &div1_d},
-    { 0xF00F, 0x300D, true,  false, false, &BasicInterpreter::dmuls,    &dmuls_d},
-    { 0xF00F, 0x3005, true,  false, false, &BasicInterpreter::dmulu,    &dmulu_d},
-    { 0xF0FF, 0x4010, true,  false, false, &BasicInterpreter::dt,        &dt_d},
-    { 0xF00F, 0x600E, true,  false, false, &BasicInterpreter::extsb,    &extsb_d},
-    { 0xF00F, 0x600F, true,  false, false, &BasicInterpreter::extsw,    &extsw_d},
-    { 0xF00F, 0x600C, true,  false, false, &BasicInterpreter::extub,     &extub_d},
-    { 0xF00F, 0x600D, true,  false, false, &BasicInterpreter::extuw,     &extuw_d},
-    { 0xFFFF, 0x001B, true,  false, false, &BasicInterpreter::sleep,    &sleep_d},
-    { 0xF000, 0xA000, false, true,  false, &BasicInterpreter::bra,      &bra_d},
-    { 0xF0FF, 0x0023, false, true,  false, &BasicInterpreter::braf,     &braf_d},
-    { 0xF000, 0xB000, false, true,  true,  &BasicInterpreter::bsr,      &bsr_d},
-    { 0xF0FF, 0x0003, false, true,  true,  &BasicInterpreter::bsrf,     &bsrf_d},
-    { 0xF0FF, 0x402B, false, true,  false, &BasicInterpreter::jmp,      &jmp_d},
-    { 0xF0FF, 0x400B, false, true,  true,  &BasicInterpreter::jsr,      &jsr_d},
-    { 0xF0FF, 0x400E, true,  false, false, &BasicInterpreter::ldcsr,    &ldcsr_d},
-    { 0xF0FF, 0x401E, true,  false, false, &BasicInterpreter::ldcgbr,   &ldcgbr_d},
-    { 0xF0FF, 0x402E, true,  false, false, &BasicInterpreter::ldcvbr,   &ldcvbr_d},
-    { 0xF0FF, 0x4007, true,  false, false, &BasicInterpreter::ldcmsr,   &ldcmsr_d},
-    { 0xF0FF, 0x4017, true,  false, false, &BasicInterpreter::ldcmgbr,  &ldcmgbr_d},
-    { 0xF0FF, 0x4027, true,  false, false, &BasicInterpreter::ldcmvbr,  &ldcmvbr_d},
-    { 0xF0FF, 0x400A, true,  false, false, &BasicInterpreter::ldsmach,  &ldsmach_d},
-    { 0xF0FF, 0x401A, true,  false, false, &BasicInterpreter::ldsmacl,  &ldsmacl_d},
-    { 0xF0FF, 0x402A, true,  false, false, &BasicInterpreter::ldspr,    &ldspr_d},
-    { 0xF0FF, 0x4006, true,  false, false, &BasicInterpreter::ldsmmach, &ldsmmach_d},
-    { 0xF0FF, 0x4016, true,  false, false, &BasicInterpreter::ldsmmacl, &ldsmmacl_d},
-    { 0xF0FF, 0x4026, true,  false, false, &BasicInterpreter::ldsmpr,   &ldsmpr_d},
-    { 0xF00F, 0x000F, true,  false, false, &BasicInterpreter::mac,      &mac_d},
-    { 0xF00F, 0x400F, true,  false, false, &BasicInterpreter::macw,     &macw_d},
-    { 0xF00F, 0x6003, true,  false, false, &BasicInterpreter::mov,      &mov_d},
-    { 0xF00F, 0x0004, false, false, false, &BasicInterpreter::movbs0,   &movbs0_d}, // R0R
-    { 0xF00F, 0x0005, false, false, false, &BasicInterpreter::movws0,   &movws0_d}, // R0R
-    { 0xF00F, 0x0006, false, false, false, &BasicInterpreter::movls0,   &movls0_d}, // R0R
-    { 0xF00F, 0x2000, false, false, false, &BasicInterpreter::movbs,    &movbs_d}, // CheckRegValue
-    { 0xF00F, 0x2001, false, false, false, &BasicInterpreter::movws,    &movws_d}, // CheckRegValue
-    { 0xF00F, 0x2002, false, false, false, &BasicInterpreter::movls,    &movls_d}, // CheckRegValue
-    { 0xF00F, 0x6000, true,  false, false, &BasicInterpreter::movbl,    &movbl_d},
-    { 0xF00F, 0x6001, true,  false, false, &BasicInterpreter::movwl,    &movwl_d},
-    { 0xF00F, 0x6002, true,  false, false, &BasicInterpreter::movll,    &movll_d},
-    { 0xF00F, 0x2004, false, false, false, &BasicInterpreter::movbm,    &movbm_d}, // CheckRegValueRM1
-    { 0xF00F, 0x2005, false, false, false, &BasicInterpreter::movwm,    &movwm_d}, // CheckRegValueRM2
-    { 0xF00F, 0x2006, false, false, false, &BasicInterpreter::movlm,    &movlm_d}, // CheckRegValueRM4
-    { 0xF00F, 0x6004, true,  false, false, &BasicInterpreter::movbp,    &movbp_d},
-    { 0xF00F, 0x6005, true,  false, false, &BasicInterpreter::movwp,    &movwp_d},
-    { 0xF00F, 0x6006, true,  false, false, &BasicInterpreter::movlp,    &movlp_d},
-    { 0xF00F, 0x000C, true,  false, false, &BasicInterpreter::movbl0,    &movbl0_d},
-    { 0xF00F, 0x000D, true,  false, false, &BasicInterpreter::movwl0,    &movwl0_d},
-    { 0xF00F, 0x000E, true,  false, false, &BasicInterpreter::movll0,    &movll0_d},
-    { 0xF000, 0xE000, true,  false, false, &BasicInterpreter::movi,     &movi_d},
-    { 0xF000, 0x9000, true,  false, false, &BasicInterpreter::movwi,    &movwi_d},
-    { 0xF000, 0xD000, true,  false, false, &BasicInterpreter::movli,    &movli_d},
-    { 0xFF00, 0xC400, true,  false, false, &BasicInterpreter::movblg,   &movblg_d},
-    { 0xFF00, 0xC500, true,  false, false, &BasicInterpreter::movwlg,   &movwlg_d},
-    { 0xFF00, 0xC600, true,  false, false, &BasicInterpreter::movllg,   &movllg_d},
-    { 0xFF00, 0xC000, false, false, false, &BasicInterpreter::movbsg,   &movbsg_d}, // DispGBR
-    { 0xFF00, 0xC100, false, false, false, &BasicInterpreter::movwsg,   &movwsg_d}, // DispGBR
-    { 0xFF00, 0xC200, false, false, false, &BasicInterpreter::movlsg,   &movlsg_d}, // DispGBR
-    { 0xFF00, 0x8000, false, false, false, &BasicInterpreter::movbs4,   &movbs4_d}, // DispR
-    { 0xFF00, 0x8100, false, false, false, &BasicInterpreter::movws4,   &movws4_d}, // DispR
-    { 0xF000, 0x1000, false, false, false, &BasicInterpreter::movls4,   &movls4_d}, // DispR
-    { 0xFF00, 0x8400, true,  false, false, &BasicInterpreter::movbl4,   &movbl4_d},
-    { 0xFF00, 0x8500, true,  false, false, &BasicInterpreter::movwl4,   &movwl4_d},
-    { 0xF000, 0x5000, true,  false, false, &BasicInterpreter::movll4,   &movll4_d},
-    { 0xFF00, 0xC700, true,  false, false, &BasicInterpreter::mova,     &mova_d},
-    { 0xF0FF, 0x0029, true,  false, false, &BasicInterpreter::movt,     &movt_d},
-    { 0xF00F, 0x0007, true,  false, false, &BasicInterpreter::mull,     &mull_d},
-    { 0xF00F, 0x200F, true,  false, false, &BasicInterpreter::muls,     &muls_d},
-    { 0xF00F, 0x200E, true,  false, false, &BasicInterpreter::mulu,     &mulu_d},
-    { 0xF00F, 0x600B, true,  false, false, &BasicInterpreter::neg,      &neg_d},
-    { 0xF00F, 0x600A, true,  false, false, &BasicInterpreter::negc,     &negc_d},
-    { 0xF00F, 0x6007, true,  false, false, &BasicInterpreter::not_op,   &not_op_d},
-    { 0xF00F, 0x200B, true,  false, false, &BasicInterpreter::or_op,    &or_op_d},
-    { 0xFF00, 0xCB00, true,  false, false, &BasicInterpreter::ori,      &ori_d},
-    { 0xFF00, 0xCF00, false, false, false, &BasicInterpreter::orm,      &orm_d}, // R0GBR
-    { 0xF0FF, 0x4024, true,  false, false, &BasicInterpreter::rotcl,    &rotcl_d},
-    { 0xF0FF, 0x4025, true,  false, false, &BasicInterpreter::rotcr,    &rotcr_d},
-    { 0xF0FF, 0x4004, true,  false, false, &BasicInterpreter::rotl,     &rotl_d},
-    { 0xF0FF, 0x4005, true,  false, false, &BasicInterpreter::rotr,     &rotr_d},
-    { 0xFFFF, 0x002B, false, true,  false, &BasicInterpreter::rte,      &rte_d},
-    { 0xFFFF, 0x000B, false, true,  false, &BasicInterpreter::rts,      &rts_d},
-    { 0xF0FF, 0x4020, true,  false, false, &BasicInterpreter::shal,     &shal_d},
-    { 0xF0FF, 0x4021, true,  false, false, &BasicInterpreter::shar,     &shar_d},
-    { 0xF0FF, 0x4000, true,  false, false, &BasicInterpreter::shll,     &shll_d},
-    { 0xF0FF, 0x4008, true,  false, false, &BasicInterpreter::shll2,    &shll2_d},
-    { 0xF0FF, 0x4018, true,  false, false, &BasicInterpreter::shll8,    &shll8_d},
-    { 0xF0FF, 0x4028, true,  false, false, &BasicInterpreter::shll16,    &shll16_d},
-    { 0xF0FF, 0x4001, true,  false, false, &BasicInterpreter::shlr,     &shlr_d},
-    { 0xF0FF, 0x4009, true,  false, false, &BasicInterpreter::shlr2,    &shlr2_d},
-    { 0xF0FF, 0x4019, true,  false, false, &BasicInterpreter::shlr8,    &shlr8_d},
-    { 0xF0FF, 0x4029, true,  false, false, &BasicInterpreter::shlr16,   &shlr16_d},
-    { 0xF0FF, 0x0002, true,  false, false, &BasicInterpreter::stcsr,    &stcsr_d},
-    { 0xF0FF, 0x0012, true,  false, false, &BasicInterpreter::stcgbr,   &stcgbr_d},
-    { 0xF0FF, 0x0022, true,  false, false, &BasicInterpreter::stcvbr,   &stcvbr_d},
-    { 0xF0FF, 0x4003, false, false, false, &BasicInterpreter::stcmsr,   &stcmsr_d}, // CheckRegValueRM4
-    { 0xF0FF, 0x4013, false, false, false, &BasicInterpreter::stcmgbr,   &stcmgbr_d}, // CheckRegValueRM4
-    { 0xF0FF, 0x4023, false, false, false, &BasicInterpreter::stcmvbr,   &stcmvbr_d}, // CheckRegValueRM4
-    { 0xF0FF, 0x000A, true,  false, false, &BasicInterpreter::stsmach,   &stsmach_d},
-    { 0xF0FF, 0x001A, true,  false, false, &BasicInterpreter::stsmacl,   &stsmacl_d},
-    { 0xF0FF, 0x002A, true,  false, false, &BasicInterpreter::stspr,    &stspr_d},
-    { 0xF0FF, 0x4002, false, false, false, &BasicInterpreter::stsmmach, &stsmmach_d}, // CheckRegValueRM4
-    { 0xF0FF, 0x4012, false, false, false, &BasicInterpreter::stsmmacl, &stsmmacl_d}, // CheckRegValueRM4
-    { 0xF0FF, 0x4022, false, false, false, &BasicInterpreter::stsmpr,   &stsmpr_d}, // CheckRegValueRM4
-    { 0xF00F, 0x3008, true,  false, false, &BasicInterpreter::sub,      &sub_d},
-    { 0xF00F, 0x300A, true,  false, false, &BasicInterpreter::subc,     &subc_d},
-    { 0xF00F, 0x300B, true,  false, false, &BasicInterpreter::subv,     &subv_d},
-    { 0xF00F, 0x6008, true,  false, false, &BasicInterpreter::swapb,    &swapb_d},
-    { 0xF00F, 0x6009, true,  false, false, &BasicInterpreter::swapw,    &swapw_d},
-    { 0xF0FF, 0x401B, false, false, false, &BasicInterpreter::tas,      &tas_d}, // CheckRegValue
-    { 0xFF00, 0xC300, true,  true,  false, &BasicInterpreter::trapa,    &trapa_d},
-    { 0xF00F, 0x2008, true,  false, false, &BasicInterpreter::tst,      &tst_d},
-    { 0xFF00, 0xC800, true,  false, false, &BasicInterpreter::tsti,     &tsti_d},
-    { 0xFF00, 0xCC00, true,  false, false, &BasicInterpreter::tstm,     &tstm_d},
-    { 0xF00F, 0x200A, true,  false, false, &BasicInterpreter::xor_op,   &xor_op_d},
-    { 0xFF00, 0xCA00, true,  false, false, &BasicInterpreter::xori,     &xori_d},
-    { 0xFF00, 0xCE00, false, false, false, &BasicInterpreter::xorm,     &xorm_d}, // R0GBR
-    { 0xF00F, 0x200D, true,  false, false, &BasicInterpreter::xtrct,    &xtrct_d}
-} };
+using InstructionsToFunctions = std::unordered_map<Sh2Instruction, ExecuteType>;
+
+//static const auto test = InstructionsToFunctions{
+//    { Sh2Instruction::nop,      &BasicInterpreter::nop,     },
+//    { Sh2Instruction::add,      &BasicInterpreter::add,     }
+//};
+
+
+//static const auto opcodes_functions=std::array<InstructionToFunction, instructions_number>
+//{ {
+static const auto test = InstructionsToFunctions{
+    { Sh2Instruction::nop,      &BasicInterpreter::nop,     },
+    { Sh2Instruction::add,      &BasicInterpreter::add,     },
+    { Sh2Instruction::addi,     &BasicInterpreter::addi,    },
+    { Sh2Instruction::addc,     &BasicInterpreter::addc,    },
+    { Sh2Instruction::addv,     &BasicInterpreter::addv,    },
+    { Sh2Instruction::and_op,   &BasicInterpreter::and_op,  },
+    { Sh2Instruction::andi,     &BasicInterpreter::andi,    },
+    { Sh2Instruction::andm,     &BasicInterpreter::andm,    },
+    { Sh2Instruction::bf,       &BasicInterpreter::bf,      },
+    { Sh2Instruction::bfs,      &BasicInterpreter::bfs,     },
+    { Sh2Instruction::bt,       &BasicInterpreter::bt,      },
+    { Sh2Instruction::bts,      &BasicInterpreter::bts,     },
+    { Sh2Instruction::clrmac,   &BasicInterpreter::clrmac,  },
+    { Sh2Instruction::clrt,     &BasicInterpreter::clrt,    },
+    { Sh2Instruction::sett,     &BasicInterpreter::sett,    },
+    { Sh2Instruction::cmpeq,    &BasicInterpreter::cmpeq,   },
+    { Sh2Instruction::cmpge,    &BasicInterpreter::cmpge,   },
+    { Sh2Instruction::cmpgt,    &BasicInterpreter::cmpgt,   },
+    { Sh2Instruction::cmphi,    &BasicInterpreter::cmphi,   },
+    { Sh2Instruction::cmphs,    &BasicInterpreter::cmphs,   },
+    { Sh2Instruction::cmppl,    &BasicInterpreter::cmppl,   },
+    { Sh2Instruction::cmppz,    &BasicInterpreter::cmppz,   },
+    { Sh2Instruction::cmpstr,   &BasicInterpreter::cmpstr,  },
+    { Sh2Instruction::cmpim,    &BasicInterpreter::cmpim,   },
+    { Sh2Instruction::div0s,    &BasicInterpreter::div0s,   },
+    { Sh2Instruction::div0u,    &BasicInterpreter::div0u,   },
+    { Sh2Instruction::div1,     &BasicInterpreter::div1,    },
+    { Sh2Instruction::dmuls,    &BasicInterpreter::dmuls,   },
+    { Sh2Instruction::dmulu,    &BasicInterpreter::dmulu,   },
+    { Sh2Instruction::dt,       &BasicInterpreter::dt,      },
+    { Sh2Instruction::extsb,    &BasicInterpreter::extsb,   },
+    { Sh2Instruction::extsw,    &BasicInterpreter::extsw,   },
+    { Sh2Instruction::extub,    &BasicInterpreter::extub,   },
+    { Sh2Instruction::extuw,    &BasicInterpreter::extuw,   },
+    { Sh2Instruction::sleep,    &BasicInterpreter::sleep,   },
+    { Sh2Instruction::bra,      &BasicInterpreter::bra,     },
+    { Sh2Instruction::braf,     &BasicInterpreter::braf,    },
+    { Sh2Instruction::bsr,      &BasicInterpreter::bsr,     },
+    { Sh2Instruction::bsrf,     &BasicInterpreter::bsrf,    },
+    { Sh2Instruction::jmp,      &BasicInterpreter::jmp,     },
+    { Sh2Instruction::jsr,      &BasicInterpreter::jsr,     },
+    { Sh2Instruction::ldcsr,    &BasicInterpreter::ldcsr,   },
+    { Sh2Instruction::ldcgbr,   &BasicInterpreter::ldcgbr,  },
+    { Sh2Instruction::ldcvbr,   &BasicInterpreter::ldcvbr,  },
+    { Sh2Instruction::ldcmsr,   &BasicInterpreter::ldcmsr,  },
+    { Sh2Instruction::ldcmgbr,  &BasicInterpreter::ldcmgbr, },
+    { Sh2Instruction::ldcmvbr,  &BasicInterpreter::ldcmvbr, },
+    { Sh2Instruction::ldsmach,  &BasicInterpreter::ldsmach, },
+    { Sh2Instruction::ldsmacl,  &BasicInterpreter::ldsmacl, },
+    { Sh2Instruction::ldspr,    &BasicInterpreter::ldspr,   },
+    { Sh2Instruction::ldsmmach, &BasicInterpreter::ldsmmach,},
+    { Sh2Instruction::ldsmmacl, &BasicInterpreter::ldsmmacl,},
+    { Sh2Instruction::ldsmpr,   &BasicInterpreter::ldsmpr,  },
+    { Sh2Instruction::mac,      &BasicInterpreter::mac,     },
+    { Sh2Instruction::macw,     &BasicInterpreter::macw,    },
+    { Sh2Instruction::mov,      &BasicInterpreter::mov,     },
+    { Sh2Instruction::movbs0,   &BasicInterpreter::movbs0,  },
+    { Sh2Instruction::movws0,   &BasicInterpreter::movws0,  },
+    { Sh2Instruction::movls0,   &BasicInterpreter::movls0,  },
+    { Sh2Instruction::movbs,    &BasicInterpreter::movbs,   },
+    { Sh2Instruction::movws,    &BasicInterpreter::movws,   },
+    { Sh2Instruction::movls,    &BasicInterpreter::movls,   },
+    { Sh2Instruction::movbl,    &BasicInterpreter::movbl,   },
+    { Sh2Instruction::movwl,    &BasicInterpreter::movwl,   },
+    { Sh2Instruction::movll,    &BasicInterpreter::movll,   },
+    { Sh2Instruction::movbm,    &BasicInterpreter::movbm,   },
+    { Sh2Instruction::movwm,    &BasicInterpreter::movwm,   },
+    { Sh2Instruction::movlm,    &BasicInterpreter::movlm,   },
+    { Sh2Instruction::movbp,    &BasicInterpreter::movbp,   },
+    { Sh2Instruction::movwp,    &BasicInterpreter::movwp,   },
+    { Sh2Instruction::movlp,    &BasicInterpreter::movlp,   },
+    { Sh2Instruction::movbl0,   &BasicInterpreter::movbl0,  },
+    { Sh2Instruction::movwl0,   &BasicInterpreter::movwl0,  },
+    { Sh2Instruction::movll0,   &BasicInterpreter::movll0,  },
+    { Sh2Instruction::movi,     &BasicInterpreter::movi,    },
+    { Sh2Instruction::movwi,    &BasicInterpreter::movwi,   },
+    { Sh2Instruction::movli,    &BasicInterpreter::movli,   },
+    { Sh2Instruction::movwlg,   &BasicInterpreter::movblg,  },
+    { Sh2Instruction::movllg,   &BasicInterpreter::movwlg,  },
+    { Sh2Instruction::movbsg,   &BasicInterpreter::movllg,  },
+    { Sh2Instruction::movwsg,   &BasicInterpreter::movbsg,  },
+    { Sh2Instruction::movlsg,   &BasicInterpreter::movwsg,  },
+    { Sh2Instruction::movbs4,   &BasicInterpreter::movlsg,  },
+    { Sh2Instruction::movws4,   &BasicInterpreter::movbs4,  },
+    { Sh2Instruction::movls4,   &BasicInterpreter::movws4,  },
+    { Sh2Instruction::movbl4,   &BasicInterpreter::movls4,  },
+    { Sh2Instruction::movwl4,   &BasicInterpreter::movbl4,  },
+    { Sh2Instruction::movll4,   &BasicInterpreter::movwl4,  },
+    { Sh2Instruction::movblg,   &BasicInterpreter::movll4,  },
+    { Sh2Instruction::mova,     &BasicInterpreter::mova,    },
+    { Sh2Instruction::movt,     &BasicInterpreter::movt,    },
+    { Sh2Instruction::mull,     &BasicInterpreter::mull,    },
+    { Sh2Instruction::muls,     &BasicInterpreter::muls,    },
+    { Sh2Instruction::mulu,     &BasicInterpreter::mulu,    },
+    { Sh2Instruction::neg,      &BasicInterpreter::neg,     },
+    { Sh2Instruction::negc,     &BasicInterpreter::negc,    },
+    { Sh2Instruction::not_op,   &BasicInterpreter::not_op,  },
+    { Sh2Instruction::or_op,    &BasicInterpreter::or_op,   },
+    { Sh2Instruction::ori,      &BasicInterpreter::ori,     },
+    { Sh2Instruction::orm,      &BasicInterpreter::orm,     },
+    { Sh2Instruction::rotcl,    &BasicInterpreter::rotcl,   },
+    { Sh2Instruction::rotcr,    &BasicInterpreter::rotcr,   },
+    { Sh2Instruction::rotl,     &BasicInterpreter::rotl,    },
+    { Sh2Instruction::rotr,     &BasicInterpreter::rotr,    },
+    { Sh2Instruction::rte,      &BasicInterpreter::rte,     },
+    { Sh2Instruction::rts,      &BasicInterpreter::rts,     },
+    { Sh2Instruction::shal,     &BasicInterpreter::shal,    },
+    { Sh2Instruction::shar,     &BasicInterpreter::shar,    },
+    { Sh2Instruction::shll,     &BasicInterpreter::shll,    },
+    { Sh2Instruction::shll2,    &BasicInterpreter::shll2,   },
+    { Sh2Instruction::shll8,    &BasicInterpreter::shll8,   },
+    { Sh2Instruction::shll16,   &BasicInterpreter::shll16,  },
+    { Sh2Instruction::shlr,     &BasicInterpreter::shlr,    },
+    { Sh2Instruction::shlr2,    &BasicInterpreter::shlr2,   },
+    { Sh2Instruction::shlr8,    &BasicInterpreter::shlr8,   },
+    { Sh2Instruction::shlr16,   &BasicInterpreter::shlr16,  },
+    { Sh2Instruction::stcsr,    &BasicInterpreter::stcsr,   },
+    { Sh2Instruction::stcgbr,   &BasicInterpreter::stcgbr,  },
+    { Sh2Instruction::stcvbr,   &BasicInterpreter::stcvbr,  },
+    { Sh2Instruction::stcmsr,   &BasicInterpreter::stcmsr,  },
+    { Sh2Instruction::stcmgbr,  &BasicInterpreter::stcmgbr, },
+    { Sh2Instruction::stcmvbr,  &BasicInterpreter::stcmvbr, },
+    { Sh2Instruction::stsmach,  &BasicInterpreter::stsmach, },
+    { Sh2Instruction::stsmacl,  &BasicInterpreter::stsmacl, },
+    { Sh2Instruction::stspr,    &BasicInterpreter::stspr,   },
+    { Sh2Instruction::stsmmach, &BasicInterpreter::stsmmach,},
+    { Sh2Instruction::stsmmacl, &BasicInterpreter::stsmmacl,},
+    { Sh2Instruction::stsmpr,   &BasicInterpreter::stsmpr,  },
+    { Sh2Instruction::sub,      &BasicInterpreter::sub,     },
+    { Sh2Instruction::subc,     &BasicInterpreter::subc,    },
+    { Sh2Instruction::subv,     &BasicInterpreter::subv,    },
+    { Sh2Instruction::swapb,    &BasicInterpreter::swapb,   },
+    { Sh2Instruction::swapw,    &BasicInterpreter::swapw,   },
+    { Sh2Instruction::tas,      &BasicInterpreter::tas,     },
+    { Sh2Instruction::trapa,    &BasicInterpreter::trapa,   },
+    { Sh2Instruction::tst,      &BasicInterpreter::tst,     },
+    { Sh2Instruction::tsti,     &BasicInterpreter::tsti,    },
+    { Sh2Instruction::tstm,     &BasicInterpreter::tstm,    },
+    { Sh2Instruction::xor_op,   &BasicInterpreter::xor_op,  },
+    { Sh2Instruction::xori,     &BasicInterpreter::xori,    },
+    { Sh2Instruction::xorm,     &BasicInterpreter::xorm,    },
+    { Sh2Instruction::xtrct,    &BasicInterpreter::xtrct,   }
+//}
+ };
 // clang-format on
 
 void initializeOpcodesLut();
