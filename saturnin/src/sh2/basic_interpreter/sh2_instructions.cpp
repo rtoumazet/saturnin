@@ -28,6 +28,7 @@
 #include <saturnin/src/memory.h>
 #include <saturnin/src/scu.h>
 #include <saturnin/src/sh2/sh2.h> // Sh2, Sh2Type
+#include <saturnin/src/sh2/basic_interpreter/sh2_functions_link.h>
 
 namespace is = saturnin::core::interrupt_source;
 
@@ -1711,19 +1712,32 @@ auto isInstructionIllegal(const u16 inst) -> bool {
 void initializeOpcodesLut() {
     auto counter = u32{};
     while (counter < opcodes_lut_size) {
-        for (u32 i = 0; i < instructions_number; ++i) {
-            if ((opcodes_table[i].opcode & opcodes_table[i].mask) == (counter & opcodes_table[i].mask)) {
-                opcodes_lut[counter] = opcodes_table[i].execute;
-                // opcodes_disasm_lut[counter]      = opcodes_table[i].disasm;
-                illegal_instruction_lut[counter] = opcodes_table[i].illegal_instruction_slot;
-                calls_subroutine_lut[counter]    = opcodes_table[i].is_subroutine_call;
+        // for (u32 i = 0; i < instructions_number; ++i) {
+        //     if ((opcodes_table[i].opcode & opcodes_table[i].mask) == (counter & opcodes_table[i].mask)) {
+        //         opcodes_lut[counter] = opcodes_table[i].execute;
+        //         // opcodes_disasm_lut[counter]      = opcodes_table[i].disasm;
+        //         illegal_instruction_lut[counter] = opcodes_table[i].illegal_instruction_slot;
+        //         calls_subroutine_lut[counter]    = opcodes_table[i].is_subroutine_call;
+        //         break;
+        //     }
+        //     opcodes_lut[counter] = &BasicInterpreter::badOpcode;
+        //     // opcodes_disasm_lut[counter]      = &badOpcode_d;
+        //     illegal_instruction_lut[counter] = false;
+        //     calls_subroutine_lut[counter]    = false;
+        // }
+
+        for (const auto& [inst, details] : opcodes_table) {
+            if ((details.opcode & details.mask) == (counter & details.mask)) {
+                opcodes_lut[counter]             = inst_to_func.at(inst);
+                illegal_instruction_lut[counter] = opcodes_table.at(inst).illegal_instruction_slot;
+                calls_subroutine_lut[counter]    = opcodes_table.at(inst).is_subroutine_call;
                 break;
             }
-            opcodes_lut[counter] = &BasicInterpreter::badOpcode;
-            // opcodes_disasm_lut[counter]      = &badOpcode_d;
+            opcodes_lut[counter]             = &BasicInterpreter::badOpcode;
             illegal_instruction_lut[counter] = false;
             calls_subroutine_lut[counter]    = false;
         }
+
         ++counter;
     }
 }

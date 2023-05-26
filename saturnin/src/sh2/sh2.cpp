@@ -1404,17 +1404,17 @@ void Sh2::setBinaryFileStartAddress(const u32 val) {
 auto Sh2::disasm(const u32 pc, const u16 opcode) -> std::string { return opcodes_disasm_lut_[opcode](pc, opcode); }
 
 void Sh2::initializeDisasmLut() {
-    auto counter = u32{};
-    while (counter < opcodes_lut_size) {
-        for (u32 i = 0; i < instructions_number; ++i) {
-            if ((opcodes_table[i].opcode & opcodes_table[i].mask) == (counter & opcodes_table[i].mask)) {
-                // opcodes_disasm_lut[counter]      = opcodes_table[i].disasm;
-                break;
-            }
-            // opcodes_disasm_lut[counter]      = &badOpcode_d;
-        }
-        ++counter;
-    }
+    // auto counter = u32{};
+    // while (counter < opcodes_lut_size) {
+    //     for (u32 i = 0; i < instructions_number; ++i) {
+    //         if ((opcodes_table[i].opcode & opcodes_table[i].mask) == (counter & opcodes_table[i].mask)) {
+    //             // opcodes_disasm_lut[counter]      = opcodes_table[i].disasm;
+    //             break;
+    //         }
+    //         // opcodes_disasm_lut[counter]      = &badOpcode_d;
+    //     }
+    //     ++counter;
+    // }
 }
 
 bool sh2CoreSetup(core::Config* config) {
