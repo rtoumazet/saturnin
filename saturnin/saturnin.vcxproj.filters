@@ -163,7 +163,7 @@
       <Filter>Fichiers sources\sh2\basic_interpreter</Filter>
     </ClCompile>
     <ClCompile Include="src\sh2\sh2_shared.cpp">
-      <Filter>Fichiers sources</Filter>
+      <Filter>Fichiers sources\sh2</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -342,7 +342,7 @@
       <Filter>Fichiers sources\sh2</Filter>
     </ClInclude>
     <ClInclude Include="src\sh2\basic_interpreter\sh2_functions_link.h">
-      <Filter>Fichiers d%27en-tête</Filter>
+      <Filter>Fichiers sources\sh2\basic_interpreter</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
