@@ -34,8 +34,6 @@ class Sh2;
 
 using OpcodeFunc = void (*)(Sh2&);
 
-// extern void delaySlot(Sh2& s, u32 addr);
-
 } // namespace saturnin::sh2
 
 namespace saturnin::sh2::fast_interpreter {
