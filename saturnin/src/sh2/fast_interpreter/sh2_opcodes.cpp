@@ -1552,7 +1552,7 @@ void FastInterpreter::execute(Sh2& s) {
         default: break;
     }
 
-    constexpr auto cycles_to_execute = u8{20};
+    constexpr auto cycles_to_execute = u8{2};
     auto           executed_cycles   = u8{};
     while (executed_cycles <= cycles_to_execute) {
         opcodes_func[s.current_opcode_](s);
@@ -1586,7 +1586,8 @@ void FastInterpreter::delaySlot(Sh2& s, const u32 addr) {
             s.modules_.context()->emulationStatus(core::EmulationStatus::stopped);
         } else {
             // Delay slot instruction execution
-            FastInterpreter::execute(s);
+            // FastInterpreter::execute(s);
+            opcodes_func[s.current_opcode_](s);
             s.cycles_elapsed_ += current_inst_cycles;
         }
     }
@@ -1603,6 +1604,7 @@ auto isInstructionIllegal(const u16 inst) -> bool {
     // 'Illegal Slot' detection
     // Returns true if an ISI (illegal slot instruction) is detected
     // return illegal_instruction_lut[inst];
+    // :TODO:
     return false;
 }
 
