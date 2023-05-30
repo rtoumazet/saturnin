@@ -31,21 +31,8 @@
 
 namespace saturnin::sh2::basic_interpreter {
 
-using ExecuteType             = void (*)(Sh2&); ///< Type of execute functions
-using InstructionsToFunctions = std::unordered_map<Sh2Instruction, ExecuteType>;
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \struct	InstructionToFunction
-///
-/// \brief	Defines a link between a SH2 instruction and its corresponding function.
-///
-/// \author	Runik
-/// \date	24/05/2023
-////////////////////////////////////////////////////////////////////////////////////////////////////
-struct InstructionToFunction {
-    Sh2Instruction instruction;
-    ExecuteType    execute; ///< Link to the corresponding function.
-};
+using ExecuteType            = void (*)(Sh2&); ///< Type of execute functions
+using InstructionsToFuncExec = std::unordered_map<Sh2Instruction, ExecuteType>;
 
 // clang-format off
 
@@ -55,7 +42,7 @@ struct InstructionToFunction {
 /// \brief (Immutable) Link between a SH2 instruction and the related function.
 /// 	   
 ////////////////////////////////////////////////////////////////////////////////////////////////
-static const auto inst_to_func = InstructionsToFunctions{   
+static const auto inst_to_exec = InstructionsToFuncExec{   
     { Sh2Instruction::nop,      &BasicInterpreter::nop,     },
     { Sh2Instruction::add,      &BasicInterpreter::add,     },
     { Sh2Instruction::addi,     &BasicInterpreter::addi,    },

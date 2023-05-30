@@ -344,6 +344,9 @@
     <ClInclude Include="src\sh2\basic_interpreter\sh2_functions_link.h">
       <Filter>Fichiers sources\sh2\basic_interpreter</Filter>
     </ClInclude>
+    <ClInclude Include="src\sh2\sh2_disasm_link.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="src\sh2\fast_interpreter\sh2_opcodes.inc">

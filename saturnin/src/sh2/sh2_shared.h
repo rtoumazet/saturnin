@@ -190,7 +190,6 @@ enum class Sh2Instruction {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 struct Sh2InstructionDetail {
-    // Sh2Instruction instruction;              ///< The instruction.
     u16  mask;                     ///< Instruction mask.
     u16  opcode;                   ///< Instruction opcode.
     bool is_simple;                ///< True if this instruction isn't a jump or doesn't modify system registers.

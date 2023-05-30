@@ -36,6 +36,7 @@
 #include <saturnin/src/sh2/sh2_registers.h>
 #include <saturnin/src/sh2/fast_interpreter/sh2_opcodes.h>
 #include <saturnin/src/sh2/basic_interpreter/sh2_instructions.h>
+#include <saturnin/src/sh2/sh2_disasm_link.h>
 
 // Forward declarations
 namespace saturnin::core {
@@ -775,12 +776,14 @@ class Sh2 {
     friend struct basic_interpreter::BasicInterpreter;
     friend struct fast_interpreter::FastInterpreter;
 
-    std::array<u8, cache_address_size>   cache_addresses_;          ///< Cache addresses (1KB).
-    std::array<u8, cache_data_size>      cache_data_;               ///< Cache data (4KB).
-    std::array<u8, io_registers_size>    io_registers_;             ///< I/O registers (512B).
-    Sh2Type                              sh2_type_;                 ///< Type of the SH2.
-    std::map<const Sh2Type, const char*> sh2_type_name_
-        = {{Sh2Type::master, "Master"}, {Sh2Type::slave, "Slave"}}; ///< Name of the SH2 type, used for logging.
+    std::array<u8, cache_address_size>   cache_addresses_; ///< Cache addresses (1KB).
+    std::array<u8, cache_data_size>      cache_data_;      ///< Cache data (4KB).
+    std::array<u8, io_registers_size>    io_registers_;    ///< I/O registers (512B).
+    Sh2Type                              sh2_type_;        ///< Type of the SH2.
+    std::map<const Sh2Type, const char*> sh2_type_name_ = {
+        {Sh2Type::master, "Master"},
+        {Sh2Type::slave,  "Slave" }
+    }; ///< Name of the SH2 type, used for logging.
 
     /// \name Processor registers
     //@{

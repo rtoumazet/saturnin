@@ -31,11 +31,6 @@
 
 namespace saturnin::sh2 {
 
-using DisasmType = auto (*)(u32 pc, u16 opcode) -> std::string; ///< Type of disassembly functions
-
-// extern std::array<DisasmType, opcodes_lut_size>
-//     opcodes_disasm_lut; ///< The opcodes disasm LUT, used for instruction fast fetching
-
 /// \name SH2 debug instructions
 //@{
 auto badOpcode_d(u32 pc, u16 opcode) -> std::string;
@@ -182,7 +177,5 @@ auto xori_d(u32 pc, u16 opcode) -> std::string;
 auto xorm_d(u32 pc, u16 opcode) -> std::string;
 auto xtrct_d(u32 pc, u16 opcode) -> std::string;
 //@}
-
-// auto disasm(u32 pc, u16 opcode) -> std::string;
 
 } // namespace saturnin::sh2
