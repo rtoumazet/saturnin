@@ -1552,7 +1552,7 @@ void FastInterpreter::execute(Sh2& s) {
         default: break;
     }
 
-    constexpr auto cycles_to_execute = u8{2};
+    constexpr auto cycles_to_execute = u8{20};
     auto           executed_cycles   = u8{};
     while (executed_cycles <= cycles_to_execute) {
         opcodes_func[s.current_opcode_](s);
