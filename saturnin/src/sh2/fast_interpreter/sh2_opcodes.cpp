@@ -1555,7 +1555,9 @@ void FastInterpreter::execute(Sh2& s) {
     constexpr auto cycles_to_execute = u8{20};
     auto           executed_cycles   = u8{};
     while (executed_cycles <= cycles_to_execute) {
+        // Log::info(Logger::test, Sh2::disasm(s.pc_, s.current_opcode_));
         opcodes_func[s.current_opcode_](s);
+        s.current_opcode_ = s.modules_.memory()->read<u16>(s.pc_);
         executed_cycles += s.cycles_elapsed_;
     }
     s.cycles_elapsed_ = executed_cycles;
@@ -1586,7 +1588,6 @@ void FastInterpreter::delaySlot(Sh2& s, const u32 addr) {
             s.modules_.context()->emulationStatus(core::EmulationStatus::stopped);
         } else {
             // Delay slot instruction execution
-            // FastInterpreter::execute(s);
             opcodes_func[s.current_opcode_](s);
             s.cycles_elapsed_ += current_inst_cycles;
         }

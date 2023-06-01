@@ -1748,7 +1748,8 @@ void BasicInterpreter::execute(Sh2& s) {
         default: break;
     }
 
-    // Log::info(Logger::test, disasm(s.pc_, s.current_opcode_));
+    // Log::info(Logger::test, Sh2::disasm(s.pc_, s.current_opcode_));
+    // s.current_opcode_ = s.modules_.memory()->read<u16>(s.pc_);
     opcodes_lut[s.current_opcode_](s);
 
     if (std::ranges::any_of(s.breakpoints_, [&s](const u32 bp) { return s.getRegister(Sh2Register::pc) == bp; })) {
