@@ -29,8 +29,9 @@
 #include <saturnin/src/log.h>
 #include <saturnin/src/memory.h>
 #include <saturnin/src/scu.h>
-#include <saturnin/src/sh2_instructions.h>
-#include <saturnin/src/sh2.h>
+#include <saturnin/src/sh2/basic_interpreter/sh2_instructions.h>
+#include <saturnin/src/sh2/fast_interpreter/opcodes_generator.h>
+#include <saturnin/src/sh2/sh2.h>
 #include <saturnin/src/smpc.h>
 #include <saturnin/src/cdrom/cdrom.h>
 #include <saturnin/src/cdrom/scsi.h>
@@ -92,12 +93,10 @@ auto EmulatorContext::initialize(int argc, char* argv[]) -> bool {
     argagg::parser parser{{
         {"help", {"-h", "--help"}, tr("Shows this help message"), 0}, 
         {"file", {"-f", "--file"}, tr("Binary file to load"), 1},
-        {"set-pc", {"-s", "--set-pc"}, 
-            tr("Address to set the PC after loading the binary file, in hex. Default is 0x6004000."), 1},
-        {"load-address", {"-l", "--load-address"}, 
-            tr("Saturn memory address to load the binary file to, in hex. Default is 0x6004000."), 1},
-        {"auto-start", {"-a", "--auto-start"}, 
-            tr("Will auto start the emulator after loading when present."),},
+        {"set-pc", {"-s", "--set-pc"}, tr("Address to set the PC after loading the binary file, in hex. Default is 0x6004000."), 1},
+        {"load-address", {"-l", "--load-address"}, tr("Saturn memory address to load the binary file to, in hex. Default is 0x6004000."), 1},
+        {"auto-start", {"-a", "--auto-start"}, tr("Will auto start the emulator after loading when present."),},
+        {"generate-sh2-opcodes", {"-g", "--generate-sh2-opcodes"}, tr("Generates a file containing SH2 opcodes."),}
 
     }};
     // clang-format on
@@ -121,6 +120,13 @@ auto EmulatorContext::initialize(int argc, char* argv[]) -> bool {
             file.is_auto_started = args["auto-start"];
 
             if (memory()->loadBinaryFile(file)) { memory()->selectedBinaryFile(file); }
+        }
+        if (args["generate-sh2-opcodes"]) {
+            if (!sh2::generateOpcodes()) {
+                Log::error(Logger::main, tr("Error while generating SH2 opcodes"));
+            } else {
+                Log::info(Logger::main, tr("SH2 opcodes were generated"));
+            }
         }
     } catch (const std::exception& e) {
         Log::error(Logger::main, tr("Error while parsing command line"));
@@ -174,7 +180,7 @@ void EmulatorContext::pauseEmulation() { debugStatus(DebugStatus::paused); }
 void EmulatorContext::emulationSetup() {
     memory()->initialize(hardware_mode_);
 
-    sh2::initializeOpcodesLut();
+    sh2::sh2CoreSetup(config());
     masterSh2()->powerOnReset();
     slaveSh2()->powerOnReset();
     smpc()->initialize();

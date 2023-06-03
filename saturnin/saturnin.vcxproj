@@ -364,6 +364,9 @@
     <ClCompile Include="src\emulator_modules.cpp" />
     <ClInclude Include="src\bit_register.h" />
     <ClInclude Include="src\exceptions.h" />
+    <ClCompile Include="src\sh2\fast_interpreter\opcodes_generator.cpp" />
+    <ClCompile Include="src\sh2\fast_interpreter\sh2_opcodes.cpp" />
+    <ClCompile Include="src\sh2\sh2_shared.cpp" />
     <ClCompile Include="src\sound\scsp.cpp" />
     <ClCompile Include="src\tests.cpp" />
     <ClCompile Include="src\thread_pool.cpp" />
@@ -424,9 +427,9 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="src\scu.cpp" />
-    <ClCompile Include="src\sh2.cpp" />
-    <ClCompile Include="src\sh2_disasm.cpp" />
-    <ClCompile Include="src\sh2_instructions.cpp" />
+    <ClCompile Include="src\sh2\sh2.cpp" />
+    <ClCompile Include="src\sh2\sh2_disasm.cpp" />
+    <ClCompile Include="src\sh2\basic_interpreter\sh2_instructions.cpp" />
     <ClCompile Include="src\smpc.cpp" />
     <ClCompile Include="src\utilities.cpp" />
     <ClCompile Include="src\video\base_rendering_part.cpp" />
@@ -447,6 +450,11 @@
     <ClInclude Include="src\resource.hpp" />
     <ClInclude Include="src\resource_holder.hpp" />
     <ClInclude Include="src\scu.h" />
+    <ClInclude Include="src\sh2\basic_interpreter\sh2_functions_link.h" />
+    <ClInclude Include="src\sh2\fast_interpreter\opcodes_generator.h" />
+    <ClInclude Include="src\sh2\fast_interpreter\sh2_opcodes.h" />
+    <ClInclude Include="src\sh2\sh2_disasm_link.h" />
+    <ClInclude Include="src\sh2\sh2_shared.h" />
     <ClInclude Include="src\tests.h" />
     <ClInclude Include="src\thread_pool.h" />
     <ClInclude Include="src\video\base_rendering_part.h" />
@@ -479,10 +487,10 @@
     <ClInclude Include="src\memory.h" />
     <ClInclude Include="src\pch.h" />
     <ClInclude Include="src\scu_registers.h" />
-    <ClInclude Include="src\sh2.h" />
-    <ClInclude Include="src\sh2_disasm.h" />
-    <ClInclude Include="src\sh2_instructions.h" />
-    <ClInclude Include="src\sh2_registers.h" />
+    <ClInclude Include="src\sh2\sh2.h" />
+    <ClInclude Include="src\sh2\sh2_disasm.h" />
+    <ClInclude Include="src\sh2\basic_interpreter\sh2_instructions.h" />
+    <ClInclude Include="src\sh2\sh2_registers.h" />
     <ClInclude Include="src\smpc.h" />
     <ClInclude Include="src\smpc_registers.h" />
     <ClInclude Include="src\sound\scsp.h" />
@@ -495,6 +503,9 @@
     <ClInclude Include="src\video\vdp2.h" />
     <ClInclude Include="src\video\vdp2_part.h" />
     <ClInclude Include="src\video\vdp2_registers.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="src\sh2\fast_interpreter\sh2_opcodes.inc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

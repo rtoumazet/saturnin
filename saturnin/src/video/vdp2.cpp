@@ -20,6 +20,7 @@
 #include <saturnin/src/pch.h>
 #include <saturnin/src/video/vdp2.h>
 #include <istream>
+#include <numeric> // accumulate
 #include <set>
 #include <unordered_set>
 #include <saturnin/src/config.h>
@@ -76,8 +77,6 @@ void Vdp2::initialize() {
     disabled_scroll_screens_[ScrollScreen::nbg3] = false;
     disabled_scroll_screens_[ScrollScreen::rbg0] = false;
     disabled_scroll_screens_[ScrollScreen::rbg1] = false;
-
-    current_time_ = steady_clock::now();
 }
 
 void Vdp2::run(const u8 cycles) {
@@ -104,11 +103,6 @@ void Vdp2::run(const u8 cycles) {
                 modules_.context()->debugStatus(core::DebugStatus::paused);
             }
         }
-        // new_time_ = steady_clock::now();
-        // auto diff = milli{new_time_ - current_time_};
-
-        // Log::warning(Logger::vdp2, tr("Saturn frame duration : {}ms"), diff.count());
-        // current_time_ = new_time_;
     }
 
     if (elapsed_frame_cycles_ > cycles_per_frame_) {
@@ -233,6 +227,7 @@ void Vdp2::calculateDisplayDuration() {
 }
 
 void Vdp2::onVblankIn() {
+    calculateFps();
     Texture::cleanCache(modules_.opengl(), VdpType::vdp2);
     updateResolution();
     updateRamStatus();
@@ -350,6 +345,11 @@ void Vdp2::refreshRegisters() {
     for (u32 i = 0; i < regs_max; i += 2) {
         write16(i, modules_.memory()->vdp2_registers_[i] << 8 | modules_.memory()->vdp2_registers_[i + 1]);
     }
+}
+
+auto Vdp2::fps() -> std::string {
+    std::lock_guard lock(fps_mutex_);
+    return fps_;
 }
 
 //--------------------------------------------------------------------------------------------------------------
@@ -3987,6 +3987,38 @@ void Vdp2::discardCache([[maybe_unused]] const ScrollScreen screen) const {
     // 2) Vdp2 parts are deleted
     // clearRenderData(screen);
 }
+
+void Vdp2::calculateFps() {
+    using namespace std::literals::chrono_literals;
+
+    static auto    previous_frame_start   = std::chrono::steady_clock::time_point{};
+    const auto     current_frame_start    = std::chrono::steady_clock::now();
+    const auto     current_frame_duration = std::chrono::duration_cast<micro>(current_frame_start - previous_frame_start);
+    static auto    frames_fps             = std::deque<double>{};
+    constexpr auto frames_max{30};
+
+    if (frames_fps.size() >= frames_max) { frames_fps.pop_front(); }
+    auto fps = 1s / current_frame_duration;
+    frames_fps.push_back(fps);
+
+    auto fps_sum = std::accumulate(frames_fps.begin(), frames_fps.end(), 0.0);
+
+    std::string    ts           = modules_.config()->readValue(core::AccessKeys::cfg_rendering_tv_standard);
+    const auto     standard     = modules_.config()->getTvStandard(ts);
+    constexpr auto max_fps_pal  = 50;
+    constexpr auto max_fps_ntsc = 60;
+    static auto    max_frames   = (standard == TvStandard::pal) ? max_fps_pal : max_fps_ntsc;
+
+    static auto update_counter = 0;
+    if (constexpr auto update_rate = 5; update_counter % update_rate == 0) {
+        std::lock_guard lock(fps_mutex_);
+        fps_ = util::format("{:.1f} / {}", fps_sum / frames_max, max_frames);
+    }
+    ++update_counter;
+
+    previous_frame_start = current_frame_start;
+}
+
 //--------------------------------------------------------------------------------------------------------------
 // Free functions
 //--------------------------------------------------------------------------------------------------------------

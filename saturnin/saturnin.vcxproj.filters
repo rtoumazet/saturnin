@@ -31,6 +31,15 @@
     <Filter Include="Fichiers sources\sound\scsp_stef">
       <UniqueIdentifier>{bb4c3faf-bf95-48bc-b06f-b62ba4cfac69}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Fichiers sources\sh2">
+      <UniqueIdentifier>{e5ce400b-885b-477c-9760-8ff489935104}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Fichiers sources\sh2\basic_interpreter">
+      <UniqueIdentifier>{1298afe0-8b84-4fd6-8f57-3a3d8d932007}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Fichiers sources\sh2\fast_interpreter">
+      <UniqueIdentifier>{dab72cf9-6b96-42c9-9a49-b64d257fa361}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\config.cpp">
@@ -72,13 +81,7 @@
     <ClCompile Include="src\cdrom\cdrom.cpp">
       <Filter>Fichiers sources\cdrom</Filter>
     </ClCompile>
-    <ClCompile Include="src\sh2.cpp">
-      <Filter>Fichiers sources</Filter>
-    </ClCompile>
     <ClCompile Include="src\scu.cpp">
-      <Filter>Fichiers sources</Filter>
-    </ClCompile>
-    <ClCompile Include="src\sh2_instructions.cpp">
       <Filter>Fichiers sources</Filter>
     </ClCompile>
     <ClCompile Include="lib\imgui\imgui_custom_controls.cpp">
@@ -88,9 +91,6 @@
       <Filter>Fichiers sources\video</Filter>
     </ClCompile>
     <ClCompile Include="src\smpc.cpp">
-      <Filter>Fichiers sources</Filter>
-    </ClCompile>
-    <ClCompile Include="src\sh2_disasm.cpp">
       <Filter>Fichiers sources</Filter>
     </ClCompile>
     <ClCompile Include="src\video\vdp2.cpp">
@@ -147,6 +147,24 @@
     <ClCompile Include="src\tests.cpp">
       <Filter>Fichiers sources</Filter>
     </ClCompile>
+    <ClCompile Include="src\sh2\fast_interpreter\opcodes_generator.cpp">
+      <Filter>Fichiers sources\sh2\fast_interpreter</Filter>
+    </ClCompile>
+    <ClCompile Include="src\sh2\basic_interpreter\sh2_instructions.cpp">
+      <Filter>Fichiers sources\sh2\basic_interpreter</Filter>
+    </ClCompile>
+    <ClCompile Include="src\sh2\sh2.cpp">
+      <Filter>Fichiers sources\sh2</Filter>
+    </ClCompile>
+    <ClCompile Include="src\sh2\fast_interpreter\sh2_opcodes.cpp">
+      <Filter>Fichiers sources\sh2\fast_interpreter</Filter>
+    </ClCompile>
+    <ClCompile Include="src\sh2\sh2_disasm.cpp">
+      <Filter>Fichiers sources\sh2\basic_interpreter</Filter>
+    </ClCompile>
+    <ClCompile Include="src\sh2\sh2_shared.cpp">
+      <Filter>Fichiers sources\sh2</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\config.h">
@@ -197,9 +215,6 @@
     <ClInclude Include="src\emulator_defs.h">
       <Filter>Fichiers sources</Filter>
     </ClInclude>
-    <ClInclude Include="src\sh2.h">
-      <Filter>Fichiers sources</Filter>
-    </ClInclude>
     <ClInclude Include="src\interrupt_controller.h">
       <Filter>Fichiers sources</Filter>
     </ClInclude>
@@ -209,14 +224,8 @@
     <ClInclude Include="src\scu_registers.h">
       <Filter>Fichiers sources</Filter>
     </ClInclude>
-    <ClInclude Include="src\sh2_registers.h">
-      <Filter>Fichiers sources</Filter>
-    </ClInclude>
     <ClInclude Include="lib\imgui\imgui_loader.h">
       <Filter>Fichiers sources\imgui</Filter>
-    </ClInclude>
-    <ClInclude Include="src\sh2_instructions.h">
-      <Filter>Fichiers sources</Filter>
     </ClInclude>
     <ClInclude Include="lib\imgui\imgui_custom_controls.h">
       <Filter>Fichiers sources\imgui</Filter>
@@ -235,9 +244,6 @@
     </ClInclude>
     <ClInclude Include="src\sound\scsp.h">
       <Filter>Fichiers sources\sound</Filter>
-    </ClInclude>
-    <ClInclude Include="src\sh2_disasm.h">
-      <Filter>Fichiers sources</Filter>
     </ClInclude>
     <ClInclude Include="lib\imgui\imgui_memory_editor.h">
       <Filter>Fichiers sources\imgui</Filter>
@@ -314,5 +320,37 @@
     <ClInclude Include="src\bit_register.h">
       <Filter>Fichiers sources</Filter>
     </ClInclude>
+    <ClInclude Include="src\sh2\fast_interpreter\opcodes_generator.h">
+      <Filter>Fichiers sources\sh2\fast_interpreter</Filter>
+    </ClInclude>
+    <ClInclude Include="src\sh2\basic_interpreter\sh2_instructions.h">
+      <Filter>Fichiers sources\sh2\basic_interpreter</Filter>
+    </ClInclude>
+    <ClInclude Include="src\sh2\sh2.h">
+      <Filter>Fichiers sources\sh2</Filter>
+    </ClInclude>
+    <ClInclude Include="src\sh2\sh2_registers.h">
+      <Filter>Fichiers sources\sh2</Filter>
+    </ClInclude>
+    <ClInclude Include="src\sh2\fast_interpreter\sh2_opcodes.h">
+      <Filter>Fichiers sources\sh2\fast_interpreter</Filter>
+    </ClInclude>
+    <ClInclude Include="src\sh2\sh2_disasm.h">
+      <Filter>Fichiers sources\sh2\basic_interpreter</Filter>
+    </ClInclude>
+    <ClInclude Include="src\sh2\sh2_shared.h">
+      <Filter>Fichiers sources\sh2</Filter>
+    </ClInclude>
+    <ClInclude Include="src\sh2\basic_interpreter\sh2_functions_link.h">
+      <Filter>Fichiers sources\sh2\basic_interpreter</Filter>
+    </ClInclude>
+    <ClInclude Include="src\sh2\sh2_disasm_link.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="src\sh2\fast_interpreter\sh2_opcodes.inc">
+      <Filter>Fichiers sources\sh2\fast_interpreter</Filter>
+    </None>
   </ItemGroup>
 </Project>

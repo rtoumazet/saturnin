@@ -19,18 +19,16 @@
 
 #include <saturnin/src/pch.h>
 #include <saturnin/src/video/gui.h>
-// #include <imgui.h>
 #include <istream>
 #include <filesystem>       // path
 #include <imgui_internal.h> // ImGuiSelectableFlags_SelectOnNav
 #include <imgui_stdlib.h>
 #include <saturnin/src/config.h>
-#include <saturnin/src/emulator_enums.h> // EmulationStatus
-#include <saturnin/src/locale.h>         // tr
-#include <saturnin/src/log.h>            // Log
-#include <saturnin/src/sh2.h>            // Sh2
-#include <saturnin/src/sh2_instructions.h>
-#include <saturnin/src/smpc.h> // SaturnDigitalPad, PeripheralKey
+#include <saturnin/src/emulator_enums.h>              // EmulationStatus
+#include <saturnin/src/locale.h>                      // tr
+#include <saturnin/src/log.h>                         // Log
+#include <saturnin/src/sh2/basic_interpreter/sh2_instructions.h>
+#include <saturnin/src/smpc.h>                        // SaturnDigitalPad, PeripheralKey
 #include <saturnin/src/tests.h>
 #include <saturnin/src/thread_pool.h>                 // ThreadPool
 #include <saturnin/src/utilities.h>                   // stringToVector, format
@@ -195,16 +193,20 @@ void showMainMenu(GuiConfiguration& conf, core::EmulatorContext& state) {
                 sound       = 4,
                 peripherals = 5,
                 logs        = 6,
+                advanced    = 7,
                 none        = 255
             };
-            using HeaderMap                = std::map<const Header, const std::string>;
-            const auto  headers            = HeaderMap{{Header::general, tr("General")},
-                                                       {Header::rendering, tr("Rendering")},
-                                                       {Header::path, tr("Paths")},
-                                                       {Header::cd_rom, tr("CD-Rom")},
-                                                       {Header::sound, tr("Sound")},
-                                                       {Header::peripherals, tr("Peripherals")},
-                                                       {Header::logs, tr("Logs")}};
+            using HeaderMap    = std::map<const Header, const std::string>;
+            const auto headers = HeaderMap{
+                {Header::general,     tr("General")    },
+                {Header::rendering,   tr("Rendering")  },
+                {Header::path,        tr("Paths")      },
+                {Header::cd_rom,      tr("CD-Rom")     },
+                {Header::sound,       tr("Sound")      },
+                {Header::peripherals, tr("Peripherals")},
+                {Header::logs,        tr("Logs")       },
+                {Header::advanced,    tr("Advanced")   }
+            };
             static auto last_opened_header = Header::none;
             if (last_opened_header == Header::none) { last_opened_header = Header::general; }
             auto setHeaderState = [](const Header header) {
@@ -593,7 +595,7 @@ void showMainMenu(GuiConfiguration& conf, core::EmulatorContext& state) {
                                 = std::ranges::find_if(connections, [&c](std::string_view str) { return c == str; });
                             static auto index_connection = static_cast<s32>(it_connection - connections.begin());
                             if (ImGui::Combo("##peripheral_connection_2", &index_connection, connections)) {
-                                state.config()->writeValue(core::AccessKeys::cfg_controls_saturn_player_1_connection,
+                                state.config()->writeValue(core::AccessKeys::cfg_controls_saturn_player_2_connection,
                                                            connections[index_connection]);
                             }
 
@@ -881,6 +883,24 @@ void showMainMenu(GuiConfiguration& conf, core::EmulatorContext& state) {
                 setupLog(core::AccessKeys::cfg_log_unimplemented, "##log_unimplemented", levels);
             }
 
+            // Advanced header
+            setHeaderState(Header::advanced);
+            if (ImGui::CollapsingHeader(headers.at(Header::advanced).c_str())) {
+                last_opened_header = Header::advanced;
+
+                // Language
+                ImGui::TextUnformatted(tr("SH2 core").c_str());
+                ImGui::SameLine(second_column_offset);
+
+                static auto sh2_cores  = state.config()->listSh2Cores();
+                std::string c          = state.config()->readValue(core::AccessKeys::cfg_advanced_sh2_core);
+                const auto  it_core    = std::ranges::find_if(sh2_cores, [&c](std::string_view str) { return c == str; });
+                static auto index_core = static_cast<s32>(it_core - sh2_cores.begin());
+                if (ImGui::Combo("##sh2_cores", &index_core, sh2_cores)) {
+                    state.config()->writeValue(core::AccessKeys::cfg_advanced_sh2_core, sh2_cores[index_core]);
+                }
+            }
+
             static auto counter        = u16{};
             static auto status_message = std::string{};
             if (ImGui::Button("Save")) {
@@ -962,7 +982,7 @@ void showRenderingWindow(core::EmulatorContext& state) {
             gui::addTextureToDrawList(state.opengl()->vdp1DebugOverlayTextureId(), width, height, overlay_alpha);
         }
     }
-    ImGui::Text("%s", state.opengl()->fps().c_str());
+    ImGui::Text("%s", state.vdp2()->fps().c_str());
     ImGui::End();
     ImGui::PopStyleVar();
     ImGui::PopStyleVar();
@@ -1162,9 +1182,9 @@ void showDebugSh2Window(core::EmulatorContext& state, bool* opened) {
                 const auto opcode = state.memory()->read<u16>(i);
                 if (i == current_pc) {
                     const auto color = ImVec4(0.5f, 0.5f, 1.0f, 1.0f);
-                    ImGui::TextColored(color, sh2::disasm(i, opcode).c_str());
+                    ImGui::TextColored(color, sh2::Sh2::disasm(i, opcode).c_str());
                 } else {
-                    ImGui::TextUnformatted(sh2::disasm(i, opcode).c_str());
+                    ImGui::TextUnformatted(sh2::Sh2::disasm(i, opcode).c_str());
                 }
             }
 
@@ -1520,12 +1540,14 @@ void showDebugVdp2Window(core::EmulatorContext& state, bool* opened) {
 
     using video::ScrollScreen;
     using ScrollScreenName    = std::unordered_map<ScrollScreen, std::string>;
-    const auto scroll_screens = ScrollScreenName{{ScrollScreen::nbg0, "NBG0"},
-                                                 {ScrollScreen::nbg1, "NBG1"},
-                                                 {ScrollScreen::nbg2, "NBG2"},
-                                                 {ScrollScreen::nbg3, "NBG3"},
-                                                 {ScrollScreen::rbg0, "RBG0"},
-                                                 {ScrollScreen::rbg1, "RBG1"}};
+    const auto scroll_screens = ScrollScreenName{
+        {ScrollScreen::nbg0, "NBG0"},
+        {ScrollScreen::nbg1, "NBG1"},
+        {ScrollScreen::nbg2, "NBG2"},
+        {ScrollScreen::nbg3, "NBG3"},
+        {ScrollScreen::rbg0, "RBG0"},
+        {ScrollScreen::rbg1, "RBG1"}
+    };
 
     auto tab_bar_flags = ImGuiTabBarFlags{ImGuiTabBarFlags_None};
     if (ImGui::BeginTabBar("Vdp2DebugTabBar", tab_bar_flags)) {

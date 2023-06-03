@@ -19,13 +19,13 @@
 
 #include <saturnin/src/pch.h>
 #include <saturnin/src/video/opengl.h>
-#include <Windows.h> // removes C4005 warning
+#include <Windows.h>  // removes C4005 warning
 #include <algorithm>
 #include <fstream>    // ifstream
 #include <filesystem> // filesystem
 #include <iostream>   // cout
 #include <lodepng.h>
-#include <sstream> // stringstream
+#include <sstream>    // stringstream
 #include <glbinding/glbinding.h>
 // #include <glbinding/gl/gl.h>
 #include <glbinding/Version.h>
@@ -42,7 +42,7 @@
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
 #include <saturnin/src/config.h>
-#include <saturnin/src/locale.h> // tr
+#include <saturnin/src/locale.h>    // tr
 #include <saturnin/src/log.h>
 #include <saturnin/src/utilities.h> // format
 #include <saturnin/src/video/gui.h>
@@ -592,7 +592,6 @@ void Opengl::render() {
     }
 
     postRender();
-    calculateFps();
 }
 
 auto Opengl::getVertexesNumberByDrawType(const PartsList& parts_list) const -> u64 {
@@ -921,10 +920,12 @@ void Opengl::packTextures(std::vector<OpenglTexture>& textures) {
         auto y1 = static_cast<float>(y_pos) / static_cast<float>(texture_array_height);
         auto y2 = static_cast<float>(y_pos + texture.size.h) / static_cast<float>(texture_array_height);
 
-        auto coords = std::vector{TextureCoordinates{x1, y1, static_cast<float>(current_layer)},
-                                  TextureCoordinates{x2, y1, static_cast<float>(current_layer)},
-                                  TextureCoordinates{x2, y2, static_cast<float>(current_layer)},
-                                  TextureCoordinates{x1, y2, static_cast<float>(current_layer)}};
+        auto coords = std::vector{
+            TextureCoordinates{x1, y1, static_cast<float>(current_layer)},
+            TextureCoordinates{x2, y1, static_cast<float>(current_layer)},
+            TextureCoordinates{x2, y2, static_cast<float>(current_layer)},
+            TextureCoordinates{x1, y2, static_cast<float>(current_layer)}
+        };
         textures_link_[texture.key].coords.swap(coords);
 
         generateSubTexture(texture.key);
@@ -1310,34 +1311,6 @@ auto Opengl::initializeTextureArray() const -> u32 {
     return texture;
 }
 
-void Opengl::calculateFps() {
-    using namespace std::literals::chrono_literals;
-    static auto time_elapsed = micro{0};
-    static auto frames_count = u8{0};
-    ++frames_count;
-    static auto previous_frame_start   = std::chrono::steady_clock::time_point{};
-    const auto  current_frame_start    = std::chrono::steady_clock::now();
-    const auto  current_frame_duration = std::chrono::duration_cast<micro>(current_frame_start - previous_frame_start);
-
-    time_elapsed += current_frame_duration;
-
-    static auto max_frames = 0;
-
-    if (time_elapsed > 1s) {
-        if (max_frames == 0) {
-            std::string    ts           = config_->readValue(core::AccessKeys::cfg_rendering_tv_standard);
-            const auto     standard     = config_->getTvStandard(ts);
-            constexpr auto max_fps_pal  = 50;
-            constexpr auto max_fps_ntsc = 60;
-            max_frames                  = (standard == TvStandard::pal) ? max_fps_pal : max_fps_ntsc;
-        }
-        fps_                 = uti::format("{:d} / {}", frames_count, max_frames);
-        previous_frame_start = current_frame_start;
-        frames_count         = 0;
-        time_elapsed         = micro{0};
-    }
-}
-
 void Opengl::switchRenderedBuffer() {
     current_rendered_buffer_ = (current_rendered_buffer_ == FboType::back_buffer) ? FboType::front_buffer : FboType::back_buffer;
 }
@@ -1518,9 +1491,11 @@ auto runOpengl(core::EmulatorContext& state) -> s32 {
     const auto ico_16 = rh::embed("saturnin-ico-16.png");
     const auto ico_32 = rh::embed("saturnin-ico-32.png");
     const auto ico_48 = rh::embed("saturnin-ico-48.png");
-    auto       icons  = std::array<GLFWimage, 3>{{loadPngImage(ico_16.data(), ico_16.size()),
-                                                  loadPngImage(ico_32.data(), ico_32.size()),
-                                                  loadPngImage(ico_48.data(), ico_48.size())}};
+    auto       icons  = std::array<GLFWimage, 3>{
+        {loadPngImage(ico_16.data(), ico_16.size()),
+         loadPngImage(ico_32.data(), ico_32.size()),
+         loadPngImage(ico_48.data(), ico_48.size())}
+    };
     glfwSetWindowIcon(window, 3, icons.data());
 
     int flags;
