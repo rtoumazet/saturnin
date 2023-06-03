@@ -196,15 +196,17 @@ void showMainMenu(GuiConfiguration& conf, core::EmulatorContext& state) {
                 advanced    = 7,
                 none        = 255
             };
-            using HeaderMap                = std::map<const Header, const std::string>;
-            const auto  headers            = HeaderMap{{Header::general, tr("General")},
-                                                       {Header::rendering, tr("Rendering")},
-                                                       {Header::path, tr("Paths")},
-                                                       {Header::cd_rom, tr("CD-Rom")},
-                                                       {Header::sound, tr("Sound")},
-                                                       {Header::peripherals, tr("Peripherals")},
-                                                       {Header::logs, tr("Logs")},
-                                                       {Header::advanced, tr("Advanced")}};
+            using HeaderMap    = std::map<const Header, const std::string>;
+            const auto headers = HeaderMap{
+                {Header::general,     tr("General")    },
+                {Header::rendering,   tr("Rendering")  },
+                {Header::path,        tr("Paths")      },
+                {Header::cd_rom,      tr("CD-Rom")     },
+                {Header::sound,       tr("Sound")      },
+                {Header::peripherals, tr("Peripherals")},
+                {Header::logs,        tr("Logs")       },
+                {Header::advanced,    tr("Advanced")   }
+            };
             static auto last_opened_header = Header::none;
             if (last_opened_header == Header::none) { last_opened_header = Header::general; }
             auto setHeaderState = [](const Header header) {
@@ -980,7 +982,7 @@ void showRenderingWindow(core::EmulatorContext& state) {
             gui::addTextureToDrawList(state.opengl()->vdp1DebugOverlayTextureId(), width, height, overlay_alpha);
         }
     }
-    ImGui::Text("%s", state.opengl()->fps().c_str());
+    ImGui::Text("%s", state.vdp2()->fps().c_str());
     ImGui::End();
     ImGui::PopStyleVar();
     ImGui::PopStyleVar();
@@ -1538,12 +1540,14 @@ void showDebugVdp2Window(core::EmulatorContext& state, bool* opened) {
 
     using video::ScrollScreen;
     using ScrollScreenName    = std::unordered_map<ScrollScreen, std::string>;
-    const auto scroll_screens = ScrollScreenName{{ScrollScreen::nbg0, "NBG0"},
-                                                 {ScrollScreen::nbg1, "NBG1"},
-                                                 {ScrollScreen::nbg2, "NBG2"},
-                                                 {ScrollScreen::nbg3, "NBG3"},
-                                                 {ScrollScreen::rbg0, "RBG0"},
-                                                 {ScrollScreen::rbg1, "RBG1"}};
+    const auto scroll_screens = ScrollScreenName{
+        {ScrollScreen::nbg0, "NBG0"},
+        {ScrollScreen::nbg1, "NBG1"},
+        {ScrollScreen::nbg2, "NBG2"},
+        {ScrollScreen::nbg3, "NBG3"},
+        {ScrollScreen::rbg0, "RBG0"},
+        {ScrollScreen::rbg1, "RBG1"}
+    };
 
     auto tab_bar_flags = ImGuiTabBarFlags{ImGuiTabBarFlags_None};
     if (ImGui::BeginTabBar("Vdp2DebugTabBar", tab_bar_flags)) {

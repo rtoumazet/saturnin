@@ -806,6 +806,19 @@ class Vdp2 {
 
     void clearRenderData(const ScrollScreen s);
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn	auto Vdp2::fps() -> std::string;
+    ///
+    /// \brief	Gets the calculated FPS.
+    ///
+    /// \author	Runik
+    /// \date	02/06/2023
+    ///
+    /// \returns	A std::string.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    auto fps() -> std::string;
+
     //--------------------------------------------------------------------------------------------------------------
     // DEBUG methods, defined in vdp2_debug.cpp
     //--------------------------------------------------------------------------------------------------------------
@@ -1757,6 +1770,8 @@ class Vdp2 {
 
     void discardCache(const ScrollScreen screen) const;
 
+    void calculateFps();
+
     EmulatorModules modules_;
 
     AddressToNameMap address_to_name_;           ///< Link between a register address and its name.
@@ -1795,157 +1810,10 @@ class Vdp2 {
     ScrollScreen         screen_in_debug_{ScrollScreen::none}; ///< Scroll screen currently viewed in debug.
     DisabledScrollScreen disabled_scroll_screens_;             ///< Disabling state of scroll screens.
 
-    std::chrono::time_point<std::chrono::steady_clock> current_time_;
-    std::chrono::time_point<std::chrono::steady_clock> new_time_;
+    std::mutex  fps_mutex_;                                    ///< Mutex protecting fps_.
+    std::string fps_;                                          ///< The FPS
 
-    ///@{
-    /// \name VDP2 registers
-    Vdp2Regs regs_;
-    // TvScreenMode                                    tvmd_;
-    // ExternalSignalEnable                            exten_;
-    // ScreenStatus                                    tvstat_;
-    // VramSizeRegister                                vrsize_;
-    // HCounter                                        hcnt_;
-    // VCounter                                        vcnt_;
-    // RamControl ramctl_;
-    // Reserve                                         rsv1_;
-    // VramCyclePatternBankLower                       cyca0l_;
-    // VramCyclePatternBankUpper                       cyca0u_;
-    // VramCyclePatternBankLower                       cyca1l_;
-    // VramCyclePatternBankUpper                       cyca1u_;
-    // VramCyclePatternBankLower                       cycb0l_;
-    // VramCyclePatternBankUpper                       cycb0u_;
-    // VramCyclePatternBankLower                       cycb1l_;
-    // VramCyclePatternBankUpper                       cycb1u_;
-    // ScreenDisplayEnable                             bgon_;
-    // MosaicControl                                   mzctl_;
-    // SpecialFunctionCodeSelect                       sfsel_;
-    // SpecialFunctionCode                             sfcode_;
-    // CharacterControlA                               chctla_;
-    // CharacterControlB                               chctlb_;
-    // BitmapPaletteNumberA                            bmpna_;
-    // BitmapPaletteNumberB                            bmpnb_;
-    // PatternNameControl                              pncn0_;
-    // PatternNameControl                              pncn1_;
-    // PatternNameControl                              pncn2_;
-    // PatternNameControl                              pncn3_;
-    // PatternNameControl                              pncr_;
-    // PlaneSizeRegister                               plsz_;
-    // MapOffsetNbg                                    mpofn_;
-    // MapOffsetRbg                                    mpofr_;
-    // MapPlaneAB                                      mpabn0_;
-    // MapPlaneCD mpcdn0_;
-    // MapPlaneAB                                      mpabn1_;
-    // MapPlaneCD mpcdn1_;
-    // MapPlaneAB                                      mpabn2_;
-    // MapPlaneCD mpcdn2_;
-    // MapPlaneAB                                      mpabn3_;
-    // MapPlaneCD mpcdn3_;
-    // MapPlaneAB                                      mpabra_;
-    // MapPlaneCD mpcdra_;
-    // MapPlaneEF mpefra_;
-    // MapPlaneGH mpghra_;
-    // MapPlaneIJ mpijra_;
-    // MapPlaneKL mpklra_;
-    // MapPlaneMN mpmnra_;
-    // MapPlaneOP mpopra_;
-    // MapPlaneAB                                      mpabrb_;
-    // MapPlaneCD                                      mpcdrb_;
-    // MapPlaneEF                                      mpefrb_;
-    // MapPlaneGH                                      mpghrb_;
-    // MapPlaneIJ                                      mpijrb_;
-    // MapPlaneKL                                      mpklrb_;
-    // MapPlaneMN                                      mpmnrb_;
-    // MapPlaneOP                                      mpoprb_;
-    // ScreenScrollValueIntegerPart                    scxin0_;
-    // ScreenScrollValueFractionalPart                 scxdn0_;
-    // ScreenScrollValueIntegerPart                    scyin0_;
-    // ScreenScrollValueFractionalPart                 scydn0_;
-    // CoordinateIncrementNbg0HorizontalIntegerPart    zmxin0_;
-    // CoordinateIncrementNbg0HorizontalFractionalPart zmxdn0_;
-    // CoordinateIncrementNbg0VerticalIntegerPart      zmyin0_;
-    // CoordinateIncrementNbg0VerticalFractionalPart   zmydn0_;
-    // ScreenScrollValueIntegerPart                    scxin1_;
-    // ScreenScrollValueFractionalPart                 scxdn1_;
-    // ScreenScrollValueIntegerPart                    scyin1_;
-    // ScreenScrollValueFractionalPart                 scydn1_;
-    // CoordinateIncrementNbg1HorizontalIntegerPart    zmxin1_;
-    // CoordinateIncrementNbg1HorizontalFractionalPart zmxdn1_;
-    // CoordinateIncrementNbg1VerticalIntegerPart      zmyin1_;
-    // CoordinateIncrementNbg1VerticalFractionalPart   zmydn1_;
-    // ScreenScrollValueIntegerPart                    scxn2_;
-    // ScreenScrollValueIntegerPart                    scyn2_;
-    // ScreenScrollValueIntegerPart                    scxn3_;
-    // ScreenScrollValueIntegerPart                    scyn3_;
-    // ReductionEnable                                 zmctl_;
-    // LineAndVerticalCellScrollControl    scrctl_;
-    // VerticalCellScrollTableAddressUpper vcstau_;
-    // VerticalCellScrollTableAddressLower vcstal_;
-    // LineScrollTableAddressNbg0Upper    lsta0u_;
-    // LineScrollTableAddressNbg0Lower    lsta0l_;
-    // LineScrollTableAddressNbg1Upper    lsta1u_;
-    // LineScrollTableAddressNbg1Lower    lsta1l_;
-    // LineColorScreenTableAddressUpper   lctau_;
-    // LineColorScreenTableAddressLower   lctal_;
-    // BackScreenTableAddressUpper        bktau_;
-    // BackScreenTableAddressLower        bktal_;
-    // RotationParameterMode              rpmd_;
-    // RotationParameterReadControl       rprctl_;
-    // CoefficientTableControl            ktctl_;
-    // CoefficientTableAddressOffset      ktaof_;
-    // ScreenOverPatternNameA             ovpnra_;
-    // ScreenOverPatternNameB             ovpnrb_;
-    // RotationParameterTableAddressUpper rptau_;
-    // RotationParameterTableAddressLower rptal_;
-    // WindowPositionW0HorizontalStart wpsx0_;
-    // WindowPositionW0VerticalStart   wpsy0_;
-    // WindowPositionW0HorizontalEnd   wpex0_;
-    // WindowPositionW0VerticalEnd     wpey0_;
-    // WindowPositionW1HorizontalStart wpsx1_;
-    // WindowPositionW1VerticalStart   wpsy1_;
-    // WindowPositionW1HorizontalEnd   wpex1_;
-    // WindowPositionW1VerticalEnd     wpey1_;
-    // WindowControlA                  wctla_;
-    // WindowControlB                  wctlb_;
-    // WindowControlC                  wctlc_;
-    // WindowControlD                  wctld_;
-    // LineWindowTableAddressW0Upper   lwta0u_;
-    // LineWindowTableAddressW0Lower   lwta0l_;
-    // LineWindowTableAddressW1Upper   lwta1u_;
-    // LineWindowTableAddressW1Lower   lwta1l_;
-    // SpriteControl                   spctl_;
-    // ShadowControl               sdctl_;
-    // ColorRamAddressOffsetA      craofa_;
-    // ColorRamAddressOffsetB      craofb_;
-    // LineColorScreenEnable       lnclen_;
-    // SpecialPriorityMode         sfprmd_;
-    // ColorCalculationControl     ccctl_;
-    // SpecialColorCalculationMode sfccmd_;
-    // PriorityNumberSpriteA prisa_;
-    // PriorityNumberSpriteB prisb_;
-    // PriorityNumberSpriteC prisc_;
-    // PriorityNumberSpriteD prisd_;
-    // PriorityNumberA       prina_;
-    // PriorityNumberB       prinb_;
-    // PriorityNumberR       prir_;
-    // Reserve                                         rsv2_;
-    // ColorCalculationRatioSpriteA       ccrsa_;
-    // ColorCalculationRatioSpriteB       ccrsb_;
-    // ColorCalculationRatioSpriteC       ccrsc_;
-    // ColorCalculationRatioSpriteD       ccrsd_;
-    // ColorCalculationRatioNbg0Nbg1      ccrna_;
-    // ColorCalculationRatioNbg2Nbg3      ccrnb_;
-    // ColorCalculationRatioRbg0          ccrr_;
-    // ColorCalculationRatioLineColorBack ccrlb_;
-    // ColorOffsetEnable                  clofen_;
-    // ColorOffsetSelect clofsl_;
-    // ColorOffsetARed   coar_;
-    // ColorOffsetAGreen coag_;
-    // ColorOffsetABlue  coab_;
-    // ColorOffsetBRed   cobr_;
-    // ColorOffsetBGreen cobg_;
-    // ColorOffsetBBlue  cobb_;
-    ///@}
+    Vdp2Regs regs_;                                            ///< VDP2 registers
 };
 
 ///@{
