@@ -1464,9 +1464,7 @@ class Vdp2 {
         const auto local_palette = palette_number;
         const auto color_address = u32{cram_start_address + screen.color_ram_address_offset | (local_palette | dot) * sizeof(T)};
         auto       color         = readColor<T>(color_address);
-        // if (screen.format == ScrollScreenFormat::bitmap) {
-        //    if (dot) DebugBreak();
-        //}
+
         if (!dot && screen.is_transparency_code_valid) color.a = 0;
 
         texture_data.insert(texture_data.end(), {color.r, color.g, color.b, color.a});
