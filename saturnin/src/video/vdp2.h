@@ -1461,7 +1461,7 @@ class Vdp2 {
                            const ScrollScreenStatus& screen,
                            const u16                 palette_number,
                            const u8                  dot) {
-        const auto local_palette = palette_number;
+        const auto local_palette = (palette_number & 0xf0) << 4;
         const auto color_address = u32{cram_start_address + screen.color_ram_address_offset | (local_palette | dot) * sizeof(T)};
         auto       color         = readColor<T>(color_address);
 
