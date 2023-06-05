@@ -334,7 +334,7 @@ struct ScuRegs {
         GENERATE_BIT_WITH_ENUM(dxft, 0, 0b111, StartingFactorSelect); ///< Defines Starting Factor Select (DxFTy)
         GENERATE_BIT_WITH_ENUM(dxwup, 8, 0b1, WriteAddressUpdate);    ///< Defines Write Address Update (DxWUP).
         GENERATE_BIT_WITH_ENUM(dxrup, 16, 0b1, ReadAddressUpdate);    ///< Defines Read Address Update (DxRUP).
-        GENERATE_BIT_WITH_ENUM(dxmod, 16, 0b1, DmaMode);              ///< Defines DMA Mode (DxMOD).
+        GENERATE_BIT_WITH_ENUM(dxmod, 24, 0b1, DmaMode);              ///< Defines DMA Mode (DxMOD).
     };
     using DxmdType = Reg<u32, Dxmd>;
     DxmdType d0md;
