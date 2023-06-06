@@ -4040,7 +4040,8 @@ auto getPatternNameData1Word1Cell16Colors10Bits(const u32 data, const ScrollScre
     auto pattern_name_data = PatternNameData{};
     auto reg               = PatternNameData1Word1Cell16Colors10BitsType{data};
 
-    pattern_name_data.character_number = static_cast<u16>(static_cast<byte>(screen.supplementary_character_number) << 10);
+    const auto scn                     = static_cast<byte>(screen.supplementary_character_number);
+    pattern_name_data.character_number = static_cast<u16>(std::to_integer<u16>(scn) << 10);
     pattern_name_data.character_number |= reg >> PatternNameData1Word1Cell16Colors10Bits::character_number_shft;
 
     pattern_name_data.palette_number = static_cast<u16>(static_cast<byte>(screen.supplementary_palette_number) << 4);
@@ -4060,8 +4061,8 @@ auto getPatternNameData1Word1Cell16Colors12Bits(const u32 data, const ScrollScre
     auto pattern_name_data = PatternNameData{};
     auto reg               = PatternNameData1Word1Cell16Colors12BitsType{data};
 
-    pattern_name_data.character_number
-        = static_cast<u16>((static_cast<byte>(screen.supplementary_character_number) & byte{0x1C}) << 10);
+    const auto scn                     = static_cast<byte>(screen.supplementary_character_number) & byte{0x1C};
+    pattern_name_data.character_number = static_cast<u16>(std::to_integer<u16>(scn) << 10);
     pattern_name_data.character_number |= reg >> PatternNameData1Word1Cell16Colors12Bits::character_number_shft;
 
     pattern_name_data.palette_number = static_cast<u16>(static_cast<byte>(screen.supplementary_palette_number) << 4);
@@ -4085,7 +4086,8 @@ auto getPatternNameData1Word1CellOver16Colors10Bits(const u32 data, const Scroll
         = static_cast<u16>(reg >> PatternNameData1Word1CellOver16Colors10Bits::palette_number_shft << 10);
     pattern_name_data.character_number |= reg >> PatternNameData1Word1CellOver16Colors10Bits::character_number_shft;
 
-    pattern_name_data.palette_number = static_cast<u16>(static_cast<byte>(screen.supplementary_palette_number) << 8);
+    const auto spn                   = static_cast<u16>(screen.supplementary_palette_number) << 8;
+    pattern_name_data.palette_number = static_cast<u16>(spn);
 
     pattern_name_data.special_color_calculation = screen.special_color_calculation;
     pattern_name_data.special_priority          = screen.special_priority;
@@ -4101,8 +4103,8 @@ auto getPatternNameData1Word1CellOver16Colors12Bits(const u32 data, const Scroll
     auto pattern_name_data = PatternNameData{};
     auto reg               = PatternNameData1Word1CellOver16Colors12BitsType{data};
 
-    pattern_name_data.character_number
-        = static_cast<u16>((static_cast<byte>(screen.supplementary_character_number) & byte{0x1C}) << 10);
+    const auto scn                     = static_cast<byte>(screen.supplementary_character_number) & byte{0x1C};
+    pattern_name_data.character_number = static_cast<u16>(std::to_integer<u16>(scn) << 10);
     pattern_name_data.character_number |= reg >> PatternNameData1Word1CellOver16Colors12Bits::character_number_shft;
 
     pattern_name_data.palette_number
@@ -4122,12 +4124,13 @@ auto getPatternNameData1Word4Cells16Colors10Bits(const u32 data, const ScrollScr
     auto pattern_name_data = PatternNameData{};
     auto reg               = PatternNameData1Word4Cells16Colors10BitsType{data};
 
-    pattern_name_data.character_number
-        = static_cast<u16>((static_cast<byte>(screen.supplementary_character_number) & byte{0x1C}) << 10);
+    const auto scn                     = static_cast<byte>(screen.supplementary_character_number) & byte{0x1C};
+    pattern_name_data.character_number = static_cast<u16>(std::to_integer<u16>(scn) << 10);
     pattern_name_data.character_number |= (reg >> PatternNameData1Word4Cells16Colors10Bits::character_number_shft << 2);
     pattern_name_data.character_number |= static_cast<u16>(static_cast<byte>(screen.supplementary_character_number) & byte{0x3});
 
-    pattern_name_data.palette_number = static_cast<u16>(static_cast<byte>(screen.supplementary_palette_number) << 4);
+    const auto spn                   = byte{screen.supplementary_palette_number};
+    pattern_name_data.palette_number = static_cast<u16>(std::to_integer<u16>(spn) << 4);
     pattern_name_data.palette_number |= reg >> PatternNameData1Word4Cells16Colors10Bits::palette_number_shft;
 
     pattern_name_data.special_color_calculation = screen.special_color_calculation;
@@ -4144,12 +4147,14 @@ auto getPatternNameData1Word4Cells16Colors12Bits(const u32 data, const ScrollScr
     auto pattern_name_data = PatternNameData{};
     auto reg               = PatternNameData1Word4Cells16Colors12BitsType{data};
 
-    pattern_name_data.character_number
-        = static_cast<u16>((static_cast<byte>(screen.supplementary_character_number) & byte{0x10}) << 10);
+    const auto scn                     = static_cast<byte>(screen.supplementary_character_number) & byte{0x10};
+    pattern_name_data.character_number = static_cast<u16>(std::to_integer<u16>(scn) << 10);
     pattern_name_data.character_number |= (reg >> PatternNameData1Word4Cells16Colors12Bits::character_number_shft << 2);
-    pattern_name_data.character_number |= static_cast<u16>(static_cast<byte>(screen.supplementary_character_number) & byte{0x3});
+    const auto scn2 = static_cast<byte>(screen.supplementary_character_number) & byte{0x3};
+    pattern_name_data.character_number |= std::to_integer<u16>(scn2);
 
-    pattern_name_data.palette_number = static_cast<u16>(static_cast<byte>(screen.supplementary_palette_number) << 4);
+    const auto spn                   = byte{screen.supplementary_palette_number};
+    pattern_name_data.palette_number = static_cast<u16>(std::to_integer<u16>(spn) << 4);
     pattern_name_data.palette_number |= reg >> PatternNameData1Word4Cells16Colors12Bits::palette_number_shft;
 
     pattern_name_data.special_color_calculation = screen.special_color_calculation;
@@ -4166,9 +4171,9 @@ auto getPatternNameData1Word4CellsOver16Colors10Bits(const u32 data, const Scrol
     auto pattern_name_data = PatternNameData{};
     auto reg               = PatternNameData1Word4CellsOver16Colors10BitsType{data};
 
-    pattern_name_data.character_number
-        = static_cast<u16>((static_cast<byte>(screen.supplementary_character_number) & byte{0x1C}) << 10);
-    constexpr auto cn_disp_2 = u8{2};
+    const auto scn                     = static_cast<byte>(screen.supplementary_character_number) & byte{0x1C};
+    pattern_name_data.character_number = static_cast<u16>(std::to_integer<u16>(scn) << 10);
+    constexpr auto cn_disp_2           = u8{2};
     pattern_name_data.character_number
         |= (reg >> PatternNameData1Word4CellsOver16Colors10Bits::character_number_shft << cn_disp_2);
     pattern_name_data.character_number |= static_cast<u16>(static_cast<byte>(screen.supplementary_character_number) & byte{0x3});
@@ -4190,10 +4195,11 @@ auto getPatternNameData1Word4CellsOver16Colors12Bits(const u32 data, const Scrol
     auto pattern_name_data = PatternNameData{};
     auto reg               = PatternNameData1Word4CellsOver16Colors12BitsType{data};
 
-    pattern_name_data.character_number
-        = static_cast<u16>((static_cast<byte>(screen.supplementary_character_number) & byte{0x10}) << 10);
+    const auto scn                     = static_cast<byte>(screen.supplementary_character_number) & byte{0x10};
+    pattern_name_data.character_number = static_cast<u16>(std::to_integer<u16>(scn) << 10);
     pattern_name_data.character_number |= (reg >> PatternNameData1Word4CellsOver16Colors12Bits::character_number_shft << 2);
-    pattern_name_data.character_number |= static_cast<u16>(static_cast<byte>(screen.supplementary_character_number) & byte{0x3});
+    const auto scn2 = static_cast<byte>(screen.supplementary_character_number) & byte{0x3};
+    pattern_name_data.character_number |= std::to_integer<u16>(scn2);
 
     pattern_name_data.palette_number
         = static_cast<u16>(reg >> PatternNameData1Word4CellsOver16Colors12Bits::palette_number_shft << 8);
