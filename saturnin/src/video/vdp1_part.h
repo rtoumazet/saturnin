@@ -700,7 +700,7 @@ void readColorBankMode256Colors(const EmulatorModules& modules,
                                texture_data,
                                color_ram_address_offset,
                                part,
-                               row.as_8bits >> DataExtraction::As8Bits::dot2_shift);
+                               row.as_8bits >> DataExtraction::As8Bits::dot1_shift);
         readDotColorBank256<T>(modules,
                                texture_data,
                                color_ram_address_offset,
