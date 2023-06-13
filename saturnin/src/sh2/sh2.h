@@ -487,35 +487,28 @@ class Sh2 {
 
     [[nodiscard]] auto callstack() -> std::vector<CallstackItem>;
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn void Sh2::initializeSubroutineDepth()
-    ///
-    /// \brief  Initializes the subroutine depth
-    ///
-    /// \author Runik
-    /// \date   06/05/2020
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    void initializeSubroutineDepth() { step_over_subroutine_depth_ = callstack_.size(); };
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn auto Sh2::subroutineDepth() const -> size_t
-    ///
-    /// \brief  The saved subroutine depth.
-    ///
-    /// \author Runik
-    /// \date   06/05/2020
-    ///
-    /// \returns    An u8.
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    auto subroutineDepth() const -> size_t { return step_over_subroutine_depth_; };
-
     ///@{
-    /// Breakpoints accessors
+    /// Accessors
     void               breakpoint(const u8 index, const u32 addr) { breakpoints_[index] = addr; };
     [[nodiscard]] auto breakpoint(const u8 index) const -> u32 { return breakpoints_[index]; };
+    void               debugReturnAddress(const u32 addr) { debug_return_address_ = addr; };
+    [[nodiscard]] auto debugReturnAddress() const -> u32 { return debug_return_address_; };
     ///@}
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn	auto Sh2::updateDebugStatus(const core::DebugStatus status) -> core::DebugStatus;
+    ///
+    /// \brief	Updates the debug status.
+    ///
+    /// \author	Runik
+    /// \date	12/06/2023
+    ///
+    /// \param 	status	The initial status.
+    ///
+    /// \returns	The updated core::DebugStatus.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    auto updateDebugStatus(const core::DebugStatus status) -> core::DebugStatus;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn void Sh2::setBinaryFileStartAddress(const u32 val);
@@ -837,11 +830,11 @@ class Sh2 {
     bool frt_current_ocr_{};    ///< Current Output Compare Register.
     //@}
 
-    std::vector<CallstackItem>          callstack_;                    ///< Callstack of the processor
-    size_t                              step_over_subroutine_depth_{}; ///< Subroutine depth, used with DebugStatus::step_over
-    std::array<u32, breakpoints_number> breakpoints_;                  ///< Breakpoints on current CPU program counter.
+    std::vector<CallstackItem>          callstack_;            ///< Callstack of the processor
+    u32                                 debug_return_address_; ///< The debug return address used with step_over / step_out.
+    std::array<u32, breakpoints_number> breakpoints_;          ///< Breakpoints on current CPU program counter.
 
-    bool is_nmi_registered_{false};                                    ///< True if a Non Maskable Interrupt is registered
+    bool is_nmi_registered_{false};                            ///< True if a Non Maskable Interrupt is registered
 
     inline static std::array<DisasmType, opcodes_lut_size>
         opcodes_disasm_lut_; ///< The opcodes disasm LUT, used for instruction fast fetching

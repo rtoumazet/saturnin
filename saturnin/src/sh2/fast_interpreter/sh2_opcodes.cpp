@@ -1162,7 +1162,7 @@ void FastInterpreter::rts(Sh2& s) {
         using enum core::DebugStatus;
         case step_out:
         case wait_end_of_routine: {
-            if (s.subroutineDepth() == s.callstack().size()) { s.modules_.context()->debugStatus(paused); }
+            // if (s.subroutineDepth() == s.callstack().size()) { s.modules_.context()->debugStatus(paused); }
             break;
         }
         default: break;

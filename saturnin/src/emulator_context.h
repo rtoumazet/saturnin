@@ -262,7 +262,7 @@ class EmulatorContext {
     /// \param  status  The new status.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    void debugStatus(const DebugStatus status) { debug_status_ = status; };
+    void debugStatus(const DebugStatus status);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn auto EmulatorContext::debugStatus() -> DebugStatus
@@ -326,17 +326,17 @@ class EmulatorContext {
 
     void emulationMainThread();
 
-    std::unique_ptr<Config>        config_;     ///< Configuration object
-    std::unique_ptr<Memory>        memory_;     ///< Memory object
-    std::unique_ptr<sh2::Sh2>      master_sh2_; ///< Master SH2 object
-    std::unique_ptr<sh2::Sh2>      slave_sh2_;  ///< Slave SH2 object
-    std::unique_ptr<Scu>           scu_;        ///< SCU object
-    std::unique_ptr<Smpc>          smpc_;       ///< SMPC object
-    std::unique_ptr<sound::Scsp>   scsp_;       ///< SCSP object
-    std::unique_ptr<cdrom::Cdrom>  cdrom_;      ///< CDROM object
-    std::unique_ptr<video::Vdp1>   vdp1_;       ///< Vdp1 object
-    std::unique_ptr<video::Vdp2>   vdp2_;       ///< Vdp2 object
-    std::unique_ptr<video::Opengl> opengl_;     ///< Opengl object
+    std::unique_ptr<Config>        config_;                      ///< Configuration object
+    std::unique_ptr<Memory>        memory_;                      ///< Memory object
+    std::unique_ptr<sh2::Sh2>      master_sh2_;                  ///< Master SH2 object
+    std::unique_ptr<sh2::Sh2>      slave_sh2_;                   ///< Slave SH2 object
+    std::unique_ptr<Scu>           scu_;                         ///< SCU object
+    std::unique_ptr<Smpc>          smpc_;                        ///< SMPC object
+    std::unique_ptr<sound::Scsp>   scsp_;                        ///< SCSP object
+    std::unique_ptr<cdrom::Cdrom>  cdrom_;                       ///< CDROM object
+    std::unique_ptr<video::Vdp1>   vdp1_;                        ///< Vdp1 object
+    std::unique_ptr<video::Vdp2>   vdp2_;                        ///< Vdp2 object
+    std::unique_ptr<video::Opengl> opengl_;                      ///< Opengl object
 
     HardwareMode    hardware_mode_{HardwareMode::saturn};        ///< Hardware mode
     EmulationStatus emulation_status_{EmulationStatus::stopped}; ///< Emulation status
@@ -351,11 +351,11 @@ class EmulatorContext {
     uint32_t    binary_address_{0};      ///< The PC will be set to this address after loading the binary.
     //@}
 
-    Rom_stv stv_rom_{Rom_stv::none}; ///< Current ST-V ROM loaded.
+    Rom_stv stv_rom_{Rom_stv::none};     ///< Current ST-V ROM loaded.
 
     std::jthread emulation_main_thread_; ///< The emulation main thread.
 
-    GLFWwindow* opengl_window_; ///< The OpenGL window.
+    GLFWwindow* opengl_window_;          ///< The OpenGL window.
 };
 
 } // namespace saturnin::core

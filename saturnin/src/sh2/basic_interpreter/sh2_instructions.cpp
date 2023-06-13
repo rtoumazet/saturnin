@@ -1291,9 +1291,14 @@ void BasicInterpreter::rts(Sh2& s) {
     s.popFromCallstack();
     switch (s.modules_.context()->debugStatus()) {
         using enum core::DebugStatus;
+        case step_over: {
+            if (s.debugReturnAddress() == s.pc_) { s.modules_.context()->debugStatus(paused); }
+            break;
+        }
         case step_out:
         case wait_end_of_routine: {
-            if (s.subroutineDepth() == s.callstack().size()) { s.modules_.context()->debugStatus(paused); }
+            // if (s.debugReturnAddress() == s.pr_) { s.modules_.context()->debugStatus(paused); }
+            if (s.debugReturnAddress() == s.pc_) { s.modules_.context()->debugStatus(paused); }
             break;
         }
         default: break;
@@ -1729,16 +1734,23 @@ void initializeOpcodesLut() {
 }
 
 void BasicInterpreter::execute(Sh2& s) {
+    // Log::info(Logger::test, Sh2::disasm(s.pc_, s.current_opcode_));
+    // s.current_opcode_ = s.modules_.memory()->read<u16>(s.pc_);
+    opcodes_lut[s.current_opcode_](s);
+
     switch (s.modules_.context()->debugStatus()) {
         using enum core::DebugStatus;
         case step_over: {
-            if (!calls_subroutine_lut[s.current_opcode_]) {
-                //
-                s.modules_.context()->debugStatus(core::DebugStatus::paused);
-            } else {
-                s.modules_.context()->debugStatus(core::DebugStatus::wait_end_of_routine);
-                s.initializeSubroutineDepth();
-            }
+            //    if (!calls_subroutine_lut[s.current_opcode_]) {
+            //        //
+            //        s.modules_.context()->debugStatus(core::DebugStatus::paused);
+            //    } else {
+            //        s.modules_.context()->debugStatus(core::DebugStatus::wait_end_of_routine);
+            //    }
+            break;
+        }
+        case wait_end_of_routine: {
+            if (s.pc_ == s.debugReturnAddress()) { s.modules_.context()->debugStatus(core::DebugStatus::paused); }
             break;
         }
         case step_into: {
@@ -1747,10 +1759,6 @@ void BasicInterpreter::execute(Sh2& s) {
         }
         default: break;
     }
-
-    // Log::info(Logger::test, Sh2::disasm(s.pc_, s.current_opcode_));
-    // s.current_opcode_ = s.modules_.memory()->read<u16>(s.pc_);
-    opcodes_lut[s.current_opcode_](s);
 
     if (std::ranges::any_of(s.breakpoints_, [&s](const u32 bp) { return s.getRegister(Sh2Register::pc) == bp; })) {
         s.modules_.context()->debugStatus(core::DebugStatus::paused);

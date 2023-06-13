@@ -314,13 +314,13 @@ class Memory {
 
     HardwareMode HardwareMode_{HardwareMode::saturn}; ///< Current hardware mode
 
-    bool was_vdp2_cram_accessed_{false}; ///< true when VDP2 color ram was accessed
+    bool was_vdp2_cram_accessed_{false};              ///< true when VDP2 color ram was accessed
     std::array<bool, vdp2_vram_size / vdp2_minimum_page_size>
-        was_vdp2_page_accessed_; ///< True when a specific VDP2 page was accessed.
+        was_vdp2_page_accessed_;                      ///< True when a specific VDP2 page was accessed.
     std::array<bool, vdp2_vram_size / vdp2_minimum_bitmap_size>
-        was_vdp2_bitmap_accessed_; ///< True when a specific VDP2 bitmap was accessed.
+        was_vdp2_bitmap_accessed_;                    ///< True when a specific VDP2 bitmap was accessed.
 
-    sh2::Sh2Type sh2_in_operation_; ///< Which SH2 is in operation
+    sh2::Sh2Type sh2_in_operation_;                   ///< Which SH2 is in operation
     // bool interrupt_signal_is_sent_from_master_sh2_{ false }; ///< InterruptCapture signal sent to the slave SH2 (minit)
     // bool interrupt_signal_is_sent_from_slave_sh2_{ false }; ///< InterruptCapture signal sent to the master SH2 (sinit)
 
@@ -620,7 +620,7 @@ class Memory {
 
         auto t = std::tie(read_8_handler_, read_16_handler_, read_32_handler_);
         for (u32 current = ar.start; current <= ar.end; ++current) {
-            auto& handler                   = std::get<ReadHandler<T>&>(t);
+            auto& handler             = std::get<ReadHandler<T>&>(t);
             handler[current & 0xFFFF] = func;
         }
     }
@@ -642,7 +642,7 @@ class Memory {
 
         auto t = std::tie(write_8_handler_, write_16_handler_, write_32_handler_);
         for (u32 current = ar.start; current <= ar.end; ++current) {
-            auto& handler                   = std::get<WriteHandler<T>&>(t);
+            auto& handler             = std::get<WriteHandler<T>&>(t);
             handler[current & 0xFFFF] = func;
         }
     }
@@ -676,7 +676,7 @@ class Memory {
 
     u32 stv_protection_offset_{};
 
-    StvGameConfiguration selected_stv_game_{}; ///< Currently selected ST-V set.
+    StvGameConfiguration selected_stv_game_{};       ///< Currently selected ST-V set.
 
     BinaryFileConfiguration selected_binary_file_{}; ///< Currently selected binary file.
 };
@@ -905,11 +905,7 @@ template<typename T>
 struct writeSmpc {
     operator Memory::WriteType<T>() const {
         return [](Memory& m, const u32 addr, const T data) {
-            Log::warning(Logger::memory,
-                         core::tr("SMPC write ({}) access {:#0x} : {:#x}"),
-                         sizeof(T) * 8,
-                         addr,
-                         data);
+            Log::warning(Logger::memory, core::tr("SMPC write ({}) access {:#0x} : {:#x}"), sizeof(T) * 8, addr, data);
             // rawWrite<T>(m.smpc_, addr & smpc_memory_mask, data);
         };
     }
@@ -1087,9 +1083,12 @@ struct readStvIo<u8> {
                     }
                     if (isKeyPressed(board.test_switch, m.modules_.context()->openglWindow())) {
                         data |= util::toUnderlying(StvIOPort::test_switch);
+                        Log::debug(Logger::memory, core::tr("Test switch pressed"));
+                        m.modules_.context()->debugStatus(core::DebugStatus::paused);
                     }
                     if (isKeyPressed(board.service_switch, m.modules_.context()->openglWindow())) {
                         data |= util::toUnderlying(StvIOPort::service_switch);
+                        Log::debug(Logger::memory, core::tr("Service switch pressed"));
                     }
                     if (isKeyPressed(board.p1_start, m.modules_.context()->openglWindow())) {
                         data |= util::toUnderlying(StvIOPort::start_player1);
@@ -1329,6 +1328,10 @@ struct writeVdp1Ram {
     operator Memory::WriteType<T>() const {
         return [](Memory& m, const u32 addr, const T data) {
             rawWrite<T>(m.vdp1_vram_, addr & vdp1_ram_memory_mask, data);
+            // 0x25e62120
+            // if ((addr & vdp1_ram_memory_mask) == (0xE62120 & vdp1_ram_memory_mask))
+            //     m.modules_.context()->debugStatus(DebugStatus::paused);
+
             // :TODO: Handle character address cache
         };
     }
@@ -1688,9 +1691,7 @@ struct writeMasterSh2Frt {
     operator Memory::WriteType<T>() const {
         return [](Memory& m, const u32 addr, const T data) {
             // m.interrupt_signal_is_sent_from_master_sh2_ = true;
-            Log::warning(Logger::memory,
-                         core::tr("{}bits write to the master SH2 FRT memory area !"),
-                         sizeof(T) * 8);
+            Log::warning(Logger::memory, core::tr("{}bits write to the master SH2 FRT memory area !"), sizeof(T) * 8);
         };
     }
 };
@@ -1719,9 +1720,7 @@ struct writeSlaveSh2Frt {
     operator Memory::WriteType<T>() const {
         return [](Memory& m, const u32 addr, const T data) {
             // m.interrupt_signal_is_sent_from_slave_sh2_ = true;
-            Log::warning(Logger::memory,
-                         core::tr("{}bits write to the slave SH2 FRT memory area !"),
-                         sizeof(T) * 8);
+            Log::warning(Logger::memory, core::tr("{}bits write to the slave SH2 FRT memory area !"), sizeof(T) * 8);
         };
     }
 };

@@ -213,6 +213,8 @@ void EmulatorContext::startInterface() {
     video::runOpengl(*this);
 }
 
+void EmulatorContext::debugStatus(const DebugStatus status) { debug_status_ = masterSh2()->updateDebugStatus(status); };
+
 void EmulatorContext::openglWindow(GLFWwindow* window) { opengl_window_ = window; }
 
 auto EmulatorContext::openglWindow() const -> GLFWwindow* { return opengl_window_; }

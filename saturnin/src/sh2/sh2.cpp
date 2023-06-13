@@ -1381,20 +1381,39 @@ auto Sh2::getRegister(const Sh2Register reg) const -> u32 {
     return 0;
 }
 
-void Sh2::addToCallstack(const u32 call_addr, const u32 return_addr) {
-    callstack_.emplace_back(call_addr, return_addr);
-    if (modules_.context()->debugStatus() == core::DebugStatus::wait_end_of_routine) { ++step_over_subroutine_depth_; }
-}
+void Sh2::addToCallstack(const u32 call_addr, const u32 return_addr) { callstack_.emplace_back(call_addr, return_addr); }
 
-void Sh2::popFromCallstack() {
-    callstack_.pop_back();
-    if (modules_.context()->debugStatus() == core::DebugStatus::wait_end_of_routine) { --step_over_subroutine_depth_; }
-};
+void Sh2::popFromCallstack() { callstack_.pop_back(); };
 
 auto Sh2::callstack() -> std::vector<CallstackItem> {
     std::lock_guard lock(sh2_mutex_);
     return callstack_;
 };
+
+auto Sh2::updateDebugStatus(const core::DebugStatus status) -> core::DebugStatus {
+    switch (status) {
+        using enum core::DebugStatus;
+        case step_over: {
+            // using enum Sh2Instruction;
+            // const auto is_bsr  = (current_opcode_ & opcodes_table.at(bsr).mask) == opcodes_table.at(bsr).opcode;
+            // const auto is_bsrf = (current_opcode_ & opcodes_table.at(bsrf).mask) == opcodes_table.at(bsrf).opcode;
+            // const auto is_jsr  = (current_opcode_ & opcodes_table.at(jsr).mask) == opcodes_table.at(jsr).opcode;
+
+            // if (is_bsr || is_bsrf || is_jsr) {
+            //     debug_return_address_ = pc_ + 4;
+            // } else {
+            //     return core::DebugStatus::step_into;
+            // }
+            break;
+        }
+        case step_out: {
+            if (!callstack_.empty()) { debug_return_address_ = callstack_.back().return_address; }
+            return core::DebugStatus::wait_end_of_routine;
+        }
+    }
+
+    return status;
+}
 
 void Sh2::setBinaryFileStartAddress(const u32 val) {
     is_binary_file_loaded_     = true;
