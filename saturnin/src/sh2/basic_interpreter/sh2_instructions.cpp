@@ -1297,7 +1297,6 @@ void BasicInterpreter::rts(Sh2& s) {
         }
         case step_out:
         case wait_end_of_routine: {
-            // if (s.debugReturnAddress() == s.pr_) { s.modules_.context()->debugStatus(paused); }
             if (s.debugReturnAddress() == s.pc_) { s.modules_.context()->debugStatus(paused); }
             break;
         }
