@@ -1734,19 +1734,20 @@ void initializeOpcodesLut() {
 }
 
 void BasicInterpreter::execute(Sh2& s) {
-    // Log::info(Logger::test, Sh2::disasm(s.pc_, s.current_opcode_));
-    // s.current_opcode_ = s.modules_.memory()->read<u16>(s.pc_);
-    opcodes_lut[s.current_opcode_](s);
-
     switch (s.modules_.context()->debugStatus()) {
         using enum core::DebugStatus;
         case step_over: {
-            //    if (!calls_subroutine_lut[s.current_opcode_]) {
-            //        //
-            //        s.modules_.context()->debugStatus(core::DebugStatus::paused);
-            //    } else {
-            //        s.modules_.context()->debugStatus(core::DebugStatus::wait_end_of_routine);
-            //    }
+            using enum Sh2Instruction;
+            const auto is_bsr  = (s.current_opcode_ & opcodes_table.at(bsr).mask) == opcodes_table.at(bsr).opcode;
+            const auto is_bsrf = (s.current_opcode_ & opcodes_table.at(bsrf).mask) == opcodes_table.at(bsrf).opcode;
+            const auto is_jsr  = (s.current_opcode_ & opcodes_table.at(jsr).mask) == opcodes_table.at(jsr).opcode;
+
+            if (is_bsr || is_bsrf || is_jsr) {
+                s.debugReturnAddress(s.pc_ + 4);
+                s.modules_.context()->debugStatus(core::DebugStatus::wait_end_of_routine);
+            } else {
+                s.modules_.context()->debugStatus(core::DebugStatus::paused);
+            }
             break;
         }
         case wait_end_of_routine: {
@@ -1759,6 +1760,10 @@ void BasicInterpreter::execute(Sh2& s) {
         }
         default: break;
     }
+
+    // Log::info(Logger::test, Sh2::disasm(s.pc_, s.current_opcode_));
+    // s.current_opcode_ = s.modules_.memory()->read<u16>(s.pc_);
+    opcodes_lut[s.current_opcode_](s);
 
     if (std::ranges::any_of(s.breakpoints_, [&s](const u32 bp) { return s.getRegister(Sh2Register::pc) == bp; })) {
         s.modules_.context()->debugStatus(core::DebugStatus::paused);

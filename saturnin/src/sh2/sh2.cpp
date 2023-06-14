@@ -1391,25 +1391,9 @@ auto Sh2::callstack() -> std::vector<CallstackItem> {
 };
 
 auto Sh2::updateDebugStatus(const core::DebugStatus status) -> core::DebugStatus {
-    switch (status) {
-        using enum core::DebugStatus;
-        case step_over: {
-            // using enum Sh2Instruction;
-            // const auto is_bsr  = (current_opcode_ & opcodes_table.at(bsr).mask) == opcodes_table.at(bsr).opcode;
-            // const auto is_bsrf = (current_opcode_ & opcodes_table.at(bsrf).mask) == opcodes_table.at(bsrf).opcode;
-            // const auto is_jsr  = (current_opcode_ & opcodes_table.at(jsr).mask) == opcodes_table.at(jsr).opcode;
-
-            // if (is_bsr || is_bsrf || is_jsr) {
-            //     debug_return_address_ = pc_ + 4;
-            // } else {
-            //     return core::DebugStatus::step_into;
-            // }
-            break;
-        }
-        case step_out: {
-            if (!callstack_.empty()) { debug_return_address_ = callstack_.back().return_address; }
-            return core::DebugStatus::wait_end_of_routine;
-        }
+    if (status == core::DebugStatus::step_out) {
+        if (!callstack_.empty()) { debug_return_address_ = callstack_.back().return_address; }
+        return core::DebugStatus::wait_end_of_routine;
     }
 
     return status;
