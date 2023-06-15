@@ -213,7 +213,14 @@ void EmulatorContext::startInterface() {
     video::runOpengl(*this);
 }
 
-void EmulatorContext::debugStatus(const DebugStatus status) { debug_status_ = masterSh2()->updateDebugStatus(status); };
+void EmulatorContext::debugStatus(const DebugStatus status) {
+    // debug_status_ = masterSh2()->updateDebugStatus(status);
+    debug_status_ = status;
+    // if (status == core::DebugStatus::step_out) {
+    //     if (!callstack_.empty()) { debug_return_address_ = callstack_.back().return_address; }
+    //     return core::DebugStatus::wait_end_of_routine;
+    // }
+};
 
 void EmulatorContext::openglWindow(GLFWwindow* window) { opengl_window_ = window; }
 

@@ -34,6 +34,7 @@ namespace is = saturnin::core::interrupt_source;
 
 namespace saturnin::sh2::basic_interpreter {
 
+using core::DebugStatus;
 using core::Log;
 using core::Logger;
 
@@ -1288,23 +1289,24 @@ void BasicInterpreter::rts(Sh2& s) {
     // Arranged and fixed using SH4 manual
     delaySlot(s, s.pc_ + 2);
 
-    s.popFromCallstack();
-    switch (s.modules_.context()->debugStatus()) {
-        using enum core::DebugStatus;
-        case step_over: {
-            if (s.debugReturnAddress() == s.pc_) { s.modules_.context()->debugStatus(paused); }
-            break;
-        }
-        case step_out:
-        case wait_end_of_routine: {
-            if (s.debugReturnAddress() == s.pc_) { s.modules_.context()->debugStatus(paused); }
-            break;
-        }
-        default: break;
-    }
-
     s.pc_             = s.pr_;
     s.cycles_elapsed_ = 2;
+
+    s.popFromCallstack();
+    // switch (s.modules_.context()->debugStatus()) {
+    //     using enum core::DebugStatus;
+    //     case step_over: {
+    //         if (s.debugReturnAddress() == s.pc_) { s.modules_.context()->debugStatus(paused); }
+    //         break;
+    //     }
+    //     case step_out:
+    //     case wait_end_of_routine: {
+    //         if (s.debugReturnAddress() == s.pc_) { s.modules_.context()->debugStatus(paused); }
+    //         break;
+    //     }
+    //     default: break;
+    // }
+    updateDebugStatus(s);
 }
 
 void BasicInterpreter::sett(Sh2& s) {
@@ -1695,6 +1697,7 @@ void BasicInterpreter::delaySlot(Sh2& s, const u32 addr) {
         } else {
             // Delay slot instruction execution
             execute(s);
+            // opcodes_lut[s.current_opcode_](s);
             s.cycles_elapsed_ += current_inst_cycles;
         }
     }
@@ -1735,24 +1738,15 @@ void initializeOpcodesLut() {
 void BasicInterpreter::execute(Sh2& s) {
     switch (s.modules_.context()->debugStatus()) {
         using enum core::DebugStatus;
-        case step_over: {
-            using enum Sh2Instruction;
-            const auto is_bsr  = (s.current_opcode_ & opcodes_table.at(bsr).mask) == opcodes_table.at(bsr).opcode;
-            const auto is_bsrf = (s.current_opcode_ & opcodes_table.at(bsrf).mask) == opcodes_table.at(bsrf).opcode;
-            const auto is_jsr  = (s.current_opcode_ & opcodes_table.at(jsr).mask) == opcodes_table.at(jsr).opcode;
-
-            if (is_bsr || is_bsrf || is_jsr) {
-                s.debugReturnAddress(s.pc_ + 4);
-                s.modules_.context()->debugStatus(core::DebugStatus::wait_end_of_routine);
-            } else {
-                s.modules_.context()->debugStatus(core::DebugStatus::paused);
-            }
-            break;
-        }
-        case wait_end_of_routine: {
-            if (s.pc_ == s.debugReturnAddress()) { s.modules_.context()->debugStatus(core::DebugStatus::paused); }
-            break;
-        }
+        // case step_over: {
+        //     if (calls_subroutine_lut[s.current_opcode_]) {
+        //         s.debugReturnAddress(s.pc_ + 4);
+        //         s.modules_.context()->debugStatus(core::DebugStatus::wait_end_of_routine);
+        //     } else {
+        //         s.modules_.context()->debugStatus(core::DebugStatus::paused);
+        //     }
+        //     break;
+        // }
         case step_into: {
             s.modules_.context()->debugStatus(core::DebugStatus::paused);
             break;
@@ -1760,8 +1754,6 @@ void BasicInterpreter::execute(Sh2& s) {
         default: break;
     }
 
-    // Log::info(Logger::test, Sh2::disasm(s.pc_, s.current_opcode_));
-    // s.current_opcode_ = s.modules_.memory()->read<u16>(s.pc_);
     opcodes_lut[s.current_opcode_](s);
 
     if (std::ranges::any_of(s.breakpoints_, [&s](const u32 bp) { return s.getRegister(Sh2Register::pc) == bp; })) {
@@ -1790,6 +1782,42 @@ void BasicInterpreter::execute(Sh2& s) {
     // if (s.modules_.context()->memory()->workram_high_[0x397D4] == 0x03)
     // s.modules_.context()->debugStatus(core::DebugStatus::paused);
     // if (s.modules_.context()->memory()->vdp1_vram_[0xc] == 0x03) s.modules_.context()->debugStatus(core::DebugStatus::paused);
+}
+
+void BasicInterpreter::updateDebugStatus(Sh2& s) {
+    switch (s.modules_.context()->debugStatus()) {
+        using enum core::DebugStatus;
+        case step_over: {
+            if (s.debugReturnAddress() == s.pc_) { s.modules_.context()->debugStatus(paused); }
+            break;
+        }
+        case step_out:
+        case wait_end_of_routine: {
+            if (s.debugReturnAddress() == s.pc_) { s.modules_.context()->debugStatus(paused); }
+            break;
+        }
+        case step_into: {
+            s.modules_.context()->debugStatus(core::DebugStatus::paused);
+            break;
+        }
+        default: break;
+    }
+}
+
+void BasicInterpreter::initializeDebugStatus(Sh2& s) {
+    switch (s.modules_.context()->debugStatus()) {
+        using enum core::DebugStatus;
+        // case step_over: {
+        //     if (s.debugReturnAddress() == s.pc_) { s.modules_.context()->debugStatus(paused); }
+        //     break;
+        // }
+        case step_out: {
+            if (!s.callstack().empty()) { s.debugReturnAddress(s.callstack().back().return_address); }
+            s.modules_.context()->debugStatus(wait_end_of_routine);
+            break;
+        }
+        default: break;
+    }
 }
 
 } // namespace saturnin::sh2::basic_interpreter

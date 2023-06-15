@@ -43,8 +43,6 @@ extern void badOpcode(Sh2& s);
 struct BasicInterpreter {
     /// \name SH2 instructions
     //@{
-    // inline void delaySlot(Sh2& s, u32 addr);
-    // inline void badOpcode(Sh2& s);
     static void add(Sh2& s);
     static void addi(Sh2& s);
     static void addc(Sh2& s);
@@ -167,9 +165,6 @@ struct BasicInterpreter {
     static void stcmsr(Sh2& s);
     static void stcmgbr(Sh2& s);
     static void stcmvbr(Sh2& s);
-    static void stmsr(Sh2& s);
-    static void stmgbr(Sh2& s);
-    static void stmvbr(Sh2& s);
     static void stsmach(Sh2& s);
     static void stsmacl(Sh2& s);
     static void stspr(Sh2& s);
@@ -208,6 +203,10 @@ struct BasicInterpreter {
     static void badOpcode(Sh2& s);
 
     static void execute(Sh2& s);
+
+    static void updateDebugStatus(Sh2& s);
+
+    static void initializeDebugStatus(Sh2& s);
 };
 
 static std::array<bool, opcodes_lut_size>

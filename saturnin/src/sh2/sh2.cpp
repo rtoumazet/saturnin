@@ -1390,14 +1390,14 @@ auto Sh2::callstack() -> std::vector<CallstackItem> {
     return callstack_;
 };
 
-auto Sh2::updateDebugStatus(const core::DebugStatus status) -> core::DebugStatus {
-    if (status == core::DebugStatus::step_out) {
-        if (!callstack_.empty()) { debug_return_address_ = callstack_.back().return_address; }
-        return core::DebugStatus::wait_end_of_routine;
-    }
-
-    return status;
-}
+// auto Sh2::updateDebugStatus(const core::DebugStatus status) -> core::DebugStatus {
+//     if (status == core::DebugStatus::step_out) {
+//         if (!callstack_.empty()) { debug_return_address_ = callstack_.back().return_address; }
+//         return core::DebugStatus::wait_end_of_routine;
+//     }
+//
+//     return status;
+// }
 
 void Sh2::setBinaryFileStartAddress(const u32 val) {
     is_binary_file_loaded_     = true;
@@ -1424,13 +1424,15 @@ bool sh2CoreSetup(core::Config* config) {
     switch (config->getCurrentSh2Core()) {
         using enum Sh2Core;
         case basic_interpreter: {
-            Sh2::execute = &basic_interpreter::BasicInterpreter::execute;
+            Sh2::execute           = &basic_interpreter::BasicInterpreter::execute;
+            Sh2::updateDebugStatus = &basic_interpreter::BasicInterpreter::updateDebugStatus;
             basic_interpreter::initializeOpcodesLut();
             Sh2::initializeDisasmLut();
             break;
         }
         case fast_interpreter: {
             Sh2::execute = &fast_interpreter::FastInterpreter::execute;
+            // Sh2::updateDebugStatus = &fast_interpreter::FastInterpreter::updateDebugStatus;
             Sh2::initializeDisasmLut();
             break;
         }

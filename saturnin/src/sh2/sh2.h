@@ -49,7 +49,8 @@ struct Interrupt;
 
 namespace saturnin::sh2 {
 
-using ExecuteFunc = void(Sh2&);
+using ExecuteFunc           = void(Sh2&);
+using UpdateDebugStatusFunc = void(Sh2&);
 
 using saturnin::core::EmulatorContext;
 using saturnin::core::EmulatorModules;
@@ -508,7 +509,7 @@ class Sh2 {
     /// \returns	The updated core::DebugStatus.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    auto updateDebugStatus(const core::DebugStatus status) -> core::DebugStatus;
+    //    auto updateDebugStatus(const core::DebugStatus status) -> core::DebugStatus;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn void Sh2::setBinaryFileStartAddress(const u32 val);
@@ -528,6 +529,8 @@ class Sh2 {
     static auto disasm(u32 pc, u16 opcode) -> std::string;
 
     inline static std::function<ExecuteFunc> execute{};
+
+    inline static std::function<UpdateDebugStatusFunc> updateDebugStatus{};
 
     EmulatorModules modules_; ///< Modules of the emulator
 
