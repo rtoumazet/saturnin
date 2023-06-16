@@ -50,7 +50,7 @@ struct Interrupt;
 namespace saturnin::sh2 {
 
 using ExecuteFunc           = void(Sh2&);
-using UpdateDebugStatusFunc = void(Sh2&);
+using UpdateDebugStatusFunc = void(const DebugPosition pos, Sh2&);
 
 using saturnin::core::EmulatorContext;
 using saturnin::core::EmulatorModules;
@@ -529,8 +529,6 @@ class Sh2 {
     static auto disasm(u32 pc, u16 opcode) -> std::string;
 
     inline static std::function<ExecuteFunc> execute{};
-
-    inline static std::function<UpdateDebugStatusFunc> updateDebugStatus{};
 
     EmulatorModules modules_; ///< Modules of the emulator
 

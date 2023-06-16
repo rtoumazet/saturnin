@@ -1293,20 +1293,7 @@ void BasicInterpreter::rts(Sh2& s) {
     s.cycles_elapsed_ = 2;
 
     s.popFromCallstack();
-    // switch (s.modules_.context()->debugStatus()) {
-    //     using enum core::DebugStatus;
-    //     case step_over: {
-    //         if (s.debugReturnAddress() == s.pc_) { s.modules_.context()->debugStatus(paused); }
-    //         break;
-    //     }
-    //     case step_out:
-    //     case wait_end_of_routine: {
-    //         if (s.debugReturnAddress() == s.pc_) { s.modules_.context()->debugStatus(paused); }
-    //         break;
-    //     }
-    //     default: break;
-    // }
-    updateDebugStatus(s);
+    updateDebugStatus(DebugPosition::on_subroutine_return, s);
 }
 
 void BasicInterpreter::sett(Sh2& s) {
@@ -1784,40 +1771,66 @@ void BasicInterpreter::execute(Sh2& s) {
     // if (s.modules_.context()->memory()->vdp1_vram_[0xc] == 0x03) s.modules_.context()->debugStatus(core::DebugStatus::paused);
 }
 
-void BasicInterpreter::updateDebugStatus(Sh2& s) {
-    switch (s.modules_.context()->debugStatus()) {
+void BasicInterpreter::updateDebugStatus(const sh2::DebugPosition pos, Sh2& s) {
+    const auto status = s.modules_.context()->debugStatus();
+    switch (pos) {
+        using enum sh2::DebugPosition;
         using enum core::DebugStatus;
-        case step_over: {
-            if (s.debugReturnAddress() == s.pc_) { s.modules_.context()->debugStatus(paused); }
+        case DebugPosition::on_subroutine_call: {
             break;
         }
-        case step_out:
-        case wait_end_of_routine: {
-            if (s.debugReturnAddress() == s.pc_) { s.modules_.context()->debugStatus(paused); }
+        case on_subroutine_return: {
+            switch (status) {
+                case step_over: {
+                    if (s.debugReturnAddress() == s.pc_) { s.modules_.context()->debugStatus(paused); }
+                    break;
+                }
+                case step_out:
+                case wait_end_of_routine: {
+                    if (s.debugReturnAddress() == s.pc_) { s.modules_.context()->debugStatus(paused); }
+                    break;
+                }
+                default: break;
+            }
             break;
         }
-        case step_into: {
-            s.modules_.context()->debugStatus(core::DebugStatus::paused);
+        case after_intruction_exec: {
+            if (status == step_into) { s.modules_.context()->debugStatus(paused); }
             break;
         }
-        default: break;
+        case on_status_change: {
+            if (status == step_out) {
+                if (!s.callstack().empty()) { s.debugReturnAddress(s.callstack().back().return_address); }
+                s.modules_.context()->debugStatus(wait_end_of_routine);
+            }
+            break;
+        }
     }
+
+    // switch (s.modules_.context()->debugStatus()) {
+    //     using enum core::DebugStatus;
+    //     case step_into: {
+    //         s.modules_.context()->debugStatus(core::DebugStatus::paused);
+    //         break;
+    //     }
+    //     default: break;
+    // }
 }
 
-void BasicInterpreter::initializeDebugStatus(Sh2& s) {
-    switch (s.modules_.context()->debugStatus()) {
-        using enum core::DebugStatus;
-        // case step_over: {
-        //     if (s.debugReturnAddress() == s.pc_) { s.modules_.context()->debugStatus(paused); }
-        //     break;
-        // }
-        case step_out: {
-            if (!s.callstack().empty()) { s.debugReturnAddress(s.callstack().back().return_address); }
-            s.modules_.context()->debugStatus(wait_end_of_routine);
-            break;
-        }
-        default: break;
-    }
-}
+// void BasicInterpreter::initializeDebugStatus(Sh2& s) {
+//     switch (s.modules_.context()->debugStatus()) {
+//         using enum core::DebugStatus;
+//         // case step_over: {
+//         //     if (s.debugReturnAddress() == s.pc_) { s.modules_.context()->debugStatus(paused); }
+//         //     break;
+//         // }
+//         case step_out: {
+//             if (!s.callstack().empty()) { s.debugReturnAddress(s.callstack().back().return_address); }
+//             s.modules_.context()->debugStatus(wait_end_of_routine);
+//             break;
+//         }
+//         default: break;
+//     }
+// }
 
 } // namespace saturnin::sh2::basic_interpreter

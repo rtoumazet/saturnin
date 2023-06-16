@@ -216,6 +216,8 @@ void EmulatorContext::startInterface() {
 void EmulatorContext::debugStatus(const DebugStatus status) {
     // debug_status_ = masterSh2()->updateDebugStatus(status);
     debug_status_ = status;
+    auto& s       = dynamic_cast<Sh2&>(*masterSh2());
+    sh2::Sh2::updateDebugStatus(sh2::DebugPosition::on_status_change, s);
     // if (status == core::DebugStatus::step_out) {
     //     if (!callstack_.empty()) { debug_return_address_ = callstack_.back().return_address; }
     //     return core::DebugStatus::wait_end_of_routine;

@@ -204,9 +204,10 @@ struct BasicInterpreter {
 
     static void execute(Sh2& s);
 
-    static void updateDebugStatus(Sh2& s);
+    // static void updateDebugStatus(Sh2& s);
+    static UpdateDebugStatusFunc updateDebugStatus;
 
-    static void initializeDebugStatus(Sh2& s);
+    // static void initializeDebugStatus(Sh2& s);
 };
 
 static std::array<bool, opcodes_lut_size>

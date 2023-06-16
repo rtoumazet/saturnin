@@ -35,6 +35,8 @@ class Sh2;
 constexpr auto instructions_number = u8{142};      ///< Total number of SH2 instructions used.
 constexpr auto opcodes_lut_size    = u32{0x10000}; ///< Size of the opcodes lookup table
 
+enum class DebugPosition { on_subroutine_call, on_subroutine_return, on_status_change, after_intruction_exec };
+
 enum class Sh2Instruction {
     nop,
     add,
