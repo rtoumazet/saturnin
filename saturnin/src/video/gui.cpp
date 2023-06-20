@@ -1063,24 +1063,28 @@ void showDebugSh2Window(core::EmulatorContext& state, bool* opened) {
         if (ImGui::Button(label_step_into.c_str(), button_width)) {
             local_pc = 0;
             state.debugStatus(core::DebugStatus::step_into);
+            state.updateDebugStatus(core::DebugPosition::on_status_change, current_sh2->sh2Type());
         }
         ImGui::SameLine();
         const auto label_step_over = icon_step_over + tr("Step over");
         if (ImGui::Button(label_step_over.c_str(), button_width)) {
             local_pc = 0;
             state.debugStatus(core::DebugStatus::step_over);
+            state.updateDebugStatus(core::DebugPosition::on_status_change, current_sh2->sh2Type());
         }
         ImGui::SameLine();
         const auto label_step_out = icon_step_out + tr("Step out");
         if (ImGui::Button(label_step_out.c_str(), button_width)) {
             local_pc = 0;
             state.debugStatus(core::DebugStatus::step_out);
+            state.updateDebugStatus(core::DebugPosition::on_status_change, current_sh2->sh2Type());
         }
         ImGui::SameLine();
         const auto label_next_frame = icon_next_frame + tr("Next frame");
         if (ImGui::Button(label_next_frame.c_str(), button_width)) {
             local_pc = 0;
             state.debugStatus(core::DebugStatus::next_frame);
+            state.updateDebugStatus(core::DebugPosition::on_status_change, current_sh2->sh2Type());
         }
         ImGui::EndGroup();
     }

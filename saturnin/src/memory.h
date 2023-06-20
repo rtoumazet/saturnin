@@ -1083,12 +1083,9 @@ struct readStvIo<u8> {
                     }
                     if (isKeyPressed(board.test_switch, m.modules_.context()->openglWindow())) {
                         data |= util::toUnderlying(StvIOPort::test_switch);
-                        Log::debug(Logger::memory, core::tr("Test switch pressed"));
-                        m.modules_.context()->debugStatus(core::DebugStatus::paused);
                     }
                     if (isKeyPressed(board.service_switch, m.modules_.context()->openglWindow())) {
                         data |= util::toUnderlying(StvIOPort::service_switch);
-                        Log::debug(Logger::memory, core::tr("Service switch pressed"));
                     }
                     if (isKeyPressed(board.p1_start, m.modules_.context()->openglWindow())) {
                         data |= util::toUnderlying(StvIOPort::start_player1);

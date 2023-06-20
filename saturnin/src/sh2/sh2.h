@@ -49,8 +49,7 @@ struct Interrupt;
 
 namespace saturnin::sh2 {
 
-using ExecuteFunc           = void(Sh2&);
-using UpdateDebugStatusFunc = void(const DebugPosition pos, Sh2&);
+using ExecuteFunc = void(Sh2&);
 
 using saturnin::core::EmulatorContext;
 using saturnin::core::EmulatorModules;
@@ -494,22 +493,10 @@ class Sh2 {
     [[nodiscard]] auto breakpoint(const u8 index) const -> u32 { return breakpoints_[index]; };
     void               debugReturnAddress(const u32 addr) { debug_return_address_ = addr; };
     [[nodiscard]] auto debugReturnAddress() const -> u32 { return debug_return_address_; };
+    [[nodiscard]] auto sh2Type() const -> Sh2Type { return sh2_type_; };
+    void               isCurrentOpcodeSubroutineCall(bool is_call) { is_current_opcode_subroutine_call_ = is_call; };
+    [[nodiscard]] auto isCurrentOpcodeSubroutineCall() const -> bool { return is_current_opcode_subroutine_call_; };
     ///@}
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn	auto Sh2::updateDebugStatus(const core::DebugStatus status) -> core::DebugStatus;
-    ///
-    /// \brief	Updates the debug status.
-    ///
-    /// \author	Runik
-    /// \date	12/06/2023
-    ///
-    /// \param 	status	The initial status.
-    ///
-    /// \returns	The updated core::DebugStatus.
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    //    auto updateDebugStatus(const core::DebugStatus status) -> core::DebugStatus;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn void Sh2::setBinaryFileStartAddress(const u32 val);
@@ -791,13 +778,14 @@ class Sh2 {
     std::array<u32, general_registers_number> r_;    ///< General registers, last one is the stack pointer (SP) (0x5C)
     //@}
 
-    u8  cycles_elapsed_;                ///< CPU cycles used by the last instruction.
-    u16 current_opcode_;                ///< Opcode to be executed.
+    u8   cycles_elapsed_;                    ///< CPU cycles used by the last instruction.
+    u16  current_opcode_;                    ///< Opcode to be executed.
+    bool is_current_opcode_subroutine_call_; ///< True if is current opcode is asubroutine call, false if not.
 
-    bool is_binary_file_loaded_{false}; ///< True if a binary file has been loaded.
-    u32  binary_file_start_address_{};  ///< Start address of the binary file if any.
+    bool is_binary_file_loaded_{false};      ///< True if a binary file has been loaded.
+    u32  binary_file_start_address_{};       ///< Start address of the binary file if any.
 
-    std::mutex sh2_mutex_;              ///< Handles class data when accessed from another thread.
+    std::mutex sh2_mutex_;                   ///< Handles class data when accessed from another thread.
 
     /// \name Interrupt management
     //@{

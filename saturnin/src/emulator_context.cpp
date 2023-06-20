@@ -213,16 +213,79 @@ void EmulatorContext::startInterface() {
     video::runOpengl(*this);
 }
 
-void EmulatorContext::debugStatus(const DebugStatus status) {
-    // debug_status_ = masterSh2()->updateDebugStatus(status);
-    debug_status_ = status;
-    auto& s       = dynamic_cast<Sh2&>(*masterSh2());
-    sh2::Sh2::updateDebugStatus(sh2::DebugPosition::on_status_change, s);
-    // if (status == core::DebugStatus::step_out) {
-    //     if (!callstack_.empty()) { debug_return_address_ = callstack_.back().return_address; }
-    //     return core::DebugStatus::wait_end_of_routine;
-    // }
-};
+void EmulatorContext::debugStatus(const DebugStatus status) { debug_status_ = status; };
+
+void EmulatorContext::updateDebugStatus(const DebugPosition pos, const sh2::Sh2Type type) {
+    const auto status = debugStatus();
+    auto       sh2    = (type == Sh2Type::master) ? masterSh2() : slaveSh2();
+    switch (pos) {
+        using enum DebugPosition;
+        using enum DebugStatus;
+        case on_subroutine_call: {
+            if (status == step_over) {
+                sh2->debugReturnAddress(sh2->getRegister(sh2::Sh2Register::pr));
+                debugStatus(wait_end_of_routine);
+            }
+
+            break;
+        }
+        case on_subroutine_return: {
+            switch (status) {
+                case step_over:
+                case step_out:
+                case wait_end_of_routine: {
+                    if (sh2->debugReturnAddress() == sh2->getRegister(sh2::Sh2Register::pc)) { debugStatus(paused); }
+                    break;
+                }
+                default: break;
+            }
+            break;
+        }
+        case after_intruction_exec: {
+            switch (status) {
+                case step_into: {
+                    debugStatus(paused);
+                    break;
+                }
+                case step_over: {
+                    if (sh2->isCurrentOpcodeSubroutineCall()) {
+                        debugStatus(wait_end_of_routine);
+                    } else {
+                        // Same as step_into
+                        debugStatus(paused);
+                    }
+                    break;
+                }
+                default: break;
+            }
+            break;
+        }
+        case before_intruction_exec: {
+            if (status == step_over) {
+                if (!sh2->isCurrentOpcodeSubroutineCall()) { debugStatus(step_into); }
+            }
+            break;
+        }
+        case on_status_change: {
+            switch (status) {
+                case step_into: {
+                    // Nothing to do.
+                    break;
+                }
+                case step_out: {
+                    if (!sh2->callstack().empty()) {
+                        sh2->debugReturnAddress(sh2->callstack().back().return_address);
+                        debugStatus(wait_end_of_routine);
+                    }
+                    break;
+                }
+                default: break;
+            }
+
+            break;
+        }
+    }
+}
 
 void EmulatorContext::openglWindow(GLFWwindow* window) { opengl_window_ = window; }
 

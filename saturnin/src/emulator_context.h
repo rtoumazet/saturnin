@@ -40,7 +40,8 @@ class Cdrom;
 }
 namespace saturnin::sh2 {
 class Sh2;
-}
+enum class Sh2Type;
+} // namespace saturnin::sh2
 namespace saturnin::sound {
 class Scsp;
 }
@@ -66,6 +67,24 @@ class Smpc;
 //@}
 
 static const std::string saturnin_version{"0.5.0"};
+
+enum class DebugPosition {
+    on_subroutine_call,
+    on_subroutine_return,
+    on_status_change,
+    after_intruction_exec,
+    before_intruction_exec
+};
+
+using DebugPositionName = std::map<const DebugPosition, const std::string>; ///< (Immutable) name of the debug position
+
+const DebugPositionName debug_position_name = {
+    {DebugPosition::on_subroutine_call,     "On subroutine call"     },
+    {DebugPosition::on_subroutine_return,   "On subroutine return"   },
+    {DebugPosition::on_status_change,       "On status change"       },
+    {DebugPosition::after_intruction_exec,  "After instruction exec" },
+    {DebugPosition::before_intruction_exec, "Before instruction exec"}
+};
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \class  EmulatorContext
@@ -252,14 +271,14 @@ class EmulatorContext {
     [[nodiscard]] auto renderingStatus() const -> RenderingStatus { return rendering_status_; };
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn void EmulatorContext::debugStatus(const DebugStatus status)
+    /// \fn	void EmulatorContext::debugStatus(const DebugStatus status);
     ///
-    /// \brief  Sets the debug status of the emulator.
+    /// \brief	Sets the debug status of the emulator.
     ///
-    /// \author Runik
-    /// \date   30/04/2020
+    /// \author	Runik
+    /// \date	30/04/2020
     ///
-    /// \param  status  The new status.
+    /// \param 	status	The new status.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     void debugStatus(const DebugStatus status);
@@ -276,6 +295,20 @@ class EmulatorContext {
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     [[nodiscard]] auto debugStatus() const -> DebugStatus { return debug_status_; };
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn	void EmulatorContext::updateDebugStatus(const DebugPosition pos, const sh2::Sh2Type type);
+    ///
+    /// \brief	Updates the debug status
+    ///
+    /// \author	Runik
+    /// \date	16/06/2023
+    ///
+    /// \param 	pos 	The position.
+    /// \param 	type	Type of SH2 to process.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    void updateDebugStatus(const DebugPosition pos, const sh2::Sh2Type type);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn void EmulatorContext::openglWindow(GLFWwindow* window);

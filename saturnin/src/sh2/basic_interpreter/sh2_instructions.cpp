@@ -40,6 +40,8 @@ using core::Logger;
 
 constexpr u32 sr_bitmask{0x3f3};
 
+bool BasicInterpreter::is_delay_slot_executing = false;
+
 void BasicInterpreter::add(Sh2& s) {
     // Rm + Rn -> Rn
     s.r_[xn00(s.current_opcode_)] += s.r_[x0n0(s.current_opcode_)];
@@ -1293,7 +1295,7 @@ void BasicInterpreter::rts(Sh2& s) {
     s.cycles_elapsed_ = 2;
 
     s.popFromCallstack();
-    updateDebugStatus(DebugPosition::on_subroutine_return, s);
+    s.modules_.context()->updateDebugStatus(core::DebugPosition::on_subroutine_return, s.sh2Type());
 }
 
 void BasicInterpreter::sett(Sh2& s) {
@@ -1683,7 +1685,9 @@ void BasicInterpreter::delaySlot(Sh2& s, const u32 addr) {
             s.modules_.context()->emulationStatus(core::EmulationStatus::stopped);
         } else {
             // Delay slot instruction execution
+            is_delay_slot_executing = true;
             execute(s);
+            is_delay_slot_executing = false;
             // opcodes_lut[s.current_opcode_](s);
             s.cycles_elapsed_ += current_inst_cycles;
         }
@@ -1723,25 +1727,16 @@ void initializeOpcodesLut() {
 }
 
 void BasicInterpreter::execute(Sh2& s) {
-    switch (s.modules_.context()->debugStatus()) {
-        using enum core::DebugStatus;
-        // case step_over: {
-        //     if (calls_subroutine_lut[s.current_opcode_]) {
-        //         s.debugReturnAddress(s.pc_ + 4);
-        //         s.modules_.context()->debugStatus(core::DebugStatus::wait_end_of_routine);
-        //     } else {
-        //         s.modules_.context()->debugStatus(core::DebugStatus::paused);
-        //     }
-        //     break;
-        // }
-        case step_into: {
-            s.modules_.context()->debugStatus(core::DebugStatus::paused);
-            break;
-        }
-        default: break;
+    if (!is_delay_slot_executing) {
+        s.isCurrentOpcodeSubroutineCall(calls_subroutine_lut[s.current_opcode_]);
+        s.modules_.context()->updateDebugStatus(core::DebugPosition::before_intruction_exec, s.sh2Type());
     }
 
     opcodes_lut[s.current_opcode_](s);
+
+    if (!is_delay_slot_executing) {
+        s.modules_.context()->updateDebugStatus(core::DebugPosition::after_intruction_exec, s.sh2Type());
+    }
 
     if (std::ranges::any_of(s.breakpoints_, [&s](const u32 bp) { return s.getRegister(Sh2Register::pc) == bp; })) {
         s.modules_.context()->debugStatus(core::DebugStatus::paused);
@@ -1770,67 +1765,5 @@ void BasicInterpreter::execute(Sh2& s) {
     // s.modules_.context()->debugStatus(core::DebugStatus::paused);
     // if (s.modules_.context()->memory()->vdp1_vram_[0xc] == 0x03) s.modules_.context()->debugStatus(core::DebugStatus::paused);
 }
-
-void BasicInterpreter::updateDebugStatus(const sh2::DebugPosition pos, Sh2& s) {
-    const auto status = s.modules_.context()->debugStatus();
-    switch (pos) {
-        using enum sh2::DebugPosition;
-        using enum core::DebugStatus;
-        case DebugPosition::on_subroutine_call: {
-            break;
-        }
-        case on_subroutine_return: {
-            switch (status) {
-                case step_over: {
-                    if (s.debugReturnAddress() == s.pc_) { s.modules_.context()->debugStatus(paused); }
-                    break;
-                }
-                case step_out:
-                case wait_end_of_routine: {
-                    if (s.debugReturnAddress() == s.pc_) { s.modules_.context()->debugStatus(paused); }
-                    break;
-                }
-                default: break;
-            }
-            break;
-        }
-        case after_intruction_exec: {
-            if (status == step_into) { s.modules_.context()->debugStatus(paused); }
-            break;
-        }
-        case on_status_change: {
-            if (status == step_out) {
-                if (!s.callstack().empty()) { s.debugReturnAddress(s.callstack().back().return_address); }
-                s.modules_.context()->debugStatus(wait_end_of_routine);
-            }
-            break;
-        }
-    }
-
-    // switch (s.modules_.context()->debugStatus()) {
-    //     using enum core::DebugStatus;
-    //     case step_into: {
-    //         s.modules_.context()->debugStatus(core::DebugStatus::paused);
-    //         break;
-    //     }
-    //     default: break;
-    // }
-}
-
-// void BasicInterpreter::initializeDebugStatus(Sh2& s) {
-//     switch (s.modules_.context()->debugStatus()) {
-//         using enum core::DebugStatus;
-//         // case step_over: {
-//         //     if (s.debugReturnAddress() == s.pc_) { s.modules_.context()->debugStatus(paused); }
-//         //     break;
-//         // }
-//         case step_out: {
-//             if (!s.callstack().empty()) { s.debugReturnAddress(s.callstack().back().return_address); }
-//             s.modules_.context()->debugStatus(wait_end_of_routine);
-//             break;
-//         }
-//         default: break;
-//     }
-// }
 
 } // namespace saturnin::sh2::basic_interpreter

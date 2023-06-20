@@ -204,10 +204,7 @@ struct BasicInterpreter {
 
     static void execute(Sh2& s);
 
-    // static void updateDebugStatus(Sh2& s);
-    static UpdateDebugStatusFunc updateDebugStatus;
-
-    // static void initializeDebugStatus(Sh2& s);
+    static bool is_delay_slot_executing;
 };
 
 static std::array<bool, opcodes_lut_size>
