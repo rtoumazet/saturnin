@@ -345,7 +345,7 @@
       <Filter>Fichiers sources\sh2\basic_interpreter</Filter>
     </ClInclude>
     <ClInclude Include="src\sh2\sh2_disasm_link.h">
-      <Filter>Fichiers d%27en-tête</Filter>
+      <Filter>Fichiers sources\sh2</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

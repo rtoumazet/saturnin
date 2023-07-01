@@ -138,6 +138,10 @@ void Vdp2::run(const u8 cycles) {
             timer_0_counter_++;
 
             if (timer_0_counter_ == modules_.scu()->getTimer0CompareValue()) { modules_.scu()->onTimer0(); }
+
+            if ((regs_.tvmd >> Tvmd::lsmd_enum) == Tvmd::InterlaceMode::non_interlace) {
+                regs_.tvstat.upd(Tvstat::odd_enum, Tvstat::ScanFieldFlag::during_odd_field_scan);
+            }
         }
     }
 

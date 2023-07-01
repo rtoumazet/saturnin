@@ -1684,6 +1684,7 @@ void BasicInterpreter::delaySlot(Sh2& s, const u32 addr) {
             Log::error(Logger::sh2, "Illegal instruction slot");
             s.modules_.context()->emulationStatus(core::EmulationStatus::stopped);
         } else {
+            s.modules_.context()->addToTrace(s.pc_);
             // Delay slot instruction execution
             is_delay_slot_executing = true;
             execute(s);

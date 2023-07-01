@@ -336,6 +336,9 @@ class EmulatorContext {
 
     [[nodiscard]] auto openglWindow() const -> GLFWwindow*;
 
+    void addToTrace(const u32 pc);
+    void dumpTrace() const;
+
   private:
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn	void EmulatorContext::emulationSetup();
@@ -389,6 +392,8 @@ class EmulatorContext {
     std::jthread emulation_main_thread_; ///< The emulation main thread.
 
     GLFWwindow* opengl_window_;          ///< The OpenGL window.
+
+    std::vector<u32> trace_;
 };
 
 } // namespace saturnin::core

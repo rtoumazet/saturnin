@@ -206,6 +206,7 @@ void EmulatorContext::emulationMainThread() {
         }
     }
     Log::info(Logger::main, tr("Emulation main thread finished"));
+    dumpTrace();
 }
 
 void EmulatorContext::startInterface() {
@@ -290,5 +291,29 @@ void EmulatorContext::updateDebugStatus(const DebugPosition pos, const sh2::Sh2T
 void EmulatorContext::openglWindow(GLFWwindow* window) { opengl_window_ = window; }
 
 auto EmulatorContext::openglWindow() const -> GLFWwindow* { return opengl_window_; }
+
+void EmulatorContext::addToTrace(const u32 pc) { trace_.emplace_back(pc); }
+
+void EmulatorContext::dumpTrace() const {
+    if (trace_.empty()) { return; }
+
+    auto counter     = u32{};
+    auto previous_pc = trace_[0];
+
+    for (const auto pc : trace_) {
+        if (pc == previous_pc) {
+            ++counter;
+        } else {
+            if (counter > 0) {
+                Log::info(Logger::sh2, "{:#0x} (looped {:d} time(s))", pc, counter);
+            } else {
+                Log::info(Logger::sh2, "{:#0x}", pc);
+            }
+
+            previous_pc = pc;
+            counter     = 0;
+        }
+    }
+}
 
 } // namespace saturnin::core
