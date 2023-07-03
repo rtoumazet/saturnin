@@ -887,19 +887,17 @@ auto Smpc::read(const u32 addr) -> u8 {
             }
             return regs_.pdr1 >> SmpcRegs::Pdr::pdr_shft;
         case port_data_register_2:
-            if (modules_.context()->hardwareMode() == HardwareMode::stv) {
-                regs_.pdr2 = 0;
+            // if (modules_.context()->hardwareMode() == HardwareMode::stv) {
+            //     // EEPROM needs a better handling.
+            //     auto pdr2 = regs_.pdr2.data();
+            //     return ~pdr2;
+            // } else {
+            //     regs_.pdr2 = 0xFF;
+            // }
 
-                // const auto controls = getStvPeripheralMapping().board_controls;
-                // controls.test_switch;
-                //    if (glfwGetKey(glfwGetCurrentContext(), uti::toUnderlying(stv_mapping_.board_controls.test_switch)) ==
-                //    GLFW_PRESS) {
-
-                //    }
-            }
-            regs_.pdr2 = 0xFF;
-
-            return regs_.pdr2 >> SmpcRegs::Pdr::pdr_shft;
+            // return regs_.pdr2 >> SmpcRegs::Pdr::pdr_shft;
+            Log::debug(Logger::smpc, "PDR2 read : {:#0x}", regs_.pdr2.data());
+            return regs_.pdr2.data();
 
         default: return 0;
     }
@@ -974,6 +972,7 @@ void Smpc::write(const u32 addr, const u8 data) {
                 }
             }
             regs_.pdr2.upd(Pdr::pdr(data));
+            Log::debug(Logger::smpc, "PDR2 write : {:#0x}", regs_.pdr2.data());
             break;
         case data_direction_register_1: regs_.ddr1.upd(Ddr::ddr(data)); break;
         case data_direction_register_2: regs_.ddr2.upd(Ddr::ddr(data)); break;
@@ -1075,6 +1074,20 @@ void Smpc::initializeRegisterNameMap() {
     addToRegisterNameMap(port_data_register_2, "PDR2");
     addToRegisterNameMap(io_select_register, "IOSEL");
     addToRegisterNameMap(external_latch_register, "EXLE");
+}
+
+void Smpc::setTestSwitch() {
+    // Test switch is active low
+    regs_.pdr2.clr(SmpcRegs::Pdr::test_sw);
+}
+void Smpc::setServiceSwitch() {
+    // Service switch is active low
+    regs_.pdr2.clr(SmpcRegs::Pdr::serv_sw);
+}
+void Smpc::clearStvSwitchs() {
+    auto pdr2 = u8{};
+    if (is_sound_on_) pdr2 |= 0x10;
+    regs_.pdr2.upd(SmpcRegs::Pdr::pdr(~pdr2));
 }
 
 auto getKeyName(const PeripheralKey pk) -> std::string { return keyboard_layout.at(pk); }

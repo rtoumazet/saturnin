@@ -1083,9 +1083,11 @@ struct readStvIo<u8> {
                     }
                     if (isKeyPressed(board.test_switch, m.modules_.context()->openglWindow())) {
                         data |= util::toUnderlying(StvIOPort::test_switch);
+                        m.modules_.smpc()->setTestSwitch();
                     }
                     if (isKeyPressed(board.service_switch, m.modules_.context()->openglWindow())) {
                         data |= util::toUnderlying(StvIOPort::service_switch);
+                        m.modules_.smpc()->setServiceSwitch();
                     }
                     if (isKeyPressed(board.p1_start, m.modules_.context()->openglWindow())) {
                         data |= util::toUnderlying(StvIOPort::start_player1);

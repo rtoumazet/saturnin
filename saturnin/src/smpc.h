@@ -535,6 +535,10 @@ class Smpc {
 
     [[nodiscard]] auto getRegisters() const -> const AddressToNameMap&;
 
+    void setTestSwitch();
+    void setServiceSwitch();
+    void clearStvSwitchs();
+
   private:
     static constexpr u8 input_registers_number{7};
     static constexpr u8 output_registers_number{32};
@@ -647,30 +651,30 @@ class Smpc {
 
     EmulatorModules modules_;
 
-    SmpcRegs regs_; ///< Internal registers
+    SmpcRegs regs_;                                            ///< Internal registers
 
-    SystemClock clock_{SystemClock::not_set}; ///< The system clock.
+    SystemClock clock_{SystemClock::not_set};                  ///< The system clock.
 
-    SaturnPeripheralMapping saturn_mapping_; ///< Saturn paripheral mapping
-    StvPeripheralMapping    stv_mapping_;    ///< ST-V peripheral mapping
+    SaturnPeripheralMapping saturn_mapping_;                   ///< Saturn paripheral mapping
+    StvPeripheralMapping    stv_mapping_;                      ///< ST-V peripheral mapping
 
-    s32 command_remaining_cycles_{}; ///< The command remaining cycles
+    s32 command_remaining_cycles_{};                           ///< The command remaining cycles
 
-    bool is_master_sh2_on_{false};      ///< Master SH2 status
-    bool is_slave_sh2_on_{false};       ///< Slave SH2 status
-    bool is_sound_on_{false};           ///< Sound status
-    bool is_soft_reset_allowed_{false}; ///< NMI generation from reset button status
-    bool is_horizontal_res_352{false};  ///< Horizontal resolution (320/352)
-    bool is_cd_on_{false};              ///< CD status
+    bool is_master_sh2_on_{false};                             ///< Master SH2 status
+    bool is_slave_sh2_on_{false};                              ///< Slave SH2 status
+    bool is_sound_on_{false};                                  ///< Sound status
+    bool is_soft_reset_allowed_{false};                        ///< NMI generation from reset button status
+    bool is_horizontal_res_352{false};                         ///< Horizontal resolution (320/352)
+    bool is_cd_on_{false};                                     ///< CD status
 
     bool            is_intback_processing_{false};             ///< Intback status
     PortStatus      port_1_status_{PortStatus::not_connected}; ///< The port 1 status
     PortStatus      port_2_status_{PortStatus::not_connected}; ///< The port 2 status
     std::vector<u8> full_peripheral_data_table_;               ///< The full peripheral data table
 
-    std::array<u8, 0x4> smem_; ///< SMPC battery backupable memory (4B).
+    std::array<u8, 0x4> smem_;                                 ///< SMPC battery backupable memory (4B).
 
-    AddressToNameMap address_to_name_; ///< Link between a register address and its name.
+    AddressToNameMap address_to_name_;                         ///< Link between a register address and its name.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

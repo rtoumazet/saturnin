@@ -120,6 +120,8 @@ void Vdp2::run(const u8 cycles) {
         Log::debug(Logger::vdp2, tr("VBlankOut interrupt request"));
         modules_.scu()->onVblankOut();
 
+        modules_.smpc()->clearStvSwitchs();
+
         timer_0_counter_ = 0;
 
         calculateDisplayDuration();
