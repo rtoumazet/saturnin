@@ -887,15 +887,16 @@ auto Smpc::read(const u32 addr) -> u8 {
             }
             return regs_.pdr1 >> SmpcRegs::Pdr::pdr_shft;
         case port_data_register_2:
-            // if (modules_.context()->hardwareMode() == HardwareMode::stv) {
-            //     // EEPROM needs a better handling.
-            //     auto pdr2 = regs_.pdr2.data();
-            //     return ~pdr2;
-            // } else {
-            //     regs_.pdr2 = 0xFF;
-            // }
+            if (modules_.context()->hardwareMode() == HardwareMode::stv) {
+                // EEPROM needs a better handling.
+                auto pdr2 = std::byte{};
+                if (is_test_switch_set_) { pdr2 &= std::byte(2); }
+                if (is_service_switch_set_) { pdr2 &= std::byte(4); }
 
-            // return regs_.pdr2 >> SmpcRegs::Pdr::pdr_shft;
+                return std::to_integer<u8>(~pdr2);
+            }
+
+            return regs_.pdr2 >> SmpcRegs::Pdr::pdr_shft;
             Log::debug(Logger::smpc, "PDR2 read : {:#0x}", regs_.pdr2.data());
             return regs_.pdr2.data();
 
@@ -1078,16 +1079,17 @@ void Smpc::initializeRegisterNameMap() {
 
 void Smpc::setTestSwitch() {
     // Test switch is active low
-    regs_.pdr2.clr(SmpcRegs::Pdr::test_sw);
+    // regs_.pdr2.clr(SmpcRegs::Pdr::test_sw);
+    is_test_switch_set_ = true;
 }
 void Smpc::setServiceSwitch() {
     // Service switch is active low
-    regs_.pdr2.clr(SmpcRegs::Pdr::serv_sw);
+    // regs_.pdr2.clr(SmpcRegs::Pdr::serv_sw);
+    is_service_switch_set_ = true;
 }
 void Smpc::clearStvSwitchs() {
-    auto pdr2 = u8{};
-    if (is_sound_on_) pdr2 |= 0x10;
-    regs_.pdr2.upd(SmpcRegs::Pdr::pdr(~pdr2));
+    is_test_switch_set_    = false;
+    is_service_switch_set_ = false;
 }
 
 auto getKeyName(const PeripheralKey pk) -> std::string { return keyboard_layout.at(pk); }

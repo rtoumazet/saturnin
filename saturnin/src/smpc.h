@@ -672,6 +672,9 @@ class Smpc {
     PortStatus      port_2_status_{PortStatus::not_connected}; ///< The port 2 status
     std::vector<u8> full_peripheral_data_table_;               ///< The full peripheral data table
 
+    bool is_service_switch_set_{false};                        ///< True if the service switch is set.
+    bool is_test_switch_set_{false};                           ///< True if the test switch is set.
+
     std::array<u8, 0x4> smem_;                                 ///< SMPC battery backupable memory (4B).
 
     AddressToNameMap address_to_name_;                         ///< Link between a register address and its name.
