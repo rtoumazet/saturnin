@@ -3357,6 +3357,9 @@ void Vdp2::readBitmapData(const ScrollScreenStatus& screen) {
             switch (screen.character_color_number) {
                 using enum ColorCount;
                 case palette_16: {
+                    texture_data.reserve(static_cast<size_t>(texture_width * texture_height * 2));
+                    read16ColorsBitmapData<u32>(texture_data, screen);
+
                     break;
                 }
                 case palette_256: {
@@ -3387,6 +3390,8 @@ void Vdp2::readBitmapData(const ScrollScreenStatus& screen) {
             switch (screen.character_color_number) {
                 using enum ColorCount;
                 case palette_16: {
+                    texture_data.reserve(static_cast<size_t>(texture_width * texture_height * 2));
+                    read16ColorsBitmapData<u16>(texture_data, screen);
                     break;
                 }
                 case palette_256: {

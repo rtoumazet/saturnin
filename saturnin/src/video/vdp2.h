@@ -1472,7 +1472,6 @@ class Vdp2 {
 
     template<typename T>
     void readPalette256DotBitmap(std::vector<u8>&          texture_data,
-                                 const u32                 texture_offset,
                                  const ScrollScreenStatus& screen,
                                  const u16                 palette_number,
                                  const u8                  dot) {
@@ -1561,6 +1560,28 @@ class Vdp2 {
     Color read16MColorsData();
 
     template<typename T>
+    void read16ColorsBitmapData(std::vector<u8>& texture_data, const ScrollScreenStatus& screen) {
+        constexpr auto offset          = u8{4};
+        auto           current_address = screen.bitmap_start_address;
+        const auto     end_address     = current_address + static_cast<u32>(texture_data.capacity()) / 4;
+        constexpr auto palette_disp    = u8{4};
+        const auto     palette         = screen.bitmap_palette_number << palette_disp;
+        auto           row             = DataExtraction{};
+        for (u32 i = screen.bitmap_start_address; i < end_address; i += offset) {
+            row.as_4bits = modules_.memory()->read<u32>(current_address);
+            readPalette16Dot<T>(texture_data, screen, palette, row.as_4bits >> DataExtraction::As4Bits::dot0_shift);
+            readPalette16Dot<T>(texture_data, screen, palette, row.as_4bits >> DataExtraction::As4Bits::dot1_shift);
+            readPalette16Dot<T>(texture_data, screen, palette, row.as_4bits >> DataExtraction::As4Bits::dot2_shift);
+            readPalette16Dot<T>(texture_data, screen, palette, row.as_4bits >> DataExtraction::As4Bits::dot3_shift);
+            readPalette16Dot<T>(texture_data, screen, palette, row.as_4bits >> DataExtraction::As4Bits::dot4_shift);
+            readPalette16Dot<T>(texture_data, screen, palette, row.as_4bits >> DataExtraction::As4Bits::dot5_shift);
+            readPalette16Dot<T>(texture_data, screen, palette, row.as_4bits >> DataExtraction::As4Bits::dot6_shift);
+            readPalette16Dot<T>(texture_data, screen, palette, row.as_4bits >> DataExtraction::As4Bits::dot7_shift);
+            current_address += offset;
+        }
+    }
+
+    template<typename T>
     void read256ColorsBitmapData(std::vector<u8>& texture_data, const ScrollScreenStatus& screen) {
         constexpr auto offset          = u8{4};
         auto           current_address = screen.bitmap_start_address;
@@ -1611,29 +1632,13 @@ class Vdp2 {
             auto row          = DataExtraction{};
             for (u32 i = start_address; i < (start_address + chunk_size); i += offset) {
                 row.as_8bits = modules_.memory()->read<u32>(i);
-                readPalette256DotBitmap<T>(local_texture,
-                                           local_offset - texture_offset,
-                                           screen,
-                                           palette,
-                                           row.as_8bits >> DataExtraction::As8Bits::dot0_shift);
+                readPalette256DotBitmap<T>(local_texture, screen, palette, row.as_8bits >> DataExtraction::As8Bits::dot0_shift);
                 local_offset += 4;
-                readPalette256DotBitmap<T>(local_texture,
-                                           local_offset - texture_offset,
-                                           screen,
-                                           palette,
-                                           row.as_8bits >> DataExtraction::As8Bits::dot1_shift);
+                readPalette256DotBitmap<T>(local_texture, screen, palette, row.as_8bits >> DataExtraction::As8Bits::dot1_shift);
                 local_offset += 4;
-                readPalette256DotBitmap<T>(local_texture,
-                                           local_offset - texture_offset,
-                                           screen,
-                                           palette,
-                                           row.as_8bits >> DataExtraction::As8Bits::dot2_shift);
+                readPalette256DotBitmap<T>(local_texture, screen, palette, row.as_8bits >> DataExtraction::As8Bits::dot2_shift);
                 local_offset += 4;
-                readPalette256DotBitmap<T>(local_texture,
-                                           local_offset - texture_offset,
-                                           screen,
-                                           palette,
-                                           row.as_8bits >> DataExtraction::As8Bits::dot3_shift);
+                readPalette256DotBitmap<T>(local_texture, screen, palette, row.as_8bits >> DataExtraction::As8Bits::dot3_shift);
                 local_offset += 4;
             }
             std::copy(local_texture.begin(), local_texture.end(), &texture_data[0] + texture_offset * 4);
