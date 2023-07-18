@@ -261,6 +261,32 @@ struct DataExtraction {
     As16BitsType as_16bits;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \struct	As11Bits
+    ///
+    /// \brief	Extracts 11 bits chunks of data from a 32 bits register.
+    ///
+    /// \author	Runik
+    /// \date	18/07/2023
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    struct As11Bits {
+        using PosType     = Pos<u32, As11Bits>;
+        using BitsType    = Bits<u32, As11Bits>;
+        using MaskedType  = Masked<u32, As11Bits>;
+        using ShiftedType = Shifted<u32, As11Bits>;
+
+        static constexpr PosType dot0_pos = PosType(16);
+        static constexpr PosType dot1_pos = PosType(0);
+
+        static constexpr u32 data_mask = 0x7FF;
+
+        static constexpr ShiftedType dot0_shift = ShiftedType(data_mask, dot0_pos);
+        static constexpr ShiftedType dot1_shift = ShiftedType(data_mask, dot1_pos);
+    };
+    using As11BitsType = Reg<u32, As11Bits>;
+    As11BitsType as_11bits;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \struct	As8Bits
     ///
     /// \brief	Extracts 8 bits chunks of data from a 32 bits register.

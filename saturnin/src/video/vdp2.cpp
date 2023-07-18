@@ -3368,6 +3368,8 @@ void Vdp2::readBitmapData(const ScrollScreenStatus& screen) {
                     break;
                 }
                 case palette_2048: {
+                    texture_data.reserve(static_cast<size_t>(texture_width * texture_height * 8));
+                    read2048ColorsBitmapData<u32>(texture_data, screen);
                     break;
                 }
                 case rgb_32k: {
@@ -3400,6 +3402,8 @@ void Vdp2::readBitmapData(const ScrollScreenStatus& screen) {
                     break;
                 }
                 case palette_2048: {
+                    texture_data.reserve(static_cast<size_t>(texture_width * texture_height * 8));
+                    read2048ColorsBitmapData<u16>(texture_data, screen);
                     break;
                 }
                 case rgb_32k: {

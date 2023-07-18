@@ -1482,6 +1482,16 @@ class Vdp2 {
         texture_data.insert(texture_data.end(), {color.r, color.g, color.b, color.a});
     };
 
+    template<typename T>
+    void readPalette2048Dot(std::vector<u8>& texture_data, const ScrollScreenStatus& screen, const u8 dot) {
+        const auto color_address = u32{cram_start_address + screen.color_ram_address_offset | dot * sizeof(T)};
+        auto       color         = readColor<T>(color_address);
+
+        if (!dot && screen.is_transparency_code_valid) color.a = 0;
+
+        texture_data.insert(texture_data.end(), {color.r, color.g, color.b, color.a});
+    };
+
     void read32KDot(std::vector<u8>& texture_data, const ScrollScreenStatus& screen, const u16 dot) const {
         auto color = Color(dot);
         if (!(dot & 0x8000) && screen.is_transparency_code_valid) color.a = 0;
@@ -1666,6 +1676,20 @@ class Vdp2 {
         //     outfile.write(reinterpret_cast<const char*>(texture_data.data()), sizeof(u8) * texture_data.size());
         //     outfile.close();
         // }
+    }
+
+    template<typename T>
+    void read2048ColorsBitmapData(std::vector<u8>& texture_data, const ScrollScreenStatus& screen) {
+        constexpr auto offset          = u8{4};
+        auto           current_address = screen.bitmap_start_address;
+        const auto     end_address     = current_address + static_cast<u32>(texture_data.capacity()) / 4;
+        auto           row             = DataExtraction{};
+        for (u32 i = screen.bitmap_start_address; i < end_address; i += offset) {
+            row.as_11bits = modules_.memory()->read<u32>(current_address);
+            readPalette2048Dot<T>(texture_data, screen, row.as_11bits >> DataExtraction::As11Bits::dot0_shift);
+            readPalette2048Dot<T>(texture_data, screen, row.as_11bits >> DataExtraction::As11Bits::dot1_shift);
+            current_address += offset;
+        }
     }
 
     void read32KColorsBitmapData(std::vector<u8>& texture_data, const ScrollScreenStatus& screen) const {
