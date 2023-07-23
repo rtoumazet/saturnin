@@ -3689,12 +3689,15 @@ void Vdp2::readCell(const ScrollScreenStatus& screen,
                         break;
                     }
                     case palette_2048: {
+                        read2048ColorsCellData<u32>(texture_data, screen, cell_address);
                         break;
                     }
                     case rgb_32k: {
+                        read32KColorsCellData(texture_data, screen, cell_address);
                         break;
                     }
                     case rgb_16m: {
+                        read16MColorsCellData(texture_data, screen, cell_address);
                         break;
                     }
                     default: {
@@ -3714,12 +3717,15 @@ void Vdp2::readCell(const ScrollScreenStatus& screen,
                         break;
                     }
                     case palette_2048: {
+                        read2048ColorsCellData<u16>(texture_data, screen, cell_address);
                         break;
                     }
                     case rgb_32k: {
+                        read32KColorsCellData(texture_data, screen, cell_address);
                         break;
                     }
                     case rgb_16m: {
+                        read16MColorsCellData(texture_data, screen, cell_address);
                         break;
                     }
                     default: {
