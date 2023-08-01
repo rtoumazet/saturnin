@@ -33,10 +33,10 @@
 #include <saturnin/src/locale.h>           // tr
 #include <saturnin/src/log.h>              // Log
 #include <saturnin/src/memory.h>
-#include <saturnin/src/thread_pool.h>      // ThreadPool
-#include <saturnin/src/utilities.h>        // toUnderlying
+#include <saturnin/src/thread_pool.h> // ThreadPool
+#include <saturnin/src/utilities.h>   // toUnderlying
 #include <saturnin/src/video/vdp_common.h>
-#include <saturnin/src/video/vdp2_part.h>  // ScrollScreenPos
+#include <saturnin/src/video/vdp2_part.h> // ScrollScreenPos
 #include <saturnin/src/video/vdp2_registers.h>
 
 // Forward declarations
@@ -287,10 +287,10 @@ struct ColorOffset {
 /// \date   23/02/2021
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 struct ScrollScreenStatus {
-    ScrollScreen scroll_screen{};                                   ///< The scroll screen value
-    bool         is_display_enabled{};                              ///< True when displayed.
-    bool         is_transparency_code_valid{};                      ///< True when transparency code is valid.
-    bool         is_transparency_code_valid_dirty{};                ///< True when transparency code was changed.
+    ScrollScreen scroll_screen{};                    ///< The scroll screen value
+    bool         is_display_enabled{};               ///< True when displayed.
+    bool         is_transparency_code_valid{};       ///< True when transparency code is valid.
+    bool         is_transparency_code_valid_dirty{}; ///< True when transparency code was changed.
 
     ScrollScreenFormat format{ScrollScreenFormat::cell};            ///< Cell or bitmap.
     ColorCount         character_color_number{ColorCount::not_set}; ///< Color number.
@@ -326,10 +326,10 @@ struct ScrollScreenStatus {
     ScreenOffset character_pattern_screen_offset{}; ///< Offset of one character pattern in cell units.
     ScreenOffset cell_screen_offset{8, 8};          ///< Offset of one cell in cell units.
 
-    u32 plane_a_start_address{};                    ///< The plane A start address
-    u32 plane_b_start_address{};                    ///< The plane B start address
-    u32 plane_c_start_address{};                    ///< The plane C start address
-    u32 plane_d_start_address{};                    ///< The plane D start address
+    u32 plane_a_start_address{}; ///< The plane A start address
+    u32 plane_b_start_address{}; ///< The plane B start address
+    u32 plane_c_start_address{}; ///< The plane C start address
+    u32 plane_d_start_address{}; ///< The plane D start address
 
     // Rotation specifics
     u32 plane_e_start_address{}; ///< The plane E start address
@@ -357,8 +357,8 @@ struct ScrollScreenStatus {
     bool        is_color_offset_enabled{}; ///< True when color offset is enabled.
     ColorOffset color_offset;              ///< Color offset data.
 
-    u16 total_screen_scroll_width{};       ///< Width of the screen scroll in pixels.
-    u16 total_screen_scroll_height{};      ///< Height of the screen scroll in pixels.
+    u16 total_screen_scroll_width{};  ///< Width of the screen scroll in pixels.
+    u16 total_screen_scroll_height{}; ///< Height of the screen scroll in pixels.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1549,6 +1549,7 @@ class Vdp2 {
         constexpr auto row_offset      = u8{4};
         auto           current_address = vram_start_address + cell_address;
         auto           row             = DataExtraction{};
+        const auto     data            = modules_.memory()->read(core::MemoryMapArea::vdp2_video_ram, current_address, 0x40);
         for (u32 i = 0; i < 8; ++i) {
             row.as_8bits = modules_.memory()->read<u32>(current_address);
             readPalette256Dot<T>(texture_data, screen, palette_number, row.as_8bits >> DataExtraction::As8Bits::dot0_shift);
@@ -1563,6 +1564,14 @@ class Vdp2 {
             readPalette256Dot<T>(texture_data, screen, palette_number, row.as_8bits >> DataExtraction::As8Bits::dot3_shift);
             current_address += row_offset;
         }
+
+        //for (const auto elem : data) {
+        //    row.as_8bits = elem;
+        //    readPalette256Dot<T>(texture_data, screen, palette_number, row.as_8bits >> DataExtraction::As8Bits::dot0_shift);
+        //    readPalette256Dot<T>(texture_data, screen, palette_number, row.as_8bits >> DataExtraction::As8Bits::dot1_shift);
+        //    readPalette256Dot<T>(texture_data, screen, palette_number, row.as_8bits >> DataExtraction::As8Bits::dot2_shift);
+        //    readPalette256Dot<T>(texture_data, screen, palette_number, row.as_8bits >> DataExtraction::As8Bits::dot3_shift);
+        //}
     }
 
     template<typename T>
@@ -1868,46 +1877,46 @@ class Vdp2 {
 
     EmulatorModules modules_;
 
-    AddressToNameMap address_to_name_;           ///< Link between a register address and its name.
+    AddressToNameMap address_to_name_; ///< Link between a register address and its name.
 
-    u32 elapsed_frame_cycles_{};                 ///< Elapsed cycles for the current frame.
-    u32 elapsed_line_cycles_{};                  ///< Elapsed cycles for the current line.
+    u32 elapsed_frame_cycles_{}; ///< Elapsed cycles for the current frame.
+    u32 elapsed_line_cycles_{};  ///< Elapsed cycles for the current line.
 
-    u32 cycles_per_frame_{};                     ///< Number of SH2 cycles needed to display one frame (active + blanking).
-    u32 cycles_per_vblank_{};                    ///< Number of SH2 cycles needed for VBlank duration.
-    u32 cycles_per_vactive_{};                   ///< Number of SH2 cycles needed to display the visible part of the frame
+    u32 cycles_per_frame_{};   ///< Number of SH2 cycles needed to display one frame (active + blanking).
+    u32 cycles_per_vblank_{};  ///< Number of SH2 cycles needed for VBlank duration.
+    u32 cycles_per_vactive_{}; ///< Number of SH2 cycles needed to display the visible part of the frame
 
-    u32 cycles_per_line_{};                      ///< Number of SH2 cycles needed to display one line (active + blanking).
-    u32 cycles_per_hblank_{};                    ///< Number of SH2 cycles needed for HBlank duration.
-    u32 cycles_per_hactive_{};                   ///< Number of SH2 cycles needed to display the visible part of a line.
+    u32 cycles_per_line_{};    ///< Number of SH2 cycles needed to display one line (active + blanking).
+    u32 cycles_per_hblank_{};  ///< Number of SH2 cycles needed for HBlank duration.
+    u32 cycles_per_hactive_{}; ///< Number of SH2 cycles needed to display the visible part of a line.
 
-    bool is_vblank_current_{};                   ///< True if VBlank is current.
-    bool is_hblank_current_{};                   ///< True if HBlank is current.
+    bool is_vblank_current_{}; ///< True if VBlank is current.
+    bool is_hblank_current_{}; ///< True if HBlank is current.
 
-    u16 timer_0_counter_{};                      ///< Timer 0 counter.
-    u16 timer_1_counter_{};                      ///< Timer 1 counter.
+    u16 timer_0_counter_{}; ///< Timer 0 counter.
+    u16 timer_1_counter_{}; ///< Timer 1 counter.
 
-    TvScreenStatus tv_screen_status_;            ///< The TV screen status.
-    RamStatus      ram_status_;                  ///< The RAM status
+    TvScreenStatus tv_screen_status_; ///< The TV screen status.
+    RamStatus      ram_status_;       ///< The RAM status
 
     std::array<ScrollScreenStatus, 6> bg_;       ///< The backgrounds status.
     std::array<ScrollScreenStatus, 6> saved_bg_; /// \brief  The backgrounds status from the previous frame.
 
     // Pre calculated modulo values used for character patterns positionning
-    std::vector<u32> pre_calculated_modulo_64_{};              ///< The pre calculated modulo 64
-    std::vector<u32> pre_calculated_modulo_32_{};              ///< The pre calculated modulo 32
+    std::vector<u32> pre_calculated_modulo_64_{}; ///< The pre calculated modulo 64
+    std::vector<u32> pre_calculated_modulo_32_{}; ///< The pre calculated modulo 32
 
-    Mutex                 vdp2_parts_mutex_;                   ///< Mutex to handle access to the shared vector between threads.
-    std::vector<Vdp2Part> vdp2_parts_[6];                      ///< Storage of rendering parts for each scroll cell.
-    std::vector<CellData> cell_data_to_process_;               ///< Will store cell data before parallelized read for one scroll.
+    Mutex                 vdp2_parts_mutex_;     ///< Mutex to handle access to the shared vector between threads.
+    std::vector<Vdp2Part> vdp2_parts_[6];        ///< Storage of rendering parts for each scroll cell.
+    std::vector<CellData> cell_data_to_process_; ///< Will store cell data before parallelized read for one scroll.
 
     ScrollScreen         screen_in_debug_{ScrollScreen::none}; ///< Scroll screen currently viewed in debug.
     DisabledScrollScreen disabled_scroll_screens_;             ///< Disabling state of scroll screens.
 
-    std::mutex  fps_mutex_;                                    ///< Mutex protecting fps_.
-    std::string fps_;                                          ///< The FPS
+    std::mutex  fps_mutex_; ///< Mutex protecting fps_.
+    std::string fps_;       ///< The FPS
 
-    Vdp2Regs regs_;                                            ///< VDP2 registers
+    Vdp2Regs regs_; ///< VDP2 registers
 };
 
 ///@{

@@ -3302,7 +3302,10 @@ void Vdp2::readScrollScreenData(const ScrollScreen s) {
 
         elapsed_time = std::chrono::steady_clock::now() - start_time;
         auto res     = (std::chrono::duration_cast<std::chrono::microseconds>(elapsed_time)).count();
-        core::Log::warning(Logger::vdp2, core::tr("Parallel read {}µs"), res);
+
+        if (screen.scroll_screen == ScrollScreen::nbg3) {
+            core::Log::warning(Logger::vdp2, core::tr("Parallel read {} : {}µs"), screenName(screen.scroll_screen), res);
+        }
 
     } else { // ScrollScreenFormat::bitmap
         readBitmapData(screen);

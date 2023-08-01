@@ -314,13 +314,13 @@ class Memory {
 
     HardwareMode HardwareMode_{HardwareMode::saturn}; ///< Current hardware mode
 
-    bool was_vdp2_cram_accessed_{false};              ///< true when VDP2 color ram was accessed
+    bool was_vdp2_cram_accessed_{false}; ///< true when VDP2 color ram was accessed
     std::array<bool, vdp2_vram_size / vdp2_minimum_page_size>
-        was_vdp2_page_accessed_;                      ///< True when a specific VDP2 page was accessed.
+        was_vdp2_page_accessed_; ///< True when a specific VDP2 page was accessed.
     std::array<bool, vdp2_vram_size / vdp2_minimum_bitmap_size>
-        was_vdp2_bitmap_accessed_;                    ///< True when a specific VDP2 bitmap was accessed.
+        was_vdp2_bitmap_accessed_; ///< True when a specific VDP2 bitmap was accessed.
 
-    sh2::Sh2Type sh2_in_operation_;                   ///< Which SH2 is in operation
+    sh2::Sh2Type sh2_in_operation_; ///< Which SH2 is in operation
     // bool interrupt_signal_is_sent_from_master_sh2_{ false }; ///< InterruptCapture signal sent to the slave SH2 (minit)
     // bool interrupt_signal_is_sent_from_slave_sh2_{ false }; ///< InterruptCapture signal sent to the master SH2 (sinit)
 
@@ -463,6 +463,23 @@ class Memory {
         auto& handler = std::get<WriteHandler<T>&>(std::tie(write_8_handler_, write_16_handler_, write_32_handler_));
         handler[addr >> 16](*this, addr, data);
     }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn	auto Memory::read(const MemoryMapArea area, const u32 start_addr, const u32 size) -> std::vector<u32>;
+    ///
+    /// \brief	Reads a chunk of data from a memory area.
+    ///
+    /// \author	Runik
+    /// \date	27/07/2023
+    ///
+    /// \param 	area	  	The area to read from.
+    /// \param 	start_addr	The start address.
+    /// \param 	size	  	The size to read.
+    ///
+    /// \returns	A vector of u32.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    auto read(const MemoryMapArea area, const u32 start_addr, const u32 size) const -> std::vector<u32>;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn void Memory::sendFrtInterruptToMaster() const;
@@ -676,7 +693,7 @@ class Memory {
 
     u32 stv_protection_offset_{};
 
-    StvGameConfiguration selected_stv_game_{};       ///< Currently selected ST-V set.
+    StvGameConfiguration selected_stv_game_{}; ///< Currently selected ST-V set.
 
     BinaryFileConfiguration selected_binary_file_{}; ///< Currently selected binary file.
 };

@@ -27,7 +27,7 @@
 #include <libzippp/libzippp.h>
 #include <saturnin/src/config.h>
 #include <saturnin/src/emulator_context.h>
-#include <saturnin/src/locale.h>    // NOLINT(modernize-deprecated-headers)
+#include <saturnin/src/locale.h> // NOLINT(modernize-deprecated-headers)
 #include <saturnin/src/sh2/sh2.h>
 #include <saturnin/src/utilities.h> // format
 #include <saturnin/src/cdrom/cdrom.h>
@@ -452,6 +452,37 @@ void Memory::writeStvProtection([[maybe_unused]] const u32 addr, [[maybe_unused]
 auto Memory::isStvProtectionEnabled() const -> bool {
     const auto relative_addr = calculateRelativeCartAddress(stv_protection_enabled);
     return cart_[relative_addr] == 0x1;
+}
+
+auto Memory::read(const MemoryMapArea area, const u32 start_addr, const u32 size) const -> std::vector<u32> {
+    auto data = std::vector<u32>{};
+    data.reserve(size / 4);
+    switch (area) {
+        using enum MemoryMapArea;
+        case vdp2_video_ram: {
+            const auto local_start_addr = start_addr & 0xfffffff;
+            if (local_start_addr % 4 != 0) {
+                Log::warning(Logger::memory,
+                             uti::format(core::tr("Start address read not on multiple of 4 : {}"), local_start_addr));
+            }
+
+            if (!uti::Range<vdp2_vram_area>::contains(local_start_addr)) {
+                Log::exception(Logger::memory,
+                               uti::format(core::tr("Start address read out of range : {:#0x}"), local_start_addr));
+            }
+            if (!uti::Range<vdp2_vram_area>::contains(local_start_addr + size)) {
+                Log::exception(Logger::memory,
+                               uti::format(core::tr("End address read out of range : {:#0x}"), local_start_addr + size));
+            }
+            for (auto i = (start_addr & vdp2_vram_memory_mask); i < (start_addr & vdp2_vram_memory_mask) + size; i += 4) {
+                data.emplace_back(vdp2_vram_[i] << 24 | vdp2_vram_[i + 1] << 16 | vdp2_vram_[i + 2] << 8 | vdp2_vram_[i + 3]);
+            }
+            break;
+        }
+
+        default: break;
+    }
+    return data;
 }
 
 void Memory::sendFrtInterruptToMaster() const { modules_.masterSh2()->sendInterruptCaptureSignal(); }
