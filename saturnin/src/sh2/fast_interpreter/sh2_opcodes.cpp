@@ -21,7 +21,7 @@
 #include <saturnin/src/sh2/fast_interpreter/sh2_opcodes.h>
 #include <saturnin/src/emulator_context.h> // EmulatorContext
 #include <saturnin/src/emulator_defs.h>
-#include <saturnin/src/emulator_enums.h>   // DebugStatus
+#include <saturnin/src/emulator_enums.h> // DebugStatus
 #include <saturnin/src/interrupt_sources.h>
 #include <saturnin/src/log.h>
 #include <saturnin/src/memory.h>
@@ -1559,6 +1559,7 @@ void FastInterpreter::execute(Sh2& s) {
         opcodes_func[s.current_opcode_](s);
         s.current_opcode_ = s.modules_.memory()->read<u16>(s.pc_);
         executed_cycles += s.cycles_elapsed_;
+        // if (s.modules_.context()->debugStatus() == core::DebugStatus::paused) { break; }
     }
     s.cycles_elapsed_ = executed_cycles;
 
