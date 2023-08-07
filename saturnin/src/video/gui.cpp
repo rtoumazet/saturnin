@@ -24,11 +24,11 @@
 #include <imgui_internal.h> // ImGuiSelectableFlags_SelectOnNav
 #include <imgui_stdlib.h>
 #include <saturnin/src/config.h>
-#include <saturnin/src/emulator_enums.h>              // EmulationStatus
-#include <saturnin/src/locale.h>                      // tr
-#include <saturnin/src/log.h>                         // Log
+#include <saturnin/src/emulator_enums.h> // EmulationStatus
+#include <saturnin/src/locale.h>         // tr
+#include <saturnin/src/log.h>            // Log
 #include <saturnin/src/sh2/basic_interpreter/sh2_instructions.h>
-#include <saturnin/src/smpc.h>                        // SaturnDigitalPad, PeripheralKey
+#include <saturnin/src/smpc.h> // SaturnDigitalPad, PeripheralKey
 #include <saturnin/src/tests.h>
 #include <saturnin/src/thread_pool.h>                 // ThreadPool
 #include <saturnin/src/utilities.h>                   // stringToVector, format
@@ -1279,8 +1279,8 @@ void showDebugSh2Window(core::EmulatorContext& state, bool* opened) {
                               ImGuiTableFlags_SizingStretchProp | ImGuiTableFlags_ScrollY | ImGuiTableFlags_PadOuterX,
                               table_size)) {
             const auto callstack_mask = std::string{"{:#010x}"};
-            auto       callstack      = current_sh2->callstack();
-            std::for_each(callstack.begin(), callstack.end(), [&](const auto& item) {
+            const auto callstack      = current_sh2->callstack();
+            std::ranges::for_each(callstack, [&](const auto& item) {
                 ImGui::TableNextRow();
                 ImGui::TableSetColumnIndex(0);
                 ImGui::TextUnformatted(uti::format(callstack_mask, item.call_address).c_str());
