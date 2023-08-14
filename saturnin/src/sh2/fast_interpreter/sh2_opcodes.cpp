@@ -1559,7 +1559,7 @@ void FastInterpreter::execute(Sh2& s) {
         opcodes_func[s.current_opcode_](s);
         s.current_opcode_ = s.modules_.memory()->read<u16>(s.pc_);
         executed_cycles += s.cycles_elapsed_;
-        // if (s.modules_.context()->debugStatus() == core::DebugStatus::paused) { break; }
+        if (s.modules_.context()->debugStatus() == core::DebugStatus::paused) { break; }
     }
     s.cycles_elapsed_ = executed_cycles;
 

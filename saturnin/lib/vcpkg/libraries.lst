@@ -9,4 +9,5 @@ libconfig
 libzip
 libzippp
 lodepng
+nanobench
 spdlog

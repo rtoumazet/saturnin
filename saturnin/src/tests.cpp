@@ -21,6 +21,8 @@
 #include <saturnin/src/tests.h>
 
 #include <chrono>
+#include <iostream>
+#include <nanobench.h>
 #include <saturnin/src/emulator_defs.h>
 #include <saturnin/src/bit_register.h>
 #include <saturnin/src/utilities.h>
@@ -86,6 +88,70 @@ void runTests() {
         }
 
         core::Log::info(Logger::test, result, "BitReg"s, reg.endTest(), val);
+    }
+
+    if constexpr (constexpr auto run_data_copy_benchmarks = true) {
+        using namespace core;
+        using namespace video;
+
+        EmulatorContext ec{};
+        ec.memory()->initialize(HardwareMode::saturn);
+        auto row             = DataExtraction{};
+        auto current_address = u32{0x25e00000};
+
+        auto filler = u8{};
+        for (auto& val : ec.memory()->vdp2_vram_) {
+            val = filler;
+            ++filler;
+        }
+
+        std::vector<u8> texture_data;
+        // core::Log::info(Logger::test, "{}", arr[0x3f]);
+        auto os = std::ostringstream{};
+        auto b  = ankerl::nanobench::Bench();
+        b.output(&os).relative(true);
+
+        // ankerl::nanobench::Bench().output(&os).run("Direct copy", [&] {
+        b.run("Direct copy", [&] {
+            texture_data.clear();
+            current_address = u32{0x25e00000};
+            for (u32 i = 0; i < 8; ++i) {
+                row.as_8bits = ec.memory()->read<u32>(current_address);
+                texture_data.emplace_back(row.as_8bits >> DataExtraction::As8Bits::dot0_shift);
+                texture_data.emplace_back(row.as_8bits >> DataExtraction::As8Bits::dot1_shift);
+                texture_data.emplace_back(row.as_8bits >> DataExtraction::As8Bits::dot2_shift);
+                texture_data.emplace_back(row.as_8bits >> DataExtraction::As8Bits::dot3_shift);
+                current_address += 4;
+                row.as_8bits = ec.memory()->read<u32>(current_address);
+                texture_data.emplace_back(row.as_8bits >> DataExtraction::As8Bits::dot0_shift);
+                texture_data.emplace_back(row.as_8bits >> DataExtraction::As8Bits::dot1_shift);
+                texture_data.emplace_back(row.as_8bits >> DataExtraction::As8Bits::dot2_shift);
+                texture_data.emplace_back(row.as_8bits >> DataExtraction::As8Bits::dot3_shift);
+                current_address += 4;
+            }
+
+            // ankerl::nanobench::doNotOptimizeAway(d);
+        });
+
+        b.run("Block copy", [&] {
+            texture_data.clear();
+            current_address = u32{0x25e00000};
+            for (u32 i = 0; i < 8; ++i) {
+                const auto data = ec.memory()->read(core::MemoryMapArea::vdp2_video_ram, current_address, 0x40);
+
+                /*              for (const auto& elem : data) {
+                                  row.as_8bits = elem;
+                                  texture_data.emplace_back(row.as_8bits >> DataExtraction::As8Bits::dot0_shift);
+                                  texture_data.emplace_back(row.as_8bits >> DataExtraction::As8Bits::dot1_shift);
+                                  texture_data.emplace_back(row.as_8bits >> DataExtraction::As8Bits::dot2_shift);
+                                  texture_data.emplace_back(row.as_8bits >> DataExtraction::As8Bits::dot3_shift);
+                              }*/
+            }
+
+            // ankerl::nanobench::doNotOptimizeAway(d);
+        });
+
+        core::Log::info(Logger::test, "{}", os.str());
     }
 }
 

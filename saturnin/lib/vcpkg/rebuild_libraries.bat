@@ -34,8 +34,8 @@ for /f %%l in (%libslist%) do (
 
 set command_install=%vcpkg_full_path% install
 for /f %%l in (%libslist%) do (
-    set command_install=!command_install! %%l:x86-windows%library_type% --editable
-    set command_install=!command_install! %%l:x64-windows%library_type% --editable
+    set command_install=!command_install! %%l:x86-windows%library_type% 
+    set command_install=!command_install! %%l:x64-windows%library_type% 
 )
 
-%command_install%
+%command_install% --editable
