@@ -43,7 +43,7 @@ jobs:
         
     - name: Install vcpkg dependencies
       run: |
-        $VCPKG_ROOT/vcpkg install argagg bshoshany-thread-pool date glbinding glfw3 glm imgui[docking-experimental,glfw-binding,opengl3-binding] libconfig libzip libzippp lodepng spdlog
+        $VCPKG_ROOT/vcpkg install argagg bshoshany-thread-pool date glbinding glfw3glm imgui[docking-experimental,glfw-binding,opengl3-binding] libconfig libzip libzippp lodepng spdlog nanobench
       shell: bash  
 
     - name: Copy properties file
