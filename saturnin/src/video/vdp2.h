@@ -1368,45 +1368,7 @@ class Vdp2 {
                   const u32                 cell_address,
                   const ScreenOffset&       cell_offset);
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn void Vdp2::concurrentReadCell(const ScrollScreenStatus screen, const PatternNameData pnd, const u32 cell_address,
-    /// const ScreenOffset cell_offset, const size_t key);
-    ///
-    /// \brief  Reads a cell in parallel. The cell data itself is read from a single thread.
-    ///
-    /// \author Runik
-    /// \date   26/08/2022
-    ///
-    /// \param  screen          Current scroll screen status.
-    /// \param  pnd             The pattern name data.
-    /// \param  cell_address    The cell address.
-    /// \param  cell_offset     The cell offset, in cell units.
-    /// \param  key             Key of the cell.
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    void concurrentReadCell(const ScrollScreenStatus screen,
-                            const PatternNameData    pnd,
-                            const u32                cell_address,
-                            const ScreenOffset       cell_offset,
-                            const size_t             key);
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn	void Vdp2::concurrentMultiReadCell(const ScrollScreenStatus screen, const std::vector<CellData>::iterator start, const
-    /// std::vector<CellData>::iterator end);
-    ///
-    /// \brief	Reads a range of cells in parallel. The cells in the range are read in a single thread.
-    ///
-    /// \author	Runik
-    /// \date	01/09/2022
-    ///
-    /// \param 	screen	Current scroll screen status.
-    /// \param 	start 	Start iterator of the cells to read.
-    /// \param 	end   	End iterator of the cells to read .
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    void concurrentMultiReadCell(const ScrollScreenStatus              screen,
-                                 const std::vector<CellData>::iterator start,
-                                 const std::vector<CellData>::iterator end);
+    void readCellTask();
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn void Vdp2::saveCell(const ScrollScreenStatus& screen, const PatternNameData& pnd, const u32 cell_address, const
@@ -1565,13 +1527,13 @@ class Vdp2 {
             current_address += row_offset;
         }
 
-        //for (const auto elem : data) {
-        //    row.as_8bits = elem;
-        //    readPalette256Dot<T>(texture_data, screen, palette_number, row.as_8bits >> DataExtraction::As8Bits::dot0_shift);
-        //    readPalette256Dot<T>(texture_data, screen, palette_number, row.as_8bits >> DataExtraction::As8Bits::dot1_shift);
-        //    readPalette256Dot<T>(texture_data, screen, palette_number, row.as_8bits >> DataExtraction::As8Bits::dot2_shift);
-        //    readPalette256Dot<T>(texture_data, screen, palette_number, row.as_8bits >> DataExtraction::As8Bits::dot3_shift);
-        //}
+        // for (const auto elem : data) {
+        //     row.as_8bits = elem;
+        //     readPalette256Dot<T>(texture_data, screen, palette_number, row.as_8bits >> DataExtraction::As8Bits::dot0_shift);
+        //     readPalette256Dot<T>(texture_data, screen, palette_number, row.as_8bits >> DataExtraction::As8Bits::dot1_shift);
+        //     readPalette256Dot<T>(texture_data, screen, palette_number, row.as_8bits >> DataExtraction::As8Bits::dot2_shift);
+        //     readPalette256Dot<T>(texture_data, screen, palette_number, row.as_8bits >> DataExtraction::As8Bits::dot3_shift);
+        // }
     }
 
     template<typename T>

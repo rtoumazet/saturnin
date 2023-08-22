@@ -86,14 +86,15 @@ void Texture::deleteTextureData(Texture& t) {
 }
 
 auto Texture::isTextureLoadingNeeded(const size_t key) -> bool {
-    ReadOnlyLock lock(storage_mutex_);
     if (!texture_storage_.contains(key)) { return true; }
 
     if (auto t = Texture::getTexture(key); t) {
         if ((*t)->isDiscarded()) {
+            UpdatableLock lock(storage_mutex_);
             (*t)->isDiscarded(false);
             return true;
         }
+        UpdatableLock lock(storage_mutex_);
         (*t)->isRecentlyUsed(true);
         return false;
     }
