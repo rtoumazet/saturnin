@@ -165,6 +165,9 @@
     <ClCompile Include="src\sh2\sh2_shared.cpp">
       <Filter>Fichiers sources\sh2</Filter>
     </ClCompile>
+    <ClCompile Include="src\timer.cpp">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\config.h">
@@ -346,6 +349,9 @@
     </ClInclude>
     <ClInclude Include="src\sh2\sh2_disasm_link.h">
       <Filter>Fichiers sources\sh2</Filter>
+    </ClInclude>
+    <ClInclude Include="src\timer.h">
+      <Filter>Fichiers sources</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
