@@ -1368,7 +1368,7 @@ class Vdp2 {
                   const u32                 cell_address,
                   const ScreenOffset&       cell_offset);
 
-    void readCellTask();
+    void readCellTask(const ScrollScreenStatus& screen, const u32 cell_address, const size_t key);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn void Vdp2::saveCell(const ScrollScreenStatus& screen, const PatternNameData& pnd, const u32 cell_address, const
