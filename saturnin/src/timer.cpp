@@ -17,6 +17,7 @@
 // limitations under the License.
 //
 
+#include <saturnin/src/pch.h>
 #include <saturnin/src/timer.h>
 
 namespace saturnin::core {
@@ -25,7 +26,11 @@ void Timer::start() { start_time_ = std::chrono::steady_clock::now(); }
 
 void Timer::stop() { elapsed_time_ = std::chrono::steady_clock::now() - start_time_; }
 
-auto Timer::µs() { return (std::chrono::duration_cast<std::chrono::microseconds>(elapsed_time_)).count(); }
+[[nodiscard]] auto Timer::micros() const -> std::chrono::microseconds::rep {
+    return (std::chrono::duration_cast<std::chrono::microseconds>(elapsed_time_)).count();
+}
 
-auto Timer::ms() { return (std::chrono::duration_cast<std::chrono::milliseconds>(elapsed_time_)).count(); }
+[[nodiscard]] auto Timer::ms() const -> std::chrono::milliseconds::rep {
+    return (std::chrono::duration_cast<std::chrono::milliseconds>(elapsed_time_)).count();
+}
 } // namespace saturnin::core

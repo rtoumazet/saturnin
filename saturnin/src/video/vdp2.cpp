@@ -26,6 +26,7 @@
 #include <saturnin/src/config.h>
 #include <saturnin/src/interrupt_sources.h>
 #include <saturnin/src/scu_registers.h>
+#include <saturnin/src/timer.h>
 #include <saturnin/src/utilities.h> // toUnderlying
 #include <saturnin/src/video/opengl.h>
 #include <saturnin/src/video/texture.h>
@@ -3233,8 +3234,8 @@ void Vdp2::readScrollScreenData(const ScrollScreen s) {
     // vdp2_parts_[util::toUnderlying(s)].clear();
 
     if (screen.format == ScrollScreenFormat::cell) {
-        std::chrono::time_point<std::chrono::steady_clock> start_time = std::chrono::steady_clock::now();
-        std::chrono::duration<double>                      elapsed_time{};
+        core::Timer tmr;
+        tmr.start();
 
         std::vector<CellData>().swap(cell_data_to_process_);
         cell_data_to_process_.reserve(screen.cells_number);
@@ -3295,11 +3296,10 @@ void Vdp2::readScrollScreenData(const ScrollScreen s) {
         //    ThreadPool::pool_.wait_for_tasks();
         //}
 
-        elapsed_time = std::chrono::steady_clock::now() - start_time;
-        auto res     = (std::chrono::duration_cast<std::chrono::microseconds>(elapsed_time)).count();
+        tmr.stop();
 
         if (screen.scroll_screen == ScrollScreen::nbg3) {
-            core::Log::warning(Logger::vdp2, core::tr("Parallel read {} : {}µs"), screenName(screen.scroll_screen), res);
+            core::Log::warning(Logger::vdp2, core::tr("Parallel read {} : {}µs"), screenName(screen.scroll_screen), tmr.micros());
         }
 
     } else { // ScrollScreenFormat::bitmap
