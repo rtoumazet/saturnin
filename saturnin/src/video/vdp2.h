@@ -1368,7 +1368,11 @@ class Vdp2 {
                   const u32                 cell_address,
                   const ScreenOffset&       cell_offset);
 
-    void readCellTask(const ScrollScreenStatus& screen, const u32 cell_address, const size_t key);
+    void readCellMT(const ScrollScreenStatus& screen,
+                    const u16                 palette_number,
+                    const u32                 cell_address,
+                    const size_t              key,
+                    const std::span<const u8> vdp2_memory);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn void Vdp2::saveCell(const ScrollScreenStatus& screen, const PatternNameData& pnd, const u32 cell_address, const

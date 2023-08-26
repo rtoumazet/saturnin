@@ -27,6 +27,7 @@
 
 #include <algorithm>                    // count
 #include <functional>                   // hash
+#include <span>                         // span
 #include <string>                       // string
 #include <type_traits>                  // underlying_type_t
 #include <vector>                       // vector
@@ -255,4 +256,18 @@ struct Range {
     static bool contains(u32 i) { return addr.start <= i && i <= addr.end; }
 };
 
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \fn	inline auto readAs32(std::span<const u8> span) -> u32
+///
+/// \brief	Reads 4 contiguous u8 array elements as 32 bits data.
+///
+/// \author	Runik
+/// \date	25/08/2023
+///
+/// \param 	span	The span.
+///
+/// \returns	an uint32_t .
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+inline auto readAs32(std::span<const u8> span) -> u32 { return span[0] << 24 | span[1] << 16 | span[2] << 8 | span[3]; };
 } // namespace saturnin::utilities

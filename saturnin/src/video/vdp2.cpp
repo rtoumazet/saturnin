@@ -3296,6 +3296,8 @@ void Vdp2::readScrollScreenData(const ScrollScreen s) {
         //    ThreadPool::pool_.wait_for_tasks();
         //}
 
+        if (use_concurrent_read_for_cells) { ThreadPool::pool_.wait_for_tasks(); }
+
         tmr.stop();
 
         if (screen.scroll_screen == ScrollScreen::nbg3) {
@@ -3665,82 +3667,96 @@ void Vdp2::readCell(const ScrollScreenStatus& screen,
         = Texture::calculateKey(VdpType::vdp2, cell_address, toUnderlying(screen.character_color_number), pnd.palette_number);
 
     if (Texture::isTextureLoadingNeeded(key)) {
-        constexpr auto  texture_width  = u16{8};
-        constexpr auto  texture_height = u16{8};
-        constexpr auto  texture_size   = texture_width * texture_height * 4;
-        std::vector<u8> texture_data;
-        texture_data.reserve(texture_size);
-
-        if (ram_status_.color_ram_mode == Vdp2Regs::Ramctl::ColorRamMode::mode_2_rgb_8_bits_1024_colors) {
-            // 32 bits access to color RAM
-            switch (screen.character_color_number) {
-                using enum ColorCount;
-                case palette_16: {
-                    read16ColorsCellData<u32>(texture_data, screen, pnd.palette_number, cell_address);
-                    break;
-                }
-                case palette_256: {
-                    read256ColorsCellData<u32>(texture_data, screen, pnd.palette_number, cell_address);
-                    break;
-                }
-                case palette_2048: {
-                    read2048ColorsCellData<u32>(texture_data, screen, cell_address);
-                    break;
-                }
-                case rgb_32k: {
-                    read32KColorsCellData(texture_data, screen, cell_address);
-                    break;
-                }
-                case rgb_16m: {
-                    read16MColorsCellData(texture_data, screen, cell_address);
-                    break;
-                }
-                default: {
-                    Log::warning(Logger::vdp2, tr("Character color number invalid !"));
-                }
-            }
+        if (use_concurrent_read_for_cells) {
+            ThreadPool::pool_.push_task(&Vdp2::readCellMT,
+                                        this,
+                                        std::cref(screen),
+                                        pnd.palette_number,
+                                        cell_address,
+                                        key,
+                                        std::span{modules_.memory()->vdp2_vram_});
         } else {
-            // 16 bits access to color RAM
-            switch (screen.character_color_number) {
-                using enum ColorCount;
-                case palette_16: {
-                    read16ColorsCellData<u16>(texture_data, screen, pnd.palette_number, cell_address);
-                    break;
+            constexpr auto  texture_width  = u16{8};
+            constexpr auto  texture_height = u16{8};
+            constexpr auto  texture_size   = texture_width * texture_height * 4;
+            std::vector<u8> texture_data;
+            texture_data.reserve(texture_size);
+
+            if (ram_status_.color_ram_mode == Vdp2Regs::Ramctl::ColorRamMode::mode_2_rgb_8_bits_1024_colors) {
+                // 32 bits access to color RAM
+                switch (screen.character_color_number) {
+                    using enum ColorCount;
+                    case palette_16: {
+                        read16ColorsCellData<u32>(texture_data, screen, pnd.palette_number, cell_address);
+                        break;
+                    }
+                    case palette_256: {
+                        read256ColorsCellData<u32>(texture_data, screen, pnd.palette_number, cell_address);
+                        break;
+                    }
+                    case palette_2048: {
+                        read2048ColorsCellData<u32>(texture_data, screen, cell_address);
+                        break;
+                    }
+                    case rgb_32k: {
+                        read32KColorsCellData(texture_data, screen, cell_address);
+                        break;
+                    }
+                    case rgb_16m: {
+                        read16MColorsCellData(texture_data, screen, cell_address);
+                        break;
+                    }
+                    default: {
+                        Log::warning(Logger::vdp2, tr("Character color number invalid !"));
+                    }
                 }
-                case palette_256: {
-                    read256ColorsCellData<u16>(texture_data, screen, pnd.palette_number, cell_address);
-                    break;
-                }
-                case palette_2048: {
-                    read2048ColorsCellData<u16>(texture_data, screen, cell_address);
-                    break;
-                }
-                case rgb_32k: {
-                    read32KColorsCellData(texture_data, screen, cell_address);
-                    break;
-                }
-                case rgb_16m: {
-                    read16MColorsCellData(texture_data, screen, cell_address);
-                    break;
-                }
-                default: {
-                    Log::warning(Logger::vdp2, tr("Character color number invalid !"));
+            } else {
+                // 16 bits access to color RAM
+                switch (screen.character_color_number) {
+                    using enum ColorCount;
+                    case palette_16: {
+                        read16ColorsCellData<u16>(texture_data, screen, pnd.palette_number, cell_address);
+                        break;
+                    }
+                    case palette_256: {
+                        read256ColorsCellData<u16>(texture_data, screen, pnd.palette_number, cell_address);
+                        break;
+                    }
+                    case palette_2048: {
+                        read2048ColorsCellData<u16>(texture_data, screen, cell_address);
+                        break;
+                    }
+                    case rgb_32k: {
+                        read32KColorsCellData(texture_data, screen, cell_address);
+                        break;
+                    }
+                    case rgb_16m: {
+                        read16MColorsCellData(texture_data, screen, cell_address);
+                        break;
+                    }
+                    default: {
+                        Log::warning(Logger::vdp2, tr("Character color number invalid !"));
+                    }
                 }
             }
+            Texture::storeTexture(Texture(VdpType::vdp2,
+                                          cell_address,
+                                          toUnderlying(screen.character_color_number),
+                                          pnd.palette_number,
+                                          texture_data,
+                                          texture_width,
+                                          texture_height));
+            modules_.opengl()->addOrUpdateTexture(key);
         }
-        Texture::storeTexture(Texture(VdpType::vdp2,
-                                      cell_address,
-                                      toUnderlying(screen.character_color_number),
-                                      pnd.palette_number,
-                                      texture_data,
-                                      texture_width,
-                                      texture_height));
-        modules_.opengl()->addOrUpdateTexture(key);
     }
     saveCell(screen, pnd, cell_address, cell_offset, key);
 }
 
-void Vdp2::readCellTask(const ScrollScreenStatus& screen, const u32 cell_address, const size_t key) {
+void Vdp2::readCellMT(const ScrollScreenStatus& screen,
+                      const u16                 palette_number,
+                      const u32                 cell_address,
+                      const size_t              key,
+                      const std::span<const u8> vdp2_memory) {
     constexpr auto  texture_width  = u16{8};
     constexpr auto  texture_height = u16{8};
     constexpr auto  texture_size   = texture_width * texture_height * 4;
@@ -3752,11 +3768,11 @@ void Vdp2::readCellTask(const ScrollScreenStatus& screen, const u32 cell_address
         switch (screen.character_color_number) {
             using enum ColorCount;
             case palette_16: {
-                read16ColorsCellData<u32>(texture_data, screen, pnd.palette_number, cell_address);
+                read16ColorsCellData<u32>(texture_data, screen, palette_number, cell_address);
                 break;
             }
             case palette_256: {
-                read256ColorsCellData<u32>(texture_data, screen, pnd.palette_number, cell_address);
+                read256ColorsCellData<u32>(texture_data, screen, palette_number, cell_address);
                 break;
             }
             case palette_2048: {
@@ -3780,11 +3796,11 @@ void Vdp2::readCellTask(const ScrollScreenStatus& screen, const u32 cell_address
         switch (screen.character_color_number) {
             using enum ColorCount;
             case palette_16: {
-                read16ColorsCellData<u16>(texture_data, screen, pnd.palette_number, cell_address);
+                read16ColorsCellData<u16>(texture_data, screen, palette_number, cell_address);
                 break;
             }
             case palette_256: {
-                read256ColorsCellData<u16>(texture_data, screen, pnd.palette_number, cell_address);
+                read256ColorsCellData<u16>(texture_data, screen, palette_number, cell_address);
                 break;
             }
             case palette_2048: {
@@ -3807,7 +3823,7 @@ void Vdp2::readCellTask(const ScrollScreenStatus& screen, const u32 cell_address
     Texture::storeTexture(Texture(VdpType::vdp2,
                                   cell_address,
                                   toUnderlying(screen.character_color_number),
-                                  pnd.palette_number,
+                                  palette_number,
                                   texture_data,
                                   texture_width,
                                   texture_height));
