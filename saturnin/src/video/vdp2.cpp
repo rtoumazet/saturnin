@@ -19,10 +19,12 @@
 
 #include <saturnin/src/pch.h>
 #include <saturnin/src/video/vdp2.h>
+#include <any> // any
 #include <istream>
 #include <numeric> // accumulate
 #include <set>
 #include <unordered_set>
+#include <variant> // variant
 #include <saturnin/src/config.h>
 #include <saturnin/src/interrupt_sources.h>
 #include <saturnin/src/scu_registers.h>
@@ -3682,63 +3684,95 @@ void Vdp2::readCell(const ScrollScreenStatus& screen,
             std::vector<u8> texture_data;
             texture_data.reserve(texture_size);
 
-            if (ram_status_.color_ram_mode == Vdp2Regs::Ramctl::ColorRamMode::mode_2_rgb_8_bits_1024_colors) {
-                // 32 bits access to color RAM
-                switch (screen.character_color_number) {
-                    using enum ColorCount;
-                    case palette_16: {
-                        read16ColorsCellData<u32>(texture_data, screen, pnd.palette_number, cell_address);
-                        break;
-                    }
-                    case palette_256: {
-                        read256ColorsCellData<u32>(texture_data, screen, pnd.palette_number, cell_address);
-                        break;
-                    }
-                    case palette_2048: {
-                        read2048ColorsCellData<u32>(texture_data, screen, cell_address);
-                        break;
-                    }
-                    case rgb_32k: {
-                        read32KColorsCellData(texture_data, screen, cell_address);
-                        break;
-                    }
-                    case rgb_16m: {
-                        read16MColorsCellData(texture_data, screen, cell_address);
-                        break;
-                    }
-                    default: {
-                        Log::warning(Logger::vdp2, tr("Character color number invalid !"));
-                    }
+            std::variant<u32, u16> type = {1};
+            auto val = (ram_status_.color_ram_mode == Vdp2Regs::Ramctl::ColorRamMode::mode_2_rgb_8_bits_1024_colors)
+                           ? std::get<0>(type)
+                           : std::get<1>(type);
+
+            switch (screen.character_color_number) {
+                using enum ColorCount;
+                case palette_16: {
+                    read16ColorsCellData<decltype(val)>(texture_data, screen, pnd.palette_number, cell_address);
+                    break;
                 }
-            } else {
-                // 16 bits access to color RAM
-                switch (screen.character_color_number) {
-                    using enum ColorCount;
-                    case palette_16: {
-                        read16ColorsCellData<u16>(texture_data, screen, pnd.palette_number, cell_address);
-                        break;
-                    }
-                    case palette_256: {
-                        read256ColorsCellData<u16>(texture_data, screen, pnd.palette_number, cell_address);
-                        break;
-                    }
-                    case palette_2048: {
-                        read2048ColorsCellData<u16>(texture_data, screen, cell_address);
-                        break;
-                    }
-                    case rgb_32k: {
-                        read32KColorsCellData(texture_data, screen, cell_address);
-                        break;
-                    }
-                    case rgb_16m: {
-                        read16MColorsCellData(texture_data, screen, cell_address);
-                        break;
-                    }
-                    default: {
-                        Log::warning(Logger::vdp2, tr("Character color number invalid !"));
-                    }
+                case palette_256: {
+                    read256ColorsCellData<decltype(val)>(texture_data, screen, pnd.palette_number, cell_address);
+                    break;
+                }
+                case palette_2048: {
+                    read2048ColorsCellData<decltype(val)>(texture_data, screen, cell_address);
+                    break;
+                }
+                case rgb_32k: {
+                    read32KColorsCellData(texture_data, screen, cell_address);
+                    break;
+                }
+                case rgb_16m: {
+                    read16MColorsCellData(texture_data, screen, cell_address);
+                    break;
+                }
+                default: {
+                    Log::warning(Logger::vdp2, tr("Character color number invalid !"));
                 }
             }
+
+            // if (ram_status_.color_ram_mode == Vdp2Regs::Ramctl::ColorRamMode::mode_2_rgb_8_bits_1024_colors) {
+            //     // 32 bits access to color RAM
+            //     switch (screen.character_color_number) {
+            //         using enum ColorCount;
+            //         case palette_16: {
+            //             read16ColorsCellData<u32>(texture_data, screen, pnd.palette_number, cell_address);
+            //             break;
+            //         }
+            //         case palette_256: {
+            //             read256ColorsCellData<u32>(texture_data, screen, pnd.palette_number, cell_address);
+            //             break;
+            //         }
+            //         case palette_2048: {
+            //             read2048ColorsCellData<u32>(texture_data, screen, cell_address);
+            //             break;
+            //         }
+            //         case rgb_32k: {
+            //             read32KColorsCellData(texture_data, screen, cell_address);
+            //             break;
+            //         }
+            //         case rgb_16m: {
+            //             read16MColorsCellData(texture_data, screen, cell_address);
+            //             break;
+            //         }
+            //         default: {
+            //             Log::warning(Logger::vdp2, tr("Character color number invalid !"));
+            //         }
+            //     }
+            // } else {
+            //     // 16 bits access to color RAM
+            //     switch (screen.character_color_number) {
+            //         using enum ColorCount;
+            //         case palette_16: {
+            //             read16ColorsCellData<u16>(texture_data, screen, pnd.palette_number, cell_address);
+            //             break;
+            //         }
+            //         case palette_256: {
+            //             read256ColorsCellData<u16>(texture_data, screen, pnd.palette_number, cell_address);
+            //             break;
+            //         }
+            //         case palette_2048: {
+            //             read2048ColorsCellData<u16>(texture_data, screen, cell_address);
+            //             break;
+            //         }
+            //         case rgb_32k: {
+            //             read32KColorsCellData(texture_data, screen, cell_address);
+            //             break;
+            //         }
+            //         case rgb_16m: {
+            //             read16MColorsCellData(texture_data, screen, cell_address);
+            //             break;
+            //         }
+            //         default: {
+            //             Log::warning(Logger::vdp2, tr("Character color number invalid !"));
+            //         }
+            //     }
+            // }
             Texture::storeTexture(Texture(VdpType::vdp2,
                                           cell_address,
                                           toUnderlying(screen.character_color_number),
