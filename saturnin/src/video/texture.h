@@ -155,6 +155,8 @@ class Texture {
 
     static auto isTextureLoadingNeeded(const size_t key) -> bool;
 
+    static auto isTextureKeyStored(const size_t key) -> bool;
+
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn static auto Texture::calculateKey(const VdpType vp, const u32 address, const u8 color_count, const u16 palette_number
     /// = 0) -> size_t;

@@ -86,7 +86,7 @@ void Texture::deleteTextureData(Texture& t) {
 }
 
 auto Texture::isTextureLoadingNeeded(const size_t key) -> bool {
-    if (!texture_storage_.contains(key)) { return true; }
+    if (!isTextureKeyStored(key)) { return true; }
 
     if (auto t = Texture::getTexture(key); t) {
         if ((*t)->isDiscarded()) {
@@ -100,6 +100,11 @@ auto Texture::isTextureLoadingNeeded(const size_t key) -> bool {
     }
 
     return true;
+}
+
+auto Texture::isTextureKeyStored(const size_t key) -> bool {
+    ReadOnlyLock lock(storage_mutex_);
+    return texture_storage_.contains(key);
 }
 
 auto Texture::calculateKey(const VdpType vp, const u32 address, const u8 color_count, const u16 palette_number) -> size_t {

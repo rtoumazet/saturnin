@@ -40,6 +40,9 @@ namespace saturnin::core {
 
 class ThreadPool {
   public:
+    template<typename T>
+    using multi_future = BS::multi_future<T>;
+
     //@{
     // Constructors / Destructors
     ThreadPool()                                       = delete;

@@ -269,5 +269,5 @@ struct Range {
 /// \returns	an uint32_t .
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-inline auto readAs32(std::span<const u8> span) -> u32 { return span[0] << 24 | span[1] << 16 | span[2] << 8 | span[3]; };
+inline auto readAs32(const std::span<const u8> span) -> u32 { return span[0] << 24 | span[1] << 16 | span[2] << 8 | span[3]; };
 } // namespace saturnin::utilities

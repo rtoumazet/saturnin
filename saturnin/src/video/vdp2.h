@@ -47,6 +47,7 @@ class Scu;
 namespace saturnin::video {
 
 class Vdp1;
+class Texture;
 
 using saturnin::core::EmulatorContext;
 using saturnin::core::EmulatorModules;
@@ -1349,30 +1350,32 @@ class Vdp2 {
     void readCharacterPattern(const ScrollScreenStatus& screen, const PatternNameData& pnd, const ScreenOffset& cp_offset);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn void Vdp2::readCell(const ScrollScreenStatus& screen, const PatternNameData& pnd, const u32 cell_address, const
-    /// ScreenOffset& cell_offset);
+    /// \fn	void Vdp2::readCellDispatch(const ScrollScreenStatus& screen, const PatternNameData& pnd, const u32 cell_address,
+    /// const ScreenOffset& cell_offset);
     ///
-    /// \brief  Reads a cell
+    /// \brief	Reads a cell
     ///
-    /// \author Runik
-    /// \date   14/03/2021
+    /// \author	Runik
+    /// \date	14/03/2021
     ///
-    /// \param  screen          Current scroll screen status.
-    /// \param  pnd             The pattern name data.
-    /// \param  cell_address    The cell address.
-    /// \param  cell_offset     The cell offset, in cell units.
+    /// \param 	screen			Current scroll screen status.
+    /// \param 	pnd				The pattern name data.
+    /// \param 	cell_address	The cell address.
+    /// \param 	cell_offset 	The cell offset, in cell units.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    void readCell(const ScrollScreenStatus& screen,
-                  const PatternNameData&    pnd,
-                  const u32                 cell_address,
-                  const ScreenOffset&       cell_offset);
+    void readCellDispatch(const ScrollScreenStatus& screen,
+                          const PatternNameData&    pnd,
+                          const u32                 cell_address,
+                          const ScreenOffset&       cell_offset);
 
-    void readCellMT(const ScrollScreenStatus& screen,
+    void readCell(const ScrollScreenStatus& screen, const PatternNameData& pnd, const u32 cell_address, const size_t key);
+
+    auto readCellMT(const ScrollScreenStatus& screen,
                     const u16                 palette_number,
                     const u32                 cell_address,
                     const size_t              key,
-                    const std::span<const u8> vdp2_memory);
+                    const std::span<const u8> vram) -> Texture;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn void Vdp2::saveCell(const ScrollScreenStatus& screen, const PatternNameData& pnd, const u32 cell_address, const
@@ -1515,7 +1518,7 @@ class Vdp2 {
         constexpr auto row_offset      = u8{4};
         auto           current_address = vram_start_address + cell_address;
         auto           row             = DataExtraction{};
-        const auto     data            = modules_.memory()->read(core::MemoryMapArea::vdp2_video_ram, current_address, 0x40);
+        // const auto     data            = modules_.memory()->read(core::MemoryMapArea::vdp2_video_ram, current_address, 0x40);
         for (u32 i = 0; i < 8; ++i) {
             row.as_8bits = modules_.memory()->read<u32>(current_address);
             readPalette256Dot<T>(texture_data, screen, palette_number, row.as_8bits >> DataExtraction::As8Bits::dot0_shift);
@@ -1530,14 +1533,35 @@ class Vdp2 {
             readPalette256Dot<T>(texture_data, screen, palette_number, row.as_8bits >> DataExtraction::As8Bits::dot3_shift);
             current_address += row_offset;
         }
+    }
 
-        // for (const auto elem : data) {
-        //     row.as_8bits = elem;
-        //     readPalette256Dot<T>(texture_data, screen, palette_number, row.as_8bits >> DataExtraction::As8Bits::dot0_shift);
-        //     readPalette256Dot<T>(texture_data, screen, palette_number, row.as_8bits >> DataExtraction::As8Bits::dot1_shift);
-        //     readPalette256Dot<T>(texture_data, screen, palette_number, row.as_8bits >> DataExtraction::As8Bits::dot2_shift);
-        //     readPalette256Dot<T>(texture_data, screen, palette_number, row.as_8bits >> DataExtraction::As8Bits::dot3_shift);
-        // }
+    template<typename T>
+    void read256ColorsCellDataMT(std::vector<u8>&          texture_data,
+                                 const ScrollScreenStatus& screen,
+                                 const u16                 palette_number,
+                                 const u32                 cell_address,
+                                 const std::span<const u8> vram) {
+        constexpr auto row_offset      = u8{4};
+        auto           current_address = vram_start_address + cell_address;
+        auto           row             = DataExtraction{};
+        for (u32 i = 0; i < 8; ++i) {
+            auto addr = current_address & core::vdp2_vram_memory_mask;
+            // auto data    = u32{vram[addr + 0] << 24 | vram[addr + 1] << 16 | vram[addr + 2] << 8 | vram[addr + 3]};
+            // row.as_8bits = vram[addr + 0] << 24 | vram[addr + 1] << 16 | vram[addr + 2] << 8 | vram[addr + 3];
+            // row.as_8bits = modules_.memory()->read<u32>(current_address);
+            row.as_8bits = utilities::readAs32(vram.subspan(current_address & core::vdp2_vram_memory_mask, 4));
+            readPalette256Dot<T>(texture_data, screen, palette_number, row.as_8bits >> DataExtraction::As8Bits::dot0_shift);
+            readPalette256Dot<T>(texture_data, screen, palette_number, row.as_8bits >> DataExtraction::As8Bits::dot1_shift);
+            readPalette256Dot<T>(texture_data, screen, palette_number, row.as_8bits >> DataExtraction::As8Bits::dot2_shift);
+            readPalette256Dot<T>(texture_data, screen, palette_number, row.as_8bits >> DataExtraction::As8Bits::dot3_shift);
+            current_address += row_offset;
+            row.as_8bits = utilities::readAs32(vram.subspan(current_address & core::vdp2_vram_memory_mask, 4));
+            readPalette256Dot<T>(texture_data, screen, palette_number, row.as_8bits >> DataExtraction::As8Bits::dot0_shift);
+            readPalette256Dot<T>(texture_data, screen, palette_number, row.as_8bits >> DataExtraction::As8Bits::dot1_shift);
+            readPalette256Dot<T>(texture_data, screen, palette_number, row.as_8bits >> DataExtraction::As8Bits::dot2_shift);
+            readPalette256Dot<T>(texture_data, screen, palette_number, row.as_8bits >> DataExtraction::As8Bits::dot3_shift);
+            current_address += row_offset;
+        }
     }
 
     template<typename T>
@@ -1840,6 +1864,9 @@ class Vdp2 {
     void discardCache(const ScrollScreen screen) const;
 
     void calculateFps();
+
+    auto getVram() const -> std::span<const u8> { return std::span<const u8>{modules_.memory()->vdp2_vram_}; };
+    auto getCram() const -> std::span<const u8> { return std::span<const u8>{modules_.memory()->vdp2_cram_}; };
 
     EmulatorModules modules_;
 
