@@ -965,7 +965,8 @@ class Vdp2 {
     auto isScreenDisplayLimitedByReduction(ScrollScreen s) const -> bool;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn	auto Vdp2::getVramAccessByCommand(const Vdp2Regs::VramAccessCommand command, const ReductionSetting reduction) -> u8;
+    /// \fn	auto Vdp2::getVramAccessByCommand(const Vdp2Regs::VramAccessCommand command, const ReductionSetting reduction) const
+    /// -> u8;
     ///
     /// \brief	Gets VRAM access corresponding to the command taking into account limitations.
     ///
@@ -978,7 +979,7 @@ class Vdp2 {
     /// \returns	Number of VRAM access for the command.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    auto getVramAccessByCommand(const Vdp2Regs::VramAccessCommand command, const ReductionSetting reduction) -> u8;
+    auto getVramAccessByCommand(const Vdp2Regs::VramAccessCommand command, const ReductionSetting reduction) const -> u8;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn	auto Vdp2::getVramBitmapReads(const VramTiming& bank_a0, const VramTiming& bank_a1, const VramTiming& bank_b0, const
@@ -1371,11 +1372,11 @@ class Vdp2 {
 
     void readCell(const ScrollScreenStatus& screen, const PatternNameData& pnd, const u32 cell_address, const size_t key);
 
-    auto readCellMT(const ScrollScreenStatus& screen,
+    void readCellMT(const ScrollScreenStatus& screen,
                     const u16                 palette_number,
                     const u32                 cell_address,
                     const size_t              key,
-                    const std::span<const u8> vram) -> Texture;
+                    const std::span<const u8> vram);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn void Vdp2::saveCell(const ScrollScreenStatus& screen, const PatternNameData& pnd, const u32 cell_address, const

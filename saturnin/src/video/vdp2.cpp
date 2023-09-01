@@ -45,17 +45,13 @@ using core::EmulatorContext;
 using core::Log;
 using core::Logger;
 using core::tr;
-// using core::ScuRegs::Dxmd::StartingFactorSelect;
-using util::toUnderlying;
 
-using LockGuard = std::lock_guard<Mutex>;
+using util::toUnderlying;
 
 constexpr auto use_concurrent_read_for_cells = bool{true};
 constexpr auto vdp2_vram_4mb_mask            = u16{0x3FFF};
 constexpr auto vdp2_vram_8mb_mask            = u16{0x7FFF};
 constexpr auto bits_in_a_byte                = u8{8};
-
-static ThreadPool::multi_future<Texture> textures_mf; ///< Multifuture holding textures after parallelized read.
 
 //--------------------------------------------------------------------------------------------------------------
 // PUBLIC section
@@ -1836,12 +1832,10 @@ auto Vdp2::isScreenDisplayLimitedByReduction(ScrollScreen s) const -> bool {
 }
 
 // NOLINTNEXTLINE(readability-convert-member-functions-to-static)
-auto Vdp2::getVramAccessByCommand(const Vdp2Regs::VramAccessCommand command, const ReductionSetting reduction) -> u8 {
-    constexpr auto vram_timing_size = u8{8};
-    using VramTiming                = std::array<Vdp2Regs::VramAccessCommand, vram_timing_size>;
-    using Tvmd                      = Vdp2Regs::Tvmd;
-    using Cycxxl                    = Vdp2Regs::Cycxxl;
-    using Cycxxu                    = Vdp2Regs::Cycxxu;
+auto Vdp2::getVramAccessByCommand(const Vdp2Regs::VramAccessCommand command, const ReductionSetting reduction) const -> u8 {
+    using Tvmd   = Vdp2Regs::Tvmd;
+    using Cycxxl = Vdp2Regs::Cycxxl;
+    using Cycxxu = Vdp2Regs::Cycxxu;
 
     auto is_normal_mode = ((regs_.tvmd >> Tvmd::hreso_enum) == Tvmd::HorizontalResolution::normal_320);
     is_normal_mode |= ((regs_.tvmd >> Tvmd::hreso_enum) == Tvmd::HorizontalResolution::normal_352);
@@ -3285,31 +3279,17 @@ void Vdp2::readScrollScreenData(const ScrollScreen s) {
             readPlaneData(screen, addr, offset);
         }
 
-        // if constexpr (use_concurrent_read_for_cells) {
-        //     // Getting all cell data values in order to parallelize their read.
-
-        //    constexpr auto chunk_size = u32{0x400};
-        //    for (u32 current = 0; current < cell_data_to_process_.size(); current += chunk_size) {
-        //        ThreadPool::pool_.push_task(&Vdp2::concurrentMultiReadCell,
-        //                                    this,
-        //                                    screen,
-        //                                    cell_data_to_process_.begin() + current,
-        //                                    cell_data_to_process_.begin() + current + chunk_size);
-        //    }
-
-        //    ThreadPool::pool_.wait_for_tasks();
-        //}
-
         if (use_concurrent_read_for_cells) {
             ThreadPool::pool_.wait_for_tasks();
-            // Texture::storeTexture(Texture(VdpType::vdp2,
-            //                               cell_address,
-            //                               static_cast<u8>(toUnderlying(screen.character_color_number)),
-            //                               palette_number,
-            //                               texture_data,
-            //                               texture_width,
-            //                               texture_height));
-            // modules_.opengl()->addOrUpdateTexture(key);
+
+            // try {
+            //     textures_mf.wait();
+            //     auto v = textures_mf.get();
+            //     for (const auto& t : v) {
+            //         Texture::storeTexture(t);
+            //         modules_.opengl()->addOrUpdateTexture(t.key());
+            //     }
+            // } catch (const std::exception& e) { core::Log::warning(Logger::vdp2, "Exception: {}", e.what()); }
         }
 
         tmr.stop();
@@ -3689,13 +3669,13 @@ void Vdp2::readCellDispatch(const ScrollScreenStatus& screen,
             //                             cell_address,
             //                             key,
             //                             std::span<const u8>{modules_.memory()->vdp2_vram_});
-            textures_mf.push_back(ThreadPool::pool_.submit(&Vdp2::readCellMT,
-                                                           this,
-                                                           std::cref(screen),
-                                                           pnd.palette_number,
-                                                           cell_address,
-                                                           key,
-                                                           std::span<const u8>{modules_.memory()->vdp2_vram_}));
+            ThreadPool::pool_.push_task(&Vdp2::readCellMT,
+                                        this,
+                                        std::cref(screen),
+                                        pnd.palette_number,
+                                        cell_address,
+                                        key,
+                                        std::span<const u8>{modules_.memory()->vdp2_vram_});
             // core::Log::warning(Logger::vdp2,
             //                    "{} tasks total, {} tasks running, {} tasks queued",
             //                    ThreadPool::pool_.get_tasks_total(),
@@ -3766,11 +3746,11 @@ void Vdp2::readCell(const ScrollScreenStatus& screen, const PatternNameData& pnd
     modules_.opengl()->addOrUpdateTexture(key);
 }
 
-auto Vdp2::readCellMT(const ScrollScreenStatus& screen,
+void Vdp2::readCellMT(const ScrollScreenStatus& screen,
                       const u16                 palette_number,
                       const u32                 cell_address,
                       const size_t              key,
-                      const std::span<const u8> vram) -> Texture {
+                      const std::span<const u8> vram) {
     constexpr auto  texture_width  = u16{8};
     constexpr auto  texture_height = u16{8};
     constexpr auto  texture_size   = texture_width * texture_height * 4;
@@ -3821,22 +3801,22 @@ auto Vdp2::readCellMT(const ScrollScreenStatus& screen,
             Log::warning(Logger::vdp2, tr("Character color number invalid !"));
         }
     }
-    // Texture::storeTexture(Texture(VdpType::vdp2,
-    //                               cell_address,
-    //                               static_cast<u8>(toUnderlying(screen.character_color_number)),
-    //                               palette_number,
-    //                               texture_data,
-    //                               texture_width,
-    //                               texture_height));
-    // modules_.opengl()->addOrUpdateTexture(key);
+    Texture::storeTexture(Texture(VdpType::vdp2,
+                                  cell_address,
+                                  static_cast<u8>(toUnderlying(screen.character_color_number)),
+                                  palette_number,
+                                  texture_data,
+                                  texture_width,
+                                  texture_height));
+    modules_.opengl()->addOrUpdateTexture(key);
 
-    return Texture(VdpType::vdp2,
-                   cell_address,
-                   static_cast<u8>(toUnderlying(screen.character_color_number)),
-                   palette_number,
-                   texture_data,
-                   texture_width,
-                   texture_height);
+    // return Texture(VdpType::vdp2,
+    //                cell_address,
+    //                static_cast<u8>(toUnderlying(screen.character_color_number)),
+    //                palette_number,
+    //                texture_data,
+    //                texture_width,
+    //                texture_height);
 }
 
 // NOLINTNEXTLINE(readability-convert-member-functions-to-static)
@@ -3853,7 +3833,6 @@ void Vdp2::saveCell(const ScrollScreenStatus& screen,
     pos.x -= screen.scroll_offset_horizontal;
     pos.y -= screen.scroll_offset_vertical;
 
-    //  LockGuard lock(vdp2_parts_mutex_);
     vdp2_parts_[util::toUnderlying(screen.scroll_screen)].emplace_back(pnd,
                                                                        pos,
                                                                        key,
