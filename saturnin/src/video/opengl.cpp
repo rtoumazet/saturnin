@@ -19,13 +19,13 @@
 
 #include <saturnin/src/pch.h>
 #include <saturnin/src/video/opengl.h>
-#include <Windows.h>  // removes C4005 warning
+#include <Windows.h> // removes C4005 warning
 #include <algorithm>
 #include <fstream>    // ifstream
 #include <filesystem> // filesystem
 #include <iostream>   // cout
 #include <lodepng.h>
-#include <sstream>    // stringstream
+#include <sstream> // stringstream
 #include <glbinding/glbinding.h>
 // #include <glbinding/gl/gl.h>
 #include <glbinding/Version.h>
@@ -42,7 +42,7 @@
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
 #include <saturnin/src/config.h>
-#include <saturnin/src/locale.h>    // tr
+#include <saturnin/src/locale.h> // tr
 #include <saturnin/src/log.h>
 #include <saturnin/src/utilities.h> // format
 #include <saturnin/src/video/gui.h>
@@ -315,11 +315,9 @@ void Opengl::displayFramebuffer(core::EmulatorContext& state) {
     if (!state.vdp2()->isLayerDisabled(ScrollScreen::rbg0)) { addVdp2PartsToList(ScrollScreen::rbg0); };
     if (!state.vdp2()->isLayerDisabled(ScrollScreen::rbg1)) { addVdp2PartsToList(ScrollScreen::rbg1); };
     addVdp1PartsToList();
-    std::sort(parts_list.begin(),
-              parts_list.end(),
-              [](const std::unique_ptr<BaseRenderingPart>& a, const std::unique_ptr<BaseRenderingPart>& b) {
-                  return a->priority() < b->priority();
-              });
+    std::ranges::sort(parts_list, [](const std::unique_ptr<BaseRenderingPart>& a, const std::unique_ptr<BaseRenderingPart>& b) {
+        return a->priority() < b->priority();
+    });
 
     if (parts_list_.empty()) {
         std::unique_lock lk(parts_list_mutex_);

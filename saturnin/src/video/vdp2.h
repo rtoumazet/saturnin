@@ -55,10 +55,9 @@ using saturnin::core::Log;
 using saturnin::core::Logger;
 using saturnin::core::ThreadPool;
 
-using namespace std::chrono;
-using seconds = duration<double>;
-using milli   = duration<double, std::milli>;
-using micro   = duration<double, std::micro>;
+using seconds = std::chrono::duration<double>;
+using milli   = std::chrono::duration<double, std::milli>;
+using micro   = std::chrono::duration<double, std::micro>;
 
 constexpr auto vram_banks_number  = u8{4};
 constexpr auto vram_bank_a0_index = u8{0};
@@ -794,6 +793,19 @@ class Vdp2 {
         return Color(modules_.memory()->read<T>(color_address));
     };
 
+    template<typename T>
+    auto readColor(const u32 color_address, std::span<const u8> cram) -> Color {
+        return Color(0);
+    };
+    template<>
+    auto readColor<u16>(const u32 color_address, std::span<const u8> cram) -> Color {
+        return Color(utilities::readAs16(cram.subspan(color_address & core::vdp2_cram_memory_mask, 2)));
+    };
+    template<>
+    auto readColor<u32>(const u32 color_address, std::span<const u8> cram) -> Color {
+        return Color(utilities::readAs32(cram.subspan(color_address & core::vdp2_cram_memory_mask, 4)));
+    };
+
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn void Vdp2::clearRenderData(const ScrollScreen s);
     ///
@@ -1376,7 +1388,8 @@ class Vdp2 {
                     const u16                 palette_number,
                     const u32                 cell_address,
                     const size_t              key,
-                    const std::span<const u8> vram);
+                    const std::span<const u8> vram,
+                    const std::span<const u8> cram);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn void Vdp2::saveCell(const ScrollScreenStatus& screen, const PatternNameData& pnd, const u32 cell_address, const
@@ -1434,6 +1447,21 @@ class Vdp2 {
         const auto local_palette = (palette_number & 0xf0) << 4;
         const auto color_address = u32{cram_start_address + screen.color_ram_address_offset | (local_palette | dot) * sizeof(T)};
         auto       color         = readColor<T>(color_address);
+
+        if (!dot && screen.is_transparency_code_valid) color.a = 0;
+
+        texture_data.insert(texture_data.end(), {color.r, color.g, color.b, color.a});
+    };
+
+    template<typename T>
+    void readPalette256Dot(std::vector<u8>&          texture_data,
+                           const ScrollScreenStatus& screen,
+                           const u16                 palette_number,
+                           const u8                  dot,
+                           const std::span<const u8> cram) {
+        const auto local_palette = (palette_number & 0xf0) << 4;
+        const auto color_address = u32{cram_start_address + screen.color_ram_address_offset | (local_palette | dot) * sizeof(T)};
+        auto       color         = readColor<T>(color_address, cram);
 
         if (!dot && screen.is_transparency_code_valid) color.a = 0;
 
@@ -1541,26 +1569,24 @@ class Vdp2 {
                                  const ScrollScreenStatus& screen,
                                  const u16                 palette_number,
                                  const u32                 cell_address,
-                                 const std::span<const u8> vram) {
+                                 const std::span<const u8> vram,
+                                 const std::span<const u8> cram) {
         constexpr auto row_offset      = u8{4};
         auto           current_address = vram_start_address + cell_address;
         auto           row             = DataExtraction{};
         for (u32 i = 0; i < 8; ++i) {
-            auto addr = current_address & core::vdp2_vram_memory_mask;
-            // auto data    = u32{vram[addr + 0] << 24 | vram[addr + 1] << 16 | vram[addr + 2] << 8 | vram[addr + 3]};
-            // row.as_8bits = vram[addr + 0] << 24 | vram[addr + 1] << 16 | vram[addr + 2] << 8 | vram[addr + 3];
-            // row.as_8bits = modules_.memory()->read<u32>(current_address);
+            // auto addr    = current_address & core::vdp2_vram_memory_mask;
             row.as_8bits = utilities::readAs32(vram.subspan(current_address & core::vdp2_vram_memory_mask, 4));
-            readPalette256Dot<T>(texture_data, screen, palette_number, row.as_8bits >> DataExtraction::As8Bits::dot0_shift);
-            readPalette256Dot<T>(texture_data, screen, palette_number, row.as_8bits >> DataExtraction::As8Bits::dot1_shift);
-            readPalette256Dot<T>(texture_data, screen, palette_number, row.as_8bits >> DataExtraction::As8Bits::dot2_shift);
-            readPalette256Dot<T>(texture_data, screen, palette_number, row.as_8bits >> DataExtraction::As8Bits::dot3_shift);
+            readPalette256Dot<T>(texture_data, screen, palette_number, row.as_8bits >> DataExtraction::As8Bits::dot0_shift, cram);
+            readPalette256Dot<T>(texture_data, screen, palette_number, row.as_8bits >> DataExtraction::As8Bits::dot1_shift, cram);
+            readPalette256Dot<T>(texture_data, screen, palette_number, row.as_8bits >> DataExtraction::As8Bits::dot2_shift, cram);
+            readPalette256Dot<T>(texture_data, screen, palette_number, row.as_8bits >> DataExtraction::As8Bits::dot3_shift, cram);
             current_address += row_offset;
             row.as_8bits = utilities::readAs32(vram.subspan(current_address & core::vdp2_vram_memory_mask, 4));
-            readPalette256Dot<T>(texture_data, screen, palette_number, row.as_8bits >> DataExtraction::As8Bits::dot0_shift);
-            readPalette256Dot<T>(texture_data, screen, palette_number, row.as_8bits >> DataExtraction::As8Bits::dot1_shift);
-            readPalette256Dot<T>(texture_data, screen, palette_number, row.as_8bits >> DataExtraction::As8Bits::dot2_shift);
-            readPalette256Dot<T>(texture_data, screen, palette_number, row.as_8bits >> DataExtraction::As8Bits::dot3_shift);
+            readPalette256Dot<T>(texture_data, screen, palette_number, row.as_8bits >> DataExtraction::As8Bits::dot0_shift, cram);
+            readPalette256Dot<T>(texture_data, screen, palette_number, row.as_8bits >> DataExtraction::As8Bits::dot1_shift, cram);
+            readPalette256Dot<T>(texture_data, screen, palette_number, row.as_8bits >> DataExtraction::As8Bits::dot2_shift, cram);
+            readPalette256Dot<T>(texture_data, screen, palette_number, row.as_8bits >> DataExtraction::As8Bits::dot3_shift, cram);
             current_address += row_offset;
         }
     }

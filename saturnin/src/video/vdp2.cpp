@@ -48,10 +48,12 @@ using core::tr;
 
 using util::toUnderlying;
 
-constexpr auto use_concurrent_read_for_cells = bool{true};
+constexpr auto use_concurrent_read_for_cells = bool{false};
 constexpr auto vdp2_vram_4mb_mask            = u16{0x3FFF};
 constexpr auto vdp2_vram_8mb_mask            = u16{0x7FFF};
 constexpr auto bits_in_a_byte                = u8{8};
+
+static std::vector<long long> measures;
 
 //--------------------------------------------------------------------------------------------------------------
 // PUBLIC section
@@ -3295,7 +3297,13 @@ void Vdp2::readScrollScreenData(const ScrollScreen s) {
         tmr.stop();
 
         if (screen.scroll_screen == ScrollScreen::nbg3) {
-            core::Log::warning(Logger::vdp2, core::tr("Parallel read {} : {}µs"), screenName(screen.scroll_screen), tmr.micros());
+            measures.push_back(tmr.micros());
+            auto avg = std::accumulate(measures.begin(), measures.end(), static_cast<long long>(0)) / measures.size();
+            core::Log::warning(Logger::vdp2,
+                               core::tr("Parallel read {} : {}µs, Moy : {}µs"),
+                               screenName(screen.scroll_screen),
+                               tmr.micros(),
+                               avg);
         }
 
     } else { // ScrollScreenFormat::bitmap
@@ -3564,7 +3572,7 @@ void Vdp2::readPageData(const ScrollScreenStatus& screen, const u32 page_address
 
     const auto isEndOfRowReached = [](const std::vector<u32>& modulos, const u32 val) {
         // Value 0 isn't added to the vector.
-        return std::any_of(modulos.begin(), modulos.end(), [&](const u32 m) { return m == val; });
+        return std::ranges::any_of(modulos, [&](const u32 m) { return m == val; });
     };
 
     const auto character_number_mask
@@ -3675,7 +3683,8 @@ void Vdp2::readCellDispatch(const ScrollScreenStatus& screen,
                                         pnd.palette_number,
                                         cell_address,
                                         key,
-                                        std::span<const u8>{modules_.memory()->vdp2_vram_});
+                                        std::span<const u8>{modules_.memory()->vdp2_vram_},
+                                        std::span<const u8>{modules_.memory()->vdp2_cram_});
             // core::Log::warning(Logger::vdp2,
             //                    "{} tasks total, {} tasks running, {} tasks queued",
             //                    ThreadPool::pool_.get_tasks_total(),
@@ -3750,7 +3759,8 @@ void Vdp2::readCellMT(const ScrollScreenStatus& screen,
                       const u16                 palette_number,
                       const u32                 cell_address,
                       const size_t              key,
-                      const std::span<const u8> vram) {
+                      const std::span<const u8> vram,
+                      const std::span<const u8> cram) {
     constexpr auto  texture_width  = u16{8};
     constexpr auto  texture_height = u16{8};
     constexpr auto  texture_size   = texture_width * texture_height * 4;
@@ -3774,7 +3784,7 @@ void Vdp2::readCellMT(const ScrollScreenStatus& screen,
                 read256ColorsCellData<u32>(texture_data, screen, palette_number, cell_address);
             } else {
                 if (use_concurrent_read_for_cells) {
-                    read256ColorsCellDataMT<u16>(texture_data, screen, palette_number, cell_address, vram);
+                    read256ColorsCellDataMT<u16>(texture_data, screen, palette_number, cell_address, vram, cram);
                 } else {
                     read256ColorsCellData<u16>(texture_data, screen, palette_number, cell_address);
                 }
@@ -3809,14 +3819,6 @@ void Vdp2::readCellMT(const ScrollScreenStatus& screen,
                                   texture_width,
                                   texture_height));
     modules_.opengl()->addOrUpdateTexture(key);
-
-    // return Texture(VdpType::vdp2,
-    //                cell_address,
-    //                static_cast<u8>(toUnderlying(screen.character_color_number)),
-    //                palette_number,
-    //                texture_data,
-    //                texture_width,
-    //                texture_height);
 }
 
 // NOLINTNEXTLINE(readability-convert-member-functions-to-static)
