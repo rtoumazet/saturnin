@@ -839,11 +839,11 @@ void Opengl::generateTextures() {
     // 2. For each Texture
 
     auto local_textures_link = TexturesLink();
-    { local_textures_link = textures_link_; }
+    local_textures_link      = textures_link_;
 
     auto textures = std::vector<OpenglTexture>();
     textures.reserve(local_textures_link.size());
-    for (auto& [key, ogl_tex] : local_textures_link) {
+    for (const auto& [key, ogl_tex] : local_textures_link) {
         const auto t = Texture::getTexture(key);
 
         auto opengl_tex = getOpenglTexture(key);
@@ -1074,7 +1074,7 @@ auto Opengl::createProgramShader(const u32 vertex_shader, const u32 fragment_sha
 }
 
 // static
-void Opengl::deleteShaders(std::vector<u32> shaders) {
+void Opengl::deleteShaders(const std::vector<u32>& shaders) {
     for (auto shader : shaders) {
         glDeleteShader(shader);
     }

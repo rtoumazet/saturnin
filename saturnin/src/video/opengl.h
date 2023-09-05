@@ -27,10 +27,10 @@
 
 #include <Windows.h> // removes C4005 warning
 #include <imgui.h>
-#include <map>       // map
-#include <mutex>     // mutex
-#include <string>    // string
-#include <tuple>     // tuple
+#include <map>    // map
+#include <mutex>  // mutex
+#include <string> // string
+#include <tuple>  // tuple
 #include <glm/mat4x4.hpp>
 #include <saturnin/src/emulator_defs.h>
 #include <saturnin/src/video/vdp1_part.h> // Vdp1Part
@@ -257,17 +257,17 @@ class Opengl {
     static auto createProgramShader(u32 vertex_shader, u32 fragment_shader) -> u32;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn static void Opengl::deleteShaders(std::vector<u32> shaders);
+    /// \fn	static void Opengl::deleteShaders(const std::vector<u32>& shaders);
     ///
-    /// \brief  Deletes the shaders.
+    /// \brief	Deletes the shaders.
     ///
-    /// \author Runik
-    /// \date   26/04/2021
+    /// \author	Runik
+    /// \date	26/04/2021
     ///
-    /// \param  shaders The shaders to delete.
+    /// \param 	shaders	The shaders to delete.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    static void deleteShaders(std::vector<u32> shaders);
+    static void deleteShaders(const std::vector<u32>& shaders);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn static auto Opengl::generateTexture(u32 width, u32 height, const std::vector<u8>& data) -> u32;
@@ -598,18 +598,18 @@ class Opengl {
 
     void generateSubTexture(const size_t key);
 
-    core::Config* config_;                        ///< Configuration object.
+    core::Config* config_; ///< Configuration object.
 
-    FboList fbo_list_;                            ///< List of framebuffer objects used in the program.
-    FboType current_rendered_buffer_;             ///< The current rendered buffer (front or back)
+    FboList fbo_list_;                ///< List of framebuffer objects used in the program.
+    FboType current_rendered_buffer_; ///< The current rendered buffer (front or back)
 
-    bool is_legacy_opengl_{};                     ///< True if rendering in legacy opengl.
+    bool is_legacy_opengl_{}; ///< True if rendering in legacy opengl.
 
     ScreenResolution saturn_screen_resolution_{}; ///< Saturn screen resolution.
     ScreenResolution host_screen_resolution_{};   ///< Host screen resolution.
 
-    PartsList parts_list_;                        // Will have to be moved to the platform agnostic renderer.
-    Vdp1Part  part_to_highlight_;                 ///< Part that will be highlighted during debug.
+    PartsList parts_list_;        // Will have to be moved to the platform agnostic renderer.
+    Vdp1Part  part_to_highlight_; ///< Part that will be highlighted during debug.
 
     u32          texture_array_id_;               ///< Identifier for the texture array.
     TexturesLink textures_link_;                  ///< Link between the Texture key and the OpenglTexture.
@@ -618,19 +618,19 @@ class Opengl {
 
     // std::vector<u32> textures_to_delete_; ///< List of the textures id to delete.
 
-    std::mutex parts_list_mutex_;            ///< Mutex protecting parts_list_.
-    std::mutex textures_link_mutex_;         ///< Mutex protecting textures_link_.
-    std::mutex texture_delete_mutex_;        ///< Mutex protecting textures_to_delete_.
+    std::mutex parts_list_mutex_;     ///< Mutex protecting parts_list_.
+    std::mutex textures_link_mutex_;  ///< Mutex protecting textures_link_.
+    std::mutex texture_delete_mutex_; ///< Mutex protecting textures_to_delete_.
 
     std::condition_variable data_condition_; ///< Condition variable to synchronize between emulation and UI thread.
 
-    PartsList parts_list_debug_;             ///< List of parts used to generate textures for debugging
-                                             // Will have to be moved to the platform agnostic renderer.
+    PartsList parts_list_debug_; ///< List of parts used to generate textures for debugging
+                                 // Will have to be moved to the platform agnostic renderer.
 
-    u32         program_shader_;             ///< Program shader used to render parts.
-    ShadersList shaders_list_;               ///< List of shaders.
+    u32         program_shader_; ///< Program shader used to render parts.
+    ShadersList shaders_list_;   ///< List of shaders.
 
-    std::string fps_;                        ///< The frames per second.
+    std::string fps_; ///< The frames per second.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
