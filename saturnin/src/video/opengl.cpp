@@ -45,6 +45,7 @@
 #include <saturnin/src/locale.h> // tr
 #include <saturnin/src/log.h>
 #include <saturnin/src/utilities.h> // format
+#include <saturnin/src/timer.h>     // Timer
 #include <saturnin/src/video/gui.h>
 #include <saturnin/src/video/texture.h>
 #include <saturnin/src/video/vdp_common.h>
@@ -595,22 +596,18 @@ void Opengl::render() {
 auto Opengl::getVertexesNumberByDrawType(const PartsList& parts_list) const -> u64 {
     auto batch_vertex_size = u64{};
 
-    batch_vertex_size = std::count_if(parts_list.begin(),
-                                      parts_list.end(),
-                                      [](const auto& p) { return p->drawType() == DrawType::textured_polygon; })
-                        * vertexes_per_tessellated_quad;
-    batch_vertex_size += std::count_if(parts_list.begin(),
-                                       parts_list.end(),
-                                       [](const auto& p) { return p->drawType() == DrawType::non_textured_polygon; })
-                         * vertexes_per_tessellated_quad;
+    batch_vertex_size
+        = std::ranges::count_if(parts_list, [](const auto& p) { return p->drawType() == DrawType::textured_polygon; })
+          * vertexes_per_tessellated_quad;
+    batch_vertex_size
+        += std::ranges::count_if(parts_list, [](const auto& p) { return p->drawType() == DrawType::non_textured_polygon; })
+           * vertexes_per_tessellated_quad;
+
+    batch_vertex_size += std::ranges::count_if(parts_list, [](const auto& p) { return p->drawType() == DrawType::polyline; })
+                         * vertexes_per_polyline;
 
     batch_vertex_size
-        += std::count_if(parts_list.begin(), parts_list.end(), [](const auto& p) { return p->drawType() == DrawType::polyline; })
-           * vertexes_per_polyline;
-
-    batch_vertex_size
-        += std::count_if(parts_list.begin(), parts_list.end(), [](const auto& p) { return p->drawType() == DrawType::line; })
-           * vertexes_per_line;
+        += std::ranges::count_if(parts_list, [](const auto& p) { return p->drawType() == DrawType::line; }) * vertexes_per_line;
 
     return batch_vertex_size;
 }
@@ -838,6 +835,9 @@ void Opengl::generateTextures() {
     // 1. Loop on the Textures
     // 2. For each Texture
 
+    core::Timer tmr;
+
+    tmr.start();
     auto local_textures_link = TexturesLink();
     local_textures_link      = textures_link_;
 
@@ -850,8 +850,14 @@ void Opengl::generateTextures() {
         if (opengl_tex) { (*opengl_tex).size = {(**t).width(), (**t).height()}; }
         textures.push_back(*opengl_tex);
     }
+    tmr.stop();
 
+    Log::info(Logger::opengl, "generateTextures() : {}ms", tmr.ms());
+
+    tmr.start();
     packTextures(textures);
+    tmr.stop();
+    Log::info(Logger::opengl, "packTextures() : {}ms", tmr.ms());
 }
 
 // Using the simplest (and fastest) method to pack textures in the atlas. Better algorithms could be used to
@@ -874,9 +880,7 @@ void Opengl::packTextures(std::vector<OpenglTexture>& textures) {
                         empty_data.data());
     }
 
-    std::sort(textures.begin(), textures.end(), [](const OpenglTexture& a, const OpenglTexture& b) {
-        return a.size.h > b.size.h;
-    });
+    std::ranges::sort(textures, [](const OpenglTexture& a, const OpenglTexture& b) { return a.size.h > b.size.h; });
 
     auto current_layer          = u16{};
     auto x_pos                  = u16{};
