@@ -3082,12 +3082,12 @@ auto Vdp2::calculatePlaneStartAddress(const ScrollScreen s, const u32 map_addr) 
     constexpr auto multiplier_8000  = u32{0x8000};
     constexpr auto multiplier_10000 = u32{0x10000};
 
-    auto&      screen                 = getScreen(s);
-    const auto is_vram_size_4mb       = (regs_.vrsize >> Vrsize::vramsz_enum) == Vrsize::VramSize::size_4_mbits;
-    auto       plane_size             = Plsz::PlaneSize{};
-    auto       pattern_name_data_size = Pcnxx::PatternNameDataSize{};
-    auto       character_size         = Vdp2Regs::CharacterSize{};
-    auto       start_address          = u32{screen.map_offset << 6 | map_addr};
+    const auto& screen                 = getScreen(s);
+    const auto  is_vram_size_4mb       = (regs_.vrsize >> Vrsize::vramsz_enum) == Vrsize::VramSize::size_4_mbits;
+    auto        plane_size             = Plsz::PlaneSize{};
+    auto        pattern_name_data_size = Pcnxx::PatternNameDataSize{};
+    auto        character_size         = Vdp2Regs::CharacterSize{};
+    auto        start_address          = u32{screen.map_offset << 6 | map_addr};
 
     switch (s) {
         using enum ScrollScreen;
@@ -3424,6 +3424,7 @@ void Vdp2::readBitmapData(const ScrollScreenStatus& screen) {
             }
         }
         Texture::storeTexture(Texture(VdpType::vdp2,
+                                      scrollScreenToLayer(screen.scroll_screen),
                                       screen.bitmap_start_address,
                                       toUnderlying(screen.character_color_number),
                                       screen.bitmap_palette_number,
@@ -3746,6 +3747,7 @@ void Vdp2::readCell(const ScrollScreenStatus& screen, const PatternNameData& pnd
     }
 
     Texture::storeTexture(Texture(VdpType::vdp2,
+                                  scrollScreenToLayer(screen.scroll_screen),
                                   cell_address,
                                   static_cast<u8>(toUnderlying(screen.character_color_number)),
                                   pnd.palette_number,
@@ -3812,6 +3814,7 @@ void Vdp2::readCellMT(const ScrollScreenStatus& screen,
         }
     }
     Texture::storeTexture(Texture(VdpType::vdp2,
+                                  scrollScreenToLayer(screen.scroll_screen),
                                   cell_address,
                                   static_cast<u8>(toUnderlying(screen.character_color_number)),
                                   palette_number,
@@ -4160,6 +4163,19 @@ auto screenName(const ScrollScreen& ss) -> std::string {
         case rbg0: return "rbg0";
         case rbg1: return "rbg1";
         default: return "unknown scroll screen";
+    }
+}
+
+auto scrollScreenToLayer(const ScrollScreen& ss) -> Layer {
+    switch (ss) {
+        using enum ScrollScreen;
+        case nbg0: return Layer::nbg0;
+        case nbg1: return Layer::nbg1;
+        case nbg2: return Layer::nbg2;
+        case nbg3: return Layer::nbg3;
+        case rbg0: return Layer::rbg0;
+        case rbg1: return Layer::rbg1;
+        default: return Layer::undefined;
     }
 }
 

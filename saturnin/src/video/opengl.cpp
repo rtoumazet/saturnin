@@ -835,9 +835,6 @@ void Opengl::generateTextures() {
     // 1. Loop on the Textures
     // 2. For each Texture
 
-    core::Timer tmr;
-
-    tmr.start();
     auto local_textures_link = TexturesLink();
     local_textures_link      = textures_link_;
 
@@ -850,14 +847,8 @@ void Opengl::generateTextures() {
         if (opengl_tex) { (*opengl_tex).size = {(**t).width(), (**t).height()}; }
         textures.push_back(*opengl_tex);
     }
-    tmr.stop();
 
-    Log::info(Logger::opengl, "generateTextures() : {}ms", tmr.ms());
-
-    tmr.start();
     packTextures(textures);
-    tmr.stop();
-    Log::info(Logger::opengl, "packTextures() : {}ms", tmr.ms());
 }
 
 // Using the simplest (and fastest) method to pack textures in the atlas. Better algorithms could be used to

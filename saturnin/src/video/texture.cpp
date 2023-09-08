@@ -37,6 +37,7 @@ std::unordered_map<size_t, Texture> Texture::texture_storage_;
 SharedMutex                         Texture::storage_mutex_;
 
 Texture::Texture(const VdpType    vp,
+                 const Layer      layer,
                  const u32        address,
                  const u8         color_count,
                  const u16        palette_number,
@@ -44,6 +45,7 @@ Texture::Texture(const VdpType    vp,
                  const u16        width,
                  const u16        height) :
     vdp_type_(vp),
+    layer_(layer),
     width_(width),
     height_(height),
     raw_data_(std::move(texture)) {

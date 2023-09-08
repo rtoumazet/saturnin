@@ -1966,4 +1966,19 @@ auto getPatternNameData1Word4CellsOver16Colors12Bits(const u32 data, const Scrol
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 auto screenName(const ScrollScreen& ss) -> std::string;
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \fn	auto scrollScreenToLayer(const ScrollScreen& ss) -> Layer;
+///
+/// \brief	Gets the layer linked to the ScrollScreen.
+///
+/// \author	Runik
+/// \date	08/09/2023
+///
+/// \param 	ss	The ScrollScreen
+///
+/// \returns	A Layer.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+auto scrollScreenToLayer(const ScrollScreen& ss) -> Layer;
 } // namespace saturnin::video

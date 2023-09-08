@@ -44,6 +44,7 @@ class Texture {
     /// Constructors / Destructors
     Texture() = delete;
     Texture(const VdpType    vp,
+            const Layer      layer,
             const u32        address,
             const u8         color_count,
             const u16        palette_number,
@@ -68,6 +69,7 @@ class Texture {
     auto isRecentlyUsed() const { return is_recently_used_; }
     void isRecentlyUsed(const bool used) { is_recently_used_ = used; }
     auto vdpType() const { return vdp_type_; }
+    auto layer() const { return layer_; }
     ///@}
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -281,6 +283,7 @@ class Texture {
     static SharedMutex                         storage_mutex_;   ///< Used for multithreading access to the texture pool.
 
     VdpType vdp_type_{VdpType::not_set}; ///< What kind of VDP type is linked to this texture.
+    Layer   layer_;                      ///< Layer linked to this texture.
     u16     width_{};                    ///< The texture width.
     u16     height_{};                   ///< The texture height.
     bool    is_discarded_{false};        ///< True if the texture is discarded.

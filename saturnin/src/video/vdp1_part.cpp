@@ -1026,8 +1026,14 @@ void loadTextureData(const EmulatorModules& modules, Vdp1Part& part) {
             }
         }
 
-        Texture::storeTexture(
-            Texture(VdpType::vdp1, start_address, toUnderlying(color_mode), 0, texture_data, texture_width, texture_height));
+        Texture::storeTexture(Texture(VdpType::vdp1,
+                                      Layer::sprite,
+                                      start_address,
+                                      toUnderlying(color_mode),
+                                      0,
+                                      texture_data,
+                                      texture_width,
+                                      texture_height));
         modules.opengl()->addOrUpdateTexture(key);
     }
     part.textureKey(key);
