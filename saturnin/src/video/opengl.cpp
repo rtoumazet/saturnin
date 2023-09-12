@@ -878,7 +878,7 @@ void Opengl::packTextures(std::vector<OpenglTexture>& textures) {
     auto y_pos                  = u16{};
     auto current_row_max_height = u16{};
 
-    for (auto& texture : textures) {
+    for (const auto& texture : textures) {
         // if (texture.key == 0x8180518edf1c0411) DebugBreak();
         // if (texture.key == 0xefc9178d67d050ee) DebugBreak();
         if ((x_pos + texture.size.w) > texture_array_width) {
