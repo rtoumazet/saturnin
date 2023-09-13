@@ -2,9 +2,9 @@ name: MSBuild
 
 on:
   push:
-    branches: [ "master","sh2-perfs" ]
+    branches: [ "master","vdp2-parallel" ]
   pull_request:
-    branches: [ "master","sh2-perfs" ]
+    branches: [ "master","vdp2-parallel" ]
 
 env:
   # Path to the solution file relative to the root of the project.
@@ -43,7 +43,7 @@ jobs:
         
     - name: Install vcpkg dependencies
       run: |
-        $VCPKG_ROOT/vcpkg install argagg bshoshany-thread-pool date glbinding glfw3 glm imgui[docking-experimental,glfw-binding,opengl3-binding] libconfig libzip libzippp lodepng spdlog
+        $VCPKG_ROOT/vcpkg install argagg bshoshany-thread-pool date glbinding glfw3 glm imgui[docking-experimental,glfw-binding,opengl3-binding] libconfig libzip libzippp lodepng nanobench spdlog
       shell: bash  
 
     - name: Copy properties file
