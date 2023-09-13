@@ -85,12 +85,12 @@ using ShaderKey   = std::tuple<GlslVersion, ShaderType, ShaderName>;
 using ShadersList = std::map<ShaderKey, const char*>;
 
 struct OpenglTexture {
-    size_t                          key;       ///< The Saturn texture key.
-    u32                             opengl_id; ///< Identifier of the OpenGL texture.
-    u16                             layer;     ///< The layer (or index) in the texture array.
-    Size                            size;      ///< Texture size
-    ScreenPos                       pos;       ///< Position of the texture in the texture atlas.
-    std::vector<TextureCoordinates> coords;    ///< The coordinates in the texture atlas
+    size_t                          key;                 ///< The Saturn texture key.
+    u32                             opengl_id;           ///< Identifier of the OpenGL texture.
+    u16                             texture_array_index; ///< The layer (or index) in the texture array.
+    Size                            size;                ///< Texture size
+    ScreenPos                       pos;                 ///< Position of the texture in the texture atlas.
+    std::vector<TextureCoordinates> coords;              ///< The coordinates in the texture atlas
 };
 
 using TexturesLink = std::unordered_map<size_t, OpenglTexture>;
@@ -110,7 +110,6 @@ class Opengl {
 
     ///@{
     /// Accessors / Mutators
-    //[[nodiscard]] auto textureArrayDebugLayerId() const { return texture_array_debug_layer_id_; };
     [[nodiscard]] auto currentRenderedBuffer() const { return current_rendered_buffer_; };
     void               currentRenderedBuffer(const FboType type) { current_rendered_buffer_ = type; };
     [[nodiscard]] auto vdp1DebugOverlayTextureId() const { return getFboTextureId(FboType::vdp1_debug_overlay); };

@@ -809,9 +809,9 @@ void Opengl::addOrUpdateTexture(const size_t key) {
 
     // if (texture) {
     std::lock_guard lock(textures_link_mutex_);
-    textures_link_[key].key       = key;
-    textures_link_[key].opengl_id = 0;
-    textures_link_[key].layer     = 0;
+    textures_link_[key].key                 = key;
+    textures_link_[key].opengl_id           = 0;
+    textures_link_[key].texture_array_index = 0;
     // textures_link_[key].width     = (*texture)->width();
     // textures_link_[key].height    = (*texture)->height();
     // textures_link_[key].size      = (*texture)->size();
@@ -897,9 +897,9 @@ void Opengl::packTextures(std::vector<OpenglTexture>& textures) {
             current_row_max_height = 0;
         }
         // This is the position of the rectangle
-        textures_link_[texture.key].layer = current_layer;
-        textures_link_[texture.key].size  = texture.size;
-        textures_link_[texture.key].pos   = {x_pos, y_pos};
+        textures_link_[texture.key].texture_array_index = current_layer;
+        textures_link_[texture.key].size                = texture.size;
+        textures_link_[texture.key].pos                 = {x_pos, y_pos};
 
         // Calculating the texture coordinates in the atlas
         // (x1,y1)     (x2,y1)
@@ -940,12 +940,11 @@ auto Opengl::getOpenglTexture(const size_t key) -> std::optional<OpenglTexture> 
 auto Opengl::getOpenglTextureDetails(const size_t key) -> std::string {
     auto            details = std::string{};
     std::lock_guard lock(textures_link_mutex_);
-    const auto      it = textures_link_.find(key);
-    if (it != textures_link_.end()) {
+    if (const auto it = textures_link_.find(key); it != textures_link_.end()) {
         details += util::format("Key: 0x{:x}\n", it->second.key);
         details += util::format("Position: {},{}\n", it->second.pos.x, it->second.pos.y);
         details += util::format("Size: {},{}\n", it->second.size.w, it->second.size.h);
-        details += util::format("Layer: {}\n", it->second.layer);
+        details += util::format("Layer: {}\n", it->second.texture_array_index);
         details += util::format("X1: {},{},{}\n", it->second.coords[0].s, it->second.coords[0].t, it->second.coords[0].p);
         details += util::format("X2: {},{},{}\n", it->second.coords[1].s, it->second.coords[1].t, it->second.coords[1].p);
         details += util::format("Y2: {},{},{}\n", it->second.coords[2].s, it->second.coords[2].t, it->second.coords[2].p);
@@ -964,7 +963,7 @@ void Opengl::generateSubTexture(const size_t key) {
                             0,
                             ogl_tex->pos.x,
                             ogl_tex->pos.y,
-                            ogl_tex->layer,
+                            ogl_tex->texture_array_index,
                             ogl_tex->size.w,
                             ogl_tex->size.h,
                             1,
