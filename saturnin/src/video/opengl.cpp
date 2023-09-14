@@ -826,6 +826,8 @@ void Opengl::generateTextures() {
     // In theory, the maximum number of different VDP2 cells that could be stored by the Saturn at a given time is 0x80000
     // (ie both RBG at maximum size, with every cell different).
     // Maximum VDP1 texture size is 504*255.
+    // Textures are grouped by layers, meaning that every layer can be linked to multiple texture array indexes. This way
+    // it's not mandatory to regenerate the whole texture atlas every frame.
 
     // OpenglTextures don't have to be deleted, as they are part of a texture atlas now
     //
@@ -838,17 +840,22 @@ void Opengl::generateTextures() {
     auto local_textures_link = TexturesLink();
     local_textures_link      = textures_link_;
 
-    auto textures = std::vector<OpenglTexture>();
-    textures.reserve(local_textures_link.size());
+    using LayerToTextures = std::unordered_map<Layer, std::vector<OpenglTexture>>;
+
+    auto textures = LayerToTextures{};
+
+    // auto textures = std::vector<OpenglTexture>();
+    // textures.reserve(local_textures_link.size());
     for (const auto& [key, ogl_tex] : local_textures_link) {
         const auto t = Texture::getTexture(key);
 
         auto opengl_tex = getOpenglTexture(key);
         if (opengl_tex) { (*opengl_tex).size = {(**t).width(), (**t).height()}; }
-        textures.push_back(*opengl_tex);
+        // textures.push_back(*opengl_tex);
+        textures[(*t)->layer()].push_back(*opengl_tex);
     }
 
-    packTextures(textures);
+    // packTextures(textures);
 }
 
 // Using the simplest (and fastest) method to pack textures in the atlas. Better algorithms could be used to

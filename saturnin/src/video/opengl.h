@@ -84,6 +84,8 @@ enum class GlslVersion { glsl_120, glsl_330 };
 using ShaderKey   = std::tuple<GlslVersion, ShaderType, ShaderName>;
 using ShadersList = std::map<ShaderKey, const char*>;
 
+using LayerToTextureArrayIndexes = std::unordered_map<Layer, std::vector<u8>>;
+
 struct OpenglTexture {
     size_t                          key;                 ///< The Saturn texture key.
     u32                             opengl_id;           ///< Identifier of the OpenGL texture.
@@ -115,7 +117,7 @@ class Opengl {
     [[nodiscard]] auto vdp1DebugOverlayTextureId() const { return getFboTextureId(FboType::vdp1_debug_overlay); };
     [[nodiscard]] auto vdp2DebugLayerTextureId() const -> u32 { return getFboTextureId(FboType::vdp2_debug_layer); };
     [[nodiscard]] auto fps() const { return fps_; };
-    void               fps(std::string fps) { fps_ = fps; };
+    void               fps(std::string_view fps) { fps_ = fps; };
     void               saturnScreenResolution(const ScreenResolution& res) { saturn_screen_resolution_ = res; };
     auto               saturnScreenResolution() const -> ScreenResolution { return saturn_screen_resolution_; };
     void               hostScreenResolution(const ScreenResolution& res) { host_screen_resolution_ = res; };
@@ -610,10 +612,11 @@ class Opengl {
     PartsList parts_list_;        // Will have to be moved to the platform agnostic renderer.
     Vdp1Part  part_to_highlight_; ///< Part that will be highlighted during debug.
 
-    u32          texture_array_id_;               ///< Identifier for the texture array.
-    TexturesLink textures_link_;                  ///< Link between the Texture key and the OpenglTexture.
-    u32          texture_array_debug_layer_id_{}; ///< Identifier for the texture array debug layer.
-    u16          texture_array_max_used_layer_{}; ///< Maximum used layer of the texture array.
+    u32                        texture_array_id_;                 ///< Identifier for the texture array.
+    TexturesLink               textures_link_;                    ///< Link between the Texture key and the OpenglTexture.
+    u32                        texture_array_debug_layer_id_{};   ///< Identifier for the texture array debug layer.
+    u16                        texture_array_max_used_layer_{};   ///< Maximum used layer of the texture array.
+    LayerToTextureArrayIndexes layer_to_texture_array_indexes_{}; ///< Link between layers and texture array indexes.
 
     // std::vector<u32> textures_to_delete_; ///< List of the textures id to delete.
 
