@@ -95,27 +95,10 @@ void Opengl::initialize() {
 
     texture_array_id_ = initializeTextureArray();
 
-    {
-        // const auto logo = rh::embed("saturnin-logo.png");
-        // auto       img  = loadPngImage(logo.data(), logo.size());
-
-        // const auto size = strlen((char*)img.pixels);
-        // auto       vec  = std::vector<u8>{img.pixels, img.pixels + size};
-        // auto       tex  = Texture(VdpType::vdp1, 0, 5, 0, vec, 1364, 886);
-        // Texture::storeTexture(tex);
-        // addOrUpdateTexture(tex.key());
-        // generateTextures();
-
-        // auto ot      = OpenglTexture{};
-        // ot.key       = 1;
-        // ot.opengl_id = texture_array_id_;
-        // ot.size      = {1364, 886};
-        // ot.pos       = {0, 0};
-
-        // textures_link_[ot.key] = ot;
+    // Clear texteure array indexes data
+    for (auto& [layer, indexes] : layer_to_texture_array_indexes_) {
+        std::vector<u8>().swap(indexes);
     }
-    //  auto max_layers = int{};
-    //  gl::glGetIntegerv(GL_MAX_ARRAY_TEXTURE_LAYERS, &max_layers);
 }
 
 void Opengl::shutdown() const {
@@ -801,7 +784,7 @@ void Opengl::renderVdp2DebugLayer(core::EmulatorContext& state) {
     }
 };
 
-void Opengl::addOrUpdateTexture(const size_t key) {
+void Opengl::addOrUpdateTexture(const size_t key, const Layer layer) {
     // If the key doesn't exist it will be automatically added.
     // If it does, opengl link will be reset in order to regenerate the texture.
     // const auto opengl_tex = getOpenglTexture(key);
@@ -812,6 +795,7 @@ void Opengl::addOrUpdateTexture(const size_t key) {
     textures_link_[key].key                 = key;
     textures_link_[key].opengl_id           = 0;
     textures_link_[key].texture_array_index = 0;
+    layer_to_cache_reload_state_[layer]     = true; // This layer will have to be reloaded
     // textures_link_[key].width     = (*texture)->width();
     // textures_link_[key].height    = (*texture)->height();
     // textures_link_[key].size      = (*texture)->size();
@@ -840,9 +824,7 @@ void Opengl::generateTextures() {
     auto local_textures_link = TexturesLink();
     local_textures_link      = textures_link_;
 
-    using LayerToTextures = std::unordered_map<Layer, std::vector<OpenglTexture>>;
-
-    auto textures = LayerToTextures{};
+    auto layer_to_textures = LayerToTextures{};
 
     // auto textures = std::vector<OpenglTexture>();
     // textures.reserve(local_textures_link.size());
@@ -852,10 +834,17 @@ void Opengl::generateTextures() {
         auto opengl_tex = getOpenglTexture(key);
         if (opengl_tex) { (*opengl_tex).size = {(**t).width(), (**t).height()}; }
         // textures.push_back(*opengl_tex);
-        textures[(*t)->layer()].push_back(*opengl_tex);
+        layer_to_textures[(*t)->layer()].push_back(*opengl_tex);
     }
 
-    // packTextures(textures);
+    for (auto& [layer, textures] : layer_to_textures) {
+        packTextures(textures);
+    }
+
+    // Reset cache reload state
+    for (auto& [layer, state] : layer_to_cache_reload_state_) {
+        state = false;
+    }
 }
 
 // Using the simplest (and fastest) method to pack textures in the atlas. Better algorithms could be used to
@@ -886,8 +875,6 @@ void Opengl::packTextures(std::vector<OpenglTexture>& textures) {
     auto current_row_max_height = u16{};
 
     for (const auto& texture : textures) {
-        // if (texture.key == 0x8180518edf1c0411) DebugBreak();
-        // if (texture.key == 0xefc9178d67d050ee) DebugBreak();
         if ((x_pos + texture.size.w) > texture_array_width) {
             // Texture doesn't fit in the remaining space of the row ... looping around to next row using
             // the maximum height from the previous row.
@@ -981,6 +968,10 @@ void Opengl::generateSubTexture(const size_t key) {
         }
     }
 }
+
+auto Opengl::getCurrentTextureArrayIndex(const Layer layer) const -> u8 { return 0; }
+
+auto Opengl::getNextAvailableTextureArrayIndex() const -> u8 { return 0; }
 
 auto Opengl::isSaturnResolutionSet() const -> bool {
     return (saturn_screen_resolution_.width == 0 || saturn_screen_resolution_.height == 0) ? false : true;
@@ -1296,8 +1287,6 @@ auto Opengl::initializeTextureArray() const -> u32 {
                  nullptr);                 // no data for now
 
     // set the texture wrapping parameters
-    // glTexParameteri(GLenum::GL_TEXTURE_2D, GLenum::GL_TEXTURE_WRAP_S, GLenum::GL_REPEAT);
-    // glTexParameteri(GLenum::GL_TEXTURE_2D, GLenum::GL_TEXTURE_WRAP_T, GLenum::GL_REPEAT);
     glTexParameteri(GLenum::GL_TEXTURE_2D_ARRAY, GLenum::GL_TEXTURE_WRAP_S, GLenum::GL_REPEAT);
     glTexParameteri(GLenum::GL_TEXTURE_2D_ARRAY, GLenum::GL_TEXTURE_WRAP_T, GLenum::GL_REPEAT);
 

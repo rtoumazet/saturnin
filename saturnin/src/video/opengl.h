@@ -84,8 +84,6 @@ enum class GlslVersion { glsl_120, glsl_330 };
 using ShaderKey   = std::tuple<GlslVersion, ShaderType, ShaderName>;
 using ShadersList = std::map<ShaderKey, const char*>;
 
-using LayerToTextureArrayIndexes = std::unordered_map<Layer, std::vector<u8>>;
-
 struct OpenglTexture {
     size_t                          key;                 ///< The Saturn texture key.
     u32                             opengl_id;           ///< Identifier of the OpenGL texture.
@@ -94,6 +92,10 @@ struct OpenglTexture {
     ScreenPos                       pos;                 ///< Position of the texture in the texture atlas.
     std::vector<TextureCoordinates> coords;              ///< The coordinates in the texture atlas
 };
+
+using LayerToTextures            = std::unordered_map<Layer, std::vector<OpenglTexture>>;
+using LayerToTextureArrayIndexes = std::unordered_map<Layer, std::vector<u8>>;
+using LayerToCacheReloadState    = std::unordered_map<Layer, bool>;
 
 using TexturesLink = std::unordered_map<size_t, OpenglTexture>;
 
@@ -376,7 +378,7 @@ class Opengl {
     void renderVdp2DebugLayer(core::EmulatorContext& state);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn void saturnin::video::Opengl::addOrUpdateTexture(const size_t key);
+    /// \fn void saturnin::video::Opengl::addOrUpdateTexture(const size_t key, const Layer layer);
     ///
     /// \brief  Adds a texture to be created or updated on OpenGL.
     ///
@@ -386,7 +388,7 @@ class Opengl {
     /// \param  key The texture key.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    void addOrUpdateTexture(const size_t key);
+    void addOrUpdateTexture(const size_t key, const Layer layer);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn void saturnin::video::Opengl::removeTextureLink(const size_t key);
@@ -574,7 +576,7 @@ class Opengl {
     auto getVertexesNumberByDrawType(const PartsList& parts_list) const -> u64;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn	void Opengl::packTextures(std::vector<OpenglTexture>& textures);
+    /// \fn	void Opengl::packTextures(const std::vector<OpenglTexture>& textures);
     ///
     /// \brief	Pack textures in a texture array of texture atlases.
     ///
@@ -599,6 +601,34 @@ class Opengl {
 
     void generateSubTexture(const size_t key);
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn auto Opengl::getCurrentTextureArrayIndex(const Layer layer) const -> u8;
+    ///
+    /// \brief  Returns the current texture array index used by one layer.
+    ///
+    /// \author Runik
+    /// \date   15/09/2023
+    ///
+    /// \param 	layer Layer.
+    ///
+    /// \returns    The current texture array index used by the layer.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    auto getCurrentTextureArrayIndex(const Layer layer) const -> u8;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn	void Opengl::getNextAvailableTextureArrayIndex() const;
+    ///
+    /// \brief	Returns the next available texture array index regardless of the layer.
+    ///
+    /// \author	Runik
+    /// \date	15/09/2023
+    ///
+    /// \returns    Texture array index.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    auto getNextAvailableTextureArrayIndex() const -> u8;
+
     core::Config* config_; ///< Configuration object.
 
     FboList fbo_list_;                ///< List of framebuffer objects used in the program.
@@ -617,6 +647,7 @@ class Opengl {
     u32                        texture_array_debug_layer_id_{};   ///< Identifier for the texture array debug layer.
     u16                        texture_array_max_used_layer_{};   ///< Maximum used layer of the texture array.
     LayerToTextureArrayIndexes layer_to_texture_array_indexes_{}; ///< Link between layers and texture array indexes.
+    LayerToCacheReloadState    layer_to_cache_reload_state_{};    ///< Stores if a layer needs its cache to be reloaded .
 
     // std::vector<u32> textures_to_delete_; ///< List of the textures id to delete.
 
