@@ -576,17 +576,18 @@ class Opengl {
     auto getVertexesNumberByDrawType(const PartsList& parts_list) const -> u64;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn	void Opengl::packTextures(const std::vector<OpenglTexture>& textures);
+    /// \fn	void Opengl::packTextures(std::vector<OpenglTexture>& textures, const Layer layer);
     ///
-    /// \brief	Pack textures in a texture array of texture atlases.
+    /// \brief	Pack textures in a texture array of texture atlases for the selected layer.
     ///
     /// \author	Runik
     /// \date	22/09/2022
     ///
     /// \param [in,out]	textures	The textures to pack.
+    /// \param 		   	layer   	The layer.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    void packTextures(std::vector<OpenglTexture>& textures);
+    void packTextures(std::vector<OpenglTexture>& textures, const Layer layer);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn	void Opengl::generateSubTexture(const size_t key);
@@ -602,19 +603,19 @@ class Opengl {
     void generateSubTexture(const size_t key);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn auto Opengl::getCurrentTextureArrayIndex(const Layer layer) const -> u8;
+    /// \fn	auto Opengl::getCurrentTextureArrayIndex(const Layer layer) -> u8;
     ///
-    /// \brief  Returns the current texture array index used by one layer.
+    /// \brief	Returns the current texture array index used by one layer.
     ///
-    /// \author Runik
-    /// \date   15/09/2023
+    /// \author	Runik
+    /// \date	15/09/2023
     ///
-    /// \param 	layer Layer.
+    /// \param 	layer	Layer.
     ///
-    /// \returns    The current texture array index used by the layer.
+    /// \returns	The current texture array index used by the layer.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    auto getCurrentTextureArrayIndex(const Layer layer) const -> u8;
+    auto getCurrentTextureArrayIndex(const Layer layer) -> u8;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn	void Opengl::getNextAvailableTextureArrayIndex() const;
@@ -645,7 +646,6 @@ class Opengl {
     u32                        texture_array_id_;                 ///< Identifier for the texture array.
     TexturesLink               textures_link_;                    ///< Link between the Texture key and the OpenglTexture.
     u32                        texture_array_debug_layer_id_{};   ///< Identifier for the texture array debug layer.
-    u16                        texture_array_max_used_layer_{};   ///< Maximum used layer of the texture array.
     LayerToTextureArrayIndexes layer_to_texture_array_indexes_{}; ///< Link between layers and texture array indexes.
     LayerToCacheReloadState    layer_to_cache_reload_state_{};    ///< Stores if a layer needs its cache to be reloaded .
 

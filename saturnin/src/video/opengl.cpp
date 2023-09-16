@@ -826,19 +826,16 @@ void Opengl::generateTextures() {
 
     auto layer_to_textures = LayerToTextures{};
 
-    // auto textures = std::vector<OpenglTexture>();
-    // textures.reserve(local_textures_link.size());
     for (const auto& [key, ogl_tex] : local_textures_link) {
         const auto t = Texture::getTexture(key);
 
         auto opengl_tex = getOpenglTexture(key);
         if (opengl_tex) { (*opengl_tex).size = {(**t).width(), (**t).height()}; }
-        // textures.push_back(*opengl_tex);
         layer_to_textures[(*t)->layer()].push_back(*opengl_tex);
     }
 
     for (auto& [layer, textures] : layer_to_textures) {
-        packTextures(textures);
+        if (layer_to_cache_reload_state_[layer]) { packTextures(textures, layer); }
     }
 
     // Reset cache reload state
@@ -850,26 +847,30 @@ void Opengl::generateTextures() {
 // Using the simplest (and fastest) method to pack textures in the atlas. Better algorithms could be used to
 // improve packing, but there's a non trivial performance tradeoff, with a big increase in complexity.
 // So for now, keeping things simple.
-void Opengl::packTextures(std::vector<OpenglTexture>& textures) {
-    // First previously used layers are cleared before reuse
+void Opengl::packTextures(std::vector<OpenglTexture>& textures, const Layer layer) {
+    // First, indexes used by the layer are cleared and removed from the used list.
     auto empty_data = std::vector<u8>(texture_array_width * texture_array_height * 4);
-    for (auto i = 0; i <= texture_array_max_used_layer_; i++) {
-        glTexSubImage3D(GL_TEXTURE_2D_ARRAY,
-                        0,
-                        0,
-                        0,
-                        i,
-                        texture_array_width,
-                        texture_array_height,
-                        1,
-                        GLenum::GL_RGBA,
-                        GLenum::GL_UNSIGNED_BYTE,
-                        empty_data.data());
+    if (!layer_to_texture_array_indexes_[layer].empty()) {
+        for (const auto& index : layer_to_texture_array_indexes_[layer]) {
+            glTexSubImage3D(GL_TEXTURE_2D_ARRAY,
+                            0,
+                            0,
+                            0,
+                            index,
+                            texture_array_width,
+                            texture_array_height,
+                            1,
+                            GLenum::GL_RGBA,
+                            GLenum::GL_UNSIGNED_BYTE,
+                            empty_data.data());
+        }
+        std::vector<u8>().swap(layer_to_texture_array_indexes_[layer]);
     }
 
+    // Second, texture are sorted by horizontal size.
     std::ranges::sort(textures, [](const OpenglTexture& a, const OpenglTexture& b) { return a.size.h > b.size.h; });
 
-    auto current_layer          = u16{};
+    auto current_index          = getCurrentTextureArrayIndex(layer);
     auto x_pos                  = u16{};
     auto y_pos                  = u16{};
     auto current_row_max_height = u16{};
@@ -885,13 +886,14 @@ void Opengl::packTextures(std::vector<OpenglTexture>& textures) {
 
         if ((y_pos + texture.size.h) > texture_array_width) {
             // Texture doesn't fit in the remaining space of the last row ... moving one layer forward.
-            ++current_layer;
+            current_index = getNextAvailableTextureArrayIndex();
+            layer_to_texture_array_indexes_.at(layer).push_back(current_index);
             x_pos                  = 0;
             y_pos                  = 0;
             current_row_max_height = 0;
         }
         // This is the position of the rectangle
-        textures_link_[texture.key].texture_array_index = current_layer;
+        textures_link_[texture.key].texture_array_index = current_index;
         textures_link_[texture.key].size                = texture.size;
         textures_link_[texture.key].pos                 = {x_pos, y_pos};
 
@@ -908,10 +910,10 @@ void Opengl::packTextures(std::vector<OpenglTexture>& textures) {
         auto y2 = static_cast<float>(y_pos + texture.size.h) / static_cast<float>(texture_array_height);
 
         auto coords = std::vector{
-            TextureCoordinates{x1, y1, static_cast<float>(current_layer)},
-            TextureCoordinates{x2, y1, static_cast<float>(current_layer)},
-            TextureCoordinates{x2, y2, static_cast<float>(current_layer)},
-            TextureCoordinates{x1, y2, static_cast<float>(current_layer)}
+            TextureCoordinates{x1, y1, static_cast<float>(current_index)},
+            TextureCoordinates{x2, y1, static_cast<float>(current_index)},
+            TextureCoordinates{x2, y2, static_cast<float>(current_index)},
+            TextureCoordinates{x1, y2, static_cast<float>(current_index)}
         };
         textures_link_[texture.key].coords.swap(coords);
 
@@ -922,7 +924,7 @@ void Opengl::packTextures(std::vector<OpenglTexture>& textures) {
         // Just saving the largest height in the new row
         if (texture.size.h > current_row_max_height) { current_row_max_height = texture.size.h; }
     }
-    texture_array_max_used_layer_ = current_layer;
+    // texture_array_max_used_layer_ = current_layer;
 }
 
 auto Opengl::getOpenglTexture(const size_t key) -> std::optional<OpenglTexture> {
@@ -969,9 +971,31 @@ void Opengl::generateSubTexture(const size_t key) {
     }
 }
 
-auto Opengl::getCurrentTextureArrayIndex(const Layer layer) const -> u8 { return 0; }
+auto Opengl::getCurrentTextureArrayIndex(const Layer layer) -> u8 {
+    if (layer_to_texture_array_indexes_.at(layer).empty()) {
+        auto index = getNextAvailableTextureArrayIndex();
+        layer_to_texture_array_indexes_.at(layer).push_back(index);
+        return index;
+    } else {
+        return *std::ranges::max_element(layer_to_texture_array_indexes_.at(layer));
+    }
+}
 
-auto Opengl::getNextAvailableTextureArrayIndex() const -> u8 { return 0; }
+auto Opengl::getNextAvailableTextureArrayIndex() const -> u8 {
+    auto appended_indexes = std::vector<u8>();
+    for (const auto& [layer, indexes] : layer_to_texture_array_indexes_) {
+        appended_indexes.insert(appended_indexes.end(), indexes.begin(), indexes.end());
+    }
+
+    std::ranges::sort(appended_indexes, [](const u8 a, const u8& b) { return a < b; });
+
+    auto ref_index = u8{};
+    for (const auto index : appended_indexes) {
+        if (index > ref_index) { return ref_index; }
+        ++ref_index;
+    }
+    return ref_index;
+}
 
 auto Opengl::isSaturnResolutionSet() const -> bool {
     return (saturn_screen_resolution_.width == 0 || saturn_screen_resolution_.height == 0) ? false : true;
