@@ -59,6 +59,8 @@ using seconds = std::chrono::duration<double>;
 using milli   = std::chrono::duration<double, std::milli>;
 using micro   = std::chrono::duration<double, std::micro>;
 
+using AddressToPlaneData = std::unordered_map<u32, std::vector<Vdp2Part>>;
+
 constexpr auto vram_banks_number  = u8{4};
 constexpr auto vram_bank_a0_index = u8{0};
 constexpr auto vram_bank_a1_index = u8{1};
@@ -1814,27 +1816,22 @@ class Vdp2 {
             read16MDot(texture_data, screen, dot);
         }
     }
+
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn void Vdp2::saveBitmap(const ScrollScreenStatus& screen, std::vector<u8>& texture_data, const u16 width, const u16
-    /// height, const size_t key);
+    /// \fn	void Vdp2::saveBitmap(const ScrollScreenStatus& screen, const u16 width, const u16 height, const size_t key);
     ///
-    /// \brief  Saves a bitmap to the parts vector.
+    /// \brief	Saves a bitmap to the parts vector.
     ///
-    /// \author Runik
-    /// \date   17/08/2021
+    /// \author	Runik
+    /// \date	17/08/2021
     ///
-    /// \param          screen          Current scroll screen status.
-    /// \param [in,out] texture_data    Raw texture data.
-    /// \param          width           Bitmap width.
-    /// \param          height          Bitmap height.
-    /// \param          key             Texture key.
+    /// \param 	screen	Current scroll screen status.
+    /// \param 	width 	Bitmap width.
+    /// \param 	height	Bitmap height.
+    /// \param 	key   	Texture key.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    void saveBitmap(const ScrollScreenStatus& screen,
-                    std::vector<u8>&          texture_data,
-                    const u16                 width,
-                    const u16                 height,
-                    const size_t              key);
+    void saveBitmap(const ScrollScreenStatus& screen, const u16 width, const u16 height, const size_t key);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn const auto Vdp2::getColorRamAddressOffset(const u8 register_offset);
@@ -1926,9 +1923,12 @@ class Vdp2 {
     std::vector<u32> pre_calculated_modulo_64_{}; ///< The pre calculated modulo 64
     std::vector<u32> pre_calculated_modulo_32_{}; ///< The pre calculated modulo 32
 
-    Mutex                 vdp2_parts_mutex_;     ///< Mutex to handle access to the shared vector between threads.
-    std::vector<Vdp2Part> vdp2_parts_[6];        ///< Storage of rendering parts for each scroll cell.
-    std::vector<CellData> cell_data_to_process_; ///< Will store cell data before parallelized read for one scroll.
+    Mutex                                vdp2_parts_mutex_;     ///< Mutex to handle access to the shared vector between threads.
+    std::array<std::vector<Vdp2Part>, 6> vdp2_parts_;           ///< Storage of rendering parts for each scroll cell.
+    std::vector<CellData>                cell_data_to_process_; ///< Will store cell data before parallelized read for one scroll.
+    AddressToPlaneData address_to_plane_data_; ///< Stores plane data to improve performance when a same address is used multiple
+    u32                current_plane_address_; ///< The current plane address.
+                                               ///< times in the same NBG / RBG.
 
     ScrollScreen         screen_in_debug_{ScrollScreen::none}; ///< Scroll screen currently viewed in debug.
     DisabledScrollScreen disabled_scroll_screens_;             ///< Disabling state of scroll screens.

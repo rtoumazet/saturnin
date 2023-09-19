@@ -3234,9 +3234,6 @@ void Vdp2::readScrollScreenData(const ScrollScreen s) {
     // vdp2_parts_[util::toUnderlying(s)].clear();
 
     if (screen.format == ScrollScreenFormat::cell) {
-        core::Timer tmr;
-        tmr.start();
-
         std::vector<CellData>().swap(cell_data_to_process_);
         cell_data_to_process_.reserve(screen.cells_number);
 
@@ -3277,34 +3274,29 @@ void Vdp2::readScrollScreenData(const ScrollScreen s) {
         }
 
         // Unique addresses are handled
+        // Reset planes data
+        for (auto& [address, parts] : address_to_plane_data_) {
+            std::vector<Vdp2Part>().swap(parts);
+        }
         for (const auto& [addr, offset] : start_addresses) {
-            readPlaneData(screen, addr, offset);
+            if (address_to_plane_data_.contains(addr)) {
+                // transform needed
+                // vdp2_parts_[util::toUnderlying(screen.scroll_screen)].resize(
+                //    vdp2_parts_[util::toUnderlying(screen.scroll_screen)].size() + address_to_plane_data_[addr].size());
+                std::ranges::transform(address_to_plane_data_[addr],
+                                       std::back_inserter(vdp2_parts_[util::toUnderlying(screen.scroll_screen)]),
+                                       [&offset](Vdp2Part vp) { return vp; });
+            } else {
+                current_plane_address_ = addr;
+                readPlaneData(screen, addr, offset);
+                vdp2_parts_[util::toUnderlying(screen.scroll_screen)].insert(
+                    vdp2_parts_[util::toUnderlying(screen.scroll_screen)].end(),
+                    address_to_plane_data_[addr].begin(),
+                    address_to_plane_data_[addr].end());
+            }
         }
 
-        if (use_concurrent_read_for_cells) {
-            ThreadPool::pool_.wait_for_tasks();
-
-            // try {
-            //     textures_mf.wait();
-            //     auto v = textures_mf.get();
-            //     for (const auto& t : v) {
-            //         Texture::storeTexture(t);
-            //         modules_.opengl()->addOrUpdateTexture(t.key());
-            //     }
-            // } catch (const std::exception& e) { core::Log::warning(Logger::vdp2, "Exception: {}", e.what()); }
-        }
-
-        tmr.stop();
-
-        if (screen.scroll_screen == ScrollScreen::nbg3) {
-            measures.push_back(tmr.micros());
-            auto avg = std::accumulate(measures.begin(), measures.end(), static_cast<long long>(0)) / measures.size();
-            core::Log::warning(Logger::vdp2,
-                               core::tr("Parallel read {} : {}µs, Moy : {}µs"),
-                               screenName(screen.scroll_screen),
-                               tmr.micros(),
-                               avg);
-        }
+        if (use_concurrent_read_for_cells) { ThreadPool::pool_.wait_for_tasks(); }
 
     } else { // ScrollScreenFormat::bitmap
         readBitmapData(screen);
@@ -3433,14 +3425,10 @@ void Vdp2::readBitmapData(const ScrollScreenStatus& screen) {
                                       texture_height));
         modules_.opengl()->addOrUpdateTexture(key, scrollScreenToLayer(screen.scroll_screen));
     }
-    saveBitmap(screen, texture_data, texture_width, texture_height, key);
+    saveBitmap(screen, texture_width, texture_height, key);
 }
 
-void Vdp2::saveBitmap(const ScrollScreenStatus& screen,
-                      std::vector<u8>&          texture_data,
-                      const u16                 width,
-                      const u16                 height,
-                      const size_t              key) {
+void Vdp2::saveBitmap(const ScrollScreenStatus& screen, const u16 width, const u16 height, const size_t key) {
     // auto pos = ScreenPos{0, 0};
 
     // auto p = Vdp2Part(key, width, height, screen.priority_number, screen.linked_layer);
@@ -3838,11 +3826,17 @@ void Vdp2::saveCell(const ScrollScreenStatus& screen,
     pos.x -= screen.scroll_offset_horizontal;
     pos.y -= screen.scroll_offset_vertical;
 
-    vdp2_parts_[util::toUnderlying(screen.scroll_screen)].emplace_back(pnd,
-                                                                       pos,
-                                                                       key,
-                                                                       screen.priority_number,
-                                                                       screen.color_offset.as_float);
+    // vdp2_parts_[util::toUnderlying(screen.scroll_screen)].emplace_back(pnd,
+    //                                                                    pos,
+    //                                                                    key,
+    //                                                                    screen.priority_number,
+    //                                                                    screen.color_offset.as_float);
+
+    address_to_plane_data_[current_plane_address_].emplace_back(pnd,
+                                                                pos,
+                                                                key,
+                                                                screen.priority_number,
+                                                                screen.color_offset.as_float);
 }
 
 auto Vdp2::getColorRamAddressOffset(const u8 register_offset) const -> u16 {
