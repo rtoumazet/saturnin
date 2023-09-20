@@ -3274,15 +3274,22 @@ void Vdp2::readScrollScreenData(const ScrollScreen s) {
         }
 
         // Unique addresses are handled
+        // for (const auto& [addr, offset] : start_addresses) {
+        //    readPlaneData(screen, addr, offset);
+        //}
+
         // Reset planes data
         for (auto& [address, parts] : address_to_plane_data_) {
             std::vector<Vdp2Part>().swap(parts);
         }
+        address_to_plane_data_.clear();
+
         for (const auto& [addr, offset] : start_addresses) {
             if (address_to_plane_data_.contains(addr)) {
                 // transform needed
                 // vdp2_parts_[util::toUnderlying(screen.scroll_screen)].resize(
                 //    vdp2_parts_[util::toUnderlying(screen.scroll_screen)].size() + address_to_plane_data_[addr].size());
+
                 std::ranges::transform(address_to_plane_data_[addr],
                                        std::back_inserter(vdp2_parts_[util::toUnderlying(screen.scroll_screen)]),
                                        [&offset](Vdp2Part vp) { return vp; });
