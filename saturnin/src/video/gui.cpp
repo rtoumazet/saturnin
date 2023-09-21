@@ -1896,7 +1896,7 @@ void showDebugTexturesWindow(core::EmulatorContext& state, bool* opened) {
                     const auto& key        = keys_list[current_texture_idx].second;
                     const auto  opengl_tex = state.opengl()->getOpenglTexture(key);
 
-                    auto tex_id = state.opengl()->generateTextureFromTextureArrayLayer(opengl_tex->layer, key);
+                    auto tex_id = state.opengl()->generateTextureFromTextureArrayLayer(opengl_tex->texture_array_index, key);
                     ImGui::SetCursorPos(layer_window_pos);
                     const auto child_size = ImVec2(area_3_width, ImGui::GetContentRegionAvail().y);
                     ImGui::BeginChild("ChildTextureLayer", child_size, false, window_flags);

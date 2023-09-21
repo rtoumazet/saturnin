@@ -19,13 +19,13 @@
 
 #include <saturnin/src/pch.h>
 #include <saturnin/src/video/opengl.h>
-#include <Windows.h>  // removes C4005 warning
+#include <Windows.h> // removes C4005 warning
 #include <algorithm>
 #include <fstream>    // ifstream
 #include <filesystem> // filesystem
 #include <iostream>   // cout
 #include <lodepng.h>
-#include <sstream>    // stringstream
+#include <sstream> // stringstream
 #include <glbinding/glbinding.h>
 // #include <glbinding/gl/gl.h>
 #include <glbinding/Version.h>
@@ -42,9 +42,10 @@
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
 #include <saturnin/src/config.h>
-#include <saturnin/src/locale.h>    // tr
+#include <saturnin/src/locale.h> // tr
 #include <saturnin/src/log.h>
 #include <saturnin/src/utilities.h> // format
+#include <saturnin/src/timer.h>     // Timer
 #include <saturnin/src/video/gui.h>
 #include <saturnin/src/video/texture.h>
 #include <saturnin/src/video/vdp_common.h>
@@ -94,27 +95,10 @@ void Opengl::initialize() {
 
     texture_array_id_ = initializeTextureArray();
 
-    {
-        // const auto logo = rh::embed("saturnin-logo.png");
-        // auto       img  = loadPngImage(logo.data(), logo.size());
-
-        // const auto size = strlen((char*)img.pixels);
-        // auto       vec  = std::vector<u8>{img.pixels, img.pixels + size};
-        // auto       tex  = Texture(VdpType::vdp1, 0, 5, 0, vec, 1364, 886);
-        // Texture::storeTexture(tex);
-        // addOrUpdateTexture(tex.key());
-        // generateTextures();
-
-        // auto ot      = OpenglTexture{};
-        // ot.key       = 1;
-        // ot.opengl_id = texture_array_id_;
-        // ot.size      = {1364, 886};
-        // ot.pos       = {0, 0};
-
-        // textures_link_[ot.key] = ot;
+    // Clear texteure array indexes data
+    for (auto& [layer, indexes] : layer_to_texture_array_indexes_) {
+        std::vector<u8>().swap(indexes);
     }
-    //  auto max_layers = int{};
-    //  gl::glGetIntegerv(GL_MAX_ARRAY_TEXTURE_LAYERS, &max_layers);
 }
 
 void Opengl::shutdown() const {
@@ -315,11 +299,9 @@ void Opengl::displayFramebuffer(core::EmulatorContext& state) {
     if (!state.vdp2()->isLayerDisabled(ScrollScreen::rbg0)) { addVdp2PartsToList(ScrollScreen::rbg0); };
     if (!state.vdp2()->isLayerDisabled(ScrollScreen::rbg1)) { addVdp2PartsToList(ScrollScreen::rbg1); };
     addVdp1PartsToList();
-    std::sort(parts_list.begin(),
-              parts_list.end(),
-              [](const std::unique_ptr<BaseRenderingPart>& a, const std::unique_ptr<BaseRenderingPart>& b) {
-                  return a->priority() < b->priority();
-              });
+    std::ranges::sort(parts_list, [](const std::unique_ptr<BaseRenderingPart>& a, const std::unique_ptr<BaseRenderingPart>& b) {
+        return a->priority() < b->priority();
+    });
 
     if (parts_list_.empty()) {
         std::unique_lock lk(parts_list_mutex_);
@@ -597,22 +579,18 @@ void Opengl::render() {
 auto Opengl::getVertexesNumberByDrawType(const PartsList& parts_list) const -> u64 {
     auto batch_vertex_size = u64{};
 
-    batch_vertex_size = std::count_if(parts_list.begin(),
-                                      parts_list.end(),
-                                      [](const auto& p) { return p->drawType() == DrawType::textured_polygon; })
-                        * vertexes_per_tessellated_quad;
-    batch_vertex_size += std::count_if(parts_list.begin(),
-                                       parts_list.end(),
-                                       [](const auto& p) { return p->drawType() == DrawType::non_textured_polygon; })
-                         * vertexes_per_tessellated_quad;
+    batch_vertex_size
+        = std::ranges::count_if(parts_list, [](const auto& p) { return p->drawType() == DrawType::textured_polygon; })
+          * vertexes_per_tessellated_quad;
+    batch_vertex_size
+        += std::ranges::count_if(parts_list, [](const auto& p) { return p->drawType() == DrawType::non_textured_polygon; })
+           * vertexes_per_tessellated_quad;
+
+    batch_vertex_size += std::ranges::count_if(parts_list, [](const auto& p) { return p->drawType() == DrawType::polyline; })
+                         * vertexes_per_polyline;
 
     batch_vertex_size
-        += std::count_if(parts_list.begin(), parts_list.end(), [](const auto& p) { return p->drawType() == DrawType::polyline; })
-           * vertexes_per_polyline;
-
-    batch_vertex_size
-        += std::count_if(parts_list.begin(), parts_list.end(), [](const auto& p) { return p->drawType() == DrawType::line; })
-           * vertexes_per_line;
+        += std::ranges::count_if(parts_list, [](const auto& p) { return p->drawType() == DrawType::line; }) * vertexes_per_line;
 
     return batch_vertex_size;
 }
@@ -806,7 +784,7 @@ void Opengl::renderVdp2DebugLayer(core::EmulatorContext& state) {
     }
 };
 
-void Opengl::addOrUpdateTexture(const size_t key) {
+void Opengl::addOrUpdateTexture(const size_t key, const Layer layer) {
     // If the key doesn't exist it will be automatically added.
     // If it does, opengl link will be reset in order to regenerate the texture.
     // const auto opengl_tex = getOpenglTexture(key);
@@ -814,9 +792,10 @@ void Opengl::addOrUpdateTexture(const size_t key) {
 
     // if (texture) {
     std::lock_guard lock(textures_link_mutex_);
-    textures_link_[key].key       = key;
-    textures_link_[key].opengl_id = 0;
-    textures_link_[key].layer     = 0;
+    textures_link_[key].key                 = key;
+    textures_link_[key].opengl_id           = 0;
+    textures_link_[key].texture_array_index = 0;
+    layer_to_cache_reload_state_[layer]     = true; // This layer will have to be reloaded
     // textures_link_[key].width     = (*texture)->width();
     // textures_link_[key].height    = (*texture)->height();
     // textures_link_[key].size      = (*texture)->size();
@@ -831,6 +810,8 @@ void Opengl::generateTextures() {
     // In theory, the maximum number of different VDP2 cells that could be stored by the Saturn at a given time is 0x80000
     // (ie both RBG at maximum size, with every cell different).
     // Maximum VDP1 texture size is 504*255.
+    // Textures are grouped by layers, meaning that every layer can be linked to multiple texture array indexes. This way
+    // it's not mandatory to regenerate the whole texture atlas every frame.
 
     // OpenglTextures don't have to be deleted, as they are part of a texture atlas now
     //
@@ -841,53 +822,60 @@ void Opengl::generateTextures() {
     // 2. For each Texture
 
     auto local_textures_link = TexturesLink();
-    { local_textures_link = textures_link_; }
+    local_textures_link      = textures_link_;
 
-    auto textures = std::vector<OpenglTexture>();
-    textures.reserve(local_textures_link.size());
-    for (auto& [key, ogl_tex] : local_textures_link) {
+    auto layer_to_textures = LayerToTextures{};
+
+    for (const auto& [key, ogl_tex] : local_textures_link) {
         const auto t = Texture::getTexture(key);
 
         auto opengl_tex = getOpenglTexture(key);
         if (opengl_tex) { (*opengl_tex).size = {(**t).width(), (**t).height()}; }
-        textures.push_back(*opengl_tex);
+        layer_to_textures[(*t)->layer()].push_back(*opengl_tex);
     }
 
-    packTextures(textures);
+    for (auto& [layer, textures] : layer_to_textures) {
+        if (layer_to_cache_reload_state_[layer]) { packTextures(textures, layer); }
+    }
+
+    // Reset cache reload state
+    for (auto& [layer, state] : layer_to_cache_reload_state_) {
+        state = false;
+    }
 }
 
 // Using the simplest (and fastest) method to pack textures in the atlas. Better algorithms could be used to
 // improve packing, but there's a non trivial performance tradeoff, with a big increase in complexity.
 // So for now, keeping things simple.
-void Opengl::packTextures(std::vector<OpenglTexture>& textures) {
-    // First previously used layers are cleared before reuse
+void Opengl::packTextures(std::vector<OpenglTexture>& textures, const Layer layer) {
+    // First, indexes used by the layer are cleared and removed from the used list.
     auto empty_data = std::vector<u8>(texture_array_width * texture_array_height * 4);
-    for (auto i = 0; i <= texture_array_max_used_layer_; i++) {
-        glTexSubImage3D(GL_TEXTURE_2D_ARRAY,
-                        0,
-                        0,
-                        0,
-                        i,
-                        texture_array_width,
-                        texture_array_height,
-                        1,
-                        GLenum::GL_RGBA,
-                        GLenum::GL_UNSIGNED_BYTE,
-                        empty_data.data());
+    if (!layer_to_texture_array_indexes_[layer].empty()) {
+        for (const auto& index : layer_to_texture_array_indexes_[layer]) {
+            glTexSubImage3D(GL_TEXTURE_2D_ARRAY,
+                            0,
+                            0,
+                            0,
+                            index,
+                            texture_array_width,
+                            texture_array_height,
+                            1,
+                            GLenum::GL_RGBA,
+                            GLenum::GL_UNSIGNED_BYTE,
+                            empty_data.data());
+        }
+        std::vector<u8>().swap(layer_to_texture_array_indexes_[layer]);
     }
 
-    std::sort(textures.begin(), textures.end(), [](const OpenglTexture& a, const OpenglTexture& b) {
-        return a.size.h > b.size.h;
-    });
+    // Second, texture are sorted by horizontal size.
+    std::ranges::sort(textures, [](const OpenglTexture& a, const OpenglTexture& b) { return a.size.h > b.size.h; });
 
-    auto current_layer          = u16{};
+    auto current_index          = getCurrentTextureArrayIndex(layer);
     auto x_pos                  = u16{};
     auto y_pos                  = u16{};
     auto current_row_max_height = u16{};
 
-    for (auto& texture : textures) {
-        // if (texture.key == 0x8180518edf1c0411) DebugBreak();
-        // if (texture.key == 0xefc9178d67d050ee) DebugBreak();
+    for (const auto& texture : textures) {
         if ((x_pos + texture.size.w) > texture_array_width) {
             // Texture doesn't fit in the remaining space of the row ... looping around to next row using
             // the maximum height from the previous row.
@@ -898,15 +886,16 @@ void Opengl::packTextures(std::vector<OpenglTexture>& textures) {
 
         if ((y_pos + texture.size.h) > texture_array_width) {
             // Texture doesn't fit in the remaining space of the last row ... moving one layer forward.
-            ++current_layer;
+            current_index = getNextAvailableTextureArrayIndex();
+            layer_to_texture_array_indexes_.at(layer).push_back(current_index);
             x_pos                  = 0;
             y_pos                  = 0;
             current_row_max_height = 0;
         }
         // This is the position of the rectangle
-        textures_link_[texture.key].layer = current_layer;
-        textures_link_[texture.key].size  = texture.size;
-        textures_link_[texture.key].pos   = {x_pos, y_pos};
+        textures_link_[texture.key].texture_array_index = current_index;
+        textures_link_[texture.key].size                = texture.size;
+        textures_link_[texture.key].pos                 = {x_pos, y_pos};
 
         // Calculating the texture coordinates in the atlas
         // (x1,y1)     (x2,y1)
@@ -921,10 +910,10 @@ void Opengl::packTextures(std::vector<OpenglTexture>& textures) {
         auto y2 = static_cast<float>(y_pos + texture.size.h) / static_cast<float>(texture_array_height);
 
         auto coords = std::vector{
-            TextureCoordinates{x1, y1, static_cast<float>(current_layer)},
-            TextureCoordinates{x2, y1, static_cast<float>(current_layer)},
-            TextureCoordinates{x2, y2, static_cast<float>(current_layer)},
-            TextureCoordinates{x1, y2, static_cast<float>(current_layer)}
+            TextureCoordinates{x1, y1, static_cast<float>(current_index)},
+            TextureCoordinates{x2, y1, static_cast<float>(current_index)},
+            TextureCoordinates{x2, y2, static_cast<float>(current_index)},
+            TextureCoordinates{x1, y2, static_cast<float>(current_index)}
         };
         textures_link_[texture.key].coords.swap(coords);
 
@@ -935,7 +924,7 @@ void Opengl::packTextures(std::vector<OpenglTexture>& textures) {
         // Just saving the largest height in the new row
         if (texture.size.h > current_row_max_height) { current_row_max_height = texture.size.h; }
     }
-    texture_array_max_used_layer_ = current_layer;
+    // texture_array_max_used_layer_ = current_layer;
 }
 
 auto Opengl::getOpenglTexture(const size_t key) -> std::optional<OpenglTexture> {
@@ -947,12 +936,11 @@ auto Opengl::getOpenglTexture(const size_t key) -> std::optional<OpenglTexture> 
 auto Opengl::getOpenglTextureDetails(const size_t key) -> std::string {
     auto            details = std::string{};
     std::lock_guard lock(textures_link_mutex_);
-    const auto      it = textures_link_.find(key);
-    if (it != textures_link_.end()) {
+    if (const auto it = textures_link_.find(key); it != textures_link_.end()) {
         details += util::format("Key: 0x{:x}\n", it->second.key);
         details += util::format("Position: {},{}\n", it->second.pos.x, it->second.pos.y);
         details += util::format("Size: {},{}\n", it->second.size.w, it->second.size.h);
-        details += util::format("Layer: {}\n", it->second.layer);
+        details += util::format("Layer: {}\n", it->second.texture_array_index);
         details += util::format("X1: {},{},{}\n", it->second.coords[0].s, it->second.coords[0].t, it->second.coords[0].p);
         details += util::format("X2: {},{},{}\n", it->second.coords[1].s, it->second.coords[1].t, it->second.coords[1].p);
         details += util::format("Y2: {},{},{}\n", it->second.coords[2].s, it->second.coords[2].t, it->second.coords[2].p);
@@ -971,7 +959,7 @@ void Opengl::generateSubTexture(const size_t key) {
                             0,
                             ogl_tex->pos.x,
                             ogl_tex->pos.y,
-                            ogl_tex->layer,
+                            ogl_tex->texture_array_index,
                             ogl_tex->size.w,
                             ogl_tex->size.h,
                             1,
@@ -981,6 +969,32 @@ void Opengl::generateSubTexture(const size_t key) {
             checkGlError();
         }
     }
+}
+
+auto Opengl::getCurrentTextureArrayIndex(const Layer layer) -> u8 {
+    if (layer_to_texture_array_indexes_.at(layer).empty()) {
+        auto index = getNextAvailableTextureArrayIndex();
+        layer_to_texture_array_indexes_.at(layer).push_back(index);
+        return index;
+    } else {
+        return *std::ranges::max_element(layer_to_texture_array_indexes_.at(layer));
+    }
+}
+
+auto Opengl::getNextAvailableTextureArrayIndex() const -> u8 {
+    auto appended_indexes = std::vector<u8>();
+    for (const auto& [layer, indexes] : layer_to_texture_array_indexes_) {
+        appended_indexes.insert(appended_indexes.end(), indexes.begin(), indexes.end());
+    }
+
+    std::ranges::sort(appended_indexes, [](const u8 a, const u8& b) { return a < b; });
+
+    auto ref_index = u8{};
+    for (const auto index : appended_indexes) {
+        if (index > ref_index) { return ref_index; }
+        ++ref_index;
+    }
+    return ref_index;
 }
 
 auto Opengl::isSaturnResolutionSet() const -> bool {
@@ -1076,7 +1090,7 @@ auto Opengl::createProgramShader(const u32 vertex_shader, const u32 fragment_sha
 }
 
 // static
-void Opengl::deleteShaders(std::vector<u32> shaders) {
+void Opengl::deleteShaders(const std::vector<u32>& shaders) {
     for (auto shader : shaders) {
         glDeleteShader(shader);
     }
@@ -1297,8 +1311,6 @@ auto Opengl::initializeTextureArray() const -> u32 {
                  nullptr);                 // no data for now
 
     // set the texture wrapping parameters
-    // glTexParameteri(GLenum::GL_TEXTURE_2D, GLenum::GL_TEXTURE_WRAP_S, GLenum::GL_REPEAT);
-    // glTexParameteri(GLenum::GL_TEXTURE_2D, GLenum::GL_TEXTURE_WRAP_T, GLenum::GL_REPEAT);
     glTexParameteri(GLenum::GL_TEXTURE_2D_ARRAY, GLenum::GL_TEXTURE_WRAP_S, GLenum::GL_REPEAT);
     glTexParameteri(GLenum::GL_TEXTURE_2D_ARRAY, GLenum::GL_TEXTURE_WRAP_T, GLenum::GL_REPEAT);
 

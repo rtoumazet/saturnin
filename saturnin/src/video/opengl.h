@@ -27,10 +27,10 @@
 
 #include <Windows.h> // removes C4005 warning
 #include <imgui.h>
-#include <map>       // map
-#include <mutex>     // mutex
-#include <string>    // string
-#include <tuple>     // tuple
+#include <map>    // map
+#include <mutex>  // mutex
+#include <string> // string
+#include <tuple>  // tuple
 #include <glm/mat4x4.hpp>
 #include <saturnin/src/emulator_defs.h>
 #include <saturnin/src/video/vdp1_part.h> // Vdp1Part
@@ -85,13 +85,17 @@ using ShaderKey   = std::tuple<GlslVersion, ShaderType, ShaderName>;
 using ShadersList = std::map<ShaderKey, const char*>;
 
 struct OpenglTexture {
-    size_t                          key;       ///< The Saturn texture key.
-    u32                             opengl_id; ///< Identifier of the OpenGL texture.
-    u16                             layer;     ///< The layer (or index) in the texture array.
-    Size                            size;      ///< Texture size
-    ScreenPos                       pos;       ///< Position of the texture in the texture atlas.
-    std::vector<TextureCoordinates> coords;    ///< The coordinates in the texture atlas
+    size_t                          key;                 ///< The Saturn texture key.
+    u32                             opengl_id;           ///< Identifier of the OpenGL texture.
+    u16                             texture_array_index; ///< The layer (or index) in the texture array.
+    Size                            size;                ///< Texture size
+    ScreenPos                       pos;                 ///< Position of the texture in the texture atlas.
+    std::vector<TextureCoordinates> coords;              ///< The coordinates in the texture atlas
 };
+
+using LayerToTextures            = std::unordered_map<Layer, std::vector<OpenglTexture>>;
+using LayerToTextureArrayIndexes = std::unordered_map<Layer, std::vector<u8>>;
+using LayerToCacheReloadState    = std::unordered_map<Layer, bool>;
 
 using TexturesLink = std::unordered_map<size_t, OpenglTexture>;
 
@@ -110,13 +114,12 @@ class Opengl {
 
     ///@{
     /// Accessors / Mutators
-    //[[nodiscard]] auto textureArrayDebugLayerId() const { return texture_array_debug_layer_id_; };
     [[nodiscard]] auto currentRenderedBuffer() const { return current_rendered_buffer_; };
     void               currentRenderedBuffer(const FboType type) { current_rendered_buffer_ = type; };
     [[nodiscard]] auto vdp1DebugOverlayTextureId() const { return getFboTextureId(FboType::vdp1_debug_overlay); };
     [[nodiscard]] auto vdp2DebugLayerTextureId() const -> u32 { return getFboTextureId(FboType::vdp2_debug_layer); };
     [[nodiscard]] auto fps() const { return fps_; };
-    void               fps(std::string fps) { fps_ = fps; };
+    void               fps(std::string_view fps) { fps_ = fps; };
     void               saturnScreenResolution(const ScreenResolution& res) { saturn_screen_resolution_ = res; };
     auto               saturnScreenResolution() const -> ScreenResolution { return saturn_screen_resolution_; };
     void               hostScreenResolution(const ScreenResolution& res) { host_screen_resolution_ = res; };
@@ -257,17 +260,17 @@ class Opengl {
     static auto createProgramShader(u32 vertex_shader, u32 fragment_shader) -> u32;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn static void Opengl::deleteShaders(std::vector<u32> shaders);
+    /// \fn	static void Opengl::deleteShaders(const std::vector<u32>& shaders);
     ///
-    /// \brief  Deletes the shaders.
+    /// \brief	Deletes the shaders.
     ///
-    /// \author Runik
-    /// \date   26/04/2021
+    /// \author	Runik
+    /// \date	26/04/2021
     ///
-    /// \param  shaders The shaders to delete.
+    /// \param 	shaders	The shaders to delete.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    static void deleteShaders(std::vector<u32> shaders);
+    static void deleteShaders(const std::vector<u32>& shaders);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn static auto Opengl::generateTexture(u32 width, u32 height, const std::vector<u8>& data) -> u32;
@@ -375,7 +378,7 @@ class Opengl {
     void renderVdp2DebugLayer(core::EmulatorContext& state);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn void saturnin::video::Opengl::addOrUpdateTexture(const size_t key);
+    /// \fn void saturnin::video::Opengl::addOrUpdateTexture(const size_t key, const Layer layer);
     ///
     /// \brief  Adds a texture to be created or updated on OpenGL.
     ///
@@ -385,7 +388,7 @@ class Opengl {
     /// \param  key The texture key.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    void addOrUpdateTexture(const size_t key);
+    void addOrUpdateTexture(const size_t key, const Layer layer);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn void saturnin::video::Opengl::removeTextureLink(const size_t key);
@@ -573,17 +576,18 @@ class Opengl {
     auto getVertexesNumberByDrawType(const PartsList& parts_list) const -> u64;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn	void Opengl::packTextures(std::vector<OpenglTexture>& textures);
+    /// \fn	void Opengl::packTextures(std::vector<OpenglTexture>& textures, const Layer layer);
     ///
-    /// \brief	Pack textures in a texture array of texture atlases.
+    /// \brief	Pack textures in a texture array of texture atlases for the selected layer.
     ///
     /// \author	Runik
     /// \date	22/09/2022
     ///
     /// \param [in,out]	textures	The textures to pack.
+    /// \param 		   	layer   	The layer.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    void packTextures(std::vector<OpenglTexture>& textures);
+    void packTextures(std::vector<OpenglTexture>& textures, const Layer layer);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn	void Opengl::generateSubTexture(const size_t key);
@@ -598,39 +602,68 @@ class Opengl {
 
     void generateSubTexture(const size_t key);
 
-    core::Config* config_;                        ///< Configuration object.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn	auto Opengl::getCurrentTextureArrayIndex(const Layer layer) -> u8;
+    ///
+    /// \brief	Returns the current texture array index used by one layer.
+    ///
+    /// \author	Runik
+    /// \date	15/09/2023
+    ///
+    /// \param 	layer	Layer.
+    ///
+    /// \returns	The current texture array index used by the layer.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    FboList fbo_list_;                            ///< List of framebuffer objects used in the program.
-    FboType current_rendered_buffer_;             ///< The current rendered buffer (front or back)
+    auto getCurrentTextureArrayIndex(const Layer layer) -> u8;
 
-    bool is_legacy_opengl_{};                     ///< True if rendering in legacy opengl.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn	void Opengl::getNextAvailableTextureArrayIndex() const;
+    ///
+    /// \brief	Returns the next available texture array index regardless of the layer.
+    ///
+    /// \author	Runik
+    /// \date	15/09/2023
+    ///
+    /// \returns    Texture array index.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    auto getNextAvailableTextureArrayIndex() const -> u8;
+
+    core::Config* config_; ///< Configuration object.
+
+    FboList fbo_list_;                ///< List of framebuffer objects used in the program.
+    FboType current_rendered_buffer_; ///< The current rendered buffer (front or back)
+
+    bool is_legacy_opengl_{}; ///< True if rendering in legacy opengl.
 
     ScreenResolution saturn_screen_resolution_{}; ///< Saturn screen resolution.
     ScreenResolution host_screen_resolution_{};   ///< Host screen resolution.
 
-    PartsList parts_list_;                        // Will have to be moved to the platform agnostic renderer.
-    Vdp1Part  part_to_highlight_;                 ///< Part that will be highlighted during debug.
+    PartsList parts_list_;        // Will have to be moved to the platform agnostic renderer.
+    Vdp1Part  part_to_highlight_; ///< Part that will be highlighted during debug.
 
-    u32          texture_array_id_;               ///< Identifier for the texture array.
-    TexturesLink textures_link_;                  ///< Link between the Texture key and the OpenglTexture.
-    u32          texture_array_debug_layer_id_{}; ///< Identifier for the texture array debug layer.
-    u16          texture_array_max_used_layer_{}; ///< Maximum used layer of the texture array.
+    u32                        texture_array_id_;                 ///< Identifier for the texture array.
+    TexturesLink               textures_link_;                    ///< Link between the Texture key and the OpenglTexture.
+    u32                        texture_array_debug_layer_id_{};   ///< Identifier for the texture array debug layer.
+    LayerToTextureArrayIndexes layer_to_texture_array_indexes_{}; ///< Link between layers and texture array indexes.
+    LayerToCacheReloadState    layer_to_cache_reload_state_{};    ///< Stores if a layer needs its cache to be reloaded .
 
     // std::vector<u32> textures_to_delete_; ///< List of the textures id to delete.
 
-    std::mutex parts_list_mutex_;            ///< Mutex protecting parts_list_.
-    std::mutex textures_link_mutex_;         ///< Mutex protecting textures_link_.
-    std::mutex texture_delete_mutex_;        ///< Mutex protecting textures_to_delete_.
+    std::mutex parts_list_mutex_;     ///< Mutex protecting parts_list_.
+    std::mutex textures_link_mutex_;  ///< Mutex protecting textures_link_.
+    std::mutex texture_delete_mutex_; ///< Mutex protecting textures_to_delete_.
 
     std::condition_variable data_condition_; ///< Condition variable to synchronize between emulation and UI thread.
 
-    PartsList parts_list_debug_;             ///< List of parts used to generate textures for debugging
-                                             // Will have to be moved to the platform agnostic renderer.
+    PartsList parts_list_debug_; ///< List of parts used to generate textures for debugging
+                                 // Will have to be moved to the platform agnostic renderer.
 
-    u32         program_shader_;             ///< Program shader used to render parts.
-    ShadersList shaders_list_;               ///< List of shaders.
+    u32         program_shader_; ///< Program shader used to render parts.
+    ShadersList shaders_list_;   ///< List of shaders.
 
-    std::string fps_;                        ///< The frames per second.
+    std::string fps_; ///< The frames per second.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
