@@ -2,9 +2,8 @@ name: MSBuild
 
 on:
   push:
-    branches: [ "master","sh2-perfs" ]
   pull_request:
-    branches: [ "master","sh2-perfs" ]
+    branches: [ "master" ]
 
 env:
   # Path to the solution file relative to the root of the project.
