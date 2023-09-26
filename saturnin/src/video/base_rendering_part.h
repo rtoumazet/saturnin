@@ -52,17 +52,17 @@ class BaseRenderingPart {
     ///@}
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn static auto BaseRenderingPart::getGlobalOrder() -> const u32
+    /// \fn	static auto BaseRenderingPart::getGlobalOrder() -> u32
     ///
-    /// \brief  Returns current global order value, which is incremented after being returned.
+    /// \brief	Returns current global order value, which is incremented after being returned.
     ///
-    /// \author Runik
-    /// \date   17/02/2021
+    /// \author	Runik
+    /// \date	17/02/2021
     ///
-    /// \returns    A const u32.
+    /// \returns	A const u32.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    static auto getGlobalOrder() -> const u32 { return global_order_++; }
+    static auto getGlobalOrder() -> u32 { return global_order_++; }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn static void BaseRenderingPart::resetGlobalOrder()
@@ -75,28 +75,17 @@ class BaseRenderingPart {
 
     static void resetGlobalOrder() { global_order_ = 0; }
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn virtual void BaseRenderingPart::renderPart() = 0;
-    ///
-    /// \brief  Renders the current part.
-    ///
-    /// \author Runik
-    /// \date   18/03/2021
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    // virtual void renderPart() = 0;
-
     ///@{
     /// Accessors / Mutators
     void               vdpType(const VdpType p) { vdp_type_ = p; };
-    [[nodiscard]] auto vdpType() const -> const VdpType { return vdp_type_; };
+    [[nodiscard]] auto vdpType() const -> VdpType { return vdp_type_; };
     void               drawType(const DrawType d) { draw_type_ = d; };
-    [[nodiscard]] auto drawType() const -> const DrawType { return draw_type_; };
+    [[nodiscard]] auto drawType() const -> DrawType { return draw_type_; };
     void               priority(const u8 p) { priority_ = p; };
-    [[nodiscard]] auto priority() const -> const u8 { return priority_; };
+    [[nodiscard]] auto priority() const -> u8 { return priority_; };
     void               textureKey(const size_t k) { texture_key_ = k; };
-    [[nodiscard]] auto textureKey() const -> const size_t { return texture_key_; };
-    [[nodiscard]] auto colorOffset() const -> const std::array<float, 3> {
+    [[nodiscard]] auto textureKey() const -> size_t { return texture_key_; };
+    [[nodiscard]] auto colorOffset() const -> std::array<float, 3> {
         return std::array<float, 3>{color_offset_.r, color_offset_.g, color_offset_.b};
     };
     ///@}
@@ -110,7 +99,10 @@ class BaseRenderingPart {
                       const u8       priority     = {},
                       const ColorF   color_offset = {}) :
         vdp_type_(vdp_type),
-        draw_type_(draw_type), texture_key_(texture_key), priority_(priority), color_offset_(color_offset){};
+        draw_type_(draw_type),
+        priority_(priority),
+        texture_key_(texture_key),
+        color_offset_(color_offset){};
 
   private:
     VdpType           vdp_type_{VdpType::not_set};     ///< Type of the part.

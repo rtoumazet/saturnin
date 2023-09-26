@@ -90,12 +90,22 @@ struct OpenglTexture {
     u16                             texture_array_index; ///< The layer (or index) in the texture array.
     Size                            size;                ///< Texture size
     ScreenPos                       pos;                 ///< Position of the texture in the texture atlas.
-    std::vector<TextureCoordinates> coords;              ///< The coordinates in the texture atlas
+    std::vector<TextureCoordinates> coords;              ///< The coordinates of the texture.
+};
+
+struct PlaneTexture {
+    u32                             start_address;       ///< Plane start address
+    ScreenOffset                    screen_offset;       ///< The screen offset of the plane
+    u16                             texture_array_index; ///< The index in the texture array.
+    Size                            size;                ///< Texture size
+    ScreenPos                       pos;                 ///< Position of the texture in the texture atlas.
+    std::vector<TextureCoordinates> coords;              ///< The coordinates of the texture.
 };
 
 using LayerToTextures            = std::unordered_map<Layer, std::vector<OpenglTexture>>;
 using LayerToTextureArrayIndexes = std::unordered_map<Layer, std::vector<u8>>;
 using LayerToCacheReloadState    = std::unordered_map<Layer, bool>;
+using LayerToPlaneTextures       = std::unordered_map<Layer, std::vector<PlaneTexture>>;
 
 using TexturesLink = std::unordered_map<size_t, OpenglTexture>;
 
@@ -648,6 +658,7 @@ class Opengl {
     u32                        texture_array_debug_layer_id_{};   ///< Identifier for the texture array debug layer.
     LayerToTextureArrayIndexes layer_to_texture_array_indexes_{}; ///< Link between layers and texture array indexes.
     LayerToCacheReloadState    layer_to_cache_reload_state_{};    ///< Stores if a layer needs its cache to be reloaded .
+    LayerToPlaneTextures       layer_to_plane_textures_{};        ///< Link between a layer and its composing planes.
 
     // std::vector<u32> textures_to_delete_; ///< List of the textures id to delete.
 

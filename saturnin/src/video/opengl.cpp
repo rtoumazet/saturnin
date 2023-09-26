@@ -814,12 +814,8 @@ void Opengl::generateTextures() {
     // it's not mandatory to regenerate the whole texture atlas every frame.
 
     // OpenglTextures don't have to be deleted, as they are part of a texture atlas now
+
     //
-    // First implementation :
-    // - Clear used texture atlas
-    // - Generate as many texture atlas as needed using
-    // 1. Loop on the Textures
-    // 2. For each Texture
 
     auto local_textures_link = TexturesLink();
     local_textures_link      = textures_link_;
