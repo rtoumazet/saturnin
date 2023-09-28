@@ -54,9 +54,9 @@ using utilities::toUnderlying;
 
 constexpr auto minimum_window_width  = u16{512};
 constexpr auto minimum_window_height = u16{512};
-constexpr auto texture_array_width   = u16{512};
-constexpr auto texture_array_height  = u16{512};
-constexpr auto texture_array_depth   = u16{128};
+constexpr auto texture_array_width   = u16{1024};
+constexpr auto texture_array_height  = u16{1024};
+constexpr auto texture_array_depth   = u16{64};
 
 enum class FboType : u8 {
     front_buffer,
@@ -105,7 +105,7 @@ struct PlaneTexture {
 using LayerToTextures            = std::unordered_map<Layer, std::vector<OpenglTexture>>;
 using LayerToTextureArrayIndexes = std::unordered_map<Layer, std::vector<u8>>;
 using LayerToCacheReloadState    = std::unordered_map<Layer, bool>;
-using LayerToPlaneTextures       = std::unordered_map<Layer, std::vector<PlaneTexture>>;
+using AddressToPlaneTexture      = std::unordered_map<u32, PlaneTexture>;
 
 using TexturesLink = std::unordered_map<size_t, OpenglTexture>;
 
@@ -658,7 +658,7 @@ class Opengl {
     u32                        texture_array_debug_layer_id_{};   ///< Identifier for the texture array debug layer.
     LayerToTextureArrayIndexes layer_to_texture_array_indexes_{}; ///< Link between layers and texture array indexes.
     LayerToCacheReloadState    layer_to_cache_reload_state_{};    ///< Stores if a layer needs its cache to be reloaded .
-    LayerToPlaneTextures       layer_to_plane_textures_{};        ///< Link between a layer and its composing planes.
+    AddressToPlaneTexture      address_to_plane_textures_{};      ///< Link between an address and its plane.
 
     // std::vector<u32> textures_to_delete_; ///< List of the textures id to delete.
 
