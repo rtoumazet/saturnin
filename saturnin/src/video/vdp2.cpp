@@ -3285,15 +3285,7 @@ void Vdp2::readScrollScreenData(const ScrollScreen s) {
         address_to_plane_data_.clear();
 
         for (const auto& [addr, offset] : start_addresses) {
-            if (address_to_plane_data_.contains(addr)) {
-                // transform needed
-                // vdp2_parts_[util::toUnderlying(screen.scroll_screen)].resize(
-                //    vdp2_parts_[util::toUnderlying(screen.scroll_screen)].size() + address_to_plane_data_[addr].size());
-
-                std::ranges::transform(address_to_plane_data_[addr],
-                                       std::back_inserter(vdp2_parts_[util::toUnderlying(screen.scroll_screen)]),
-                                       [&offset](Vdp2Part vp) { return vp; });
-            } else {
+            if (!address_to_plane_data_.contains(addr)) {
                 current_plane_address_ = addr;
                 readPlaneData(screen, addr, offset);
                 vdp2_parts_[util::toUnderlying(screen.scroll_screen)].insert(
@@ -3523,8 +3515,8 @@ void Vdp2::readPageData(const ScrollScreenStatus& screen, const u32 page_address
 
     // Assigning the current configuration function to a function pointer
     // Not using std::function here because of the performance cost.
-    using PatterNameDataFunc = PatternNameData (*)(const u32, const ScrollScreenStatus&);
-    auto readPatternNameData = PatterNameDataFunc();
+    using PatterNameDataFunc                                       = PatternNameData (*)(const u32, const ScrollScreenStatus&);
+    auto                                       readPatternNameData = PatterNameDataFunc();
     switch (current_pnd_config) {
         using enum PatternNameDataEnum;
         case two_words: readPatternNameData = reinterpret_cast<PatterNameDataFunc>(&getPatternNameData2Words); break;
@@ -3830,8 +3822,9 @@ void Vdp2::saveCell(const ScrollScreenStatus& screen,
 
     auto pos = ScreenPos{static_cast<u16>(cell_offset.x * texture_width), static_cast<u16>(cell_offset.y * texture_height)};
 
-    pos.x -= screen.scroll_offset_horizontal;
-    pos.y -= screen.scroll_offset_vertical;
+    //: TODO: scroll offset must be handled during display, put in comments here for now
+    // pos.x -= screen.scroll_offset_horizontal;
+    // pos.y -= screen.scroll_offset_vertical;
 
     // vdp2_parts_[util::toUnderlying(screen.scroll_screen)].emplace_back(pnd,
     //                                                                    pos,
