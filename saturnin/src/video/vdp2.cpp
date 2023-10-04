@@ -3273,17 +3273,14 @@ void Vdp2::readScrollScreenData(const ScrollScreen s) {
             addPlane(screen.plane_p_start_address, ScreenOffset{static_cast<u16>(offset_x * 3), static_cast<u16>(offset_y * 3)});
         }
 
-        // Unique addresses are handled
-        // for (const auto& [addr, offset] : start_addresses) {
-        //    readPlaneData(screen, addr, offset);
-        //}
-
-        // Reset planes data
+        // Reset planes data. Currently done at every frame, but could be saved between frames in order to speed up display ...
+        // needs an update detection (size + color mode + nbg + etc. )
         for (auto& [address, parts] : address_to_plane_data_) {
             std::vector<Vdp2Part>().swap(parts);
         }
         address_to_plane_data_.clear();
 
+        // Each plane similar data is only read once, even if it's used multiple times.
         for (const auto& [addr, offset] : start_addresses) {
             if (!address_to_plane_data_.contains(addr)) {
                 current_plane_address_ = addr;

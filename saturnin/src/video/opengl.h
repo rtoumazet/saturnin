@@ -94,7 +94,6 @@ struct OpenglTexture {
 };
 
 struct PlaneTexture {
-    u32                             start_address;       ///< Plane start address
     ScreenOffset                    screen_offset;       ///< The screen offset of the plane
     u16                             texture_array_index; ///< The index in the texture array.
     Size                            size;                ///< Texture size
