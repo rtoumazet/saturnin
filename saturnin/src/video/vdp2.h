@@ -403,6 +403,21 @@ struct CellData {
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \struct PlaneDetail
+///
+/// \brief  Stores details of a plane, used for rendering.
+///
+/// \author Runik
+/// \date   06/10/2023
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+struct PlaneDetail {
+    u32          start_address;
+    ScreenOffset screen_offset;
+    PlaneDetail(const u32 sa, const ScreenOffset so) : start_address(sa), screen_offset(so){};
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \struct	PatternNameData2Words
 ///
 /// \brief	Pattern Name Data - 2 words configuration.
@@ -1929,6 +1944,7 @@ class Vdp2 {
     AddressToPlaneData address_to_plane_data_; ///< Stores plane data to improve performance when a same address is used multiple
     u32                current_plane_address_; ///< The current plane address.
                                                ///< times in the same NBG / RBG.
+    std::array<std::vector<PlaneDetail>, 6> planes_details_; ///< Stores planes détails for every scroll.
 
     ScrollScreen         screen_in_debug_{ScrollScreen::none}; ///< Scroll screen currently viewed in debug.
     DisabledScrollScreen disabled_scroll_screens_;             ///< Disabling state of scroll screens.

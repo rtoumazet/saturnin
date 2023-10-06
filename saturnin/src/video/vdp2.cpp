@@ -3280,8 +3280,12 @@ void Vdp2::readScrollScreenData(const ScrollScreen s) {
         }
         address_to_plane_data_.clear();
 
+        std::vector<PlaneDetail>().swap(planes_details_[util::toUnderlying(screen.scroll_screen)]);
+
         // Each plane similar data is only read once, even if it's used multiple times.
         for (const auto& [addr, offset] : start_addresses) {
+            planes_details_[util::toUnderlying(screen.scroll_screen)].emplace_back(addr, offset);
+
             if (!address_to_plane_data_.contains(addr)) {
                 current_plane_address_ = addr;
                 readPlaneData(screen, addr, offset);
@@ -3829,11 +3833,8 @@ void Vdp2::saveCell(const ScrollScreenStatus& screen,
     //                                                                    screen.priority_number,
     //                                                                    screen.color_offset.as_float);
 
-    address_to_plane_data_[current_plane_address_].emplace_back(pnd,
-                                                                pos,
-                                                                key,
-                                                                screen.priority_number,
-                                                                screen.color_offset.as_float);
+    address_to_plane_data_[current_plane_address_]
+        .emplace_back(pnd, pos, key, screen.priority_number, screen.color_offset.as_float, current_plane_address_);
 }
 
 auto Vdp2::getColorRamAddressOffset(const u8 register_offset) const -> u16 {

@@ -50,7 +50,8 @@ class Vdp2Part final : public BaseRenderingPart {
              const ScreenPos&       pos,
              const size_t           texture_key,
              const u8               priority,
-             const ColorF&          color_offset);
+             const ColorF&          color_offset,
+             const u32              linked_plane_address);
     Vdp2Part(size_t        texture_key,
              const u16     texture_width,
              const u16     texture_height,
@@ -69,5 +70,6 @@ class Vdp2Part final : public BaseRenderingPart {
     u16       palette_number_{};          ///< The palette number.
     bool      is_horizontally_flipped_{}; ///< True if the part is horizontally flipped.
     bool      is_vertically_flipped_{};   ///< True if the part is vertically flipped.
+    u32       linked_plane_address_{};    ///< Address of the linked plane, used to generate the plane texture while rendering.
 };
 } // namespace saturnin::video

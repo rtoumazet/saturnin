@@ -27,13 +27,15 @@ Vdp2Part::Vdp2Part(const PatternNameData& pnd,
                    const ScreenPos&       pos,
                    const size_t           texture_key,
                    const u8               priority,
-                   const ColorF&          color_offset) :
+                   const ColorF&          color_offset,
+                   const u32              linked_plane_address) :
     BaseRenderingPart(VdpType::vdp2, DrawType::textured_polygon, texture_key, priority, color_offset),
     scroll_screen_pos_(pos),
     character_number_(pnd.character_number),
     palette_number_(pnd.palette_number),
     is_horizontally_flipped_(pnd.is_horizontally_flipped),
-    is_vertically_flipped_(pnd.is_vertically_flipped) {
+    is_vertically_flipped_(pnd.is_vertically_flipped),
+    linked_plane_address_(linked_plane_address) {
     // Vdp2 parts are 8*8 pixels squares
     constexpr auto cell_width   = u8{8};
     constexpr auto cell_height  = u8{8};
