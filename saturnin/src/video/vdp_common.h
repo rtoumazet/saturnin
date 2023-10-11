@@ -50,7 +50,19 @@ enum class VdpType { not_set, vdp1, vdp2 };
 /// \brief	Values that represent rendered layers.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class Layer { nbg0 = 0, rbg1 = 0, nbg1 = 1, exbg = 1, nbg2 = 2, nbg3 = 3, rbg0 = 4, back = 5, sprite = 6, undefined = -1 };
+enum class Layer {
+    nbg0      = 0,
+    rbg1      = 0,
+    nbg1      = 1,
+    exbg      = 1,
+    nbg2      = 2,
+    nbg3      = 3,
+    rbg0      = 4,
+    back      = 5,
+    sprite    = 6,
+    plane     = 7,
+    undefined = -1
+};
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \enum   DrawType
