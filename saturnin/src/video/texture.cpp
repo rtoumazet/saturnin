@@ -30,9 +30,6 @@ using core::Log;
 using core::Logger;
 using core::tr;
 
-using ReadOnlyLock  = std::shared_lock<SharedMutex>;
-using UpdatableLock = std::unique_lock<SharedMutex>;
-
 std::unordered_map<size_t, Texture> Texture::texture_storage_;
 SharedMutex                         Texture::storage_mutex_;
 

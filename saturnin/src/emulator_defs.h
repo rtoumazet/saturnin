@@ -49,8 +49,10 @@ using s64  = std::int64_t;
 using LabelValue       = std::pair<std::string, std::optional<std::string>>;
 using AddressToNameMap = std::map<u32, std::string>;
 
-using Mutex       = std::mutex;
-using SharedMutex = std::shared_mutex;
+using Mutex         = std::mutex;
+using SharedMutex   = std::shared_mutex;
+using ReadOnlyLock  = std::shared_lock<SharedMutex>;
+using UpdatableLock = std::unique_lock<SharedMutex>;
 
 constexpr auto sign_bit_48_mask = u64{0x800000000000};
 constexpr auto sign_bit_32_mask = u32{0x80000000};

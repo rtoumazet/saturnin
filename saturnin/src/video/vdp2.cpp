@@ -3275,9 +3275,9 @@ void Vdp2::readScrollScreenData(const ScrollScreen s) {
 
         // Reset planes data. Currently done at every frame, but could be saved between frames in order to speed up display ...
         // needs an update detection (size + color mode + nbg + etc. )
-        for (auto& [address, parts] : address_to_plane_data_) {
-            std::vector<Vdp2Part>().swap(parts);
-        }
+        // for (auto& [address, parts] : address_to_plane_data_) {
+        //    std::vector<Vdp2Part>().swap(parts);
+        //}
         address_to_plane_data_.clear();
 
         std::vector<PlaneDetail>().swap(planes_details_[util::toUnderlying(screen.scroll_screen)]);
@@ -3827,14 +3827,11 @@ void Vdp2::saveCell(const ScrollScreenStatus& screen,
     // pos.x -= screen.scroll_offset_horizontal;
     // pos.y -= screen.scroll_offset_vertical;
 
-    // vdp2_parts_[util::toUnderlying(screen.scroll_screen)].emplace_back(pnd,
-    //                                                                    pos,
-    //                                                                    key,
-    //                                                                    screen.priority_number,
-    //                                                                    screen.color_offset.as_float);
-
-    address_to_plane_data_[current_plane_address_]
+    vdp2_parts_[util::toUnderlying(screen.scroll_screen)]
         .emplace_back(pnd, pos, key, screen.priority_number, screen.color_offset.as_float, current_plane_address_);
+
+    // address_to_plane_data_[current_plane_address_]
+    //     .emplace_back(pnd, pos, key, screen.priority_number, screen.color_offset.as_float, current_plane_address_);
 }
 
 auto Vdp2::getColorRamAddressOffset(const u8 register_offset) const -> u16 {

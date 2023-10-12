@@ -59,7 +59,7 @@ using seconds = std::chrono::duration<double>;
 using milli   = std::chrono::duration<double, std::milli>;
 using micro   = std::chrono::duration<double, std::micro>;
 
-using AddressToPlaneData = std::unordered_map<u32, std::vector<Vdp2Part>>;
+using AddressToPlaneData = std::unordered_map<u32, std::vector<Vdp2PartPosition>>;
 
 constexpr auto vram_banks_number  = u8{4};
 constexpr auto vram_bank_a0_index = u8{0};
@@ -1938,13 +1938,13 @@ class Vdp2 {
     std::vector<u32> pre_calculated_modulo_64_{}; ///< The pre calculated modulo 64
     std::vector<u32> pre_calculated_modulo_32_{}; ///< The pre calculated modulo 32
 
-    Mutex                                vdp2_parts_mutex_;     ///< Mutex to handle access to the shared vector between threads.
     std::array<std::vector<Vdp2Part>, 6> vdp2_parts_;           ///< Storage of rendering parts for each scroll cell.
     std::vector<CellData>                cell_data_to_process_; ///< Will store cell data before parallelized read for one scroll.
+    std::mutex                           plane_data_mutex_;     ///< Mutex protecting address_to_plane_data_.
     AddressToPlaneData address_to_plane_data_; ///< Stores plane data to improve performance when a same address is used multiple
     u32                current_plane_address_; ///< The current plane address.
                                                ///< times in the same NBG / RBG.
-    std::array<std::vector<PlaneDetail>, 6> planes_details_; ///< Stores planes détails for every scroll.
+    std::array<std::vector<PlaneDetail>, 6> planes_details_; ///< Stores planes details for every scroll.
 
     ScrollScreen         screen_in_debug_{ScrollScreen::none}; ///< Scroll screen currently viewed in debug.
     DisabledScrollScreen disabled_scroll_screens_;             ///< Disabling state of scroll screens.

@@ -418,4 +418,19 @@ struct DataExtraction {
     As4BitsType as_4bits;
 };
 
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \struct	Vdp2PartPosition
+///
+/// \brief	Stores the position and texture key of a Vdp2Part.
+///
+/// \author	Runik
+/// \date	12/10/2023
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+struct Vdp2PartPosition {
+    ScreenOffset plane_position; ///< Position of the part in the plane.
+    size_t       key;            ///< Key of the part, used to get the correct part texture.
+    Vdp2PartPosition(const ScreenOffset plane_position, const size_t key) : plane_position(plane_position), key(key){};
+};
+
 } // namespace saturnin::video

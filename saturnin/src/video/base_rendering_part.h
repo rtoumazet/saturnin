@@ -108,9 +108,8 @@ class BaseRenderingPart {
     VdpType           vdp_type_{VdpType::not_set};     ///< Type of the part.
     DrawType          draw_type_{DrawType::undefined}; ///< Type of the draw
     u8                priority_{0};                    ///< Priority of the part.
-    u32               order_{0};        ///< Creation order for the same priority parts (mostly used for VDP1 parts).
-    static inline u32 global_order_{0}; ///< Static variable used to get the current part order.
-    size_t            texture_key_{};   ///< Link to the texture.
-    ColorF            color_offset_{};  ///< Color offset for the part.
+    static inline u32 global_order_{0};                ///< Static variable used to get the current part order.
+    size_t            texture_key_{};                  ///< Link to the texture.
+    ColorF            color_offset_{};                 ///< Color offset for the part.
 };
 } // namespace saturnin::video
