@@ -3278,7 +3278,7 @@ void Vdp2::readScrollScreenData(const ScrollScreen s) {
         // for (auto& [address, parts] : address_to_plane_data_) {
         //    std::vector<Vdp2Part>().swap(parts);
         //}
-        address_to_plane_data_.clear();
+        auto local_address_to_plane_data = AddressToPlaneData{};
 
         std::vector<PlaneDetail>().swap(planes_details_[util::toUnderlying(screen.scroll_screen)]);
 
@@ -3286,14 +3286,15 @@ void Vdp2::readScrollScreenData(const ScrollScreen s) {
         for (const auto& [addr, offset] : start_addresses) {
             planes_details_[util::toUnderlying(screen.scroll_screen)].emplace_back(addr, offset);
 
-            if (!address_to_plane_data_.contains(addr)) {
+            if (!local_address_to_plane_data.contains(addr)) {
                 current_plane_address_ = addr;
                 readPlaneData(screen, addr, offset);
-                vdp2_parts_[util::toUnderlying(screen.scroll_screen)].insert(
-                    vdp2_parts_[util::toUnderlying(screen.scroll_screen)].end(),
-                    address_to_plane_data_[addr].begin(),
-                    address_to_plane_data_[addr].end());
             }
+        }
+
+        // Creation of the vdp2 parts positions which will be used to generate plane textures.
+        for (const auto& vp : vdp2_parts_[util::toUnderlying(screen.scroll_screen)]) {
+            local_address_to_plane_data[vp.linkedPlaneAddress()].emplace_back(vp.scrollScreenPos(), vp.textureKey());
         }
 
         if (use_concurrent_read_for_cells) { ThreadPool::pool_.wait_for_tasks(); }
@@ -3829,9 +3830,6 @@ void Vdp2::saveCell(const ScrollScreenStatus& screen,
 
     vdp2_parts_[util::toUnderlying(screen.scroll_screen)]
         .emplace_back(pnd, pos, key, screen.priority_number, screen.color_offset.as_float, current_plane_address_);
-
-    // address_to_plane_data_[current_plane_address_]
-    //     .emplace_back(pnd, pos, key, screen.priority_number, screen.color_offset.as_float, current_plane_address_);
 }
 
 auto Vdp2::getColorRamAddressOffset(const u8 register_offset) const -> u16 {

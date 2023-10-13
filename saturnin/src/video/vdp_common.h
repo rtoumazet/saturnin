@@ -428,9 +428,9 @@ struct DataExtraction {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 struct Vdp2PartPosition {
-    ScreenOffset plane_position; ///< Position of the part in the plane.
-    size_t       key;            ///< Key of the part, used to get the correct part texture.
-    Vdp2PartPosition(const ScreenOffset plane_position, const size_t key) : plane_position(plane_position), key(key){};
+    ScreenPos plane_position; ///< Position of the part in the plane.
+    size_t    key;            ///< Key of the part, used to get the correct part texture.
+    Vdp2PartPosition(const ScreenPos plane_position, const size_t key) : plane_position(plane_position), key(key){};
 };
 
 } // namespace saturnin::video

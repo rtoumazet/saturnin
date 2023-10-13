@@ -64,6 +64,9 @@ class Vdp2Part final : public BaseRenderingPart {
     ~Vdp2Part() override                           = default;
     ///@}
 
+    auto scrollScreenPos() const -> ScreenPos { return scroll_screen_pos_; }
+    auto linkedPlaneAddress() const -> u32 { return linked_plane_address_; }
+
   private:
     ScreenPos scroll_screen_pos_{};       ///< Position in the scroll screen.
     u16       character_number_{};        ///< The character number.
