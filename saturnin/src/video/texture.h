@@ -112,6 +112,19 @@ class Texture {
     static void storeTextures(std::vector<Texture>& textures);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn	static void Texture::storePlaneData(AddressToPlaneData& address_to_plane_data);
+    ///
+    /// \brief	Stores plane data needed to generate plane textures
+    ///
+    /// \author	Runik
+    /// \date	13/10/2023
+    ///
+    /// \param [in,out]	address_to_plane_data	Information describing the address to plane.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    static void storePlaneData(AddressToPlaneData& address_to_plane_data);
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn	static auto Texture::getTexture(const size_t key) -> std::optional<Texture*>;
     ///
     /// \brief	Gets a texture
@@ -279,8 +292,9 @@ class Texture {
     static auto calculateTextureSize(const Size& max_size, const size_t texture_key) -> Size;
 
   private:
-    static std::unordered_map<size_t, Texture> texture_storage_; ///< The current texture storage.
-    static SharedMutex                         storage_mutex_;   ///< Used for multithreading access to the texture pool.
+    static std::unordered_map<size_t, Texture> texture_storage_;       ///< The current texture storage.
+    static SharedMutex                         storage_mutex_;         ///< Used for multithreading access to the texture pool.
+    static AddressToPlaneData                  address_to_plane_data_; ///< Information describing the address to plane
 
     VdpType vdp_type_{VdpType::not_set}; ///< What kind of VDP type is linked to this texture.
     Layer   layer_;                      ///< Layer linked to this texture.

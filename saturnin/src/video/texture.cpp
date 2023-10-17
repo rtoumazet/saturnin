@@ -32,6 +32,7 @@ using core::tr;
 
 std::unordered_map<size_t, Texture> Texture::texture_storage_;
 SharedMutex                         Texture::storage_mutex_;
+AddressToPlaneData                  Texture::address_to_plane_data_;
 
 Texture::Texture(const VdpType    vp,
                  const Layer      layer,
@@ -67,6 +68,11 @@ void Texture::storeTextures(std::vector<Texture>& textures) {
         texture_storage_.erase(t.key());
         texture_storage_.try_emplace(t.key(), std::move(t));
     }
+}
+
+void Texture::storePlaneData(AddressToPlaneData& address_to_plane_data) {
+    UpdatableLock lock(storage_mutex_);
+    address_to_plane_data_.swap(address_to_plane_data);
 }
 
 auto Texture::getTexture(const size_t key) -> std::optional<Texture*> {
