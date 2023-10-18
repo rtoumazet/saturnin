@@ -269,7 +269,6 @@ void Opengl::initializeShaders() {
 void Opengl::displayFramebuffer(core::EmulatorContext& state) {
     // if (is_saturn_data_available_) return;
 
-    using PartsList = std::vector<std::unique_ptr<video::BaseRenderingPart>>;
     auto parts_list = PartsList{};
 
     const auto addVdp2PartsToList = [&](const ScrollScreen s) {
@@ -718,6 +717,8 @@ void Opengl::addOrUpdateTexture(const size_t key, const Layer layer) {
 
 void Opengl::removeTextureLink(const size_t key) { textures_link_.erase(key); }
 
+void Opengl::generatePlanesTextures() {}
+
 void Opengl::generateTextures() {
     // Textures are generated in a 128 layers texture array, each layer being a texture atlas of
     // 1024*1024 pixels.
@@ -747,6 +748,9 @@ void Opengl::generateTextures() {
     for (auto& [layer, textures] : layer_to_textures) {
         if (layer_to_cache_reload_state_[layer]) { packTextures(textures, layer); }
     }
+
+    // Generate planes textures, based on previously generated vdp2 parts textures.
+    generatePlanesTextures();
 
     // Reset cache reload state
     for (auto& [layer, state] : layer_to_cache_reload_state_) {

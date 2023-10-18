@@ -3278,15 +3278,15 @@ void Vdp2::readScrollScreenData(const ScrollScreen s) {
         // for (auto& [address, parts] : address_to_plane_data_) {
         //    std::vector<Vdp2Part>().swap(parts);
         //}
-        auto local_address_to_plane_data = AddressToPlaneData{};
+        auto address_to_plane_data = AddressToPlaneData{};
 
-        std::vector<PlaneDetail>().swap(planes_details_[util::toUnderlying(screen.scroll_screen)]);
+        std::vector<PlaneDetail>().swap(plane_details_[util::toUnderlying(screen.scroll_screen)]);
 
         // Each plane similar data is only read once, even if it's used multiple times.
         for (const auto& [addr, offset] : start_addresses) {
-            planes_details_[util::toUnderlying(screen.scroll_screen)].emplace_back(addr, offset);
+            plane_details_[util::toUnderlying(screen.scroll_screen)].emplace_back(addr, offset);
 
-            if (!local_address_to_plane_data.contains(addr)) {
+            if (!address_to_plane_data.contains(addr)) {
                 current_plane_address_ = addr;
                 readPlaneData(screen, addr, offset);
             }
@@ -3294,8 +3294,10 @@ void Vdp2::readScrollScreenData(const ScrollScreen s) {
 
         // Creation of the vdp2 parts positions which will be used to generate plane textures.
         for (const auto& vp : vdp2_parts_[util::toUnderlying(screen.scroll_screen)]) {
-            local_address_to_plane_data[vp.linkedPlaneAddress()].emplace_back(vp.scrollScreenPos(), vp.textureKey());
+            address_to_plane_data[vp.linkedPlaneAddress()].emplace_back(vp.scrollScreenPos(), vp.textureKey());
         }
+
+        Texture::storePlaneData(address_to_plane_data);
 
         if (use_concurrent_read_for_cells) { ThreadPool::pool_.wait_for_tasks(); }
 

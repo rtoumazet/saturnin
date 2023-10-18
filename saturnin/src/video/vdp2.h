@@ -1942,7 +1942,7 @@ class Vdp2 {
     std::vector<CellData>                cell_data_to_process_; ///< Will store cell data before parallelized read for one scroll.
     u32                                  current_plane_address_; ///< The current plane address.
                                                                  ///< times in the same NBG / RBG.
-    std::array<std::vector<PlaneDetail>, 6> planes_details_;     ///< Stores planes details for every scroll.
+    std::array<std::vector<PlaneDetail>, 6> plane_details_;      ///< Stores planes details for every scroll.
 
     ScrollScreen         screen_in_debug_{ScrollScreen::none}; ///< Scroll screen currently viewed in debug.
     DisabledScrollScreen disabled_scroll_screens_;             ///< Disabling state of scroll screens.
