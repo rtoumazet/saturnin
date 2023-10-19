@@ -717,7 +717,21 @@ void Opengl::addOrUpdateTexture(const size_t key, const Layer layer) {
 
 void Opengl::removeTextureLink(const size_t key) { textures_link_.erase(key); }
 
-void Opengl::generatePlanesTextures() {}
+void Opengl::generatePlanesTextures() {
+    // A texture will be generated from each plane currently displayed, identified by its start address.
+    // One plane size can be 512*512px, 1024*512px or 1024*1024px, meaning up to 4 planes can be stored in one
+    // texture array level.
+
+    auto current_index         = getNextAvailableTextureArrayIndex();
+    auto address_to_plane_data = std::move(Texture::getPlaneData());
+    for (const auto& [addr, data] : address_to_plane_data) {
+        for (const auto& part_pos : data) {
+            // part_pos.
+        }
+    }
+
+    // layer_to_texture_array_indexes_.at(layer).push_back(current_index);
+}
 
 void Opengl::generateTextures() {
     // Textures are generated in a 128 layers texture array, each layer being a texture atlas of

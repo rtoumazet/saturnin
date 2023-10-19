@@ -75,6 +75,11 @@ void Texture::storePlaneData(AddressToPlaneData& address_to_plane_data) {
     address_to_plane_data_.swap(address_to_plane_data);
 }
 
+auto Texture::getPlaneData() -> AddressToPlaneData& {
+    UpdatableLock lock(storage_mutex_);
+    return address_to_plane_data_;
+}
+
 auto Texture::getTexture(const size_t key) -> std::optional<Texture*> {
     ReadOnlyLock lock(storage_mutex_);
     try {
