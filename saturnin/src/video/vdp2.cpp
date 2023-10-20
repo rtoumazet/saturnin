@@ -237,10 +237,10 @@ void Vdp2::calculateDisplayDuration() {
 
 void Vdp2::onVblankIn() {
     calculateFps();
-    Texture::cleanCache(modules_.opengl(), VdpType::vdp2);
+    Texture::cleanCache(modules_.opengl(), VdpType::vdp2_cell);
     updateResolution();
     updateRamStatus();
-    Texture::setCache(VdpType::vdp2);
+    Texture::setCache(VdpType::vdp2_cell);
     populateRenderData();
     resetCacheState();
 }
@@ -3343,7 +3343,7 @@ void Vdp2::readBitmapData(const ScrollScreenStatus& screen) {
     // const auto      texture_size = texture_width * texture_height * 4;
     std::vector<u8> texture_data;
     // texture_data.reserve(texture_size);
-    const auto key = Texture::calculateKey(VdpType::vdp2,
+    const auto key = Texture::calculateKey(VdpType::vdp2_cell,
                                            screen.bitmap_start_address,
                                            toUnderlying(screen.character_color_number),
                                            screen.bitmap_palette_number);
@@ -3418,7 +3418,7 @@ void Vdp2::readBitmapData(const ScrollScreenStatus& screen) {
                 }
             }
         }
-        Texture::storeTexture(Texture(VdpType::vdp2,
+        Texture::storeTexture(Texture(VdpType::vdp2_cell,
                                       scrollScreenToLayer(screen.scroll_screen),
                                       screen.bitmap_start_address,
                                       toUnderlying(screen.character_color_number),
@@ -3657,8 +3657,10 @@ void Vdp2::readCellDispatch(const ScrollScreenStatus& screen,
                             const PatternNameData&    pnd,
                             const u32                 cell_address,
                             const ScreenOffset&       cell_offset) {
-    const auto key
-        = Texture::calculateKey(VdpType::vdp2, cell_address, toUnderlying(screen.character_color_number), pnd.palette_number);
+    const auto key = Texture::calculateKey(VdpType::vdp2_cell,
+                                           cell_address,
+                                           toUnderlying(screen.character_color_number),
+                                           pnd.palette_number);
 
     if (Texture::isTextureLoadingNeeded(key)) {
         if (use_concurrent_read_for_cells) {
@@ -3737,7 +3739,7 @@ void Vdp2::readCell(const ScrollScreenStatus& screen, const PatternNameData& pnd
         }
     }
 
-    Texture::storeTexture(Texture(VdpType::vdp2,
+    Texture::storeTexture(Texture(VdpType::vdp2_cell,
                                   scrollScreenToLayer(screen.scroll_screen),
                                   cell_address,
                                   static_cast<u8>(toUnderlying(screen.character_color_number)),
@@ -3804,7 +3806,7 @@ void Vdp2::readCellMT(const ScrollScreenStatus& screen,
             Log::warning(Logger::vdp2, tr("Character color number invalid !"));
         }
     }
-    Texture::storeTexture(Texture(VdpType::vdp2,
+    Texture::storeTexture(Texture(VdpType::vdp2_cell,
                                   scrollScreenToLayer(screen.scroll_screen),
                                   cell_address,
                                   static_cast<u8>(toUnderlying(screen.character_color_number)),
@@ -3912,7 +3914,7 @@ auto Vdp2::isCacheDirty(const ScrollScreen screen) -> bool {
 
 void Vdp2::discardCache([[maybe_unused]] const ScrollScreen screen) const {
     // 1) Textures used by the vdp2 parts of the screen are discarded
-    Texture::discardCache(VdpType::vdp2);
+    Texture::discardCache(VdpType::vdp2_cell);
 
     // 2) Vdp2 parts are deleted
     // clearRenderData(screen);

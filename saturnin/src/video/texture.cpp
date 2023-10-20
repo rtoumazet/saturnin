@@ -217,7 +217,7 @@ auto Texture::statistics() -> std::vector<std::string> {
     stats.push_back(uti::format("Number of VDP1 textures : {}", vdp1_nb));
 
     const auto vdp2_nb
-        = std::ranges::count_if(texture_storage_, [](const auto& t) { return t.second.vdpType() == VdpType::vdp2; });
+        = std::ranges::count_if(texture_storage_, [](const auto& t) { return t.second.vdpType() == VdpType::vdp2_cell; });
     stats.push_back(uti::format("Number of VDP2 textures : {}", vdp2_nb));
 
     auto max_width  = 0;

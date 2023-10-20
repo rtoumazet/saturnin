@@ -726,7 +726,21 @@ void Opengl::generatePlanesTextures() {
     auto address_to_plane_data = std::move(Texture::getPlaneData());
     for (const auto& [addr, data] : address_to_plane_data) {
         for (const auto& part_pos : data) {
-            // part_pos.
+            const auto tex = Texture::getTexture(part_pos.key);
+            if (tex) {
+                glTexSubImage3D(GL_TEXTURE_2D_ARRAY,
+                                0,
+                                part_pos.plane_position.x,
+                                part_pos.plane_position.y,
+                                current_index,
+                                8,
+                                8,
+                                1,
+                                GLenum::GL_RGBA,
+                                GLenum::GL_UNSIGNED_BYTE,
+                                (*tex)->rawData().data());
+                checkGlError();
+            }
         }
     }
 
