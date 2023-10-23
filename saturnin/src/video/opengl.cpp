@@ -742,8 +742,13 @@ void Opengl::generatePlanesTextures() {
                 checkGlError();
             }
         }
-        auto pt                             = PlaneTexture{};
-        pt.address_to_plane_textures_[addr] = pt;
+        auto pt                          = PlaneTexture{};
+        pt.screen_offset                 = 0;
+        pt.texture_array_index           = current_index;
+        pt.size                          = 0;
+        pt.pos                           = 0;
+        pt.coords                        = {};
+        address_to_plane_textures_[addr] = pt;
     }
 
     // layer_to_texture_array_indexes_.at(layer).push_back(current_index);
