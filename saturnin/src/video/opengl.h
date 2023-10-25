@@ -650,6 +650,25 @@ class Opengl {
 
     auto getNextAvailableTextureArrayIndex() const -> u8;
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn	auto Opengl::calculateTextureCoordinates(const ScreenPos& pos, const Size& size, const u8 texture_array_index) ->
+    /// std::vector<TextureCoordinates>;
+    ///
+    /// \brief	Calculates the texture coordinates
+    ///
+    /// \author	Runik
+    /// \date	23/10/2023
+    ///
+    /// \param 	pos				   	The position in pixels of the texture in the texture array.
+    /// \param 	size			   	The size of the texture.
+    /// \param 	texture_array_index	Zero-based index of the texture array.
+    ///
+    /// \returns	The calculated texture coordinates of the texture.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    auto calculateTextureCoordinates(const ScreenPos& pos, const Size& size, const u8 texture_array_index)
+        -> std::vector<TextureCoordinates>;
+
     core::Config* config_; ///< Configuration object.
 
     FboList fbo_list_;                ///< List of framebuffer objects used in the program.

@@ -742,12 +742,12 @@ void Opengl::generatePlanesTextures() {
                 checkGlError();
             }
         }
-        auto pt                          = PlaneTexture{};
-        pt.screen_offset                 = 0;
-        pt.texture_array_index           = current_index;
-        pt.size                          = 0;
-        pt.pos                           = 0;
-        pt.coords                        = {};
+        auto pt = PlaneTexture{};
+        // pt.screen_offset                 = 0;
+        // pt.texture_array_index           = current_index;
+        // pt.size                          = 0;
+        // pt.pos                           = 0;
+        pt.coords                        = calculateTextureCoordinates(pt.pos, pt.size, current_index);
         address_to_plane_textures_[addr] = pt;
     }
 
@@ -853,18 +853,7 @@ void Opengl::packTextures(std::vector<OpenglTexture>& textures, const Layer laye
         //        .---.
         // (x1,y2)     (x2,y2)
 
-        auto x1 = static_cast<float>(x_pos) / static_cast<float>(texture_array_width);
-        auto x2 = static_cast<float>(x_pos + texture.size.w) / static_cast<float>(texture_array_width);
-        auto y1 = static_cast<float>(y_pos) / static_cast<float>(texture_array_height);
-        auto y2 = static_cast<float>(y_pos + texture.size.h) / static_cast<float>(texture_array_height);
-
-        auto coords = std::vector{
-            TextureCoordinates{x1, y1, static_cast<float>(current_index)},
-            TextureCoordinates{x2, y1, static_cast<float>(current_index)},
-            TextureCoordinates{x2, y2, static_cast<float>(current_index)},
-            TextureCoordinates{x1, y2, static_cast<float>(current_index)}
-        };
-        textures_link_[texture.key].coords.swap(coords);
+        textures_link_[texture.key].coords = calculateTextureCoordinates({x_pos, y_pos}, texture.size, current_index);
 
         generateSubTexture(texture.key);
 
@@ -874,6 +863,21 @@ void Opengl::packTextures(std::vector<OpenglTexture>& textures, const Layer laye
         if (texture.size.h > current_row_max_height) { current_row_max_height = texture.size.h; }
     }
     // texture_array_max_used_layer_ = current_layer;
+}
+
+auto Opengl::calculateTextureCoordinates(const ScreenPos& pos, const Size& size, const u8 texture_array_index)
+    -> std::vector<TextureCoordinates> {
+    auto x1 = static_cast<float>(pos.x) / static_cast<float>(texture_array_width);
+    auto x2 = static_cast<float>(pos.x + size.w) / static_cast<float>(texture_array_width);
+    auto y1 = static_cast<float>(pos.y) / static_cast<float>(texture_array_height);
+    auto y2 = static_cast<float>(pos.y + size.h) / static_cast<float>(texture_array_height);
+
+    return std::vector{
+        TextureCoordinates{x1, y1, static_cast<float>(texture_array_index)},
+        TextureCoordinates{x2, y1, static_cast<float>(texture_array_index)},
+        TextureCoordinates{x2, y2, static_cast<float>(texture_array_index)},
+        TextureCoordinates{x1, y2, static_cast<float>(texture_array_index)}
+    };
 }
 
 auto Opengl::getOpenglTexture(const size_t key) -> std::optional<OpenglTexture> {
