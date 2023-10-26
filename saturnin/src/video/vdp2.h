@@ -59,7 +59,8 @@ using seconds = std::chrono::duration<double>;
 using milli   = std::chrono::duration<double, std::milli>;
 using micro   = std::chrono::duration<double, std::micro>;
 
-using AddressToPlaneData = std::unordered_map<u32, std::vector<Vdp2PartPosition>>;
+// using AddressToPlaneData = std::unordered_map<u32, std::vector<Vdp2PartPosition>>;
+using AddressToPlaneData = std::unordered_map<u32, Vdp2PlaneData>;
 
 constexpr auto vram_banks_number  = u8{4};
 constexpr auto vram_bank_a0_index = u8{0};

@@ -433,4 +433,9 @@ struct Vdp2PartPosition {
     Vdp2PartPosition(const ScreenPos plane_position, const size_t key) : plane_position(plane_position), key(key){};
 };
 
+struct Vdp2PlaneData {
+    Size                          plane_size;
+    std::vector<Vdp2PartPosition> parts_position;
+};
+
 } // namespace saturnin::video

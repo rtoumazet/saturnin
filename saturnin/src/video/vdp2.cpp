@@ -3292,15 +3292,38 @@ void Vdp2::readScrollScreenData(const ScrollScreen s) {
             }
         }
 
+        auto size = Size{};
+        switch (screen.plane_size) {
+            using PlaneSize = Vdp2Regs::Plsz::PlaneSize;
+            case PlaneSize::size_1_by_1: {
+                size.w = 512;
+                size.h = 512;
+                break;
+            }
+            case PlaneSize::size_2_by_1: {
+                size.w = 1024;
+                size.h = 512;
+                break;
+            }
+            case PlaneSize::size_2_by_2: {
+                size.w = 1024;
+                size.h = 1024;
+                break;
+            }
+            default: {
+                Log::warning(Logger::vdp2, tr("Unknown plane size value !"));
+            }
+        }
+
         // Creation of the vdp2 parts positions which will be used to generate plane textures.
         for (const auto& vp : vdp2_parts_[util::toUnderlying(screen.scroll_screen)]) {
-            address_to_plane_data[vp.linkedPlaneAddress()].emplace_back(vp.scrollScreenPos(), vp.textureKey());
+            address_to_plane_data[vp.linkedPlaneAddress()].plane_size = size;
+            address_to_plane_data[vp.linkedPlaneAddress()].parts_position.emplace_back(vp.scrollScreenPos(), vp.textureKey());
         }
 
         Texture::storePlaneData(address_to_plane_data);
 
         if (use_concurrent_read_for_cells) { ThreadPool::pool_.wait_for_tasks(); }
-
     } else { // ScrollScreenFormat::bitmap
         readBitmapData(screen);
     }

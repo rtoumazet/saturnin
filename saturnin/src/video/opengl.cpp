@@ -724,8 +724,8 @@ void Opengl::generatePlanesTextures() {
 
     auto current_index         = getNextAvailableTextureArrayIndex();
     auto address_to_plane_data = std::move(Texture::getPlaneData());
-    for (const auto& [addr, data] : address_to_plane_data) {
-        for (const auto& part_pos : data) {
+    for (const auto& [addr, plane_data] : address_to_plane_data) {
+        for (const auto& part_pos : plane_data.parts_position) {
             const auto tex = Texture::getTexture(part_pos.key);
             if (tex) {
                 glTexSubImage3D(GL_TEXTURE_2D_ARRAY,
@@ -744,8 +744,8 @@ void Opengl::generatePlanesTextures() {
         }
         auto pt = PlaneTexture{};
         // pt.screen_offset                 = 0;
-        // pt.texture_array_index           = current_index;
-        // pt.size                          = 0;
+        pt.texture_array_index = current_index;
+        pt.size                = plane_data.plane_size;
         // pt.pos                           = 0;
         pt.coords                        = calculateTextureCoordinates(pt.pos, pt.size, current_index);
         address_to_plane_textures_[addr] = pt;
