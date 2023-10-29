@@ -3316,12 +3316,28 @@ void Vdp2::readScrollScreenData(const ScrollScreen s) {
         }
 
         // Creation of the vdp2 parts positions which will be used to generate plane textures.
+        // for (const auto& vp : vdp2_parts_[util::toUnderlying(screen.scroll_screen)]) {
+        //    address_to_plane_data[vp.linkedPlaneAddress()].plane_size = size;
+        //    address_to_plane_data[vp.linkedPlaneAddress()].parts_position.emplace_back(vp.scrollScreenPos(), vp.textureKey());
+        //}
+        // Texture::storePlaneData(address_to_plane_data);
+
+        auto texture_data = std::vector<u8>{};
+        texture_data.reserve(vdp2_parts_.size() * 8 * 8 * 4);
         for (const auto& vp : vdp2_parts_[util::toUnderlying(screen.scroll_screen)]) {
-            address_to_plane_data[vp.linkedPlaneAddress()].plane_size = size;
-            address_to_plane_data[vp.linkedPlaneAddress()].parts_position.emplace_back(vp.scrollScreenPos(), vp.textureKey());
+            const auto& t = Texture::getTexture(vp.textureKey());
+            // std::ranges::copy((*t)->rawData(), texture_data.end());
+            texture_data.insert(texture_data.end(), (*t)->rawData().begin(), (*t)->rawData().end());
         }
 
-        Texture::storePlaneData(address_to_plane_data);
+        Texture::storeTexture(Texture(VdpType::vdp2_plane,
+                                      scrollScreenToLayer(screen.scroll_screen),
+                                      0,
+                                      static_cast<u8>(toUnderlying(screen.character_color_number)),
+                                      0,
+                                      texture_data,
+                                      size.w,
+                                      size.h));
 
         if (use_concurrent_read_for_cells) { ThreadPool::pool_.wait_for_tasks(); }
     } else { // ScrollScreenFormat::bitmap

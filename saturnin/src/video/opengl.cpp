@@ -785,7 +785,7 @@ void Opengl::generateTextures() {
     }
 
     // Generate planes textures, based on previously generated vdp2 parts textures.
-    generatePlanesTextures();
+    //generatePlanesTextures();
 
     // Reset cache reload state
     for (auto& [layer, state] : layer_to_cache_reload_state_) {
@@ -846,13 +846,6 @@ void Opengl::packTextures(std::vector<OpenglTexture>& textures, const Layer laye
         textures_link_[texture.key].size                = texture.size;
         textures_link_[texture.key].pos                 = {x_pos, y_pos};
 
-        // Calculating the texture coordinates in the atlas
-        // (x1,y1)     (x2,y1)
-        //        .---.
-        //        |   |
-        //        .---.
-        // (x1,y2)     (x2,y2)
-
         textures_link_[texture.key].coords = calculateTextureCoordinates({x_pos, y_pos}, texture.size, current_index);
 
         generateSubTexture(texture.key);
@@ -865,8 +858,15 @@ void Opengl::packTextures(std::vector<OpenglTexture>& textures, const Layer laye
     // texture_array_max_used_layer_ = current_layer;
 }
 
-auto Opengl::calculateTextureCoordinates(const ScreenPos& pos, const Size& size, const u8 texture_array_index)
+auto Opengl::calculateTextureCoordinates(const ScreenPos& pos, const Size& size, const u8 texture_array_index) const
     -> std::vector<TextureCoordinates> {
+    // Calculating the texture coordinates in the atlas
+    // (x1,y1)     (x2,y1)
+    //        .---.
+    //        |   |
+    //        .---.
+    // (x1,y2)     (x2,y2)
+
     auto x1 = static_cast<float>(pos.x) / static_cast<float>(texture_array_width);
     auto x2 = static_cast<float>(pos.x + size.w) / static_cast<float>(texture_array_width);
     auto y1 = static_cast<float>(pos.y) / static_cast<float>(texture_array_height);

@@ -651,8 +651,8 @@ class Opengl {
     auto getNextAvailableTextureArrayIndex() const -> u8;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn	auto Opengl::calculateTextureCoordinates(const ScreenPos& pos, const Size& size, const u8 texture_array_index) ->
-    /// std::vector<TextureCoordinates>;
+    /// \fn	auto Opengl::calculateTextureCoordinates(const ScreenPos& pos, const Size& size, const u8 texture_array_index) const
+    /// -> std::vector<TextureCoordinates>;
     ///
     /// \brief	Calculates the texture coordinates
     ///
@@ -666,7 +666,7 @@ class Opengl {
     /// \returns	The calculated texture coordinates of the texture.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    auto calculateTextureCoordinates(const ScreenPos& pos, const Size& size, const u8 texture_array_index)
+    auto calculateTextureCoordinates(const ScreenPos& pos, const Size& size, const u8 texture_array_index) const
         -> std::vector<TextureCoordinates>;
 
     core::Config* config_; ///< Configuration object.
