@@ -3282,16 +3282,6 @@ void Vdp2::readScrollScreenData(const ScrollScreen s) {
 
         std::vector<PlaneDetail>().swap(plane_details_[util::toUnderlying(screen.scroll_screen)]);
 
-        // Each plane similar data is only read once, even if it's used multiple times.
-        for (const auto& [addr, offset] : start_addresses) {
-            plane_details_[util::toUnderlying(screen.scroll_screen)].emplace_back(addr, offset);
-
-            if (!address_to_plane_data.contains(addr)) {
-                current_plane_address_ = addr;
-                readPlaneData(screen, addr, offset);
-            }
-        }
-
         auto size = Size{};
         switch (screen.plane_size) {
             using PlaneSize = Vdp2Regs::Plsz::PlaneSize;
@@ -3315,29 +3305,32 @@ void Vdp2::readScrollScreenData(const ScrollScreen s) {
             }
         }
 
-        // Creation of the vdp2 parts positions which will be used to generate plane textures.
-        // for (const auto& vp : vdp2_parts_[util::toUnderlying(screen.scroll_screen)]) {
-        //    address_to_plane_data[vp.linkedPlaneAddress()].plane_size = size;
-        //    address_to_plane_data[vp.linkedPlaneAddress()].parts_position.emplace_back(vp.scrollScreenPos(), vp.textureKey());
-        //}
-        // Texture::storePlaneData(address_to_plane_data);
+        // Each plane similar data is only read once, even if it's used multiple times.
+        for (const auto& [addr, offset] : start_addresses) {
+            plane_details_[util::toUnderlying(screen.scroll_screen)].emplace_back(addr, offset);
 
-        auto texture_data = std::vector<u8>{};
-        texture_data.reserve(vdp2_parts_.size() * 8 * 8 * 4);
-        for (const auto& vp : vdp2_parts_[util::toUnderlying(screen.scroll_screen)]) {
-            const auto& t = Texture::getTexture(vp.textureKey());
-            // std::ranges::copy((*t)->rawData(), texture_data.end());
-            texture_data.insert(texture_data.end(), (*t)->rawData().begin(), (*t)->rawData().end());
+            if (!address_to_plane_data.contains(addr)) {
+                current_plane_address_ = addr;
+                readPlaneData(screen, addr, offset);
+
+                auto texture_data = std::vector<u8>{};
+                texture_data.reserve(vdp2_parts_[util::toUnderlying(screen.scroll_screen)].size() * 8 * 8 * 4);
+                for (const auto& vp : vdp2_parts_[util::toUnderlying(screen.scroll_screen)]) {
+                    const auto& t = Texture::getTexture(vp.textureKey());
+                    texture_data.insert(texture_data.end(), (*t)->rawData().begin(), (*t)->rawData().end());
+                }
+
+                const auto key = Texture::storeTexture(Texture(VdpType::vdp2_plane,
+                                                               scrollScreenToLayer(screen.scroll_screen),
+                                                               current_plane_address_,
+                                                               static_cast<u8>(toUnderlying(screen.character_color_number)),
+                                                               0,
+                                                               texture_data,
+                                                               size.w,
+                                                               size.h));
+                modules_.opengl()->addOrUpdateTexture(key, scrollScreenToLayer(screen.scroll_screen));
+            }
         }
-
-        Texture::storeTexture(Texture(VdpType::vdp2_plane,
-                                      scrollScreenToLayer(screen.scroll_screen),
-                                      0,
-                                      static_cast<u8>(toUnderlying(screen.character_color_number)),
-                                      0,
-                                      texture_data,
-                                      size.w,
-                                      size.h));
 
         if (use_concurrent_read_for_cells) { ThreadPool::pool_.wait_for_tasks(); }
     } else { // ScrollScreenFormat::bitmap
