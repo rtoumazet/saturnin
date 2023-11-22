@@ -502,7 +502,7 @@ void showMainMenu(GuiConfiguration& conf, core::EmulatorContext& state) {
 
                             ImGui::BeginChild("ChildSaturnPlayer1", ImVec2(child_width, child_height), true, window_flags);
 
-                            ImGui::PushItemWidth(ImGui::GetWindowContentRegionWidth() - second_column_offset);
+                            ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x - second_column_offset);
 
                             ImGui::CenteredText(tr("Player 1"));
 
@@ -583,7 +583,7 @@ void showMainMenu(GuiConfiguration& conf, core::EmulatorContext& state) {
                                 state.config()->readPeripheralConfiguration(core::AccessKeys::cfg_controls_saturn_player_2));
 
                             ImGui::BeginChild("ChildSaturnPlayer2", ImVec2(child_width, child_height), true, window_flags);
-                            ImGui::PushItemWidth(ImGui::GetWindowContentRegionWidth() - second_column_offset);
+                            ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x - second_column_offset);
 
                             ImGui::CenteredText(tr("Player 2"));
 
@@ -710,7 +710,7 @@ void showMainMenu(GuiConfiguration& conf, core::EmulatorContext& state) {
                             constexpr auto child_height = u16{220};
                             ImGui::BeginChild("ChildStvPlayer1", ImVec2(child_width, child_height), true, window_flags);
 
-                            ImGui::PushItemWidth(ImGui::GetWindowContentRegionWidth() - second_column_offset);
+                            ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x - second_column_offset);
 
                             ImGui::CenteredText(tr("Player 1"));
 
@@ -761,7 +761,7 @@ void showMainMenu(GuiConfiguration& conf, core::EmulatorContext& state) {
                             constexpr auto child_height = u16{220};
                             ImGui::BeginChild("ChildStvPlayer2", ImVec2(child_width, child_height), true, window_flags);
 
-                            ImGui::PushItemWidth(ImGui::GetWindowContentRegionWidth() - second_column_offset);
+                            ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x - second_column_offset);
 
                             ImGui::CenteredText(tr("Player 2"));
 
