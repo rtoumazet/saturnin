@@ -24,7 +24,7 @@
 
 #pragma once
 
-#pragma warning(disable : 4275)       // libconfig specific warning disable
+#pragma warning(disable : 4275) // libconfig specific warning disable
 #include <libconfig.h++>
 #include <any>                        // any
 #include <map>                        // map
@@ -773,9 +773,9 @@ class Config {
 
     auto getLogLevel(const std::string& key) -> LogLevel;
 
-    std::string filename_;        ///< Name of the configuration file used
+    std::string filename_; ///< Name of the configuration file used
 
-    libconfig::Config cfg_;       ///< Internal configuration object
+    libconfig::Config cfg_; ///< Internal configuration object
 
     MapKeys        full_keys_;    ///< Link between access keys enumerators and string keys.
     MapKeysDefault default_keys_; ///< Link between access keys enumerators and default values.

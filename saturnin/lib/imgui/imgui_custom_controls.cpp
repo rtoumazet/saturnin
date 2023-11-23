@@ -97,7 +97,8 @@ void peripheralKeyCombo(const std::vector<PeripheralKey>& keys, PeripheralKey& d
 void CenteredText(const std::string& text) {
     auto           size  = ImGui::CalcTextSize(text.c_str());
     constexpr auto ratio = float{0.5f};
-    ImGui::SetCursorPosX(ImGui::GetWindowContentRegionWidth() * ratio - size.x / 2);
+    // ImGui::SetCursorPosX(ImGui::GetWindowContentRegionWidth() * ratio - size.x / 2);
+    ImGui::SetCursorPosX(ImGui::GetContentRegionAvail().x * ratio - size.x / 2);
     ImGui::TextUnformatted(text.c_str());
 }
 
@@ -121,7 +122,7 @@ void ChildWindowHeader(const std::string& label) {
                                               ImVec2(pos.x + size.x, pos.y + 15.f),
                                               ImGui::GetColorU32(ImGuiCol_TableHeaderBg, 255),
                                               5.f,
-                                              ImDrawCornerFlags_Top);
+                                              ImDrawFlags_RoundCornersTop);
     ImGui::AlignTextToFramePadding();
     ImGui::SameLine(3.0f);
     ImGui::Text("%s", label.c_str());
