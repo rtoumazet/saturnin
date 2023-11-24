@@ -785,7 +785,7 @@ void Opengl::generateTextures() {
     }
 
     // Generate planes textures, based on previously generated vdp2 parts textures.
-    //generatePlanesTextures();
+    // generatePlanesTextures();
 
     // Reset cache reload state
     for (auto& [layer, state] : layer_to_cache_reload_state_) {
