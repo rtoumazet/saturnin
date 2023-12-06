@@ -1150,17 +1150,17 @@ auto Opengl::initializeVao(const ShaderName name) -> std::tuple<u32, u32> {
 
             // texture coords pointer
             auto offset = GLintptr(sizeof(VertexPosition));
-            glVertexAttribPointer(1, 3, GLenum::GL_FLOAT, GL_FALSE, sizeof(Vertex), reinterpret_cast<GLvoid*>(offset));
+            glVertexAttribPointer(1, 3, GLenum::GL_FLOAT, GL_FALSE, sizeof(Vertex), std::bit_cast<GLvoid*>(offset));
             glEnableVertexAttribArray(1);
 
             // color pointer
             offset += GLintptr(sizeof(TextureCoordinates));
-            glVertexAttribPointer(2, 4, GLenum::GL_UNSIGNED_BYTE, GL_TRUE, sizeof(Vertex), reinterpret_cast<GLvoid*>(offset));
+            glVertexAttribPointer(2, 4, GLenum::GL_UNSIGNED_BYTE, GL_TRUE, sizeof(Vertex), std::bit_cast<GLvoid*>(offset));
             glEnableVertexAttribArray(2);
 
             // gouraud color pointer
             offset += GLintptr(sizeof(VertexColor));
-            glVertexAttribPointer(3, 3, GLenum::GL_BYTE, GL_TRUE, sizeof(Vertex), reinterpret_cast<GLvoid*>(offset));
+            glVertexAttribPointer(3, 3, GLenum::GL_BYTE, GL_TRUE, sizeof(Vertex), std::bit_cast<GLvoid*>(offset));
             glEnableVertexAttribArray(3);
             break;
         }
@@ -1638,7 +1638,7 @@ auto loadPngImage(const u8* data, const size_t size) -> GLFWimage {
 }
 
 void windowSizeCallback(GLFWwindow* window, int width, int height) {
-    const auto state = reinterpret_cast<core::EmulatorContext*>(glfwGetWindowUserPointer(window));
+    const auto state = std::bit_cast<core::EmulatorContext*>(glfwGetWindowUserPointer(window));
     state->opengl()->onWindowResize(width, height);
 }
 
@@ -1660,8 +1660,8 @@ void checkShaderCompilation(const u32 shader) {
             case GL_FRAGMENT_SHADER: shader_type = "Fragment shader"; break;
             default: shader_type = "Unknown shader"; break;
         }
-        Log::error(Logger::opengl, "{} compilation failed : {}", shader_type, info);
-        throw std::runtime_error("Opengl error !");
+
+        Log::exception(Logger::opengl, "{} compilation failed : {}", shader_type, info);
     }
 }
 
@@ -1676,8 +1676,7 @@ void checkProgramCompilation(const u32 program) {
         glGetProgramInfoLog(program, length, nullptr, v.data());
         const auto info = std::string(v.begin(), v.end());
 
-        Log::error(Logger::opengl, "Shader program link failed : {}", info);
-        throw std::runtime_error("Opengl error !");
+        Log::exception(Logger::opengl, "Shader program link failed : {}", info);
     }
 }
 

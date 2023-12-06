@@ -3195,13 +3195,13 @@ auto Vdp2::calculatePlaneStartAddress(const ScrollScreen s, const u32 map_addr) 
                 if (character_size == Vdp2Regs::CharacterSize::one_by_one) {
                     constexpr auto mask_4mb = u16{0x003c};
                     constexpr auto mask_8mb = u16{0x007c};
-                    mask                    = (is_vram_size_4mb) ? mask_4mb : mask_8mb;
+                    mask                    = is_vram_size_4mb ? mask_4mb : mask_8mb;
                     multiplier              = multiplier_8000;
                 } else {
                     // CharacterSize::two_by_two
                     constexpr auto mask_4mb = u16{0x00fc};
                     constexpr auto mask_8mb = u16{0x01fc};
-                    mask                    = (is_vram_size_4mb) ? mask_4mb : mask_8mb;
+                    mask                    = is_vram_size_4mb ? mask_4mb : mask_8mb;
                     multiplier              = multiplier_2000;
                 }
             } else {
@@ -3209,13 +3209,13 @@ auto Vdp2::calculatePlaneStartAddress(const ScrollScreen s, const u32 map_addr) 
                 if (character_size == Vdp2Regs::CharacterSize::one_by_one) {
                     constexpr auto mask_4mb = u16{0x001c};
                     constexpr auto mask_8mb = u16{0x003c};
-                    mask                    = (is_vram_size_4mb) ? mask_4mb : mask_8mb;
+                    mask                    = is_vram_size_4mb ? mask_4mb : mask_8mb;
                     multiplier              = multiplier_10000;
                 } else {
                     // CharacterSize::two_by_two
                     constexpr auto mask_4mb = u16{0x007c};
                     constexpr auto mask_8mb = u16{0x00fc};
-                    mask                    = (is_vram_size_4mb) ? mask_4mb : mask_8mb;
+                    mask                    = is_vram_size_4mb ? mask_4mb : mask_8mb;
                     multiplier              = multiplier_4000;
                 }
             }
@@ -3555,30 +3555,30 @@ void Vdp2::readPageData(const ScrollScreenStatus& screen, const u32 page_address
     auto                                       readPatternNameData = PatterNameDataFunc();
     switch (current_pnd_config) {
         using enum PatternNameDataEnum;
-        case two_words: readPatternNameData = reinterpret_cast<PatterNameDataFunc>(&getPatternNameData2Words); break;
+        case two_words: readPatternNameData = std::bit_cast<PatterNameDataFunc>(&getPatternNameData2Words); break;
         case one_word_1_cell_16_colors_10_bits:
-            readPatternNameData = reinterpret_cast<PatterNameDataFunc>(&getPatternNameData1Word1Cell16Colors10Bits);
+            readPatternNameData = std::bit_cast<PatterNameDataFunc>(&getPatternNameData1Word1Cell16Colors10Bits);
             break;
         case one_word_1_cell_16_colors_12_bits:
-            readPatternNameData = reinterpret_cast<PatterNameDataFunc>(&getPatternNameData1Word1Cell16Colors12Bits);
+            readPatternNameData = std::bit_cast<PatterNameDataFunc>(&getPatternNameData1Word1Cell16Colors12Bits);
             break;
         case one_word_1_cell_over_16_colors_10_bits:
-            readPatternNameData = reinterpret_cast<PatterNameDataFunc>(&getPatternNameData1Word1CellOver16Colors10Bits);
+            readPatternNameData = std::bit_cast<PatterNameDataFunc>(&getPatternNameData1Word1CellOver16Colors10Bits);
             break;
         case one_word_1_cell_over_16_colors_12_bits:
-            readPatternNameData = reinterpret_cast<PatterNameDataFunc>(&getPatternNameData1Word1CellOver16Colors12Bits);
+            readPatternNameData = std::bit_cast<PatterNameDataFunc>(&getPatternNameData1Word1CellOver16Colors12Bits);
             break;
         case one_word_4_cells_16_colors_10_bits:
-            readPatternNameData = reinterpret_cast<PatterNameDataFunc>(&getPatternNameData1Word4Cells16Colors10Bits);
+            readPatternNameData = std::bit_cast<PatterNameDataFunc>(&getPatternNameData1Word4Cells16Colors10Bits);
             break;
         case one_word_4_cells_16_colors_12_bits:
-            readPatternNameData = reinterpret_cast<PatterNameDataFunc>(&getPatternNameData1Word4Cells16Colors12Bits);
+            readPatternNameData = std::bit_cast<PatterNameDataFunc>(&getPatternNameData1Word4Cells16Colors12Bits);
             break;
         case one_word_4_cells_over_16_colors_10_bits:
-            readPatternNameData = reinterpret_cast<PatterNameDataFunc>(&getPatternNameData1Word4CellsOver16Colors10Bits);
+            readPatternNameData = std::bit_cast<PatterNameDataFunc>(&getPatternNameData1Word4CellsOver16Colors10Bits);
             break;
         case one_word_4_cells_over_16_colors_12_bits:
-            readPatternNameData = reinterpret_cast<PatterNameDataFunc>(&getPatternNameData1Word4CellsOver16Colors12Bits);
+            readPatternNameData = std::bit_cast<PatterNameDataFunc>(&getPatternNameData1Word4CellsOver16Colors12Bits);
             break;
     }
 
