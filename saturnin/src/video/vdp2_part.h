@@ -56,7 +56,9 @@ class Vdp2Part final : public BaseRenderingPart {
              const u16     texture_width,
              const u16     texture_height,
              const u8      priority,
-             const ColorF& color_offset); // Constructor for bitmaps
+             const ColorF& color_offset,
+             const VdpType vdp_type); // Constructor for bitmaps and planes
+
     Vdp2Part(const Vdp2Part&)                      = default;
     Vdp2Part(Vdp2Part&&)                           = default;
     auto operator=(const Vdp2Part&) & -> Vdp2Part& = default;

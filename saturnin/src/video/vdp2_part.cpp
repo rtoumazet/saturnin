@@ -68,8 +68,9 @@ Vdp2Part::Vdp2Part(const size_t  texture_key,
                    const u16     texture_width,
                    const u16     texture_height,
                    const u8      priority,
-                   const ColorF& color_offset) :
-    BaseRenderingPart(VdpType::vdp2_cell, DrawType::textured_polygon, texture_key, priority, color_offset),
+                   const ColorF& color_offset,
+                   const VdpType vdp_type) :
+    BaseRenderingPart(vdp_type, DrawType::textured_polygon, texture_key, priority, color_offset),
     scroll_screen_pos_({0, 0}),
     character_number_(0),
     palette_number_(0),
