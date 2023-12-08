@@ -272,10 +272,18 @@ void Opengl::displayFramebuffer(core::EmulatorContext& state) {
     auto parts_list = PartsList{};
 
     const auto addVdp2PartsToList = [&](const ScrollScreen s) {
-        const auto& vdp2_parts = state.vdp2()->vdp2Parts(s);
-        if (!vdp2_parts.empty()) {
-            parts_list.reserve(parts_list.size() + vdp2_parts.size());
-            for (const auto& p : vdp2_parts) {
+        const auto& vdp2_planes = state.vdp2()->vdp2Parts(s, VdpType::vdp2_plane);
+        if (!vdp2_planes.empty()) {
+            parts_list.reserve(parts_list.size() + vdp2_planes.size());
+            for (const auto& p : vdp2_planes) {
+                parts_list.emplace_back(std::make_unique<Vdp2Part>(p));
+            }
+        }
+
+        const auto& vdp2_bitmaps = state.vdp2()->vdp2Parts(s, VdpType::vdp2_bitmap);
+        if (!vdp2_bitmaps.empty()) {
+            parts_list.reserve(parts_list.size() + vdp2_bitmaps.size());
+            for (const auto& p : vdp2_bitmaps) {
                 parts_list.emplace_back(std::make_unique<Vdp2Part>(p));
             }
         }
@@ -603,7 +611,7 @@ void Opengl::renderVdp2DebugLayer(core::EmulatorContext& state) {
     //----------- Render -----------------//
     std::vector<std::unique_ptr<video::BaseRenderingPart>> parts_list;
     if (state.vdp2()->screenInDebug() != video::ScrollScreen::none) {
-        const auto& vdp2_parts = state.vdp2()->vdp2Parts(state.vdp2()->screenInDebug());
+        const auto vdp2_parts = state.vdp2()->vdp2Parts(state.vdp2()->screenInDebug(), VdpType::vdp2_cell);
         if (!vdp2_parts.empty()) {
             parts_list.reserve(parts_list.size() + vdp2_parts.size());
             for (const auto& p : vdp2_parts) {

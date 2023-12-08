@@ -245,6 +245,16 @@ void Vdp2::onVblankIn() {
     resetCacheState();
 }
 
+auto Vdp2::vdp2Parts(const ScrollScreen s, const VdpType t) const -> std::vector<video::Vdp2Part> {
+    auto parts = std::vector<video::Vdp2Part>{};
+    std::ranges::copy_if(vdp2_parts_[utilities::toUnderlying(s)], std::back_inserter(parts), [=](const Vdp2Part& p) {
+        return p.vdpType() == t;
+    });
+
+    // return vdp2_parts_[utilities::toUnderlying(s)];
+    return parts;
+}
+
 auto Vdp2::getSpriteColorAddressOffset() -> u16 {
     return getColorRamAddressOffset(static_cast<u8>(regs_.craofb >> Vdp2Regs::Craofb::spcaos_shft));
 }

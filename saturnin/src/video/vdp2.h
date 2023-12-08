@@ -699,7 +699,7 @@ class Vdp2 {
     void onVblankIn();
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn auto Vdp2::vdp2Parts(const ScrollScreen s)  const -> const std::vector<std::unique_ptr<video::BaseRenderingPart>>
+    /// \fn auto Vdp2::vdp2Parts(const ScrollScreen s, const VdpType t)  const -> std::vector<video::Vdp2Part>
     ///
     /// \brief  Returns the VDP2 parts of a scroll screen.
     ///
@@ -707,13 +707,12 @@ class Vdp2 {
     /// \date   15/04/2021
     ///
     /// \param  s   A ScrollScreen.
+    /// \param  t   Type of part to return.
     ///
     /// \returns    A reference to a const std::vector&lt;Vdp2Part&gt;
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    auto vdp2Parts(const ScrollScreen s) const -> const std::vector<video::Vdp2Part>& {
-        return vdp2_parts_[utilities::toUnderlying(s)];
-    }
+    auto vdp2Parts(const ScrollScreen s, const VdpType t) const -> std::vector<video::Vdp2Part>;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn auto Vdp2::getSpriteColorAddressOffset() const -> u16;
