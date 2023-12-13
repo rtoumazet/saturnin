@@ -3324,25 +3324,25 @@ void Vdp2::readScrollScreenData(const ScrollScreen s) {
             current_plane_address_ = addr;
             readPlaneData(screen, addr, offset);
 
-            auto texture_data = std::vector<u8>{};
-            texture_data.reserve(vdp2_parts_[util::toUnderlying(screen.scroll_screen)].size() * 8 * 8 * 4);
-            for (const auto& vp : vdp2_parts_[util::toUnderlying(screen.scroll_screen)]) {
-                const auto& t = Texture::getTexture(vp.textureKey());
-                texture_data.insert(texture_data.end(), (*t)->rawData().begin(), (*t)->rawData().end());
-            }
+            // auto texture_data = std::vector<u8>{};
+            // texture_data.reserve(vdp2_parts_[util::toUnderlying(screen.scroll_screen)].size() * 8 * 8 * 4);
+            // for (const auto& vp : vdp2_parts_[util::toUnderlying(screen.scroll_screen)]) {
+            //     const auto& t = Texture::getTexture(vp.textureKey());
+            //     texture_data.insert(texture_data.end(), (*t)->rawData().begin(), (*t)->rawData().end());
+            // }
 
-            const auto key = Texture::storeTexture(Texture(VdpType::vdp2_plane,
-                                                           scrollScreenToLayer(screen.scroll_screen),
-                                                           current_plane_address_,
-                                                           static_cast<u8>(toUnderlying(screen.character_color_number)),
-                                                           0,
-                                                           texture_data,
-                                                           size.w,
-                                                           size.h));
-            modules_.opengl()->addOrUpdateTexture(key, scrollScreenToLayer(screen.scroll_screen));
+            // const auto key = Texture::storeTexture(Texture(VdpType::vdp2_plane,
+            //                                                scrollScreenToLayer(screen.scroll_screen),
+            //                                                current_plane_address_,
+            //                                                static_cast<u8>(toUnderlying(screen.character_color_number)),
+            //                                                0,
+            //                                                texture_data,
+            //                                                size.w,
+            //                                                size.h));
+            // modules_.opengl()->addOrUpdateTexture(key, scrollScreenToLayer(screen.scroll_screen));
 
-            vdp2_parts_[util::toUnderlying(screen.scroll_screen)]
-                .emplace_back(key, size.w, size.h, screen.priority_number, screen.color_offset.as_float, VdpType::vdp2_plane);
+            // vdp2_parts_[util::toUnderlying(screen.scroll_screen)]
+            //     .emplace_back(key, size.w, size.h, screen.priority_number, screen.color_offset.as_float, VdpType::vdp2_plane);
         }
 
         if (use_concurrent_read_for_cells) { ThreadPool::pool_.wait_for_tasks(); }
@@ -3789,7 +3789,7 @@ void Vdp2::readCell(const ScrollScreenStatus& screen, const PatternNameData& pnd
                                   texture_data,
                                   texture_width,
                                   texture_height));
-    // modules_.opengl()->addOrUpdateTexture(key, scrollScreenToLayer(screen.scroll_screen));
+    modules_.opengl()->addOrUpdateTexture(key, scrollScreenToLayer(screen.scroll_screen));
 }
 
 void Vdp2::readCellMT(const ScrollScreenStatus& screen,
@@ -3856,7 +3856,7 @@ void Vdp2::readCellMT(const ScrollScreenStatus& screen,
                                   texture_data,
                                   texture_width,
                                   texture_height));
-    // modules_.opengl()->addOrUpdateTexture(key, scrollScreenToLayer(screen.scroll_screen));
+    modules_.opengl()->addOrUpdateTexture(key, scrollScreenToLayer(screen.scroll_screen));
 }
 
 // NOLINTNEXTLINE(readability-convert-member-functions-to-static)
@@ -3871,8 +3871,8 @@ void Vdp2::saveCell(const ScrollScreenStatus& screen,
     auto pos = ScreenPos{static_cast<u16>(cell_offset.x * texture_width), static_cast<u16>(cell_offset.y * texture_height)};
 
     //: TODO: scroll offset must be handled during display, put in comments here for now
-    // pos.x -= screen.scroll_offset_horizontal;
-    // pos.y -= screen.scroll_offset_vertical;
+    pos.x -= screen.scroll_offset_horizontal;
+    pos.y -= screen.scroll_offset_vertical;
 
     vdp2_parts_[util::toUnderlying(screen.scroll_screen)]
         .emplace_back(pnd, pos, key, screen.priority_number, screen.color_offset.as_float, current_plane_address_);
