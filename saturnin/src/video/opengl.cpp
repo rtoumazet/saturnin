@@ -350,6 +350,12 @@ void Opengl::render() {
 
         const auto texture_used_loc = glGetUniformLocation(program_shader_, "is_texture_used");
 
+        auto elements_buffer = u32{};
+        glGenBuffers(1, &elements_buffer);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elements_buffer);
+        std::array<GLuint, 6> indices = {0, 1, 2, 0, 2, 3};
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices.data(), GL_STATIC_DRAW);
+
         for (const auto& part : parts_list) {
             if (part->vertexes_.empty()) { continue; }
 
@@ -388,23 +394,32 @@ void Opengl::render() {
 
                     // Quad is tessellated into 2 triangles, using a texture
                     //******
-                    auto vertexes = std::vector<Vertex>{};
 
-                    vertexes.reserve(vertexes_per_tessellated_quad);
-                    // Transforming one quad in 2 triangles
-                    vertexes.emplace_back(part->vertexes_[0]);
-                    vertexes.emplace_back(part->vertexes_[1]);
-                    vertexes.emplace_back(part->vertexes_[2]);
-                    vertexes.emplace_back(part->vertexes_[0]);
-                    vertexes.emplace_back(part->vertexes_[2]);
-                    vertexes.emplace_back(part->vertexes_[3]);
+                    if constexpr (constexpr bool usesDrawElements = true) {
+                        glBufferData(GL_ARRAY_BUFFER,
+                                     sizeof(Vertex) * part->vertexes_.size(),
+                                     part->vertexes_.data(),
+                                     GL_STATIC_DRAW);
 
-                    // Sending vertex buffer data to the GPU
-                    glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * vertexes.size(), vertexes.data(), GL_STATIC_DRAW);
-                    // glActiveTexture(GLenum::GL_TEXTURE0);
-                    //******
+                        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+                    } else {
+                        auto vertexes = std::vector<Vertex>{};
 
-                    glDrawArrays(GL_TRIANGLES, 0, vertexes_per_tessellated_quad);
+                        vertexes.reserve(vertexes_per_tessellated_quad);
+                        // Transforming one quad in 2 triangles
+                        vertexes.emplace_back(part->vertexes_[0]);
+                        vertexes.emplace_back(part->vertexes_[1]);
+                        vertexes.emplace_back(part->vertexes_[2]);
+                        vertexes.emplace_back(part->vertexes_[0]);
+                        vertexes.emplace_back(part->vertexes_[2]);
+                        vertexes.emplace_back(part->vertexes_[3]);
+
+                        //// Sending vertex buffer data to the GPU
+                        glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * vertexes.size(), vertexes.data(), GL_STATIC_DRAW);
+
+                        glDrawArrays(GL_TRIANGLES, 0, vertexes_per_tessellated_quad);
+                    }
+
                     break;
                 }
                 case non_textured_polygon: {
@@ -485,7 +500,8 @@ void Opengl::render() {
         // glDeleteVertexArrays(elements_nb, vao_ids_array.data());
         gl::glDeleteBuffers(1, &vertex_buffer);
         gl::glDeleteVertexArrays(1, &vao);
-
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+        gl::glDeleteBuffers(1, &elements_buffer);
         // Texture::cleanCache(this);
     }
 
