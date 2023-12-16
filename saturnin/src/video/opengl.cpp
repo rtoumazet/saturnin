@@ -311,9 +311,21 @@ void Opengl::displayFramebuffer(core::EmulatorContext& state) {
                                  return a->priority() < b->priority();
                              });
 
-    // Parts are read in order. Goal is to regroup parts with the same draw type to reduce number of glDraw* calls
-    // When it changes, a new vector is created.
-    std::vector<std::vector<PartsList>> p;
+    // Parts are read in order. Goal is to regroup parts with the same draw type to reduce number of glDraw* calls.
+    std::vector<PartsList> parts_by_type;
+
+    if (!parts_list.empty()) {
+        auto current_type = parts_list[0]->drawType();
+        auto current_list = PartsList{};
+        for (const auto& p : parts_list) {
+            if (current_type != p->drawType()) {
+                // Vector is moved to the global vector list
+                parts_by_type.push_back(std::move(current_list));
+                current_type = p->drawType();
+            }
+            current_list.push_back(std::make_unique<BaseRenderingPart>(*p));
+        }
+    }
 
     if (parts_list_.empty()) {
         std::unique_lock lk(parts_list_mutex_);
