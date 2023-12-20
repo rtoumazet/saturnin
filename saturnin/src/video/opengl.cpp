@@ -73,6 +73,8 @@ constexpr auto vertexes_per_line             = u32{2};
 
 constexpr auto check_gl_error = 1;
 
+constexpr bool usesDrawElements = false;
+
 Opengl::Opengl(core::Config* config) { config_ = config; }
 
 Opengl::~Opengl() { shutdown(); }
@@ -327,10 +329,18 @@ void Opengl::displayFramebuffer(core::EmulatorContext& state) {
         }
     }
 
-    if (parts_list_.empty()) {
-        std::unique_lock lk(parts_list_mutex_);
-        parts_list_ = std::move(parts_list);
-        data_condition_.wait(lk, [this]() { return parts_list_.empty(); });
+    if constexpr (usesDrawElements) {
+        if (parts_list_by_type_.empty()) {
+            std::unique_lock lk(parts_list_mutex_);
+            parts_list_by_type_ = std::move(parts_by_type);
+            data_condition_.wait(lk, [this]() { return parts_list_by_type_.empty(); });
+        }
+    } else {
+        if (parts_list_.empty()) {
+            std::unique_lock lk(parts_list_mutex_);
+            parts_list_ = std::move(parts_list);
+            data_condition_.wait(lk, [this]() { return parts_list_.empty(); });
+        }
     }
 }
 
@@ -411,7 +421,7 @@ void Opengl::render() {
                     // Quad is tessellated into 2 triangles, using a texture
                     //******
 
-                    if constexpr (constexpr bool usesDrawElements = true) {
+                    if constexpr (usesDrawElements == true) {
                         glBufferData(GL_ARRAY_BUFFER,
                                      sizeof(Vertex) * part->vertexes_.size(),
                                      part->vertexes_.data(),
@@ -511,6 +521,224 @@ void Opengl::render() {
                 }
             }
         }
+
+        // glDeleteBuffers(elements_nb, vertex_buffer_ids_array.data());
+        // glDeleteVertexArrays(elements_nb, vao_ids_array.data());
+        gl::glDeleteBuffers(1, &vertex_buffer);
+        gl::glDeleteVertexArrays(1, &vao);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+        gl::glDeleteBuffers(1, &elements_buffer);
+        // Texture::cleanCache(this);
+    }
+
+    {
+        std::lock_guard lk(parts_list_mutex_);
+        PartsList().swap(parts_list_);
+        data_condition_.notify_one();
+    }
+
+    postRender();
+}
+
+void Opengl::renderNew() {
+    // std::vector<std::unique_ptr<video::BaseRenderingPart>> parts_list;
+    std::vector<PartsList> parts_by_type;
+
+    preRender();
+    {
+        std::lock_guard lock(parts_list_mutex_);
+        if (!parts_list_by_type_.empty()) { parts_by_type = std::move(parts_list_by_type_); }
+    }
+
+    if (!parts_by_type.empty()) {
+        const auto [vao, vertex_buffer] = initializeVao(ShaderName::textured);
+
+        glUseProgram(program_shader_);
+        glBindVertexArray(vao);                       // binding VAO
+        glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer); // binding vertex buffer
+
+        // Calculating the ortho projection matrix
+        const auto proj_matrix = calculateDisplayViewportMatrix();
+
+        // Sending the ortho projection matrix to the shader
+        const auto uni_proj_matrix = glGetUniformLocation(program_shader_, "proj_matrix");
+        glUniformMatrix4fv(uni_proj_matrix, 1, GL_FALSE, glm::value_ptr(proj_matrix));
+
+        glActiveTexture(GLenum::GL_TEXTURE0);
+        const auto sampler_loc = glGetUniformLocation(program_shader_, "sampler");
+        // glUniform1i(sampler_loc, GLenum::GL_TEXTURE0);
+        glUniform1i(sampler_loc, 0);
+        glBindTexture(GL_TEXTURE_2D_ARRAY, texture_array_id_);
+
+        const auto texture_used_loc = glGetUniformLocation(program_shader_, "is_texture_used");
+
+        auto elements_buffer = u32{};
+        glGenBuffers(1, &elements_buffer); // This buffer will be used to send indices data to the GPU
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elements_buffer);
+
+        for (const auto& parts_list : parts_by_type) {
+            // Initializing the number of indices to send to the GPU.
+            const auto indices = generateDrawIndices(parts_list);
+            switch (parts_list.at(0)->drawType()) {
+                using enum DrawType;
+                case textured_polygon: {
+                    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices.data(), GL_STATIC_DRAW);
+                    break;
+                }
+                case non_textured_polygon: {
+                    break;
+                }
+                case polyline: {
+                    break;
+                }
+                case line: {
+                    break;
+                }
+                default: {
+                    break;
+                }
+            }
+        }
+
+        // for (const auto& part : parts_list) {
+        //     if (part->vertexes_.empty()) { continue; }
+
+        //    const auto color_offset_loc = glGetUniformLocation(program_shader_, "color_offset");
+        //    glUniform3fv(color_offset_loc, 1, part->colorOffset().data());
+
+        //    switch (part->drawType()) {
+        //        using enum DrawType;
+        //        case textured_polygon: {
+        //            // Sending the variable to configure the shader to use texture data.
+        //            const auto is_texture_used = GLboolean(true);
+        //            glUniform1i(texture_used_loc, is_texture_used);
+
+        //            const auto opengl_tex = getOpenglTexture(part->textureKey());
+        //            if (opengl_tex.has_value()) {
+        //                // Replacing texture coordinates of the vertex by those of the OpenGL texture.
+        //                for (auto& v : part->vertexes_) {
+        //                    if ((v.tex_coords.s == 0.0) && (v.tex_coords.t == 0.0)) {
+        //                        v.tex_coords = opengl_tex->coords[0];
+        //                        continue;
+        //                    }
+        //                    if ((v.tex_coords.s == 1.0) && (v.tex_coords.t == 0.0)) {
+        //                        v.tex_coords = opengl_tex->coords[1];
+        //                        continue;
+        //                    }
+        //                    if ((v.tex_coords.s == 1.0) && (v.tex_coords.t == 1.0)) {
+        //                        v.tex_coords = opengl_tex->coords[2];
+        //                        continue;
+        //                    }
+        //                    if ((v.tex_coords.s == 0.0) && (v.tex_coords.t == 1.0)) {
+        //                        v.tex_coords = opengl_tex->coords[3];
+        //                        continue;
+        //                    }
+        //                }
+        //            }
+
+        //            // Quad is tessellated into 2 triangles, using a texture
+        //            //******
+
+        //            if constexpr (constexpr bool usesDrawElements = true) {
+        //                glBufferData(GL_ARRAY_BUFFER,
+        //                             sizeof(Vertex) * part->vertexes_.size(),
+        //                             part->vertexes_.data(),
+        //                             GL_STATIC_DRAW);
+
+        //                glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        //            } else {
+        //                auto vertexes = std::vector<Vertex>{};
+
+        //                vertexes.reserve(vertexes_per_tessellated_quad);
+        //                // Transforming one quad in 2 triangles
+        //                vertexes.emplace_back(part->vertexes_[0]);
+        //                vertexes.emplace_back(part->vertexes_[1]);
+        //                vertexes.emplace_back(part->vertexes_[2]);
+        //                vertexes.emplace_back(part->vertexes_[0]);
+        //                vertexes.emplace_back(part->vertexes_[2]);
+        //                vertexes.emplace_back(part->vertexes_[3]);
+
+        //                //// Sending vertex buffer data to the GPU
+        //                glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * vertexes.size(), vertexes.data(), GL_STATIC_DRAW);
+
+        //                glDrawArrays(GL_TRIANGLES, 0, vertexes_per_tessellated_quad);
+        //            }
+
+        //            break;
+        //        }
+        //        case non_textured_polygon: {
+        //            // Quad is tessellated into 2 triangles, using color
+        //            //*****
+        //            auto vertexes = std::vector<Vertex>{};
+
+        //            vertexes.reserve(vertexes_per_tessellated_quad);
+        //            // Transforming one quad in 2 triangles
+        //            vertexes.emplace_back(part->vertexes_[0]);
+        //            vertexes.emplace_back(part->vertexes_[1]);
+        //            vertexes.emplace_back(part->vertexes_[2]);
+        //            vertexes.emplace_back(part->vertexes_[0]);
+        //            vertexes.emplace_back(part->vertexes_[2]);
+        //            vertexes.emplace_back(part->vertexes_[3]);
+
+        //            // Sending vertex buffer data to the GPU
+        //            glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * vertexes.size(), vertexes.data(), GL_STATIC_DRAW);
+        //            //*****
+
+        //            // Sending the variable to configure the shader to use color.
+        //            const auto is_texture_used = GLboolean(false);
+        //            glUniform1i(texture_used_loc, is_texture_used);
+
+        //            // Drawing the list, rendering 2 triangles (one quad) at a time while changing the current texture
+        //            glDrawArrays(GL_TRIANGLES, 0, vertexes_per_tessellated_quad);
+        //            break;
+        //        }
+        //        case polyline: {
+        //            // Quad is drawn using LINE_LOOP (4 vertexes)
+        //            //*****
+        //            auto vertexes = std::vector<Vertex>{};
+        //            vertexes.reserve(vertexes_per_polyline);
+        //            vertexes.emplace_back(part->vertexes_[0]);
+        //            vertexes.emplace_back(part->vertexes_[1]);
+        //            vertexes.emplace_back(part->vertexes_[2]);
+        //            vertexes.emplace_back(part->vertexes_[3]);
+
+        //            // Sending vertex buffer data to the GPU
+        //            glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * vertexes.size(), vertexes.data(), GL_STATIC_DRAW);
+        //            //*****
+
+        //            // Sending the variable to configure the shader to use color.
+        //            const auto is_texture_used = GLboolean(false);
+        //            glUniform1i(texture_used_loc, is_texture_used);
+
+        //            // Drawing the list
+        //            glDrawArrays(GL_LINE_LOOP, 0, vertexes_per_polyline);
+        //            break;
+        //        }
+        //        case line: {
+        //            // Single line (2 vertexes)
+        //            //*****
+        //            auto vertexes = std::vector<Vertex>{};
+        //            vertexes.reserve(vertexes_per_polyline);
+        //            vertexes.emplace_back(part->vertexes_[0]);
+        //            vertexes.emplace_back(part->vertexes_[1]);
+
+        //            // Sending vertex buffer data to the GPU
+        //            glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * vertexes.size(), vertexes.data(), GL_STATIC_DRAW);
+        //            //*****
+
+        //            // Sending the variable to configure the shader to use color.
+        //            const auto is_texture_used = GLboolean(false);
+        //            glUniform1i(texture_used_loc, is_texture_used);
+
+        //            // Drawing the list
+        //            glDrawArrays(GL_LINES, 0, vertexes_per_line);
+        //            break;
+        //        }
+        //        default: {
+        //            break;
+        //        }
+        //    }
+        //}
 
         // glDeleteBuffers(elements_nb, vertex_buffer_ids_array.data());
         // glDeleteVertexArrays(elements_nb, vao_ids_array.data());
@@ -1726,6 +1954,46 @@ void checkGlError() {
         const auto error = glGetError();
         if (error != GLenum::GL_NO_ERROR) { Log::warning(Logger::opengl, "OpenGL error : {}", (int)error); }
     }
+}
+
+auto generateDrawIndices(const PartsList& parts) -> std::vector<u32> {
+    constexpr auto indices_per_polygon  = std::array<GLuint, 6>{0, 1, 2, 0, 2, 3};
+    constexpr auto indices_per_polyline = std::array<GLuint, 4>{0, 1, 2, 3};
+    constexpr auto indices_per_line     = std::array<GLuint, 2>{0, 1};
+
+    auto indices = std::vector<GLuint>{};
+
+    switch (parts.at(0)->drawType()) {
+        using enum DrawType;
+        case textured_polygon:
+        case non_textured_polygon: {
+            indices.reserve(parts.size() * indices_per_polygon.size());
+            for ([[maybe_unused]] const auto& p : parts) {
+                indices.insert(indices.end(), indices_per_polygon.begin(), indices_per_polygon.end());
+            }
+            break;
+        }
+        case polyline: {
+            indices.reserve(parts.size() * indices_per_polyline.size());
+            for ([[maybe_unused]] const auto& p : parts) {
+                indices.insert(indices.end(), indices_per_polyline.begin(), indices_per_polyline.end());
+            }
+            break;
+        }
+        case line: {
+            indices.reserve(parts.size() * indices_per_line.size());
+            for ([[maybe_unused]] const auto& p : parts) {
+                indices.insert(indices.end(), indices_per_line.begin(), indices_per_line.end());
+            }
+
+            break;
+        }
+        default: {
+            break;
+        }
+    }
+
+    return indices;
 }
 
 }; // namespace saturnin::video

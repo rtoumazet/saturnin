@@ -334,6 +334,7 @@ class Opengl {
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     void render();
+    void renderNew();
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn auto saturnin::video::Opengl::isThereSomethingToRender() const -> bool;
@@ -679,8 +680,9 @@ class Opengl {
     ScreenResolution saturn_screen_resolution_{}; ///< Saturn screen resolution.
     ScreenResolution host_screen_resolution_{};   ///< Host screen resolution.
 
-    PartsList parts_list_;        // Will have to be moved to the platform agnostic renderer.
-    Vdp1Part  part_to_highlight_; ///< Part that will be highlighted during debug.
+    PartsList              parts_list_; // Will have to be moved to the platform agnostic renderer.
+    std::vector<PartsList> parts_list_by_type_;
+    Vdp1Part               part_to_highlight_; ///< Part that will be highlighted during debug.
 
     u32                        texture_array_id_;                 ///< Identifier for the texture array.
     TexturesLink               textures_link_;                    ///< Link between the Texture key and the OpenglTexture.
@@ -839,5 +841,7 @@ void checkShaderCompilation(u32 shader);
 void checkProgramCompilation(u32 program);
 
 void checkGlError();
+
+auto generateDrawIndices(const PartsList& parts) -> std::vector<u32>;
 
 }; // namespace saturnin::video
