@@ -73,7 +73,7 @@ constexpr auto vertexes_per_line             = u32{2};
 
 constexpr auto check_gl_error = 1;
 
-constexpr bool usesDrawElements = false;
+constexpr bool usesDrawElements = true;
 
 Opengl::Opengl(core::Config* config) { config_ = config; }
 
@@ -582,7 +582,16 @@ void Opengl::renderNew() {
             switch (parts_list.at(0)->drawType()) {
                 using enum DrawType;
                 case textured_polygon: {
+                    // Sending the variable to configure the shader to use texture data.
+                    const auto is_texture_used = GLboolean(true);
+                    glUniform1i(texture_used_loc, is_texture_used);
+
                     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices.data(), GL_STATIC_DRAW);
+
+                    glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * parts_list.size(), parts_list.data(), GL_STATIC_DRAW);
+
+                    glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, &indices.front());
+
                     break;
                 }
                 case non_textured_polygon: {
@@ -751,7 +760,8 @@ void Opengl::renderNew() {
 
     {
         std::lock_guard lk(parts_list_mutex_);
-        PartsList().swap(parts_list_);
+        // PartsList().swap(parts_list_);
+        std::vector<PartsList>().swap(parts_list_by_type_);
         data_condition_.notify_one();
     }
 
