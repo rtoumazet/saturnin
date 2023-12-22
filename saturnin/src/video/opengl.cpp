@@ -25,6 +25,7 @@
 #include <filesystem> // filesystem
 #include <iostream>   // cout
 #include <lodepng.h>
+#include <ranges>
 #include <sstream> // stringstream
 #include <glbinding/glbinding.h>
 // #include <glbinding/gl/gl.h>
@@ -73,7 +74,7 @@ constexpr auto vertexes_per_line             = u32{2};
 
 constexpr auto check_gl_error = 1;
 
-constexpr bool usesDrawElements = true;
+constexpr bool usesDrawElements = false;
 
 Opengl::Opengl(core::Config* config) { config_ = config; }
 
@@ -316,18 +317,18 @@ void Opengl::displayFramebuffer(core::EmulatorContext& state) {
     // Parts are read in order. Goal is to regroup parts with the same draw type to reduce number of glDraw* calls.
     std::vector<PartsList> parts_by_type;
 
-    if (!parts_list.empty()) {
-        auto current_type = parts_list[0]->drawType();
-        auto current_list = PartsList{};
-        for (const auto& p : parts_list) {
-            if (current_type != p->drawType()) {
-                // Vector is moved to the global vector list
-                parts_by_type.push_back(std::move(current_list));
-                current_type = p->drawType();
-            }
-            current_list.push_back(std::make_unique<BaseRenderingPart>(*p));
-        }
-    }
+    // if (!parts_list.empty()) {
+    //     auto current_type = parts_list[0]->drawType();
+    //     auto current_list = PartsList{};
+    //     for (const auto& p : parts_list) {
+    //         if (current_type != p->drawType()) {
+    //             // Vector is moved to the global vector list
+    //             parts_by_type.push_back(std::move(current_list));
+    //             current_type = p->drawType();
+    //         }
+    //         current_list.push_back(std::make_unique<BaseRenderingPart>(*p));
+    //     }
+    // }
 
     if constexpr (usesDrawElements) {
         if (parts_list_by_type_.empty()) {
@@ -578,7 +579,8 @@ void Opengl::renderNew() {
 
         for (const auto& parts_list : parts_by_type) {
             // Initializing the number of indices to send to the GPU.
-            const auto indices = generateDrawIndices(parts_list);
+            const auto indices  = generateDrawIndices(parts_list);
+            const auto vertexes = readVertexes(parts_list);
             switch (parts_list.at(0)->drawType()) {
                 using enum DrawType;
                 case textured_polygon: {
@@ -586,11 +588,10 @@ void Opengl::renderNew() {
                     const auto is_texture_used = GLboolean(true);
                     glUniform1i(texture_used_loc, is_texture_used);
 
-                    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices.data(), GL_STATIC_DRAW);
+                    glBufferData(GL_ARRAY_BUFFER, sizeof(vertexes), vertexes.data(), GL_STATIC_DRAW);
+                    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), &indices.front(), GL_STATIC_DRAW);
 
-                    glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * parts_list.size(), parts_list.data(), GL_STATIC_DRAW);
-
-                    glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, &indices.front());
+                    glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(indices.size()), GL_UNSIGNED_INT, (void*)0);
 
                     break;
                 }
@@ -787,7 +788,13 @@ auto Opengl::getVertexesNumberByDrawType(const PartsList& parts_list) const -> u
     return batch_vertex_size;
 }
 
-auto Opengl::isThereSomethingToRender() const -> bool { return !parts_list_.empty(); }
+auto Opengl::isThereSomethingToRender() const -> bool {
+    if (usesDrawElements) {
+        return !parts_list_by_type_.empty();
+    } else {
+        return !parts_list_.empty();
+    }
+}
 
 auto Opengl::getRenderedBufferTextureId() const -> u32 { return getFboTextureId(current_rendered_buffer_); }
 
@@ -1967,33 +1974,43 @@ void checkGlError() {
 }
 
 auto generateDrawIndices(const PartsList& parts) -> std::vector<u32> {
-    constexpr auto indices_per_polygon  = std::array<GLuint, 6>{0, 1, 2, 0, 2, 3};
-    constexpr auto indices_per_polyline = std::array<GLuint, 4>{0, 1, 2, 3};
-    constexpr auto indices_per_line     = std::array<GLuint, 2>{0, 1};
+    const auto     indices_per_polygon  = std::vector<u32>{0, 1, 2, 0, 2, 3};
+    constexpr auto indices_per_polyline = std::array<u32, 4>{0, 1, 2, 3};
+    constexpr auto indices_per_line     = std::array<u32, 2>{0, 1};
 
-    auto indices = std::vector<GLuint>{};
-
+    auto indices   = std::vector<u32>{};
+    auto increment = u32{};
     switch (parts.at(0)->drawType()) {
         using enum DrawType;
         case textured_polygon:
         case non_textured_polygon: {
             indices.reserve(parts.size() * indices_per_polygon.size());
             for ([[maybe_unused]] const auto& p : parts) {
-                indices.insert(indices.end(), indices_per_polygon.begin(), indices_per_polygon.end());
+                std::ranges::transform(indices_per_polygon, std::back_inserter(indices), [&increment](u32 i) {
+                    return i + increment;
+                });
+
+                increment += 4;
             }
             break;
         }
         case polyline: {
             indices.reserve(parts.size() * indices_per_polyline.size());
             for ([[maybe_unused]] const auto& p : parts) {
-                indices.insert(indices.end(), indices_per_polyline.begin(), indices_per_polyline.end());
+                std::ranges::transform(indices_per_polyline, std::back_inserter(indices), [&increment](u32 i) {
+                    return i + increment;
+                });
+                increment += 4;
             }
             break;
         }
         case line: {
             indices.reserve(parts.size() * indices_per_line.size());
             for ([[maybe_unused]] const auto& p : parts) {
-                indices.insert(indices.end(), indices_per_line.begin(), indices_per_line.end());
+                std::ranges::transform(indices_per_line, std::back_inserter(indices), [&increment](u32 i) {
+                    return i + increment;
+                });
+                increment += 4;
             }
 
             break;
@@ -2006,4 +2023,12 @@ auto generateDrawIndices(const PartsList& parts) -> std::vector<u32> {
     return indices;
 }
 
+auto readVertexes(const PartsList& parts) -> std::vector<Vertex> {
+    auto vertexes = std::vector<Vertex>{};
+    for (const auto& p : parts) {
+        std::ranges::copy(p->vertexes_.begin(), p->vertexes_.end(), std::back_inserter(vertexes));
+    }
+
+    return vertexes;
+}
 }; // namespace saturnin::video

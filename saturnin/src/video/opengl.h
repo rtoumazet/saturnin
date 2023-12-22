@@ -842,6 +842,34 @@ void checkProgramCompilation(u32 program);
 
 void checkGlError();
 
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \fn	auto generateDrawIndices(const PartsList& parts) -> std::vector<u32>;
+///
+/// \brief	Generates a draw indices from a parts list.
+///
+/// \author	Runik
+/// \date	22/12/2023
+///
+/// \param 	parts	The parts.
+///
+/// \returns	The draw indices.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
 auto generateDrawIndices(const PartsList& parts) -> std::vector<u32>;
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \fn	auto readVertexes(const PartsList& parts) -> std::vector<Vertex>
+///
+/// \brief	Returns all the vertexes from a parts list.
+///
+/// \author	Runik
+/// \date	22/12/2023
+///
+/// \param 	parts	The parts.
+///
+/// \returns	The vertexes.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+auto readVertexes(const PartsList& parts) -> std::vector<Vertex>;
 
 }; // namespace saturnin::video
