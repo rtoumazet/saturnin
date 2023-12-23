@@ -976,8 +976,7 @@ void showRenderingWindow(core::EmulatorContext& state) {
     if (state.opengl()->areFbosInitialized()) {
         if (state.opengl()->isThereSomethingToRender()) {
             state.opengl()->generateTextures();
-            state.opengl()->render();
-            // state.opengl()->renderNew();
+            state.opengl()->renderSelector();
         }
         const auto alpha = 0xff;
         gui::addTextureToDrawList(state.opengl()->getRenderedBufferTextureId(), width, height, alpha);

@@ -335,6 +335,7 @@ class Opengl {
 
     void render();
     void renderNew();
+    void renderSelector();
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn auto saturnin::video::Opengl::isThereSomethingToRender() const -> bool;

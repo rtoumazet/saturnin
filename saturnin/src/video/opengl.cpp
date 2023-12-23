@@ -74,7 +74,8 @@ constexpr auto vertexes_per_line             = u32{2};
 
 constexpr auto check_gl_error = 1;
 
-constexpr bool usesDrawElements = false;
+constexpr enum class RenderType { RenderType_drawArrays, RenderType_drawElements, RenderType_test };
+constexpr auto render_type = RenderType::RenderType_drawArrays;
 
 Opengl::Opengl(core::Config* config) { config_ = config; }
 
@@ -314,29 +315,31 @@ void Opengl::displayFramebuffer(core::EmulatorContext& state) {
                                  return a->priority() < b->priority();
                              });
 
-    // Parts are read in order. Goal is to regroup parts with the same draw type to reduce number of glDraw* calls.
-    std::vector<PartsList> parts_by_type;
+    if constexpr (render_type == RenderType::RenderType_drawElements) {
+        // Parts are read in order. Goal is to regroup parts with the same draw type to reduce number of glDraw* calls.
+        std::vector<PartsList> parts_by_type;
 
-    // if (!parts_list.empty()) {
-    //     auto current_type = parts_list[0]->drawType();
-    //     auto current_list = PartsList{};
-    //     for (const auto& p : parts_list) {
-    //         if (current_type != p->drawType()) {
-    //             // Vector is moved to the global vector list
-    //             parts_by_type.push_back(std::move(current_list));
-    //             current_type = p->drawType();
-    //         }
-    //         current_list.push_back(std::make_unique<BaseRenderingPart>(*p));
-    //     }
-    // }
+        if (!parts_list.empty()) {
+            auto current_type = parts_list[0]->drawType();
+            auto current_list = PartsList{};
+            for (const auto& p : parts_list) {
+                if (current_type != p->drawType()) {
+                    // Vector is moved to the global vector list
+                    parts_by_type.push_back(std::move(current_list));
+                    current_type = p->drawType();
+                }
+                current_list.push_back(std::make_unique<BaseRenderingPart>(*p));
+            }
+        }
 
-    if constexpr (usesDrawElements) {
         if (parts_list_by_type_.empty()) {
             std::unique_lock lk(parts_list_mutex_);
             parts_list_by_type_ = std::move(parts_by_type);
             data_condition_.wait(lk, [this]() { return parts_list_by_type_.empty(); });
         }
-    } else {
+    }
+
+    if constexpr (render_type == RenderType::RenderType_drawArrays) {
         if (parts_list_.empty()) {
             std::unique_lock lk(parts_list_mutex_);
             parts_list_ = std::move(parts_list);
@@ -422,14 +425,15 @@ void Opengl::render() {
                     // Quad is tessellated into 2 triangles, using a texture
                     //******
 
-                    if constexpr (usesDrawElements == true) {
+                    if constexpr (render_type == RenderType::RenderType_drawElements) {
                         glBufferData(GL_ARRAY_BUFFER,
                                      sizeof(Vertex) * part->vertexes_.size(),
                                      part->vertexes_.data(),
                                      GL_STATIC_DRAW);
 
                         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-                    } else {
+                    }
+                    if constexpr (render_type == RenderType::RenderType_drawArrays) {
                         auto vertexes = std::vector<Vertex>{};
 
                         vertexes.reserve(vertexes_per_tessellated_quad);
@@ -591,7 +595,7 @@ void Opengl::renderNew() {
                     glBufferData(GL_ARRAY_BUFFER, sizeof(vertexes), vertexes.data(), GL_STATIC_DRAW);
                     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), &indices.front(), GL_STATIC_DRAW);
 
-                    glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(indices.size()), GL_UNSIGNED_INT, (void*)0);
+                    glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(indices.size()), GL_UNSIGNED_INT, (GLvoid*)0);
 
                     break;
                 }
@@ -769,6 +773,11 @@ void Opengl::renderNew() {
     postRender();
 }
 
+void Opengl::renderSelector() {
+    if constexpr (render_type == RenderType::RenderType_drawElements) { renderNew(); }
+    if constexpr (render_type == RenderType::RenderType_drawArrays) { render(); }
+}
+
 auto Opengl::getVertexesNumberByDrawType(const PartsList& parts_list) const -> u64 {
     auto batch_vertex_size = u64{};
 
@@ -789,11 +798,9 @@ auto Opengl::getVertexesNumberByDrawType(const PartsList& parts_list) const -> u
 }
 
 auto Opengl::isThereSomethingToRender() const -> bool {
-    if (usesDrawElements) {
-        return !parts_list_by_type_.empty();
-    } else {
-        return !parts_list_.empty();
-    }
+    if constexpr (render_type == RenderType::RenderType_drawElements) { return !parts_list_by_type_.empty(); }
+    if constexpr (render_type == RenderType::RenderType_drawArrays) { return !parts_list_.empty(); }
+    if constexpr (render_type == RenderType::RenderType_test) { return true; }
 }
 
 auto Opengl::getRenderedBufferTextureId() const -> u32 { return getFboTextureId(current_rendered_buffer_); }
