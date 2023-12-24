@@ -74,8 +74,8 @@ constexpr auto vertexes_per_line             = u32{2};
 
 constexpr auto check_gl_error = 1;
 
-constexpr enum class RenderType { RenderType_drawArrays, RenderType_drawElements, RenderType_test };
-constexpr auto render_type = RenderType::RenderType_drawArrays;
+constexpr enum class RenderType { RenderType_drawArrays, RenderType_drawElements, RenderType_drawTest };
+constexpr auto render_type = RenderType::RenderType_drawElements;
 
 Opengl::Opengl(core::Config* config) { config_ = config; }
 
@@ -773,8 +773,99 @@ void Opengl::renderNew() {
     postRender();
 }
 
+void Opengl::renderTest() {
+    preRender();
+
+    const auto [vao, vertex_buffer] = initializeVao(ShaderName::textured);
+
+    glUseProgram(program_shader_);
+    glBindVertexArray(vao);                       // binding VAO
+    glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer); // binding vertex buffer
+
+    // Calculating the ortho projection matrix
+    const auto proj_matrix = calculateDisplayViewportMatrix();
+
+    // Sending the ortho projection matrix to the shader
+    const auto uni_proj_matrix = glGetUniformLocation(program_shader_, "proj_matrix");
+    glUniformMatrix4fv(uni_proj_matrix, 1, GL_FALSE, glm::value_ptr(proj_matrix));
+
+    glActiveTexture(GLenum::GL_TEXTURE0);
+    const auto sampler_loc = glGetUniformLocation(program_shader_, "sampler");
+    // glUniform1i(sampler_loc, GLenum::GL_TEXTURE0);
+    glUniform1i(sampler_loc, 0);
+    glBindTexture(GL_TEXTURE_2D_ARRAY, texture_array_id_);
+
+    const auto texture_used_loc = glGetUniformLocation(program_shader_, "is_texture_used");
+
+    auto elements_buffer = u32{};
+    glGenBuffers(1, &elements_buffer); // This buffer will be used to send indices data to the GPU
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elements_buffer);
+
+    // Sending the variable to configure the shader to use texture data.
+    const auto is_texture_used = GLboolean(false);
+    glUniform1i(texture_used_loc, is_texture_used);
+
+    // const auto vertexes = std::vector<Vertex> {
+    //     {0x60,0x60,0.0f,0.0f,0.0f}
+    // }
+    // part.vertexes_.reserve(4);
+    // part.vertexes_.emplace_back(part.calculatedXA(),
+    //                             part.calculatedYA(),
+    //                             0.0f,
+    //                             0.0f,
+    //                             0.0f,
+    //                             color.r,
+    //                             color.g,
+    //                             color.b,
+    //                             color.a,
+    //                             gouraud_values[0]); // lower left
+    // part.vertexes_.emplace_back(part.calculatedXB(),
+    //                             part.calculatedYB(),
+    //                             1.0f,
+    //                             0.0f,
+    //                             0.0f,
+    //                             color.r,
+    //                             color.g,
+    //                             color.b,
+    //                             color.a,
+    //                             gouraud_values[1]); // lower right
+    // part.vertexes_.emplace_back(part.calculatedXC(),
+    //                             part.calculatedYC(),
+    //                             1.0f,
+    //                             1.0f,
+    //                             0.0f,
+    //                             color.r,
+    //                             color.g,
+    //                             color.b,
+    //                             color.a,
+    //                             gouraud_values[2]); // upper right
+    // part.vertexes_.emplace_back(part.calculatedXD(),
+    //                             part.calculatedYD(),
+    //                             0.0f,
+    //                             1.0f,
+    //                             0.0f,
+    //                             color.r,
+    //                             color.g,
+    //                             color.b,
+    //                             color.a,
+    //                             gouraud_values[3]); // upper left
+
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertexes), vertexes.data(), GL_STATIC_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), &indices.front(), GL_STATIC_DRAW);
+
+    glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(indices.size()), GL_UNSIGNED_INT, (GLvoid*)0);
+
+    gl::glDeleteBuffers(1, &vertex_buffer);
+    gl::glDeleteVertexArrays(1, &vao);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+    gl::glDeleteBuffers(1, &elements_buffer);
+
+    postRender();
+}
+
 void Opengl::renderSelector() {
     if constexpr (render_type == RenderType::RenderType_drawElements) { renderNew(); }
+    if constexpr (render_type == RenderType::RenderType_drawArrays) { render(); }
     if constexpr (render_type == RenderType::RenderType_drawArrays) { render(); }
 }
 
@@ -800,7 +891,7 @@ auto Opengl::getVertexesNumberByDrawType(const PartsList& parts_list) const -> u
 auto Opengl::isThereSomethingToRender() const -> bool {
     if constexpr (render_type == RenderType::RenderType_drawElements) { return !parts_list_by_type_.empty(); }
     if constexpr (render_type == RenderType::RenderType_drawArrays) { return !parts_list_.empty(); }
-    if constexpr (render_type == RenderType::RenderType_test) { return true; }
+    if constexpr (render_type == RenderType::RenderType_drawTest) { return true; }
 }
 
 auto Opengl::getRenderedBufferTextureId() const -> u32 { return getFboTextureId(current_rendered_buffer_); }
