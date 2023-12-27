@@ -75,7 +75,7 @@ constexpr auto vertexes_per_line             = u32{2};
 constexpr auto check_gl_error = 1;
 
 constexpr enum class RenderType { RenderType_drawArrays, RenderType_drawElements, RenderType_drawTest };
-constexpr auto render_type = RenderType::RenderType_drawElements;
+constexpr auto render_type = RenderType::RenderType_drawTest;
 
 Opengl::Opengl(core::Config* config) { config_ = config; }
 
@@ -800,60 +800,36 @@ void Opengl::renderTest() {
     auto elements_buffer = u32{};
     glGenBuffers(1, &elements_buffer); // This buffer will be used to send indices data to the GPU
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elements_buffer);
+    std::array<GLuint, 14> indices = {0, 1, 2, 0, 2, 3, 4, 5, 6, 4, 6, 7, 8, 9};
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices.data(), GL_STATIC_DRAW);
 
     // Sending the variable to configure the shader to use texture data.
     const auto is_texture_used = GLboolean(false);
     glUniform1i(texture_used_loc, is_texture_used);
 
-    // const auto vertexes = std::vector<Vertex> {
-    //     {0x60,0x60,0.0f,0.0f,0.0f}
-    // }
-    // part.vertexes_.reserve(4);
-    // part.vertexes_.emplace_back(part.calculatedXA(),
-    //                             part.calculatedYA(),
-    //                             0.0f,
-    //                             0.0f,
-    //                             0.0f,
-    //                             color.r,
-    //                             color.g,
-    //                             color.b,
-    //                             color.a,
-    //                             gouraud_values[0]); // lower left
-    // part.vertexes_.emplace_back(part.calculatedXB(),
-    //                             part.calculatedYB(),
-    //                             1.0f,
-    //                             0.0f,
-    //                             0.0f,
-    //                             color.r,
-    //                             color.g,
-    //                             color.b,
-    //                             color.a,
-    //                             gouraud_values[1]); // lower right
-    // part.vertexes_.emplace_back(part.calculatedXC(),
-    //                             part.calculatedYC(),
-    //                             1.0f,
-    //                             1.0f,
-    //                             0.0f,
-    //                             color.r,
-    //                             color.g,
-    //                             color.b,
-    //                             color.a,
-    //                             gouraud_values[2]); // upper right
-    // part.vertexes_.emplace_back(part.calculatedXD(),
-    //                             part.calculatedYD(),
-    //                             0.0f,
-    //                             1.0f,
-    //                             0.0f,
-    //                             color.r,
-    //                             color.g,
-    //                             color.b,
-    //                             color.a,
-    //                             gouraud_values[3]); // upper left
+    auto vertexes = std::vector<Vertex>{
+        {100, 100, 0.0f, 0.0f, 0.0f, 0xff, 0,    0,    0xff, Gouraud()},
+        {100, 150, 1.0f, 0.0f, 0.0f, 0xff, 0,    0,    0xff, Gouraud()},
+        {150, 150, 1.0f, 1.0f, 0.0f, 0xff, 0,    0,    0xff, Gouraud()},
+        {150, 100, 0.0f, 1.0f, 0.0f, 0xff, 0,    0,    0xff, Gouraud()},
 
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertexes), vertexes.data(), GL_STATIC_DRAW);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), &indices.front(), GL_STATIC_DRAW);
+        {200, 200, 0.0f, 0.0f, 0.0f, 0,    0,    0xff, 0xff, Gouraud()},
+        {200, 250, 1.0f, 0.0f, 0.0f, 0,    0,    0xff, 0xff, Gouraud()},
+        {250, 250, 1.0f, 1.0f, 0.0f, 0,    0,    0xff, 0xff, Gouraud()},
+        {250, 200, 0.0f, 1.0f, 0.0f, 0,    0,    0xff, 0xff, Gouraud()},
 
-    glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(indices.size()), GL_UNSIGNED_INT, (GLvoid*)0);
+        {50,  50,  0.0f, 0.0f, 0.0f, 0,    0xff, 0,    0xff, Gouraud()},
+        {100, 100, 1.0f, 0.0f, 0.0f, 0,    0xff, 0,    0xff, Gouraud()},
+    };
+
+    glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * vertexes.size(), vertexes.data(), GL_STATIC_DRAW);
+
+    // glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(indices.size()), GL_UNSIGNED_INT, (GLvoid*)0);
+    // glDrawRangeElements(GL_TRIANGLES, 0, 11, 12, GL_UNSIGNED_INT, (GLvoid*)0);
+    glDrawRangeElements(GL_TRIANGLES, 0, 5, 6, GL_UNSIGNED_INT, (GLvoid*)0);
+    glDrawRangeElements(GL_TRIANGLES, 0, 5, 6, GL_UNSIGNED_INT, (GLuint*)0 + 6);
+
+    glDrawRangeElements(GL_LINES, 0, 1, 2, GL_UNSIGNED_INT, (GLuint*)0 + 12);
 
     gl::glDeleteBuffers(1, &vertex_buffer);
     gl::glDeleteVertexArrays(1, &vao);
@@ -866,7 +842,7 @@ void Opengl::renderTest() {
 void Opengl::renderSelector() {
     if constexpr (render_type == RenderType::RenderType_drawElements) { renderNew(); }
     if constexpr (render_type == RenderType::RenderType_drawArrays) { render(); }
-    if constexpr (render_type == RenderType::RenderType_drawArrays) { render(); }
+    if constexpr (render_type == RenderType::RenderType_drawTest) { renderTest(); }
 }
 
 auto Opengl::getVertexesNumberByDrawType(const PartsList& parts_list) const -> u64 {
