@@ -70,11 +70,9 @@ class Vdp2Part final : public BaseRenderingPart {
     auto linkedPlaneAddress() const -> u32 { return linked_plane_address_; }
 
   private:
-    ScreenPos scroll_screen_pos_{};       ///< Position in the scroll screen.
-    u16       character_number_{};        ///< The character number.
-    u16       palette_number_{};          ///< The palette number.
-    bool      is_horizontally_flipped_{}; ///< True if the part is horizontally flipped.
-    bool      is_vertically_flipped_{};   ///< True if the part is vertically flipped.
-    u32       linked_plane_address_{};    ///< Address of the linked plane, used to generate the plane texture while rendering.
+    ScreenPos scroll_screen_pos_{};    ///< Position in the scroll screen.
+    u16       character_number_{};     ///< The character number.
+    u16       palette_number_{};       ///< The palette number.
+    u32       linked_plane_address_{}; ///< Address of the linked plane, used to generate the plane texture while rendering.
 };
 } // namespace saturnin::video

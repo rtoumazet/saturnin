@@ -75,7 +75,7 @@ constexpr auto vertexes_per_line             = u32{2};
 constexpr auto check_gl_error = 1;
 
 constexpr enum class RenderType { RenderType_drawArrays, RenderType_drawElements, RenderType_drawTest };
-constexpr auto render_type = RenderType::RenderType_drawTest;
+constexpr auto render_type = RenderType::RenderType_drawArrays;
 
 Opengl::Opengl(core::Config* config) { config_ = config; }
 
@@ -344,6 +344,16 @@ void Opengl::displayFramebuffer(core::EmulatorContext& state) {
             std::unique_lock lk(parts_list_mutex_);
             parts_list_ = std::move(parts_list);
             data_condition_.wait(lk, [this]() { return parts_list_.empty(); });
+        }
+    }
+
+    if constexpr (render_type == RenderType::RenderType_drawTest) {
+        if (!parts_list.empty()) {
+            std::vector<DrawRange>().swap(draw_range_);
+            for (const auto& p : parts_list) {
+                DrawRange dr{};
+                dr.indice_start_in_range = 0;
+            }
         }
     }
 }
@@ -824,12 +834,10 @@ void Opengl::renderTest() {
 
     glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * vertexes.size(), vertexes.data(), GL_STATIC_DRAW);
 
-    // glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(indices.size()), GL_UNSIGNED_INT, (GLvoid*)0);
-    // glDrawRangeElements(GL_TRIANGLES, 0, 11, 12, GL_UNSIGNED_INT, (GLvoid*)0);
-    glDrawRangeElements(GL_TRIANGLES, 0, 5, 6, GL_UNSIGNED_INT, (GLvoid*)0);
-    glDrawRangeElements(GL_TRIANGLES, 0, 5, 6, GL_UNSIGNED_INT, (GLuint*)0 + 6);
-
-    glDrawRangeElements(GL_LINES, 0, 1, 2, GL_UNSIGNED_INT, (GLuint*)0 + 12);
+    // glDrawRangeElements(GL_TRIANGLES, 0, 5, 6, GL_UNSIGNED_INT, static_cast<GLuint*>(nullptr));
+    // glDrawRangeElements(GL_TRIANGLES, 0, 5, 6, GL_UNSIGNED_INT, static_cast<GLuint*>(nullptr) + 6);
+    glDrawRangeElements(GL_TRIANGLES, 0, 11, 12, GL_UNSIGNED_INT, static_cast<GLuint*>(nullptr));
+    glDrawRangeElements(GL_LINES, 0, 1, 2, GL_UNSIGNED_INT, static_cast<GLuint*>(nullptr) + 12);
 
     gl::glDeleteBuffers(1, &vertex_buffer);
     gl::glDeleteVertexArrays(1, &vao);
@@ -2048,7 +2056,7 @@ void checkGlError() {
 }
 
 auto generateDrawIndices(const PartsList& parts) -> std::vector<u32> {
-    const auto     indices_per_polygon  = std::vector<u32>{0, 1, 2, 0, 2, 3};
+    const auto     indices_per_polygon  = std::array<u32, 6>{0, 1, 2, 0, 2, 3};
     constexpr auto indices_per_polyline = std::array<u32, 4>{0, 1, 2, 3};
     constexpr auto indices_per_line     = std::array<u32, 2>{0, 1};
 
@@ -2084,7 +2092,7 @@ auto generateDrawIndices(const PartsList& parts) -> std::vector<u32> {
                 std::ranges::transform(indices_per_line, std::back_inserter(indices), [&increment](u32 i) {
                     return i + increment;
                 });
-                increment += 4;
+                increment += 2;
             }
 
             break;

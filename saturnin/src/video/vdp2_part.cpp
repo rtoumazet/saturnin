@@ -33,8 +33,6 @@ Vdp2Part::Vdp2Part(const PatternNameData& pnd,
     scroll_screen_pos_(pos),
     character_number_(pnd.character_number),
     palette_number_(pnd.palette_number),
-    is_horizontally_flipped_(pnd.is_horizontally_flipped),
-    is_vertically_flipped_(pnd.is_vertically_flipped),
     linked_plane_address_(linked_plane_address) {
     // Vdp2 parts are 8*8 pixels squares
     constexpr auto cell_width   = u8{8};
@@ -49,11 +47,11 @@ Vdp2Part::Vdp2Part(const PatternNameData& pnd,
     auto t_down  = float{0.0};
     auto t_up    = float{1.0};
 
-    if (is_horizontally_flipped_) {
+    if (pnd.is_horizontally_flipped) {
         s_left  = 1.0f - s_left;
         s_right = 1.0f - s_right;
     }
-    if (is_vertically_flipped_) {
+    if (pnd.is_vertically_flipped) {
         t_down = 1.0f - t_down;
         t_up   = 1.0f - t_up;
     }
@@ -73,9 +71,7 @@ Vdp2Part::Vdp2Part(const size_t  texture_key,
     BaseRenderingPart(vdp_type, DrawType::textured_polygon, texture_key, priority, color_offset),
     scroll_screen_pos_({0, 0}),
     character_number_(0),
-    palette_number_(0),
-    is_horizontally_flipped_(false),
-    is_vertically_flipped_(false) {
+    palette_number_(0) {
     const auto pos_x        = static_cast<s16>(0);
     const auto pos_x_width  = static_cast<s16>(texture_width);
     const auto pos_y        = static_cast<s16>(0);

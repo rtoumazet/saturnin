@@ -101,6 +101,29 @@ struct PlaneTexture {
     std::vector<TextureCoordinates> coords;              ///< The coordinates of the texture.
 };
 
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \struct	DrawRange
+///
+/// \brief	Used to draw different primitives with calls to glDrawRangeElements.
+///
+/// \author	Runik
+/// \date	27/12/2023
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+struct DrawRange {
+    u32      indice_start_in_range; ///< The indice start in range.
+    u32      indice_end_in_range;   ///< The indice end in range
+    u32      indices_nb;            ///< Number of indices to draw
+    u32      range_start;           ///< Start of the range
+    DrawType primitive;             ///< The primitive used to draw the indices in the range
+};
+
+struct ReducedPart {
+    ColorF              color_offset;
+    size_t              texture_key;
+    std::vector<Vertex> vertexes;
+};
+
 using LayerToTextures            = std::unordered_map<Layer, std::vector<OpenglTexture>>;
 using LayerToTextureArrayIndexes = std::unordered_map<Layer, std::vector<u8>>;
 using LayerToCacheReloadState    = std::unordered_map<Layer, bool>;
@@ -682,9 +705,11 @@ class Opengl {
     ScreenResolution saturn_screen_resolution_{}; ///< Saturn screen resolution.
     ScreenResolution host_screen_resolution_{};   ///< Host screen resolution.
 
-    PartsList              parts_list_; // Will have to be moved to the platform agnostic renderer.
-    std::vector<PartsList> parts_list_by_type_;
-    Vdp1Part               part_to_highlight_; ///< Part that will be highlighted during debug.
+    PartsList                parts_list_; // Will have to be moved to the platform agnostic renderer.
+    std::vector<PartsList>   parts_list_by_type_;
+    Vdp1Part                 part_to_highlight_; ///< Part that will be highlighted during debug.
+    std::vector<DrawRange>   draw_range_;
+    std::vector<ReducedPart> reduced_parts_;
 
     u32                        texture_array_id_;                 ///< Identifier for the texture array.
     TexturesLink               textures_link_;                    ///< Link between the Texture key and the OpenglTexture.
@@ -692,8 +717,6 @@ class Opengl {
     LayerToTextureArrayIndexes layer_to_texture_array_indexes_{}; ///< Link between layers and texture array indexes.
     LayerToCacheReloadState    layer_to_cache_reload_state_{};    ///< Stores if a layer needs its cache to be reloaded .
     AddressToPlaneTexture      address_to_plane_textures_{};      ///< Link between an address and its plane.
-
-    // std::vector<u32> textures_to_delete_; ///< List of the textures id to delete.
 
     std::mutex parts_list_mutex_;     ///< Mutex protecting parts_list_.
     std::mutex textures_link_mutex_;  ///< Mutex protecting textures_link_.
