@@ -31,8 +31,6 @@ Vdp2Part::Vdp2Part(const PatternNameData& pnd,
                    const u32              linked_plane_address) :
     BaseRenderingPart(VdpType::vdp2_cell, DrawType::textured_polygon, texture_key, priority, color_offset),
     scroll_screen_pos_(pos),
-    character_number_(pnd.character_number),
-    palette_number_(pnd.palette_number),
     linked_plane_address_(linked_plane_address) {
     // Vdp2 parts are 8*8 pixels squares
     constexpr auto cell_width   = u8{8};
@@ -69,9 +67,7 @@ Vdp2Part::Vdp2Part(const size_t  texture_key,
                    const ColorF& color_offset,
                    const VdpType vdp_type) :
     BaseRenderingPart(vdp_type, DrawType::textured_polygon, texture_key, priority, color_offset),
-    scroll_screen_pos_({0, 0}),
-    character_number_(0),
-    palette_number_(0) {
+    scroll_screen_pos_({0, 0}) {
     const auto pos_x        = static_cast<s16>(0);
     const auto pos_x_width  = static_cast<s16>(texture_width);
     const auto pos_y        = static_cast<s16>(0);
