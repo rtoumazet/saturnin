@@ -51,30 +51,6 @@ class BaseRenderingPart {
     virtual ~BaseRenderingPart()                                     = default;
     ///@}
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn	static auto BaseRenderingPart::getGlobalOrder() -> u32
-    ///
-    /// \brief	Returns current global order value, which is incremented after being returned.
-    ///
-    /// \author	Runik
-    /// \date	17/02/2021
-    ///
-    /// \returns	A const u32.
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    static auto getGlobalOrder() -> u32 { return global_order_++; }
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn static void BaseRenderingPart::resetGlobalOrder()
-    ///
-    /// \brief  Resets global order value.
-    ///
-    /// \author Runik
-    /// \date   17/02/2021
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    static void resetGlobalOrder() { global_order_ = 0; }
-
     ///@{
     /// Accessors / Mutators
     void               vdpType(const VdpType p) { vdp_type_ = p; };
@@ -105,11 +81,10 @@ class BaseRenderingPart {
         color_offset_(color_offset){};
 
   private:
-    VdpType           vdp_type_{VdpType::not_set};     ///< Type of the part.
-    DrawType          draw_type_{DrawType::undefined}; ///< Type of the draw
-    u8                priority_{0};                    ///< Priority of the part.
-    static inline u32 global_order_{0};                ///< Static variable used to get the current part order.
-    size_t            texture_key_{};                  ///< Link to the texture.
-    ColorF            color_offset_{};                 ///< Color offset for the part.
+    VdpType  vdp_type_{VdpType::not_set};     ///< Type of the part.
+    DrawType draw_type_{DrawType::undefined}; ///< Type of the draw
+    u8       priority_{0};                    ///< Priority of the part.
+    size_t   texture_key_{};                  ///< Link to the texture.
+    ColorF   color_offset_{};                 ///< Color offset for the part.
 };
 } // namespace saturnin::video
