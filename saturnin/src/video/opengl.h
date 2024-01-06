@@ -46,7 +46,7 @@ struct GLFWimage;
 namespace saturnin::video {
 
 // Forward declaration
-enum class DrawType;
+enum class DrawType : u8;
 class BaseRenderingPart;
 
 using saturnin::core::Config;
@@ -118,10 +118,21 @@ struct DrawRange {
     DrawType primitive;             ///< The primitive used to draw the indices in the range
 };
 
-struct ReducedPart {
-    ColorF              color_offset;
-    size_t              texture_key;
-    std::vector<Vertex> vertexes;
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \struct	RenderPart
+///
+/// \brief	A render part for the opengl renderer.
+///
+/// \author	Runik
+/// \date	06/01/2024
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+struct RenderPart {
+    std::vector<Vertex> vertexes;     ///< The vertexes used for rendering.
+    ColorF              color_offset; ///< Color offset.
+    size_t              texture_key;  ///< Link to the texture.
+    DrawType            draw_type;    ///< Type of the draw.
+    u8                  priority{0};  ///< Priority (used for sorting).
 };
 
 using LayerToTextures            = std::unordered_map<Layer, std::vector<OpenglTexture>>;
@@ -705,11 +716,11 @@ class Opengl {
     ScreenResolution saturn_screen_resolution_{}; ///< Saturn screen resolution.
     ScreenResolution host_screen_resolution_{};   ///< Host screen resolution.
 
-    PartsList                parts_list_; // Will have to be moved to the platform agnostic renderer.
-    std::vector<PartsList>   parts_list_by_type_;
-    Vdp1Part                 part_to_highlight_; ///< Part that will be highlighted during debug.
-    std::vector<DrawRange>   draw_range_;
-    std::vector<ReducedPart> reduced_parts_;
+    PartsList               parts_list_; // Will have to be moved to the platform agnostic renderer.
+    std::vector<PartsList>  parts_list_by_type_;
+    Vdp1Part                part_to_highlight_; ///< Part that will be highlighted during debug.
+    std::vector<DrawRange>  draw_range_;
+    std::vector<RenderPart> render_parts_;
 
     u32                        texture_array_id_;                 ///< Identifier for the texture array.
     TexturesLink               textures_link_;                    ///< Link between the Texture key and the OpenglTexture.

@@ -70,7 +70,7 @@ enum class Layer {
 /// \brief  Values that represent draw types.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class DrawType {
+enum class DrawType : u8 {
     textured_polygon, // VDP2 cells, normal/scaled/distorted sprites
     non_textured_polygon,
     polyline,
