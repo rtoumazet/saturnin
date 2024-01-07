@@ -26,7 +26,8 @@
 #pragma once
 
 #include <saturnin/src/emulator_defs.h>
-#include <saturnin/src/video/base_rendering_part.h>
+#include <saturnin/src/video/vdp_common.h>
+// #include <saturnin/src/video/base_rendering_part.h>
 
 namespace saturnin::video {
 
@@ -41,7 +42,7 @@ struct PatternNameData;
 /// \date   18/03/2021
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class Vdp2Part final : public BaseRenderingPart {
+class Vdp2Part {
   public:
     ///@{
     /// Constructors / Destructors
@@ -63,11 +64,13 @@ class Vdp2Part final : public BaseRenderingPart {
     Vdp2Part(Vdp2Part&&)                           = default;
     auto operator=(const Vdp2Part&) & -> Vdp2Part& = default;
     auto operator=(Vdp2Part&&) & -> Vdp2Part&      = default;
-    ~Vdp2Part() override                           = default;
+    ~Vdp2Part()                                    = default;
     ///@}
 
     auto scrollScreenPos() const -> ScreenPos { return scroll_screen_pos_; }
     auto linkedPlaneAddress() const -> u32 { return linked_plane_address_; }
+
+    CommonVdpData common_vdp_data_; ///< Data shared between different VDP parts.
 
   private:
     ScreenPos scroll_screen_pos_{};    ///< Position in the scroll screen.

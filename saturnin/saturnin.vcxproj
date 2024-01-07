@@ -433,7 +433,6 @@
     <ClCompile Include="src\sh2\basic_interpreter\sh2_instructions.cpp" />
     <ClCompile Include="src\smpc.cpp" />
     <ClCompile Include="src\utilities.cpp" />
-    <ClCompile Include="src\video\base_rendering_part.cpp" />
     <ClCompile Include="src\video\gui.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='DebugFast|x64'">Use</PrecompiledHeader>
@@ -459,7 +458,6 @@
     <ClInclude Include="src\tests.h" />
     <ClInclude Include="src\thread_pool.h" />
     <ClInclude Include="src\timer.h" />
-    <ClInclude Include="src\video\base_rendering_part.h" />
     <ClInclude Include="src\video\texture.h" />
     <ClInclude Include="src\video\vdp1_part.h" />
     <ClInclude Include="src\video\vdp1_registers.h" />

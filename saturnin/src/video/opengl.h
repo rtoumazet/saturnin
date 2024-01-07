@@ -33,7 +33,9 @@
 #include <tuple>  // tuple
 #include <glm/mat4x4.hpp>
 #include <saturnin/src/emulator_defs.h>
+#include <saturnin/src/video/vdp_common.h>
 #include <saturnin/src/video/vdp1_part.h> // Vdp1Part
+#include <saturnin/src/video/vdp2_part.h> // Vdp2Part
 
 // Forward declarations
 namespace saturnin::core {
@@ -74,8 +76,6 @@ enum class FboType : u8 {
 
 using FboData = std::pair<u32, u32>; // 1st is fbo id, 2nd is texture id.
 using FboList = std::unordered_map<FboType, FboData>;
-
-using PartsList = std::vector<std::unique_ptr<video::BaseRenderingPart>>;
 
 enum class ShaderName { textured };
 enum class ShaderType { vertex, fragment };
@@ -121,7 +121,7 @@ struct DrawRange {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \struct	RenderPart
 ///
-/// \brief	A render part for the opengl renderer.
+/// \brief	A render part to be used in the various renderers.
 ///
 /// \author	Runik
 /// \date	06/01/2024
@@ -133,7 +133,20 @@ struct RenderPart {
     size_t              texture_key;  ///< Link to the texture.
     DrawType            draw_type;    ///< Type of the draw.
     u8                  priority{0};  ///< Priority (used for sorting).
+    explicit RenderPart(const Vdp1Part& p) :
+        vertexes(p.common_vdp_data_.vertexes),
+        color_offset(p.common_vdp_data_.color_offset),
+        texture_key(p.common_vdp_data_.texture_key),
+        draw_type(p.common_vdp_data_.draw_type),
+        priority(p.common_vdp_data_.priority){};
+    explicit RenderPart(const Vdp2Part& p) :
+        vertexes(p.common_vdp_data_.vertexes),
+        color_offset(p.common_vdp_data_.color_offset),
+        texture_key(p.common_vdp_data_.texture_key),
+        draw_type(p.common_vdp_data_.draw_type),
+        priority(p.common_vdp_data_.priority){};
 };
+using PartsList = std::vector<RenderPart>;
 
 using LayerToTextures            = std::unordered_map<Layer, std::vector<OpenglTexture>>;
 using LayerToTextureArrayIndexes = std::unordered_map<Layer, std::vector<u8>>;
@@ -716,11 +729,11 @@ class Opengl {
     ScreenResolution saturn_screen_resolution_{}; ///< Saturn screen resolution.
     ScreenResolution host_screen_resolution_{};   ///< Host screen resolution.
 
-    PartsList               parts_list_; // Will have to be moved to the platform agnostic renderer.
-    std::vector<PartsList>  parts_list_by_type_;
-    Vdp1Part                part_to_highlight_; ///< Part that will be highlighted during debug.
-    std::vector<DrawRange>  draw_range_;
-    std::vector<RenderPart> render_parts_;
+    PartsList              parts_list_; // Will have to be moved to the platform agnostic renderer.
+    std::vector<PartsList> parts_list_by_type_;
+    Vdp1Part               part_to_highlight_; ///< Part that will be highlighted during debug.
+    std::vector<DrawRange> draw_range_;
+    // std::vector<RenderPart> render_parts_;
 
     u32                        texture_array_id_;                 ///< Identifier for the texture array.
     TexturesLink               textures_link_;                    ///< Link between the Texture key and the OpenglTexture.

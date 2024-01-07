@@ -1491,8 +1491,8 @@ void showDebugVdp1Window(core::EmulatorContext& state, bool* opened) {
                     ImGui::EndMenuBar();
                 }
 
-                if (draw_list[current_part_idx].textureKey() != 0) {
-                    const auto& texture = video::Texture::getTexture(draw_list[current_part_idx].textureKey());
+                if (draw_list[current_part_idx].common_vdp_data_.texture_key != 0) {
+                    const auto& texture = video::Texture::getTexture(draw_list[current_part_idx].common_vdp_data_.texture_key);
                     // Preview is 260*260 max. When image ratio isn't 1:1, preview size must be adapted to keep the image
                     // ratio.
                     const auto max_size     = Size{260, 260};

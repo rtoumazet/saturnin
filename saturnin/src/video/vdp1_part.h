@@ -26,7 +26,6 @@
 #pragma once
 
 #include <saturnin/src/emulator_defs.h>
-#include <saturnin/src/video/base_rendering_part.h>
 #include <saturnin/src/video/vdp_common.h>
 #include <saturnin/src/video/vdp1_registers.h>
 #include <saturnin/src/emulator_modules.h>
@@ -73,7 +72,8 @@ constexpr auto cmdgrda_offset          = u8{0x1c};
 /// \date   13/05/2021
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class Vdp1Part final : public BaseRenderingPart {
+// class Vdp1Part final : public BaseRenderingPart {
+class Vdp1Part {
   public:
     ///@{
     /// Constructors / Destructors
@@ -88,7 +88,7 @@ class Vdp1Part final : public BaseRenderingPart {
     Vdp1Part(Vdp1Part&&)                           = default;
     auto operator=(const Vdp1Part&) & -> Vdp1Part& = default;
     auto operator=(Vdp1Part&&) & -> Vdp1Part&      = default;
-    ~Vdp1Part() override                           = default;
+    ~Vdp1Part()                                    = default;
     ///@}
 
     static void SetLocalCoordinates(const s16 x, const s16 y);
@@ -124,6 +124,9 @@ class Vdp1Part final : public BaseRenderingPart {
     CmdGrdaType             cmdgrda_;       ///< Gouraud shading table.
     u32                     table_address_; ///< The table address.
                                             ///@}
+
+    CommonVdpData common_vdp_data_; ///< Data shared between different VDP parts.
+
     ///@{
     /// Accessors / mutators
     void debugHeader(std::string_view s) { debug_header_ = s; }

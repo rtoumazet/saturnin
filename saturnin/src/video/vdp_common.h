@@ -37,12 +37,12 @@ constexpr auto vdp1_address_multiplier = u8{8};
 constexpr auto gouraud_offset = s8{0x10};
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   VdpType
+/// \enum	VdpType
 ///
-/// \brief  Values that represent VDP types
+/// \brief	Values that represent VDP types
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class VdpType { not_set, vdp1, vdp2_cell, vdp2_plane, vdp2_bitmap };
+enum class VdpType : u8 { not_set, vdp1, vdp2_cell, vdp2_plane, vdp2_bitmap };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \enum	Layer
@@ -145,9 +145,10 @@ struct ColorS16 {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 struct ColorF {
-    float r;
-    float g;
-    float b;
+    float       r;
+    float       g;
+    float       b;
+    inline auto arrayData() const { return std::array<float, 3>{r, g, b}.data(); }
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -436,6 +437,24 @@ struct Vdp2PartPosition {
 struct Vdp2PlaneData {
     Size                          plane_size;
     std::vector<Vdp2PartPosition> parts_position;
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \struct	CommonVdpData
+///
+/// \brief	Data shared between different VDP parts.
+///
+/// \author	Runik
+/// \date	06/01/2024
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+struct CommonVdpData {
+    std::vector<Vertex> vertexes;                       ///< Contains the geometry vertexes of the part.
+    ColorF              color_offset{};                 ///< Color offset for the part.
+    size_t              texture_key{};                  ///< Link to the texture.
+    VdpType             vdp_type{VdpType::not_set};     ///< Type of the part.
+    DrawType            draw_type{DrawType::undefined}; ///< Type of the draw
+    u8                  priority{0};                    ///< Priority of the part.
 };
 
 } // namespace saturnin::video

@@ -51,7 +51,7 @@
 #include <saturnin/src/video/texture.h>
 #include <saturnin/src/video/vdp_common.h>
 #include <saturnin/src/video/vdp1.h>
-#include <saturnin/src/video/base_rendering_part.h>
+// #include <saturnin/src/video/base_rendering_part.h>
 #include <saturnin/src/resource_holder.hpp>
 
 // using namespace gl;
@@ -77,7 +77,7 @@ constexpr auto check_gl_error = 1;
 constexpr enum class RenderType { RenderType_drawArrays, RenderType_drawElements, RenderType_drawTest };
 constexpr auto render_type = RenderType::RenderType_drawArrays;
 
-Opengl::Opengl(core::Config* config) { config_ = config; }
+Opengl::Opengl(core::Config* config) : config_(config){};
 
 Opengl::~Opengl() { shutdown(); }
 
@@ -271,8 +271,6 @@ void Opengl::initializeShaders() {
 }
 
 void Opengl::displayFramebuffer(core::EmulatorContext& state) {
-    // if (is_saturn_data_available_) return;
-
     auto parts_list = PartsList{};
 
     const auto addVdp2PartsToList = [&](const ScrollScreen s) {
@@ -280,7 +278,8 @@ void Opengl::displayFramebuffer(core::EmulatorContext& state) {
         if (!vdp2_planes.empty()) {
             parts_list.reserve(parts_list.size() + vdp2_planes.size());
             for (const auto& p : vdp2_planes) {
-                parts_list.emplace_back(std::make_unique<Vdp2Part>(p));
+                // parts_list.emplace_back(std::make_unique<Vdp2Part>(p));
+                parts_list.emplace_back(p);
             }
         }
 
@@ -288,7 +287,8 @@ void Opengl::displayFramebuffer(core::EmulatorContext& state) {
         if (!vdp2_bitmaps.empty()) {
             parts_list.reserve(parts_list.size() + vdp2_bitmaps.size());
             for (const auto& p : vdp2_bitmaps) {
-                parts_list.emplace_back(std::make_unique<Vdp2Part>(p));
+                // parts_list.emplace_back(std::make_unique<Vdp2Part>(p));
+                parts_list.emplace_back(p);
             }
         }
     };
@@ -298,7 +298,8 @@ void Opengl::displayFramebuffer(core::EmulatorContext& state) {
         if (!vdp1_parts.empty()) {
             parts_list.reserve(parts_list.size() + vdp1_parts.size());
             for (const auto& p : vdp1_parts) {
-                parts_list.push_back(std::make_unique<Vdp1Part>(p));
+                // parts_list.push_back(std::make_unique<Vdp1Part>(p));
+                parts_list.emplace_back(p);
             }
         }
     };
@@ -310,25 +311,22 @@ void Opengl::displayFramebuffer(core::EmulatorContext& state) {
     if (!state.vdp2()->isLayerDisabled(ScrollScreen::rbg1)) { addVdp2PartsToList(ScrollScreen::rbg1); }
     if (!state.vdp2()->isLayerDisabled(ScrollScreen::rbg0)) { addVdp2PartsToList(ScrollScreen::rbg0); }
     addVdp1PartsToList();
-    std::ranges::stable_sort(parts_list,
-                             [](const std::unique_ptr<BaseRenderingPart>& a, const std::unique_ptr<BaseRenderingPart>& b) {
-                                 return a->priority() < b->priority();
-                             });
+    std::ranges::stable_sort(parts_list, [](const RenderPart& a, const RenderPart& b) { return a.priority < b.priority; });
 
     if constexpr (render_type == RenderType::RenderType_drawElements) {
         // Parts are read in order. Goal is to regroup parts with the same draw type to reduce number of glDraw* calls.
         std::vector<PartsList> parts_by_type;
 
         if (!parts_list.empty()) {
-            auto current_type = parts_list[0]->drawType();
+            auto current_type = parts_list[0].draw_type;
             auto current_list = PartsList{};
             for (const auto& p : parts_list) {
-                if (current_type != p->drawType()) {
+                if (current_type != p.draw_type) {
                     // Vector is moved to the global vector list
                     parts_by_type.push_back(std::move(current_list));
-                    current_type = p->drawType();
+                    current_type = p.draw_type;
                 }
-                current_list.push_back(std::make_unique<BaseRenderingPart>(*p));
+                current_list.push_back(p);
             }
         }
 
@@ -359,7 +357,7 @@ void Opengl::displayFramebuffer(core::EmulatorContext& state) {
 }
 
 void Opengl::render() {
-    std::vector<std::unique_ptr<video::BaseRenderingPart>> parts_list;
+    PartsList parts_list;
 
     preRender();
     {
@@ -396,23 +394,23 @@ void Opengl::render() {
         std::array<GLuint, 6> indices = {0, 1, 2, 0, 2, 3};
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices.data(), GL_STATIC_DRAW);
 
-        for (const auto& part : parts_list) {
-            if (part->vertexes_.empty()) { continue; }
+        for (auto& part : parts_list) {
+            if (part.vertexes.empty()) { continue; }
 
             const auto color_offset_loc = glGetUniformLocation(program_shader_, "color_offset");
-            glUniform3fv(color_offset_loc, 1, part->colorOffset().data());
+            glUniform3fv(color_offset_loc, 1, part.color_offset.arrayData());
 
-            switch (part->drawType()) {
+            switch (part.draw_type) {
                 using enum DrawType;
                 case textured_polygon: {
                     // Sending the variable to configure the shader to use texture data.
                     const auto is_texture_used = GLboolean(true);
                     glUniform1i(texture_used_loc, is_texture_used);
 
-                    const auto opengl_tex = getOpenglTexture(part->textureKey());
+                    const auto opengl_tex = getOpenglTexture(part.texture_key);
                     if (opengl_tex.has_value()) {
                         // Replacing texture coordinates of the vertex by those of the OpenGL texture.
-                        for (auto& v : part->vertexes_) {
+                        for (auto& v : part.vertexes) {
                             if ((v.tex_coords.s == 0.0) && (v.tex_coords.t == 0.0)) {
                                 v.tex_coords = opengl_tex->coords[0];
                                 continue;
@@ -437,8 +435,8 @@ void Opengl::render() {
 
                     if constexpr (render_type == RenderType::RenderType_drawElements) {
                         glBufferData(GL_ARRAY_BUFFER,
-                                     sizeof(Vertex) * part->vertexes_.size(),
-                                     part->vertexes_.data(),
+                                     sizeof(Vertex) * part.vertexes.size(),
+                                     part.vertexes.data(),
                                      GL_STATIC_DRAW);
 
                         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
@@ -448,12 +446,12 @@ void Opengl::render() {
 
                         vertexes.reserve(vertexes_per_tessellated_quad);
                         // Transforming one quad in 2 triangles
-                        vertexes.emplace_back(part->vertexes_[0]);
-                        vertexes.emplace_back(part->vertexes_[1]);
-                        vertexes.emplace_back(part->vertexes_[2]);
-                        vertexes.emplace_back(part->vertexes_[0]);
-                        vertexes.emplace_back(part->vertexes_[2]);
-                        vertexes.emplace_back(part->vertexes_[3]);
+                        vertexes.emplace_back(part.vertexes[0]);
+                        vertexes.emplace_back(part.vertexes[1]);
+                        vertexes.emplace_back(part.vertexes[2]);
+                        vertexes.emplace_back(part.vertexes[0]);
+                        vertexes.emplace_back(part.vertexes[2]);
+                        vertexes.emplace_back(part.vertexes[3]);
 
                         //// Sending vertex buffer data to the GPU
                         glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * vertexes.size(), vertexes.data(), GL_STATIC_DRAW);
@@ -470,12 +468,12 @@ void Opengl::render() {
 
                     vertexes.reserve(vertexes_per_tessellated_quad);
                     // Transforming one quad in 2 triangles
-                    vertexes.emplace_back(part->vertexes_[0]);
-                    vertexes.emplace_back(part->vertexes_[1]);
-                    vertexes.emplace_back(part->vertexes_[2]);
-                    vertexes.emplace_back(part->vertexes_[0]);
-                    vertexes.emplace_back(part->vertexes_[2]);
-                    vertexes.emplace_back(part->vertexes_[3]);
+                    vertexes.emplace_back(part.vertexes[0]);
+                    vertexes.emplace_back(part.vertexes[1]);
+                    vertexes.emplace_back(part.vertexes[2]);
+                    vertexes.emplace_back(part.vertexes[0]);
+                    vertexes.emplace_back(part.vertexes[2]);
+                    vertexes.emplace_back(part.vertexes[3]);
 
                     // Sending vertex buffer data to the GPU
                     glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * vertexes.size(), vertexes.data(), GL_STATIC_DRAW);
@@ -494,10 +492,10 @@ void Opengl::render() {
                     //*****
                     auto vertexes = std::vector<Vertex>{};
                     vertexes.reserve(vertexes_per_polyline);
-                    vertexes.emplace_back(part->vertexes_[0]);
-                    vertexes.emplace_back(part->vertexes_[1]);
-                    vertexes.emplace_back(part->vertexes_[2]);
-                    vertexes.emplace_back(part->vertexes_[3]);
+                    vertexes.emplace_back(part.vertexes[0]);
+                    vertexes.emplace_back(part.vertexes[1]);
+                    vertexes.emplace_back(part.vertexes[2]);
+                    vertexes.emplace_back(part.vertexes[3]);
 
                     // Sending vertex buffer data to the GPU
                     glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * vertexes.size(), vertexes.data(), GL_STATIC_DRAW);
@@ -516,8 +514,8 @@ void Opengl::render() {
                     //*****
                     auto vertexes = std::vector<Vertex>{};
                     vertexes.reserve(vertexes_per_polyline);
-                    vertexes.emplace_back(part->vertexes_[0]);
-                    vertexes.emplace_back(part->vertexes_[1]);
+                    vertexes.emplace_back(part.vertexes[0]);
+                    vertexes.emplace_back(part.vertexes[1]);
 
                     // Sending vertex buffer data to the GPU
                     glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * vertexes.size(), vertexes.data(), GL_STATIC_DRAW);
@@ -595,7 +593,7 @@ void Opengl::renderNew() {
             // Initializing the number of indices to send to the GPU.
             const auto indices  = generateDrawIndices(parts_list);
             const auto vertexes = readVertexes(parts_list);
-            switch (parts_list.at(0)->drawType()) {
+            switch (parts_list.at(0).draw_type) {
                 using enum DrawType;
                 case textured_polygon: {
                     // Sending the variable to configure the shader to use texture data.
@@ -856,18 +854,17 @@ void Opengl::renderSelector() {
 auto Opengl::getVertexesNumberByDrawType(const PartsList& parts_list) const -> u64 {
     auto batch_vertex_size = u64{};
 
+    batch_vertex_size = std::ranges::count_if(parts_list, [](const auto& p) { return p.draw_type == DrawType::textured_polygon; })
+                        * vertexes_per_tessellated_quad;
     batch_vertex_size
-        = std::ranges::count_if(parts_list, [](const auto& p) { return p->drawType() == DrawType::textured_polygon; })
-          * vertexes_per_tessellated_quad;
-    batch_vertex_size
-        += std::ranges::count_if(parts_list, [](const auto& p) { return p->drawType() == DrawType::non_textured_polygon; })
+        += std::ranges::count_if(parts_list, [](const auto& p) { return p.draw_type == DrawType::non_textured_polygon; })
            * vertexes_per_tessellated_quad;
 
-    batch_vertex_size += std::ranges::count_if(parts_list, [](const auto& p) { return p->drawType() == DrawType::polyline; })
+    batch_vertex_size += std::ranges::count_if(parts_list, [](const auto& p) { return p.draw_type == DrawType::polyline; })
                          * vertexes_per_polyline;
 
     batch_vertex_size
-        += std::ranges::count_if(parts_list, [](const auto& p) { return p->drawType() == DrawType::line; }) * vertexes_per_line;
+        += std::ranges::count_if(parts_list, [](const auto& p) { return p.draw_type == DrawType::line; }) * vertexes_per_line;
 
     return batch_vertex_size;
 }
@@ -908,20 +905,20 @@ void Opengl::renderVdp1DebugOverlay() {
 
     auto vertexes = std::vector<Vertex>{};
 
-    if (!part.vertexes_.empty()) {
-        const auto debug_color  = VertexColor({0xff, 0, 0, 0xff});
-        part.vertexes_[0].color = debug_color;
-        part.vertexes_[1].color = debug_color;
-        part.vertexes_[2].color = debug_color;
-        part.vertexes_[3].color = debug_color;
+    if (!part.common_vdp_data_.vertexes.empty()) {
+        const auto debug_color                  = VertexColor({0xff, 0, 0, 0xff});
+        part.common_vdp_data_.vertexes[0].color = debug_color;
+        part.common_vdp_data_.vertexes[1].color = debug_color;
+        part.common_vdp_data_.vertexes[2].color = debug_color;
+        part.common_vdp_data_.vertexes[3].color = debug_color;
 
         vertexes.reserve(vertexes_per_tessellated_quad);
-        vertexes.emplace_back(part.vertexes_[0]);
-        vertexes.emplace_back(part.vertexes_[1]);
-        vertexes.emplace_back(part.vertexes_[2]);
-        vertexes.emplace_back(part.vertexes_[0]);
-        vertexes.emplace_back(part.vertexes_[2]);
-        vertexes.emplace_back(part.vertexes_[3]);
+        vertexes.emplace_back(part.common_vdp_data_.vertexes[0]);
+        vertexes.emplace_back(part.common_vdp_data_.vertexes[1]);
+        vertexes.emplace_back(part.common_vdp_data_.vertexes[2]);
+        vertexes.emplace_back(part.common_vdp_data_.vertexes[0]);
+        vertexes.emplace_back(part.common_vdp_data_.vertexes[2]);
+        vertexes.emplace_back(part.common_vdp_data_.vertexes[3]);
 
         glUseProgram(program_shader_);
         glBindVertexArray(vao_simple);                       // binding VAO
@@ -969,13 +966,14 @@ void Opengl::renderVdp2DebugLayer(core::EmulatorContext& state) {
     glClear(GL_COLOR_BUFFER_BIT);
 
     //----------- Render -----------------//
-    std::vector<std::unique_ptr<video::BaseRenderingPart>> parts_list;
+    PartsList parts_list;
     if (state.vdp2()->screenInDebug() != video::ScrollScreen::none) {
         const auto vdp2_parts = state.vdp2()->vdp2Parts(state.vdp2()->screenInDebug(), VdpType::vdp2_cell);
         if (!vdp2_parts.empty()) {
             parts_list.reserve(parts_list.size() + vdp2_parts.size());
             for (const auto& p : vdp2_parts) {
-                parts_list.push_back(std::make_unique<Vdp2Part>(p));
+                // parts_list.push_back(std::make_unique<Vdp2Part>(p));
+                parts_list.emplace_back(p);
             }
         }
 
@@ -992,8 +990,8 @@ void Opengl::renderVdp2DebugLayer(core::EmulatorContext& state) {
         // const auto vao_ids_array           = std::array<u32, elements_nb>{vao};
         // const auto vertex_buffer_ids_array = std::array<u32, elements_nb>{vertex_buffer};
 
-        for (const auto& part : parts_list) {
-            if (part->vertexes_.empty()) { continue; }
+        for (auto& part : parts_list) {
+            if (part.vertexes.empty()) { continue; }
 
             glUseProgram(program_shader_);
             glBindVertexArray(vao);                       // binding VAO
@@ -1008,10 +1006,10 @@ void Opengl::renderVdp2DebugLayer(core::EmulatorContext& state) {
             const auto is_texture_used = GLboolean(true);
             glUniform1i(uni_use_texture, is_texture_used);
 
-            const auto opengl_tex = getOpenglTexture(part->textureKey());
+            const auto opengl_tex = getOpenglTexture(part.texture_key);
             if (opengl_tex.has_value()) {
                 // Replacing texture coordinates of the vertex by those of the OpenGL texture.
-                for (auto& v : part->vertexes_) {
+                for (auto& v : part.vertexes) {
                     if ((v.tex_coords.s == 0.0) && (v.tex_coords.t == 0.0)) {
                         v.tex_coords = opengl_tex->coords[0];
                         continue;
@@ -1038,12 +1036,12 @@ void Opengl::renderVdp2DebugLayer(core::EmulatorContext& state) {
 
             vertexes.reserve(vertexes_per_tessellated_quad);
             // Transforming one quad in 2 triangles
-            vertexes.emplace_back(part->vertexes_[0]);
-            vertexes.emplace_back(part->vertexes_[1]);
-            vertexes.emplace_back(part->vertexes_[2]);
-            vertexes.emplace_back(part->vertexes_[0]);
-            vertexes.emplace_back(part->vertexes_[2]);
-            vertexes.emplace_back(part->vertexes_[3]);
+            vertexes.emplace_back(part.vertexes[0]);
+            vertexes.emplace_back(part.vertexes[1]);
+            vertexes.emplace_back(part.vertexes[2]);
+            vertexes.emplace_back(part.vertexes[0]);
+            vertexes.emplace_back(part.vertexes[2]);
+            vertexes.emplace_back(part.vertexes[3]);
 
             // Sending vertex buffer data to the GPU
             glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * vertexes.size(), vertexes.data(), GL_STATIC_DRAW);
@@ -2062,7 +2060,7 @@ auto generateDrawIndices(const PartsList& parts) -> std::vector<u32> {
 
     auto indices   = std::vector<u32>{};
     auto increment = u32{};
-    switch (parts.at(0)->drawType()) {
+    switch (parts.at(0).draw_type) {
         using enum DrawType;
         case textured_polygon:
         case non_textured_polygon: {
@@ -2108,7 +2106,7 @@ auto generateDrawIndices(const PartsList& parts) -> std::vector<u32> {
 auto readVertexes(const PartsList& parts) -> std::vector<Vertex> {
     auto vertexes = std::vector<Vertex>{};
     for (const auto& p : parts) {
-        std::ranges::copy(p->vertexes_.begin(), p->vertexes_.end(), std::back_inserter(vertexes));
+        std::ranges::copy(p.vertexes.begin(), p.vertexes.end(), std::back_inserter(vertexes));
     }
 
     return vertexes;
