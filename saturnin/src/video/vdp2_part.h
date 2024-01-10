@@ -27,7 +27,6 @@
 
 #include <saturnin/src/emulator_defs.h>
 #include <saturnin/src/video/vdp_common.h>
-// #include <saturnin/src/video/base_rendering_part.h>
 
 namespace saturnin::video {
 

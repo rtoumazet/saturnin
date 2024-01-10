@@ -49,7 +49,6 @@ namespace saturnin::video {
 
 // Forward declaration
 enum class DrawType : u8;
-class BaseRenderingPart;
 
 using saturnin::core::Config;
 using utilities::toUnderlying;
@@ -892,19 +891,19 @@ void checkProgramCompilation(u32 program);
 void checkGlError();
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \fn	auto generateDrawIndices(const PartsList& parts) -> std::vector<u32>;
+/// \fn	auto generateDrawRanges(const PartsList& parts) -> std::vector<DrawRange>;
 ///
-/// \brief	Generates a draw indices from a parts list.
+/// \brief	Generates draw ranges from the parts list
 ///
 /// \author	Runik
-/// \date	22/12/2023
+/// \date	10/01/2024
 ///
-/// \param 	parts	The parts.
+/// \param 	parts	The source parts.
 ///
-/// \returns	The draw indices.
+/// \returns	The draw ranges.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-auto generateDrawIndices(const PartsList& parts) -> std::vector<u32>;
+auto generateDrawRanges(const PartsList& parts) -> std::vector<DrawRange>;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \fn	auto readVertexes(const PartsList& parts) -> std::vector<Vertex>

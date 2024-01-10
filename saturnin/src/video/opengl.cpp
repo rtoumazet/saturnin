@@ -51,7 +51,6 @@
 #include <saturnin/src/video/texture.h>
 #include <saturnin/src/video/vdp_common.h>
 #include <saturnin/src/video/vdp1.h>
-// #include <saturnin/src/video/base_rendering_part.h>
 #include <saturnin/src/resource_holder.hpp>
 
 // using namespace gl;
@@ -743,7 +742,7 @@ auto Opengl::getVertexesNumberByDrawType(const PartsList& parts_list) const -> u
 }
 
 auto Opengl::isThereSomethingToRender() const -> bool {
-    if constexpr (render_type == RenderType::RenderType_drawElements) { return !parts_list_by_type_.empty(); }
+    if constexpr (render_type == RenderType::RenderType_drawElements) { return !parts_list_.empty(); }
     if constexpr (render_type == RenderType::RenderType_drawArrays) { return !parts_list_.empty(); }
     if constexpr (render_type == RenderType::RenderType_drawTest) { return true; }
 }
@@ -1926,54 +1925,67 @@ void checkGlError() {
     }
 }
 
-auto generateDrawIndices(const PartsList& parts) -> std::vector<u32> {
+auto generateDrawRanges(const PartsList& parts) -> std::vector<DrawRange> {
     const auto     indices_per_polygon  = std::array<u32, 6>{0, 1, 2, 0, 2, 3};
     constexpr auto indices_per_polyline = std::array<u32, 4>{0, 1, 2, 3};
     constexpr auto indices_per_line     = std::array<u32, 2>{0, 1};
 
-    auto indices   = std::vector<u32>{};
-    auto increment = u32{};
-    switch (parts.at(0).draw_type) {
-        using enum DrawType;
-        case textured_polygon:
-        case non_textured_polygon: {
-            indices.reserve(parts.size() * indices_per_polygon.size());
-            for ([[maybe_unused]] const auto& p : parts) {
-                std::ranges::transform(indices_per_polygon, std::back_inserter(indices), [&increment](u32 i) {
-                    return i + increment;
-                });
+    auto ranges        = std::vector<DrawRange>{};
+    auto increment     = u32{};
+    auto current_range = DrawRange{.indice_start_in_range = 0,
+                                   .indice_end_in_range   = 0,
+                                   .indices_nb            = 0,
+                                   .range_start           = 0,
+                                   .primitive             = DrawType::undefined};
+    for (const auto& p : parts) {
+        if (p.draw_type != current_range.primitive) {
+            ranges.push_back(current_range);
 
-                increment += 4;
-            }
-            break;
-        }
-        case polyline: {
-            indices.reserve(parts.size() * indices_per_polyline.size());
-            for ([[maybe_unused]] const auto& p : parts) {
-                std::ranges::transform(indices_per_polyline, std::back_inserter(indices), [&increment](u32 i) {
-                    return i + increment;
-                });
-                increment += 4;
-            }
-            break;
-        }
-        case line: {
-            indices.reserve(parts.size() * indices_per_line.size());
-            for ([[maybe_unused]] const auto& p : parts) {
-                std::ranges::transform(indices_per_line, std::back_inserter(indices), [&increment](u32 i) {
-                    return i + increment;
-                });
-                increment += 2;
-            }
-
-            break;
-        }
-        default: {
-            break;
+            current_range.primitive = p.draw_type;
         }
     }
 
-    return indices;
+    // switch (parts.at(0).draw_type) {
+    //     using enum DrawType;
+    //     case textured_polygon:
+    //     case non_textured_polygon: {
+    //         indices.reserve(parts.size() * indices_per_polygon.size());
+    //         for ([[maybe_unused]] const auto& p : parts) {
+    //             std::ranges::transform(indices_per_polygon, std::back_inserter(indices), [&increment](u32 i) {
+    //                 return i + increment;
+    //             });
+
+    //            increment += 4;
+    //        }
+    //        break;
+    //    }
+    //    case polyline: {
+    //        indices.reserve(parts.size() * indices_per_polyline.size());
+    //        for ([[maybe_unused]] const auto& p : parts) {
+    //            std::ranges::transform(indices_per_polyline, std::back_inserter(indices), [&increment](u32 i) {
+    //                return i + increment;
+    //            });
+    //            increment += 4;
+    //        }
+    //        break;
+    //    }
+    //    case line: {
+    //        indices.reserve(parts.size() * indices_per_line.size());
+    //        for ([[maybe_unused]] const auto& p : parts) {
+    //            std::ranges::transform(indices_per_line, std::back_inserter(indices), [&increment](u32 i) {
+    //                return i + increment;
+    //            });
+    //            increment += 2;
+    //        }
+
+    //        break;
+    //    }
+    //    default: {
+    //        break;
+    //    }
+    //}
+
+    return ranges;
 }
 
 auto readVertexes(const PartsList& parts) -> std::vector<Vertex> {
