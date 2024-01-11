@@ -906,6 +906,21 @@ void checkGlError();
 auto generateDrawRanges(const PartsList& parts) -> std::vector<DrawRange>;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \fn	auto generateDrawIndices(const PartsList& parts) -> std::vector<u32>;
+///
+/// \brief	Generates vertex indices that will be used to batch draw from the parts list.
+///
+/// \author	Runik
+/// \date	10/01/2024
+///
+/// \param 	parts	The source parts.
+///
+/// \returns	The vertex indices.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+auto generateVertexIndices(const PartsList& parts) -> std::vector<u32>;
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \fn	auto readVertexes(const PartsList& parts) -> std::vector<Vertex>
 ///
 /// \brief	Returns all the vertexes from a parts list.

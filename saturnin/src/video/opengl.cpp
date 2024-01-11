@@ -595,6 +595,7 @@ void Opengl::renderNew() {
         glGenBuffers(1, &elements_buffer); // This buffer will be used to send indices data to the GPU
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elements_buffer);
 
+        const auto indices = generateVertexIndices(parts_list); // Initializing the number of indices to send to the GPU.
         // for (const auto& parts_list : parts_list) {
         //     // Initializing the number of indices to send to the GPU.
         //     const auto indices  = generateDrawIndices(parts_list);
@@ -1986,6 +1987,89 @@ auto generateDrawRanges(const PartsList& parts) -> std::vector<DrawRange> {
     //}
 
     return ranges;
+}
+
+auto generateVertexIndices(const PartsList& parts) -> std::vector<u32> {
+    const auto indices_per_polygon  = std::vector<u32>{0, 1, 2, 0, 2, 3};
+    const auto indices_per_polyline = std::vector<u32>{0, 1, 2, 3};
+    const auto indices_per_line     = std::vector<u32>{0, 1};
+
+    using TypeToIndices      = std::map<const DrawType, const std::vector<u32>>;
+    const auto typeToIndices = TypeToIndices{
+        {DrawType::textured_polygon,     indices_per_polygon },
+        {DrawType::non_textured_polygon, indices_per_polygon },
+        {DrawType::polyline,             indices_per_polyline},
+        {DrawType::line,                 indices_per_line    }
+    };
+
+    using TypeToIncrement      = std::map<const DrawType, const u32>;
+    const auto typeToIncrement = TypeToIncrement{
+        {DrawType::textured_polygon,     4},
+        {DrawType::non_textured_polygon, 4},
+        {DrawType::polyline,             4},
+        {DrawType::line,                 2}
+    };
+
+    auto indices   = std::vector<u32>{};
+    auto increment = u32{};
+    //    auto current_type = DrawType::undefined;
+
+    indices.reserve(parts.size() * indices_per_polygon.size()); // Size will be bigger than needed, but that's not important.
+    for (const auto& p : parts) {
+        // if (p.draw_type != current_type) {
+        //     // Type has changed, updating current type.
+
+        //    current_type = p.draw_type;
+        //}
+
+        std::ranges::transform(typeToIndices.at(p.draw_type), std::back_inserter(indices), [&increment](u32 i) {
+            return i + increment;
+        });
+
+        increment += typeToIncrement.at(p.draw_type);
+    }
+
+    // switch (parts.at(0).draw_type) {
+    //     using enum DrawType;
+    //     case textured_polygon:
+    //     case non_textured_polygon: {
+    //         indices.reserve(parts.size() * indices_per_polygon.size());
+    //         for ([[maybe_unused]] const auto& p : parts) {
+    //             std::ranges::transform(indices_per_polygon, std::back_inserter(indices), [&increment](u32 i) {
+    //                 return i + increment;
+    //             });
+
+    //            increment += 4;
+    //        }
+    //        break;
+    //    }
+    //    case polyline: {
+    //        indices.reserve(parts.size() * indices_per_polyline.size());
+    //        for ([[maybe_unused]] const auto& p : parts) {
+    //            std::ranges::transform(indices_per_polyline, std::back_inserter(indices), [&increment](u32 i) {
+    //                return i + increment;
+    //            });
+    //            increment += 4;
+    //        }
+    //        break;
+    //    }
+    //    case line: {
+    //        indices.reserve(parts.size() * indices_per_line.size());
+    //        for ([[maybe_unused]] const auto& p : parts) {
+    //            std::ranges::transform(indices_per_line, std::back_inserter(indices), [&increment](u32 i) {
+    //                return i + increment;
+    //            });
+    //            increment += 2;
+    //        }
+
+    //        break;
+    //    }
+    //    default: {
+    //        break;
+    //    }
+    //}
+
+    return indices;
 }
 
 auto readVertexes(const PartsList& parts) -> std::vector<Vertex> {
