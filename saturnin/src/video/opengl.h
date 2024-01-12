@@ -76,6 +76,8 @@ enum class FboType : u8 {
 using FboData = std::pair<u32, u32>; // 1st is fbo id, 2nd is texture id.
 using FboList = std::unordered_map<FboType, FboData>;
 
+using FboData = std::pair<u32, u32>;
+
 enum class ShaderName { textured };
 enum class ShaderType { vertex, fragment };
 enum class GlslVersion { glsl_120, glsl_330 };
@@ -906,7 +908,7 @@ void checkGlError();
 auto generateDrawRanges(const PartsList& parts) -> std::vector<DrawRange>;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \fn	auto generateDrawIndices(const PartsList& parts) -> std::vector<u32>;
+/// \fn	auto generateVertexIndicesAndDrawRanges(const PartsList& parts) -> std::tuple<std::vector<u32>, std::vector<DrawRange>>;
 ///
 /// \brief	Generates vertex indices that will be used to batch draw from the parts list.
 ///
@@ -915,10 +917,10 @@ auto generateDrawRanges(const PartsList& parts) -> std::vector<DrawRange>;
 ///
 /// \param 	parts	The source parts.
 ///
-/// \returns	The vertex indices.
+/// \returns	The vertex indices and the draw ranges.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-auto generateVertexIndices(const PartsList& parts) -> std::vector<u32>;
+auto generateVertexIndicesAndDrawRanges(const PartsList& parts) -> std::tuple<std::vector<u32>, std::vector<DrawRange>>;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \fn	auto readVertexes(const PartsList& parts) -> std::vector<Vertex>
