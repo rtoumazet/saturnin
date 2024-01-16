@@ -42,6 +42,10 @@ namespace saturnin::core {
 class Config;
 class EmulatorContext;
 } // namespace saturnin::core
+
+namespace gl {
+enum class GLenum : saturnin::u32;
+}
 struct GLFWwindow;
 struct GLFWimage;
 
@@ -112,11 +116,13 @@ struct PlaneTexture {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 struct DrawRange {
-    u32      indice_start_in_range; ///< The indice start in range.
-    u32      indice_end_in_range;   ///< The indice end in range
-    u32      indices_nb;            ///< Number of indices to draw
-    u32      range_start;           ///< Start of the range
-    DrawType primitive;             ///< The primitive used to draw the indices in the range
+    u32        vertex_array_start;  ///< Start position in vertex array.
+    u32        vertex_array_end;    ///< End position in vertex array.
+    u32        indices_nb;          ///< Number of indices to draw.
+    size_t     indices_array_start; ///< Start position in indices array.
+    bool       is_textured;         ///< True if the range must display textured data.
+    DrawType   draw_type;           ///< Type of the draw.
+    gl::GLenum primitive;           ///< The primitive used to draw the indices in the range.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -891,21 +897,6 @@ void checkShaderCompilation(u32 shader);
 void checkProgramCompilation(u32 program);
 
 void checkGlError();
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \fn	auto generateDrawRanges(const PartsList& parts) -> std::vector<DrawRange>;
-///
-/// \brief	Generates draw ranges from the parts list
-///
-/// \author	Runik
-/// \date	10/01/2024
-///
-/// \param 	parts	The source parts.
-///
-/// \returns	The draw ranges.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-auto generateDrawRanges(const PartsList& parts) -> std::vector<DrawRange>;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \fn	auto generateVertexIndicesAndDrawRanges(const PartsList& parts) -> std::tuple<std::vector<u32>, std::vector<DrawRange>>;
