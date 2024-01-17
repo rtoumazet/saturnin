@@ -74,7 +74,7 @@ constexpr auto vertexes_per_line             = u32{2};
 constexpr auto check_gl_error = 1;
 
 constexpr enum class RenderType { RenderType_drawArrays, RenderType_drawElements, RenderType_drawTest };
-constexpr auto render_type = RenderType::RenderType_drawTest;
+constexpr auto render_type = RenderType::RenderType_drawElements;
 
 Opengl::Opengl(core::Config* config) : config_(config){};
 
@@ -599,7 +599,7 @@ void Opengl::renderNew() {
         const auto vertexes                 = readVertexes(parts_list);
 
         // Sending data to the GPU
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices.data(), GL_STATIC_DRAW);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(u32) * indices.size(), indices.data(), GL_STATIC_DRAW);
         glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * vertexes.size(), vertexes.data(), GL_STATIC_DRAW);
 
         for (const auto& range : draw_ranges) {
@@ -660,11 +660,11 @@ void Opengl::renderTest() {
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elements_buffer);
 
     if constexpr (true) {
-        std::array<GLuint, 20> indices = {0, 1, 2, 0, 2, 3, 4, 5, 6, 4, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15};
-        // std::vector<GLuint>     vindices = {0, 1, 2, 0, 2, 3, 4, 5, 6, 4, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15};
-        // std::span<const GLuint> indices(vindices);
-        //   std::array<GLuint, 5> indices = {0, 1, 2, 3, 0};
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices.data(), GL_STATIC_DRAW);
+        // std::array<GLuint, 20> indices = {0, 1, 2, 0, 2, 3, 4, 5, 6, 4, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15};
+        std::vector<GLuint> indices = {0, 1, 2, 0, 2, 3, 4, 5, 6, 4, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15};
+        // std::span<GLuint>   indices(vindices);
+        //      std::array<GLuint, 5> indices = {0, 1, 2, 3, 0};
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint) * indices.size(), &indices.front(), GL_STATIC_DRAW);
 
         // Sending the variable to configure the shader to use texture data.
         const auto is_texture_used = GLboolean(false);
