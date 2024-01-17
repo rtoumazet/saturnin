@@ -603,28 +603,6 @@ void Opengl::renderNew() {
         glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * vertexes.size(), vertexes.data(), GL_STATIC_DRAW);
 
         for (const auto& range : draw_ranges) {
-            // switch (range.primitive) {
-            //     using enum DrawType;
-            //     case textured_polygon: {
-            //         // Sending the variable to configure the shader to use texture data.
-            //         const auto is_texture_used = GLboolean(true);
-            //         glUniform1i(texture_used_loc, is_texture_used);
-
-            //        break;
-            //    }
-            //    case non_textured_polygon:
-            //    case polyline:
-            //    case line: {
-            //        const auto is_texture_used = GLboolean(false);
-            //        glUniform1i(texture_used_loc, is_texture_used);
-
-            //        break;
-            //    }
-            //    default: {
-            //        break;
-            //    }
-            //}
-
             const auto is_texture_used = GLboolean(range.is_textured);
             glUniform1i(texture_used_loc, is_texture_used);
 
@@ -680,68 +658,115 @@ void Opengl::renderTest() {
     auto elements_buffer = u32{};
     glGenBuffers(1, &elements_buffer); // This buffer will be used to send indices data to the GPU
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elements_buffer);
-    std::array<GLuint, 20> indices = {0, 1, 2, 0, 2, 3, 4, 5, 6, 4, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15};
-    // std::array<GLuint, 5> indices = {0, 1, 2, 3, 0};
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices.data(), GL_STATIC_DRAW);
 
-    // Sending the variable to configure the shader to use texture data.
-    const auto is_texture_used = GLboolean(false);
-    glUniform1i(texture_used_loc, is_texture_used);
+    if constexpr (true) {
+        std::array<GLuint, 20> indices = {0, 1, 2, 0, 2, 3, 4, 5, 6, 4, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15};
+        // std::vector<GLuint>     vindices = {0, 1, 2, 0, 2, 3, 4, 5, 6, 4, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15};
+        // std::span<const GLuint> indices(vindices);
+        //   std::array<GLuint, 5> indices = {0, 1, 2, 3, 0};
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices.data(), GL_STATIC_DRAW);
 
-    auto vertexes = std::vector<Vertex>{
-        {100, 100, 0.0f, 0.0f, 0.0f, 0xff, 0,    0,    0xff, Gouraud()},
-        {100, 150, 1.0f, 0.0f, 0.0f, 0xff, 0,    0,    0xff, Gouraud()},
-        {150, 150, 1.0f, 1.0f, 0.0f, 0xff, 0,    0,    0xff, Gouraud()},
-        {150, 100, 0.0f, 1.0f, 0.0f, 0xff, 0,    0,    0xff, Gouraud()},
+        // Sending the variable to configure the shader to use texture data.
+        const auto is_texture_used = GLboolean(false);
+        glUniform1i(texture_used_loc, is_texture_used);
 
-        {200, 200, 0.0f, 0.0f, 0.0f, 0,    0,    0xff, 0xff, Gouraud()},
-        {200, 250, 1.0f, 0.0f, 0.0f, 0,    0,    0xff, 0xff, Gouraud()},
-        {250, 250, 1.0f, 1.0f, 0.0f, 0,    0,    0xff, 0xff, Gouraud()},
-        {250, 200, 0.0f, 1.0f, 0.0f, 0,    0,    0xff, 0xff, Gouraud()},
+        auto vertexes = std::vector<Vertex>{
+            {100, 100, 0.0f, 0.0f, 0.0f, 0xff, 0,    0,    0xff, Gouraud()},
+            {100, 150, 1.0f, 0.0f, 0.0f, 0xff, 0,    0,    0xff, Gouraud()},
+            {150, 150, 1.0f, 1.0f, 0.0f, 0xff, 0,    0,    0xff, Gouraud()},
+            {150, 100, 0.0f, 1.0f, 0.0f, 0xff, 0,    0,    0xff, Gouraud()},
 
-        {50,  50,  0.0f, 0.0f, 0.0f, 0,    0xff, 0,    0xff, Gouraud()},
-        {100, 100, 1.0f, 0.0f, 0.0f, 0,    0xff, 0,    0xff, Gouraud()},
+            {200, 200, 0.0f, 0.0f, 0.0f, 0,    0,    0xff, 0xff, Gouraud()},
+            {200, 250, 1.0f, 0.0f, 0.0f, 0,    0,    0xff, 0xff, Gouraud()},
+            {250, 250, 1.0f, 1.0f, 0.0f, 0,    0,    0xff, 0xff, Gouraud()},
+            {250, 200, 0.0f, 1.0f, 0.0f, 0,    0,    0xff, 0xff, Gouraud()},
 
-        {70,  70,  0.0f, 0.0f, 0.0f, 0xff, 0,    0,    0xff, Gouraud()},
-        {120, 120, 1.0f, 0.0f, 0.0f, 0xff, 0,    0,    0xff, Gouraud()},
+            {50,  50,  0.0f, 0.0f, 0.0f, 0,    0xff, 0,    0xff, Gouraud()},
+            {100, 100, 1.0f, 0.0f, 0.0f, 0,    0xff, 0,    0xff, Gouraud()},
 
-        {70,  70,  0.0f, 0.0f, 0.0f, 0,    0,    0xff, 0xff, Gouraud()},
-        {70,  120, 1.0f, 0.0f, 0.0f, 0,    0,    0xff, 0xff, Gouraud()},
-        {120, 120, 1.0f, 1.0f, 0.0f, 0,    0,    0xff, 0xff, Gouraud()},
-        {120, 70,  0.0f, 1.0f, 0.0f, 0,    0,    0xff, 0xff, Gouraud()}
-    };
+            {70,  70,  0.0f, 0.0f, 0.0f, 0xff, 0,    0,    0xff, Gouraud()},
+            {120, 120, 1.0f, 0.0f, 0.0f, 0xff, 0,    0,    0xff, Gouraud()},
 
-    // auto current_range = DrawRange{.indice_start_in_range = 0,
-    //                                .indice_end_in_range   = 11,
-    //                                .indices_nb            = 12,
-    //                                .range_start           = 0,
-    //                                .primitive             = DrawType::undefined};
+            {70,  70,  0.0f, 0.0f, 0.0f, 0,    0,    0xff, 0xff, Gouraud()},
+            {70,  120, 1.0f, 0.0f, 0.0f, 0,    0,    0xff, 0xff, Gouraud()},
+            {120, 120, 1.0f, 1.0f, 0.0f, 0,    0,    0xff, 0xff, Gouraud()},
+            {120, 70,  0.0f, 1.0f, 0.0f, 0,    0,    0xff, 0xff, Gouraud()}
+        };
 
-    // Sending data to the GPU
-    glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * vertexes.size(), vertexes.data(), GL_STATIC_DRAW);
+        // Sending data to the GPU
+        glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * vertexes.size(), vertexes.data(), GL_STATIC_DRAW);
 
-    // glDrawRangeElements(GL_TRIANGLES, 0, 7, 12, GL_UNSIGNED_INT, static_cast<GLuint*>(nullptr));
-    //  glDrawRangeElements(GL_LINES, 12, 13, 2, GL_UNSIGNED_INT, static_cast<GLuint*>(nullptr) + 12);
-    //  glDrawRangeElements(GL_LINE_LOOP, 14, 17, 4, GL_UNSIGNED_INT, static_cast<GLuint*>(nullptr) + 14);
+        glDrawRangeElements(GL_TRIANGLES, 0, 7, 12, GL_UNSIGNED_INT, static_cast<GLuint*>(nullptr));
+        glDrawRangeElements(GL_LINES, 8, 11, 4, GL_UNSIGNED_INT, static_cast<GLuint*>(nullptr) + 12);
+        glDrawRangeElements(GL_LINE_LOOP, 12, 15, 4, GL_UNSIGNED_INT, static_cast<GLuint*>(nullptr) + 16);
+    } else {
+        auto parts = PartsList{};
 
-    // glDrawRangeElements(GL_TRIANGLES, 0, 5, 6, GL_UNSIGNED_INT, static_cast<GLuint*>(nullptr));
-    // glDrawRangeElements(GL_TRIANGLES, 0, 3, 3, GL_UNSIGNED_INT, static_cast<GLuint*>(nullptr));
-    // glDrawRangeElements(GL_LINES, 0, 3, 2, GL_UNSIGNED_INT, static_cast<GLuint*>(nullptr));
-    // glDrawRangeElements(GL_LINES, 0, 1, 2, GL_UNSIGNED_INT, static_cast<GLuint*>(nullptr));
+        auto render_part                      = Vdp1Part{};
+        render_part.common_vdp_data_.vertexes = {
+            {100, 100, 0.0f, 0.0f, 0.0f, 0xff, 0, 0, 0xff, Gouraud()},
+            {100, 150, 1.0f, 0.0f, 0.0f, 0xff, 0, 0, 0xff, Gouraud()},
+            {150, 150, 1.0f, 1.0f, 0.0f, 0xff, 0, 0, 0xff, Gouraud()},
+            {150, 100, 0.0f, 1.0f, 0.0f, 0xff, 0, 0, 0xff, Gouraud()}
+        };
+        render_part.common_vdp_data_.draw_type = DrawType::non_textured_polygon;
+        render_part.common_vdp_data_.vdp_type  = VdpType::vdp1;
+        parts.emplace_back(render_part);
 
-    // glDrawRangeElements(GL_TRIANGLES, 0, 7, 12, GL_UNSIGNED_INT, static_cast<GLuint*>(nullptr));
-    // glDrawRangeElements(GL_LINES, 8, 9, 2, GL_UNSIGNED_INT, static_cast<GLuint*>(nullptr) + 12);
-    // glDrawRangeElements(GL_LINES, 10, 11, 2, GL_UNSIGNED_INT, static_cast<GLuint*>(nullptr) + 14);
+        render_part.common_vdp_data_.vertexes = {
+            {200, 200, 0.0f, 0.0f, 0.0f, 0, 0, 0xff, 0xff, Gouraud()},
+            {200, 250, 1.0f, 0.0f, 0.0f, 0, 0, 0xff, 0xff, Gouraud()},
+            {250, 250, 1.0f, 1.0f, 0.0f, 0, 0, 0xff, 0xff, Gouraud()},
+            {250, 200, 0.0f, 1.0f, 0.0f, 0, 0, 0xff, 0xff, Gouraud()}
+        };
+        render_part.common_vdp_data_.draw_type = DrawType::non_textured_polygon;
+        render_part.common_vdp_data_.vdp_type  = VdpType::vdp1;
+        parts.emplace_back(render_part);
 
-    // glDrawRangeElements(GL_TRIANGLES, 0, 3, 6, GL_UNSIGNED_INT, static_cast<GLuint*>(nullptr));
-    // glDrawRangeElements(GL_TRIANGLES, 4, 7, 6, GL_UNSIGNED_INT, static_cast<GLuint*>(nullptr) + 6);
-    // glDrawRangeElements(GL_LINES, 8, 9, 2, GL_UNSIGNED_INT, static_cast<GLuint*>(nullptr) + 12);
-    // glDrawRangeElements(GL_LINES, 10, 11, 2, GL_UNSIGNED_INT, static_cast<GLuint*>(nullptr) + 14);
-    // glDrawRangeElements(GL_LINE_LOOP, 12, 15, 4, GL_UNSIGNED_INT, static_cast<GLuint*>(nullptr) + 16);
+        render_part.common_vdp_data_.vertexes = {
+            {50,  50,  0.0f, 0.0f, 0.0f, 0, 0xff, 0, 0xff, Gouraud()},
+            {100, 100, 1.0f, 0.0f, 0.0f, 0, 0xff, 0, 0xff, Gouraud()}
+        };
+        render_part.common_vdp_data_.draw_type = DrawType::line;
+        render_part.common_vdp_data_.vdp_type  = VdpType::vdp1;
+        parts.emplace_back(render_part);
 
-    glDrawRangeElements(GL_TRIANGLES, 0, 7, 12, GL_UNSIGNED_INT, static_cast<GLuint*>(nullptr));
-    glDrawRangeElements(GL_LINES, 8, 11, 4, GL_UNSIGNED_INT, static_cast<GLuint*>(nullptr) + 12);
-    glDrawRangeElements(GL_LINE_LOOP, 12, 15, 4, GL_UNSIGNED_INT, static_cast<GLuint*>(nullptr) + 16);
+        render_part.common_vdp_data_.vertexes = {
+            {70,  70,  0.0f, 0.0f, 0.0f, 0xff, 0, 0, 0xff, Gouraud()},
+            {120, 120, 1.0f, 0.0f, 0.0f, 0xff, 0, 0, 0xff, Gouraud()}
+        };
+        render_part.common_vdp_data_.draw_type = DrawType::line;
+        render_part.common_vdp_data_.vdp_type  = VdpType::vdp1;
+        parts.emplace_back(render_part);
+
+        render_part.common_vdp_data_.vertexes = {
+            {70,  70,  0.0f, 0.0f, 0.0f, 0, 0, 0xff, 0xff, Gouraud()},
+            {70,  120, 1.0f, 0.0f, 0.0f, 0, 0, 0xff, 0xff, Gouraud()},
+            {120, 120, 1.0f, 1.0f, 0.0f, 0, 0, 0xff, 0xff, Gouraud()},
+            {120, 70,  0.0f, 1.0f, 0.0f, 0, 0, 0xff, 0xff, Gouraud()}
+        };
+        render_part.common_vdp_data_.draw_type = DrawType::polyline;
+        render_part.common_vdp_data_.vdp_type  = VdpType::vdp1;
+        parts.emplace_back(render_part);
+
+        const auto&& [indices, draw_ranges] = generateVertexIndicesAndDrawRanges(parts);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices.data(), GL_STATIC_DRAW);
+
+        const auto vertexes = readVertexes(parts);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * vertexes.size(), vertexes.data(), GL_STATIC_DRAW);
+
+        for (const auto& range : draw_ranges) {
+            const auto is_texture_used = GLboolean(range.is_textured);
+            glUniform1i(texture_used_loc, is_texture_used);
+
+            glDrawRangeElements(range.primitive,
+                                range.vertex_array_start,
+                                range.vertex_array_end,
+                                range.indices_nb,
+                                GL_UNSIGNED_INT,
+                                static_cast<GLuint*>(nullptr) + range.indices_array_start);
+        }
+    }
 
     gl::glDeleteBuffers(1, &vertex_buffer);
     gl::glDeleteVertexArrays(1, &vao);
@@ -2022,7 +2047,7 @@ auto generateVertexIndicesAndDrawRanges(const PartsList& parts) -> std::tuple<st
 
             previous_vertexes_nb             = current_range.indices_nb;
             current_range.vertex_array_start = current_range.vertex_array_end + 1;
-            current_range.vertex_array_end   = 0;
+            current_range.vertex_array_end   = current_range.vertex_array_start;
             current_range.indices_nb         = 0;
 
             current_range.is_textured = typeIsTextured.at(p.draw_type);
@@ -2036,8 +2061,15 @@ auto generateVertexIndicesAndDrawRanges(const PartsList& parts) -> std::tuple<st
 
         increment += typeToVertexIncrement.at(p.draw_type);
 
-        // current_range.vertex_array_end += static_cast<u32>(typeToVertexIncrement.at(p.draw_type).size());
+        current_range.vertex_array_end += typeToVertexIncrement.at(p.draw_type);
         current_range.indices_nb += static_cast<u32>(typeToIndices.at(p.draw_type).size());
+    }
+
+    // The last range is added if needed
+    if (current_range.draw_type != DrawType::undefined) {
+        --current_range.vertex_array_end;
+        current_range.indices_array_start += previous_vertexes_nb;
+        ranges.push_back(current_range);
     }
 
     return {indices, ranges};
