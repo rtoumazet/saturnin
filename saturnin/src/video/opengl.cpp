@@ -74,6 +74,7 @@ constexpr auto vertexes_per_line             = u32{2};
 constexpr auto check_gl_error = 1;
 
 constexpr enum class RenderType { RenderType_drawArrays, RenderType_drawElements, RenderType_drawTest };
+// constexpr auto render_type = RenderType::RenderType_drawArrays;
 constexpr auto render_type = RenderType::RenderType_drawElements;
 
 Opengl::Opengl(core::Config* config) : config_(config){};
@@ -98,7 +99,7 @@ void Opengl::initialize() {
 
     texture_array_id_ = initializeTextureArray();
 
-    // Clear texteure array indexes data
+    // Clear texture array indexes data
     for (auto& [layer, indexes] : layer_to_texture_array_indexes_) {
         std::vector<u8>().swap(indexes);
     }
@@ -1177,6 +1178,37 @@ auto Opengl::calculateTextureCoordinates(const ScreenPos& pos, const Size& size,
     };
 }
 
+auto Opengl::readVertexes(const PartsList& parts) -> std::vector<Vertex> {
+    auto vertexes = std::vector<Vertex>{};
+    for (auto p : parts) {
+        const auto opengl_tex = getOpenglTexture(p.texture_key);
+        if (opengl_tex.has_value()) {
+            // Replacing texture coordinates of the vertex by those of the OpenGL texture.
+            for (auto& v : p.vertexes) {
+                if ((v.tex_coords.s == 0.0) && (v.tex_coords.t == 0.0)) {
+                    v.tex_coords = opengl_tex->coords[0];
+                    continue;
+                }
+                if ((v.tex_coords.s == 1.0) && (v.tex_coords.t == 0.0)) {
+                    v.tex_coords = opengl_tex->coords[1];
+                    continue;
+                }
+                if ((v.tex_coords.s == 1.0) && (v.tex_coords.t == 1.0)) {
+                    v.tex_coords = opengl_tex->coords[2];
+                    continue;
+                }
+                if ((v.tex_coords.s == 0.0) && (v.tex_coords.t == 1.0)) {
+                    v.tex_coords = opengl_tex->coords[3];
+                    continue;
+                }
+            }
+        }
+        std::ranges::copy(p.vertexes.begin(), p.vertexes.end(), std::back_inserter(vertexes));
+    }
+
+    return vertexes;
+}
+
 auto Opengl::getOpenglTexture(const size_t key) -> std::optional<OpenglTexture> {
     std::lock_guard lock(textures_link_mutex_);
     const auto      it = textures_link_.find(key);
@@ -2075,12 +2107,4 @@ auto generateVertexIndicesAndDrawRanges(const PartsList& parts) -> std::tuple<st
     return {indices, ranges};
 }
 
-auto readVertexes(const PartsList& parts) -> std::vector<Vertex> {
-    auto vertexes = std::vector<Vertex>{};
-    for (const auto& p : parts) {
-        std::ranges::copy(p.vertexes.begin(), p.vertexes.end(), std::back_inserter(vertexes));
-    }
-
-    return vertexes;
-}
 }; // namespace saturnin::video

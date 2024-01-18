@@ -726,6 +726,21 @@ class Opengl {
     auto calculateTextureCoordinates(const ScreenPos& pos, const Size& size, const u8 texture_array_index) const
         -> std::vector<TextureCoordinates>;
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn	auto readVertexes(const PartsList& parts) -> std::vector<Vertex>
+    ///
+    /// \brief	Returns all the vertexes from a parts list.
+    ///
+    /// \author	Runik
+    /// \date	22/12/2023
+    ///
+    /// \param 	parts	The parts.
+    ///
+    /// \returns	The vertexes.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    auto readVertexes(const PartsList& parts) -> std::vector<Vertex>;
+
     core::Config* config_; ///< Configuration object.
 
     FboList fbo_list_;                ///< List of framebuffer objects used in the program.
@@ -912,20 +927,5 @@ void checkGlError();
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 auto generateVertexIndicesAndDrawRanges(const PartsList& parts) -> std::tuple<std::vector<u32>, std::vector<DrawRange>>;
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \fn	auto readVertexes(const PartsList& parts) -> std::vector<Vertex>
-///
-/// \brief	Returns all the vertexes from a parts list.
-///
-/// \author	Runik
-/// \date	22/12/2023
-///
-/// \param 	parts	The parts.
-///
-/// \returns	The vertexes.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-auto readVertexes(const PartsList& parts) -> std::vector<Vertex>;
 
 }; // namespace saturnin::video
