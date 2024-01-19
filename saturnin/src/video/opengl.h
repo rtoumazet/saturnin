@@ -640,19 +640,6 @@ class Opengl {
     auto calculateViewportPosAndSize() const -> std::tuple<u32, u32, u32, u32>;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn auto Opengl::getVertexesNumberByDrawType(const PartsList& parts_list) -> u64;
-    ///
-    /// \brief  Returns the number of vertexes needed to display the parts.
-    ///
-    /// \author Runik
-    /// \date   23/03/2022
-    ///
-    /// \returns    The number of vertexes.
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    auto getVertexesNumberByDrawType(const PartsList& parts_list) const -> u64;
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn	void Opengl::packTextures(std::vector<OpenglTexture>& textures, const Layer layer);
     ///
     /// \brief	Pack textures in a texture array of texture atlases for the selected layer.

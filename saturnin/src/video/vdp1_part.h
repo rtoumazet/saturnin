@@ -72,7 +72,6 @@ constexpr auto cmdgrda_offset          = u8{0x1c};
 /// \date   13/05/2021
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-// class Vdp1Part final : public BaseRenderingPart {
 class Vdp1Part {
   public:
     ///@{

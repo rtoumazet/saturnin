@@ -783,24 +783,6 @@ void Opengl::renderSelector() {
     if constexpr (render_type == RenderType::RenderType_drawTest) { renderTest(); }
 }
 
-auto Opengl::getVertexesNumberByDrawType(const PartsList& parts_list) const -> u64 {
-    auto batch_vertex_size = u64{};
-
-    batch_vertex_size = std::ranges::count_if(parts_list, [](const auto& p) { return p.draw_type == DrawType::textured_polygon; })
-                        * vertexes_per_tessellated_quad;
-    batch_vertex_size
-        += std::ranges::count_if(parts_list, [](const auto& p) { return p.draw_type == DrawType::non_textured_polygon; })
-           * vertexes_per_tessellated_quad;
-
-    batch_vertex_size += std::ranges::count_if(parts_list, [](const auto& p) { return p.draw_type == DrawType::polyline; })
-                         * vertexes_per_polyline;
-
-    batch_vertex_size
-        += std::ranges::count_if(parts_list, [](const auto& p) { return p.draw_type == DrawType::line; }) * vertexes_per_line;
-
-    return batch_vertex_size;
-}
-
 auto Opengl::isThereSomethingToRender() const -> bool {
     if constexpr (render_type == RenderType::RenderType_drawElements) { return !parts_list_.empty(); }
     if constexpr (render_type == RenderType::RenderType_drawArrays) { return !parts_list_.empty(); }
