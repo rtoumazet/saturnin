@@ -2065,43 +2065,48 @@ auto generateVertexIndicesAndDrawRanges(const PartsList& parts) -> std::tuple<st
                                           .primitive           = gl::GL_TRIANGLES};
     auto previous_vertexes_nb = u32{};
 
-    if (!parts.empty()) { current_range.draw_type = parts.at(0).draw_type; }
+    if (!parts.empty()) {
+        current_range.draw_type = parts.at(0).draw_type;
 
-    indices.reserve(parts.size()
-                    * indices_per_polygon.size()); // Size will be a bit bigger than needed, but that's not important.
-    for (const auto& p : parts) {
-        if (!typeToIndices.contains(p.draw_type)) { continue; } // Non drawable parts are skipped
+        indices.reserve(parts.size()
+                        * indices_per_polygon.size()); // Size will be a bit bigger than needed, but that's not important.
+        for (const auto& p : parts) {
+            if (!typeToIndices.contains(p.draw_type)) { continue; } // Non drawable parts are skipped
 
-        if (current_range.draw_type != p.draw_type && current_range.indices_nb > 0) {
-            --current_range.vertex_array_end;
-            current_range.indices_array_start += previous_vertexes_nb;
-            ranges.push_back(current_range);
+            if (current_range.draw_type != p.draw_type && current_range.indices_nb > 0) {
+                --current_range.vertex_array_end;
+                current_range.indices_array_start += previous_vertexes_nb;
+                ranges.push_back(current_range);
 
-            previous_vertexes_nb             = current_range.indices_nb;
-            current_range.vertex_array_start = current_range.vertex_array_end + 1;
-            current_range.vertex_array_end   = current_range.vertex_array_start;
-            current_range.indices_nb         = 0;
+                previous_vertexes_nb             = current_range.indices_nb;
+                current_range.vertex_array_start = current_range.vertex_array_end + 1;
+                current_range.vertex_array_end   = current_range.vertex_array_start;
+                current_range.indices_nb         = 0;
+                current_range.is_textured        = typeIsTextured.at(p.draw_type);
+                current_range.draw_type          = p.draw_type;
+                current_range.primitive          = typeToPrimitive.at(p.draw_type);
+            }
 
-            current_range.is_textured = typeIsTextured.at(p.draw_type);
-            current_range.draw_type   = p.draw_type;
-            current_range.primitive   = typeToPrimitive.at(p.draw_type);
+            std::ranges::transform(typeToIndices.at(p.draw_type), std::back_inserter(indices), [&increment](u32 i) {
+                return i + increment;
+            });
+
+            increment += typeToVertexIncrement.at(p.draw_type);
+
+            current_range.vertex_array_end += typeToVertexIncrement.at(p.draw_type);
+            current_range.indices_nb += static_cast<u32>(typeToIndices.at(p.draw_type).size());
         }
 
-        std::ranges::transform(typeToIndices.at(p.draw_type), std::back_inserter(indices), [&increment](u32 i) {
-            return i + increment;
-        });
+        // The last range is added if needed
+        if (typeToPrimitive.contains(current_range.draw_type)) {
+            --current_range.vertex_array_end;
+            current_range.indices_array_start += previous_vertexes_nb;
+            current_range.is_textured = typeIsTextured.at(current_range.draw_type);
+            current_range.draw_type   = current_range.draw_type;
+            current_range.primitive   = typeToPrimitive.at(current_range.draw_type);
 
-        increment += typeToVertexIncrement.at(p.draw_type);
-
-        current_range.vertex_array_end += typeToVertexIncrement.at(p.draw_type);
-        current_range.indices_nb += static_cast<u32>(typeToIndices.at(p.draw_type).size());
-    }
-
-    // The last range is added if needed
-    if (current_range.draw_type != DrawType::undefined) {
-        --current_range.vertex_array_end;
-        current_range.indices_array_start += previous_vertexes_nb;
-        ranges.push_back(current_range);
+            ranges.push_back(current_range);
+        }
     }
 
     return {indices, ranges};
