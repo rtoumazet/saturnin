@@ -278,7 +278,6 @@ void Opengl::displayFramebuffer(core::EmulatorContext& state) {
         if (!vdp2_planes.empty()) {
             parts_list.reserve(parts_list.size() + vdp2_planes.size());
             for (const auto& p : vdp2_planes) {
-                // parts_list.emplace_back(std::make_unique<Vdp2Part>(p));
                 parts_list.emplace_back(p);
             }
         }
@@ -287,7 +286,6 @@ void Opengl::displayFramebuffer(core::EmulatorContext& state) {
         if (!vdp2_bitmaps.empty()) {
             parts_list.reserve(parts_list.size() + vdp2_bitmaps.size());
             for (const auto& p : vdp2_bitmaps) {
-                // parts_list.emplace_back(std::make_unique<Vdp2Part>(p));
                 parts_list.emplace_back(p);
             }
         }
@@ -298,7 +296,6 @@ void Opengl::displayFramebuffer(core::EmulatorContext& state) {
         if (!vdp1_parts.empty()) {
             parts_list.reserve(parts_list.size() + vdp1_parts.size());
             for (const auto& p : vdp1_parts) {
-                // parts_list.push_back(std::make_unique<Vdp1Part>(p));
                 parts_list.emplace_back(p);
             }
         }
@@ -314,28 +311,6 @@ void Opengl::displayFramebuffer(core::EmulatorContext& state) {
     std::ranges::stable_sort(parts_list, [](const RenderPart& a, const RenderPart& b) { return a.priority < b.priority; });
 
     if constexpr (render_type == RenderType::RenderType_drawElements) {
-        // Parts are read in order. Goal is to regroup parts with the same draw type to reduce number of glDraw* calls.
-        // std::vector<PartsList> parts_by_type;
-
-        // if (!parts_list.empty()) {
-        //     auto current_type = parts_list[0].draw_type;
-        //     auto current_list = PartsList{};
-        //     for (const auto& p : parts_list) {
-        //         if (current_type != p.draw_type) {
-        //             // Vector is moved to the global vector list
-        //             parts_by_type.push_back(std::move(current_list));
-        //             current_type = p.draw_type;
-        //         }
-        //         current_list.push_back(p);
-        //     }
-        // }
-
-        // if (parts_list_by_type_.empty()) {
-        //     std::unique_lock lk(parts_list_mutex_);
-        //     parts_list_by_type_ = std::move(parts_by_type);
-        //     data_condition_.wait(lk, [this]() { return parts_list_by_type_.empty(); });
-        // }
-
         if (parts_list_.empty()) {
             std::unique_lock lk(parts_list_mutex_);
             parts_list_ = std::move(parts_list);
@@ -368,7 +343,6 @@ void Opengl::render() {
     preRender();
     {
         std::lock_guard lock(parts_list_mutex_);
-        // Log::info(Logger::main, "parts_list_ : {}", parts_list_.size());
         if (!parts_list_.empty()) { parts_list = std::move(parts_list_); }
     }
 
@@ -388,7 +362,7 @@ void Opengl::render() {
 
         glActiveTexture(GLenum::GL_TEXTURE0);
         const auto sampler_loc = glGetUniformLocation(program_shader_, "sampler");
-        // glUniform1i(sampler_loc, GLenum::GL_TEXTURE0);
+
         glUniform1i(sampler_loc, 0);
         glBindTexture(GL_TEXTURE_2D_ARRAY, texture_array_id_);
 
@@ -439,31 +413,20 @@ void Opengl::render() {
                     // Quad is tessellated into 2 triangles, using a texture
                     //******
 
-                    if constexpr (render_type == RenderType::RenderType_drawElements) {
-                        glBufferData(GL_ARRAY_BUFFER,
-                                     sizeof(Vertex) * part.vertexes.size(),
-                                     part.vertexes.data(),
-                                     GL_STATIC_DRAW);
+                    auto vertexes = std::vector<Vertex>{};
+                    vertexes.reserve(vertexes_per_tessellated_quad);
+                    // Transforming one quad in 2 triangles
+                    vertexes.emplace_back(part.vertexes[0]);
+                    vertexes.emplace_back(part.vertexes[1]);
+                    vertexes.emplace_back(part.vertexes[2]);
+                    vertexes.emplace_back(part.vertexes[0]);
+                    vertexes.emplace_back(part.vertexes[2]);
+                    vertexes.emplace_back(part.vertexes[3]);
 
-                        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-                    }
-                    if constexpr (render_type == RenderType::RenderType_drawArrays) {
-                        auto vertexes = std::vector<Vertex>{};
+                    //// Sending vertex buffer data to the GPU
+                    glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * vertexes.size(), vertexes.data(), GL_STATIC_DRAW);
 
-                        vertexes.reserve(vertexes_per_tessellated_quad);
-                        // Transforming one quad in 2 triangles
-                        vertexes.emplace_back(part.vertexes[0]);
-                        vertexes.emplace_back(part.vertexes[1]);
-                        vertexes.emplace_back(part.vertexes[2]);
-                        vertexes.emplace_back(part.vertexes[0]);
-                        vertexes.emplace_back(part.vertexes[2]);
-                        vertexes.emplace_back(part.vertexes[3]);
-
-                        //// Sending vertex buffer data to the GPU
-                        glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * vertexes.size(), vertexes.data(), GL_STATIC_DRAW);
-
-                        glDrawArrays(GL_TRIANGLES, 0, vertexes_per_tessellated_quad);
-                    }
+                    glDrawArrays(GL_TRIANGLES, 0, vertexes_per_tessellated_quad);
 
                     break;
                 }
@@ -541,8 +504,6 @@ void Opengl::render() {
             }
         }
 
-        // glDeleteBuffers(elements_nb, vertex_buffer_ids_array.data());
-        // glDeleteVertexArrays(elements_nb, vao_ids_array.data());
         gl::glDeleteBuffers(1, &vertex_buffer);
         gl::glDeleteVertexArrays(1, &vao);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
@@ -560,8 +521,6 @@ void Opengl::render() {
 }
 
 void Opengl::renderNew() {
-    // std::vector<std::unique_ptr<video::BaseRenderingPart>> parts_list;
-    // std::vector<PartsList> parts_by_type;
     PartsList parts_list;
 
     preRender();
@@ -586,7 +545,7 @@ void Opengl::renderNew() {
 
         glActiveTexture(GLenum::GL_TEXTURE0);
         const auto sampler_loc = glGetUniformLocation(program_shader_, "sampler");
-        // glUniform1i(sampler_loc, GLenum::GL_TEXTURE0);
+
         glUniform1i(sampler_loc, 0);
         glBindTexture(GL_TEXTURE_2D_ARRAY, texture_array_id_);
 
@@ -624,7 +583,6 @@ void Opengl::renderNew() {
 
     {
         std::lock_guard lk(parts_list_mutex_);
-        // PartsList().swap(parts_list_);
         PartsList().swap(parts_list);
         data_condition_.notify_one();
     }
@@ -1839,7 +1797,6 @@ auto runOpengl(core::EmulatorContext& state) -> s32 {
 
     updateMainWindowSizeAndRatio(window, minimum_window_width, minimum_window_height);
 
-    // state.opengl()->initialize(window);
     state.opengl()->initialize();
 
     Log::info(Logger::opengl, "Card : {}", (char*)glGetString(GL_RENDERER));
@@ -1884,14 +1841,8 @@ auto runOpengl(core::EmulatorContext& state) -> s32 {
 
         // Update and Render additional Platform Windows
         if ((io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable) > 0) {
-            // if (ImGui::GetIO().KeyAlt) { //
-            //     printf("");
-            // } // Set a debugger breakpoint here!
-
-            // GLFWwindow* backup_current_context = glfwGetCurrentContext();
             ImGui::UpdatePlatformWindows();
             ImGui::RenderPlatformWindowsDefault();
-            // glfwMakeContextCurrent(backup_current_context);
         }
 
         glfwSwapBuffers(window);
