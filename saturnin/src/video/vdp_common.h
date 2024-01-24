@@ -214,6 +214,8 @@ struct Vertex {
     TextureCoordinates tex_coords; ///< Texture coordinates.
     VertexColor        color;      ///< Color.
     Gouraud            gouraud;    ///< Gouraud color.
+    // ColorF             color_offset; ///< Color offset.
+    ColorS16 color_offset; ///< Color offset.
 
     Vertex(const s16 x, const s16 y, const float s, const float t) :
         pos(VertexPosition(x, y)),
@@ -450,7 +452,7 @@ struct Vdp2PlaneData {
 
 struct CommonVdpData {
     std::vector<Vertex> vertexes;                       ///< Contains the geometry vertexes of the part.
-    ColorF              color_offset{};                 ///< Color offset for the part.
+    ColorS16            color_offset{};                 ///< Color offset for the part.
     size_t              texture_key{};                  ///< Link to the texture.
     VdpType             vdp_type{VdpType::not_set};     ///< Type of the part.
     DrawType            draw_type{DrawType::undefined}; ///< Type of the draw

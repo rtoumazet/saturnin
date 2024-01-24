@@ -48,7 +48,7 @@ Vdp1Part::Vdp1Part(const EmulatorModules& modules,
                    const u32              table_address,
                    const CmdCtrlType&     cmdctrl,
                    const CmdLinkType&     cmdlink,
-                   const ColorF&          color_offset) {
+                   const ColorS16&        color_offset) {
     common_vdp_data_.vdp_type     = VdpType::vdp1;
     common_vdp_data_.draw_type    = type;
     common_vdp_data_.color_offset = color_offset;

@@ -188,7 +188,7 @@ void Vdp1::populateRenderData() {
                                              current_table_address,
                                              cmdctrl,
                                              cmdlink,
-                                             color_offset_.as_float);
+                                             color_offset_.as_s16);
                     break;
                 }
                 case normal_sprite_draw: {
@@ -197,7 +197,7 @@ void Vdp1::populateRenderData() {
                                              current_table_address,
                                              cmdctrl,
                                              cmdlink,
-                                             color_offset_.as_float);
+                                             color_offset_.as_s16);
                     break;
                 }
                 case scaled_sprite_draw: {
@@ -206,7 +206,7 @@ void Vdp1::populateRenderData() {
                                              current_table_address,
                                              cmdctrl,
                                              cmdlink,
-                                             color_offset_.as_float);
+                                             color_offset_.as_s16);
                     break;
                 }
                 case distorted_sprite_draw: {
@@ -215,7 +215,7 @@ void Vdp1::populateRenderData() {
                                              current_table_address,
                                              cmdctrl,
                                              cmdlink,
-                                             color_offset_.as_float);
+                                             color_offset_.as_s16);
                     break;
                 }
                 case polygon_draw: {
@@ -224,7 +224,7 @@ void Vdp1::populateRenderData() {
                                              current_table_address,
                                              cmdctrl,
                                              cmdlink,
-                                             color_offset_.as_float);
+                                             color_offset_.as_s16);
                     break;
                 }
                 case polyline_draw: {
@@ -233,12 +233,12 @@ void Vdp1::populateRenderData() {
                                              current_table_address,
                                              cmdctrl,
                                              cmdlink,
-                                             color_offset_.as_float);
+                                             color_offset_.as_s16);
                     break;
                 }
                 case line_draw: {
                     vdp1_parts_
-                        .emplace_back(modules_, DrawType::line, current_table_address, cmdctrl, cmdlink, color_offset_.as_float);
+                        .emplace_back(modules_, DrawType::line, current_table_address, cmdctrl, cmdlink, color_offset_.as_s16);
                     break;
                 }
                 default: {

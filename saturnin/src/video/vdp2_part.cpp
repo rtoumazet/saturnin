@@ -27,7 +27,7 @@ Vdp2Part::Vdp2Part(const PatternNameData& pnd,
                    const ScreenPos&       pos,
                    const size_t           texture_key,
                    const u8               priority,
-                   const ColorF&          color_offset,
+                   const ColorS16&        color_offset,
                    const u32              linked_plane_address) :
     scroll_screen_pos_(pos),
     linked_plane_address_(linked_plane_address) {
@@ -65,12 +65,12 @@ Vdp2Part::Vdp2Part(const PatternNameData& pnd,
     common_vdp_data_.color_offset = color_offset;
 };
 
-Vdp2Part::Vdp2Part(const size_t  texture_key,
-                   const u16     texture_width,
-                   const u16     texture_height,
-                   const u8      priority,
-                   const ColorF& color_offset,
-                   const VdpType vdp_type) :
+Vdp2Part::Vdp2Part(const size_t    texture_key,
+                   const u16       texture_width,
+                   const u16       texture_height,
+                   const u8        priority,
+                   const ColorS16& color_offset,
+                   const VdpType   vdp_type) :
     scroll_screen_pos_({0, 0}) {
     const auto pos_x        = static_cast<s16>(0);
     const auto pos_x_width  = static_cast<s16>(texture_width);

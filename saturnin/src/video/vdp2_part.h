@@ -50,14 +50,14 @@ class Vdp2Part {
              const ScreenPos&       pos,
              const size_t           texture_key,
              const u8               priority,
-             const ColorF&          color_offset,
+             const ColorS16&        color_offset,
              const u32              linked_plane_address);
-    Vdp2Part(size_t        texture_key,
-             const u16     texture_width,
-             const u16     texture_height,
-             const u8      priority,
-             const ColorF& color_offset,
-             const VdpType vdp_type); // Constructor for bitmaps and planes
+    Vdp2Part(size_t          texture_key,
+             const u16       texture_width,
+             const u16       texture_height,
+             const u8        priority,
+             const ColorS16& color_offset,
+             const VdpType   vdp_type); // Constructor for bitmaps and planes
 
     Vdp2Part(const Vdp2Part&)                      = default;
     Vdp2Part(Vdp2Part&&)                           = default;
