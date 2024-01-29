@@ -136,7 +136,7 @@ struct DrawRange {
 
 struct RenderPart {
     std::vector<Vertex> vertexes;     ///< The vertexes used for rendering.
-    ColorS16            color_offset; ///< Color offset.
+    ColorOffset         color_offset; ///< Color offset.
     size_t              texture_key;  ///< Link to the texture.
     DrawType            draw_type;    ///< Type of the draw.
     u8                  priority{0};  ///< Priority (used for sorting).

@@ -121,18 +121,32 @@ struct Gouraud {
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \struct	ColorS16
+/// \struct	ColorOffsetComponent
 ///
-/// \brief	A color with internal components as s16.
+/// \brief	A color offset component.
+///
+/// \author	Runik
+/// \date	28/01/2024
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+struct ColorOffsetComponent {
+    u8 is_positive; // is technically a bool, but will be passed as u8 to the shader.
+    u8 value;
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \struct	ColorOffset
+///
+/// \brief	Color offset components, one for each color.
 ///
 /// \author	Runik
 /// \date	10/08/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-struct ColorS16 {
-    s16 r;
-    s16 g;
-    s16 b;
+struct ColorOffset {
+    ColorOffsetComponent r;
+    ColorOffsetComponent g;
+    ColorOffsetComponent b;
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -210,12 +224,11 @@ struct TextureCoordinates {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 struct Vertex {
-    VertexPosition     pos;        ///< Position in Saturn space.
-    TextureCoordinates tex_coords; ///< Texture coordinates.
-    VertexColor        color;      ///< Color.
-    Gouraud            gouraud;    ///< Gouraud color.
-    // ColorF             color_offset; ///< Color offset.
-    ColorS16 color_offset; ///< Color offset.
+    VertexPosition     pos;          ///< Position in Saturn space.
+    TextureCoordinates tex_coords;   ///< Texture coordinates.
+    VertexColor        color;        ///< Color.
+    Gouraud            gouraud;      ///< Gouraud color.
+    ColorOffset        color_offset; ///< Color offset.
 
     Vertex(const s16 x, const s16 y, const float s, const float t) :
         pos(VertexPosition(x, y)),
@@ -452,7 +465,7 @@ struct Vdp2PlaneData {
 
 struct CommonVdpData {
     std::vector<Vertex> vertexes;                       ///< Contains the geometry vertexes of the part.
-    ColorS16            color_offset{};                 ///< Color offset for the part.
+    ColorOffset         color_offset{};                 ///< Color offset for the part.
     size_t              texture_key{};                  ///< Link to the texture.
     VdpType             vdp_type{VdpType::not_set};     ///< Type of the part.
     DrawType            draw_type{DrawType::undefined}; ///< Type of the draw

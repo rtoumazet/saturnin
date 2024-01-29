@@ -82,7 +82,7 @@ class Vdp1Part {
              const u32              table_address,
              const CmdCtrlType&     cmdctrl,
              const CmdLinkType&     cmdlink,
-             const ColorS16&        color_offset);
+             const ColorOffset&     color_offset);
     Vdp1Part(const Vdp1Part&)                      = default;
     Vdp1Part(Vdp1Part&&)                           = default;
     auto operator=(const Vdp1Part&) & -> Vdp1Part& = default;

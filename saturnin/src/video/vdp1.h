@@ -25,11 +25,11 @@
 
 #pragma once
 
-#include <array>                          // array
-#include <saturnin/src/emulator_defs.h>   // u8, u16, u32
+#include <array>                        // array
+#include <saturnin/src/emulator_defs.h> // u8, u16, u32
 #include <saturnin/src/emulator_modules.h>
-#include <saturnin/src/locale.h>          // tr
-#include <saturnin/src/log.h>             // Log
+#include <saturnin/src/locale.h> // tr
+#include <saturnin/src/log.h>    // Log
 #include <saturnin/src/video/vdp1_registers.h>
 #include <saturnin/src/video/vdp1_part.h> // Vdp1Part
 
@@ -216,12 +216,12 @@ class Vdp1 {
     // VDP1 registers
     Vdp1Regs regs_;
 
-    std::array<u32, 2> framebuffer_;                 ///< Framebuffers texture id.
+    std::array<u32, 2> framebuffer_; ///< Framebuffers texture id.
 
     std::vector<Vdp1Part> vdp1_parts_;               ///< Storage of vdp1 rendering parts .
     u16                   color_ram_address_offset_; ///< The color ram address offset.
 
-    ColorOffset color_offset_;                       ///< Current color offset configuration for the sprite layer.
+    ColorOffset color_offset_; ///< Current color offset configuration for the sprite layer.
 };
 
 } // namespace saturnin::video

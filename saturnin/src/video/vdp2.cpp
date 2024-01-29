@@ -337,24 +337,30 @@ auto Vdp2::getColorOffset(const Layer layer) -> ColorOffset {
         constexpr auto sign_ext_mask = u16{0xFF00};
         using Sign                   = Vdp2Regs::Sign;
         if (select_bit == Clofsl::ColorOffsetSelect::use_color_offset_a) {
-            if ((regs_.coar >> Vdp2Regs::Coar::sign_enum) == Sign::negative) { regs_.coar = (regs_.coar.data() | sign_ext_mask); }
-            if ((regs_.coag >> Vdp2Regs::Coag::sign_enum) == Sign::negative) { regs_.coag = (regs_.coag.data() | sign_ext_mask); }
-            if ((regs_.coab >> Vdp2Regs::Coab::sign_enum) == Sign::negative) { regs_.coab = (regs_.coab.data() | sign_ext_mask); }
-            color_offset.as_s16.r = static_cast<s16>(regs_.coar.data());
-            color_offset.as_s16.g = static_cast<s16>(regs_.coag.data());
-            color_offset.as_s16.b = static_cast<s16>(regs_.coab.data());
+            // if ((regs_.coar >> Vdp2Regs::Coar::sign_enum) == Sign::negative) { regs_.coar = (regs_.coar.data() |
+            // sign_ext_mask); } if ((regs_.coag >> Vdp2Regs::Coag::sign_enum) == Sign::negative) { regs_.coag =
+            // (regs_.coag.data() | sign_ext_mask); } if ((regs_.coab >> Vdp2Regs::Coab::sign_enum) == Sign::negative) {
+            // regs_.coab = (regs_.coab.data() | sign_ext_mask); }
+            // color_offset = {.r{util::signExtend<s16, 9>(regs_.coar.data())},
+            //                .g{util::signExtend<s16, 9>(regs_.coag.data())},
+            //                .b{util::signExtend<s16, 9>(regs_.coab.data())}};
         } else {
-            if ((regs_.cobr >> Vdp2Regs::Cobr::sign_enum) == Sign::negative) { regs_.cobr = (regs_.cobr.data() | sign_ext_mask); }
-            if ((regs_.cobg >> Vdp2Regs::Cobg::sign_enum) == Sign::negative) { regs_.cobg = (regs_.cobg.data() | sign_ext_mask); }
-            if ((regs_.cobb >> Vdp2Regs::Cobb::sign_enum) == Sign::negative) { regs_.cobb = (regs_.cobb.data() | sign_ext_mask); }
-            color_offset.as_s16.r = static_cast<s16>(regs_.cobr.data());
-            color_offset.as_s16.g = static_cast<s16>(regs_.cobg.data());
-            color_offset.as_s16.b = static_cast<s16>(regs_.cobb.data());
-        }
+            // if ((regs_.cobr >> Vdp2Regs::Cobr::sign_enum) == Sign::negative) { regs_.cobr = (regs_.cobr.data() |
+            // sign_ext_mask); } if ((regs_.cobg >> Vdp2Regs::Cobg::sign_enum) == Sign::negative) { regs_.cobg =
+            // (regs_.cobg.data() | sign_ext_mask); } if ((regs_.cobb >> Vdp2Regs::Cobb::sign_enum) == Sign::negative) {
+            // regs_.cobb = (regs_.cobb.data() | sign_ext_mask); }
+            // color_offset = {.r{util::signExtend<s32, 9>(regs_.cobr.data())},
+            //                .g{util::signExtend<s32, 9>(regs_.cobg.data())},
+            //                .b{util::signExtend<s32, 9>(regs_.cobb.data())}};
+            auto r = ColorOffsetComponent{(regs_.cobr >> Vdp2Regs::Cobr::sign_enum) == Sign::positive,
+                                          static_cast<u8>(regs_.cobr >> Vdp2Regs::Cobr::cobrd_shft)};
+            auto g = ColorOffsetComponent{(regs_.cobg >> Vdp2Regs::Cobg::sign_enum) == Sign::positive,
+                                          static_cast<u8>(regs_.cobg >> Vdp2Regs::Cobg::cobgr_shft)};
+            auto b = ColorOffsetComponent{(regs_.cobb >> Vdp2Regs::Cobb::sign_enum) == Sign::positive,
+                                          static_cast<u8>(regs_.cobb >> Vdp2Regs::Cobb::cobbl_shft)};
 
-        color_offset.as_float.r = static_cast<float>(color_offset.as_s16.r) / static_cast<float>(u8_max);
-        color_offset.as_float.g = static_cast<float>(color_offset.as_s16.g) / static_cast<float>(u8_max);
-        color_offset.as_float.b = static_cast<float>(color_offset.as_s16.b) / static_cast<float>(u8_max);
+            color_offset = {.r{r}, .g{g}, .b{b}};
+        }
     }
     return color_offset;
 }
@@ -3485,7 +3491,7 @@ void Vdp2::saveBitmap(const ScrollScreenStatus& screen, const u16 width, const u
     //  vdp2_parts_[util::toUnderlying(screen.scroll_screen)].push_back(
     //     std::make_unique<Vdp2Part>(key, width, height, screen.priority_number));
     vdp2_parts_[util::toUnderlying(screen.scroll_screen)]
-        .emplace_back(key, width, height, screen.priority_number, screen.color_offset.as_s16, VdpType::vdp2_bitmap);
+        .emplace_back(key, width, height, screen.priority_number, screen.color_offset, VdpType::vdp2_bitmap);
 }
 
 void Vdp2::readPlaneData(const ScrollScreenStatus& screen, const u32 plane_address, const ScreenOffset& plane_offset) {
@@ -3875,7 +3881,7 @@ void Vdp2::saveCell(const ScrollScreenStatus& screen,
     pos.y -= screen.scroll_offset_vertical;
 
     vdp2_parts_[util::toUnderlying(screen.scroll_screen)]
-        .emplace_back(pnd, pos, key, screen.priority_number, screen.color_offset.as_s16, current_plane_address_);
+        .emplace_back(pnd, pos, key, screen.priority_number, screen.color_offset, current_plane_address_);
 }
 
 auto Vdp2::getColorRamAddressOffset(const u8 register_offset) const -> u16 {

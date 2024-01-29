@@ -274,22 +274,23 @@ auto Vdp2::getDebugVramAccessCommandDescription(const Vdp2Regs::VramAccessComman
     using VramCommandsDescription = std::map<Vdp2Regs::VramAccessCommand, LabelValue>;
     using enum Vdp2Regs::VramAccessCommand;
     const auto vram_commands_descriptions = VramCommandsDescription{
-        {nbg0_pattern_name_read, {"N0PN", tr("NBG0 Pattern Name Data Read")}},
-        {nbg1_pattern_name_read, {"N1PN", tr("NBG1 Pattern Name Data Read")}},
-        {nbg2_pattern_name_read, {"N2PN", tr("NBG2 Pattern Name Data Read")}},
-        {nbg3_pattern_name_read, {"N3PN", tr("NBG3 Pattern Name Data Read")}},
-        {nbg0_character_pattern_data_read, {"N0CG", tr("NBG0 Character Pattern Data Read")}},
-        {nbg1_character_pattern_data_read, {"N1CG", tr("NBG1 Character Pattern Data Read")}},
-        {nbg2_character_pattern_data_read, {"N2CG", tr("NBG2 Character Pattern Data Read")}},
-        {nbg3_character_pattern_data_read, {"N3CG", tr("NBG3 Character Pattern Data Read")}},
-        {setting_not_allowed_1, {"XXX", tr("Setting not allowed")}},
-        {setting_not_allowed_2, {"XXX", tr("Setting not allowed")}},
-        {setting_not_allowed_3, {"XXX", tr("Setting not allowed")}},
-        {setting_not_allowed_4, {"XXX", tr("Setting not allowed")}},
+        {nbg0_pattern_name_read,                    {"N0PN", tr("NBG0 Pattern Name Data Read")}              },
+        {nbg1_pattern_name_read,                    {"N1PN", tr("NBG1 Pattern Name Data Read")}              },
+        {nbg2_pattern_name_read,                    {"N2PN", tr("NBG2 Pattern Name Data Read")}              },
+        {nbg3_pattern_name_read,                    {"N3PN", tr("NBG3 Pattern Name Data Read")}              },
+        {nbg0_character_pattern_data_read,          {"N0CG", tr("NBG0 Character Pattern Data Read")}         },
+        {nbg1_character_pattern_data_read,          {"N1CG", tr("NBG1 Character Pattern Data Read")}         },
+        {nbg2_character_pattern_data_read,          {"N2CG", tr("NBG2 Character Pattern Data Read")}         },
+        {nbg3_character_pattern_data_read,          {"N3CG", tr("NBG3 Character Pattern Data Read")}         },
+        {setting_not_allowed_1,                     {"XXX", tr("Setting not allowed")}                       },
+        {setting_not_allowed_2,                     {"XXX", tr("Setting not allowed")}                       },
+        {setting_not_allowed_3,                     {"XXX", tr("Setting not allowed")}                       },
+        {setting_not_allowed_4,                     {"XXX", tr("Setting not allowed")}                       },
         {nbg0_vertical_cell_scroll_table_data_read, {"N0CE", tr("NBG0 Vertical Cell Scroll Table Data Read")}},
         {nbg1_vertical_cell_scroll_table_data_read, {"N1CE", tr("NBG1 Vertical Cell Scroll Table Data Read")}},
-        {cpu_read_write, {"CPU", tr("CPU Read/Write")}},
-        {no_access, {"NA", tr("No Access")}}};
+        {cpu_read_write,                            {"CPU", tr("CPU Read/Write")}                            },
+        {no_access,                                 {"NA", tr("No Access")}                                  }
+    };
 
     return vram_commands_descriptions.at(command);
 }
@@ -456,9 +457,9 @@ auto Vdp2::getDebugScrollScreenData(const ScrollScreen s) -> std::optional<std::
     if (screen.is_color_offset_enabled) {
         values.emplace_back(tr("Color offset"),
                             uti::format("R:{:+d} G:{:+d} B:{:+d}",
-                                        screen.color_offset.as_s16.r,
-                                        screen.color_offset.as_s16.g,
-                                        screen.color_offset.as_s16.b));
+                                        screen.color_offset.r.value,
+                                        screen.color_offset.g.value,
+                                        screen.color_offset.b.value));
     } else {
         values.emplace_back(tr("Color offset"), tr("Disabled"));
     }
