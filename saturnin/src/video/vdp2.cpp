@@ -352,14 +352,22 @@ auto Vdp2::getColorOffset(const Layer layer) -> ColorOffset {
             // color_offset = {.r{util::signExtend<s32, 9>(regs_.cobr.data())},
             //                .g{util::signExtend<s32, 9>(regs_.cobg.data())},
             //                .b{util::signExtend<s32, 9>(regs_.cobb.data())}};
-            auto r = ColorOffsetComponent{(regs_.cobr >> Vdp2Regs::Cobr::sign_enum) == Sign::positive,
-                                          static_cast<u8>(regs_.cobr >> Vdp2Regs::Cobr::cobrd_shft)};
-            auto g = ColorOffsetComponent{(regs_.cobg >> Vdp2Regs::Cobg::sign_enum) == Sign::positive,
-                                          static_cast<u8>(regs_.cobg >> Vdp2Regs::Cobg::cobgr_shft)};
-            auto b = ColorOffsetComponent{(regs_.cobb >> Vdp2Regs::Cobb::sign_enum) == Sign::positive,
-                                          static_cast<u8>(regs_.cobb >> Vdp2Regs::Cobb::cobbl_shft)};
+            // auto r = ColorOffsetComponent{(regs_.cobr >> Vdp2Regs::Cobr::sign_enum) == Sign::positive,
+            //                              static_cast<u8>(regs_.cobr >> Vdp2Regs::Cobr::cobrd_shft)};
+            // auto g = ColorOffsetComponent{(regs_.cobg >> Vdp2Regs::Cobg::sign_enum) == Sign::positive,
+            //                              static_cast<u8>(regs_.cobg >> Vdp2Regs::Cobg::cobgr_shft)};
+            // auto b = ColorOffsetComponent{(regs_.cobb >> Vdp2Regs::Cobb::sign_enum) == Sign::positive,
+            //                              static_cast<u8>(regs_.cobb >> Vdp2Regs::Cobb::cobbl_shft)};
 
-            color_offset = {.r{r}, .g{g}, .b{b}};
+            // color_offset = {.r{r}, .g{g}, .b{b}};
+            color_offset = {
+                .signs{(regs_.cobr >> Vdp2Regs::Cobr::sign_enum) == Sign::positive,
+                       (regs_.cobg >> Vdp2Regs::Cobg::sign_enum) == Sign::positive,
+                       (regs_.cobb >> Vdp2Regs::Cobb::sign_enum) == Sign::positive},
+                .values{static_cast<u8>(regs_.cobr >> Vdp2Regs::Cobr::cobrd_shft),
+                       static_cast<u8>(regs_.cobg >> Vdp2Regs::Cobg::cobgr_shft),
+                       static_cast<u8>(regs_.cobb >> Vdp2Regs::Cobb::cobbl_shft)  }
+            };
         }
     }
     return color_offset;

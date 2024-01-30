@@ -457,9 +457,9 @@ auto Vdp2::getDebugScrollScreenData(const ScrollScreen s) -> std::optional<std::
     if (screen.is_color_offset_enabled) {
         values.emplace_back(tr("Color offset"),
                             uti::format("R:{:+d} G:{:+d} B:{:+d}",
-                                        screen.color_offset.r.value,
-                                        screen.color_offset.g.value,
-                                        screen.color_offset.b.value));
+                                        screen.color_offset.values[0],
+                                        screen.color_offset.values[1],
+                                        screen.color_offset.values[2]));
     } else {
         values.emplace_back(tr("Color offset"), tr("Disabled"));
     }
