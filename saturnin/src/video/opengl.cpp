@@ -75,7 +75,7 @@ constexpr auto check_gl_error = 1;
 
 constexpr enum class RenderType { RenderType_drawArrays, RenderType_drawElements, RenderType_drawTest };
 // constexpr auto render_type = RenderType::RenderType_drawArrays;
-constexpr auto render_type = RenderType::RenderType_drawTest;
+constexpr auto render_type = RenderType::RenderType_drawElements;
 
 Opengl::Opengl(core::Config* config) : config_(config){};
 
@@ -195,13 +195,8 @@ void Opengl::initializeShaders() {
         layout (location = 2) in vec4 vtx_color;
         layout (location = 3) in vec4 vtx_grd_color;
         
-        layout (location = 4) in float vtx_color_offset_r_is_positive;
-        layout (location = 6) in float vtx_color_offset_g_is_positive;
-        layout (location = 8) in float vtx_color_offset_b_is_positive;
-
-        layout (location = 5) in float vtx_color_offset_r;
-        layout (location = 7) in float vtx_color_offset_g;
-        layout (location = 9) in float vtx_color_offset_b;
+        layout (location = 4) in vec3 vtx_color_offset_is_positive;
+        layout (location = 5) in vec3 vtx_color_offset;
 
         out vec3 frg_tex_coord;
         out vec4 frg_color;
@@ -216,10 +211,9 @@ void Opengl::initializeShaders() {
             frg_tex_coord   = vec3(vtx_tex_coord);
             frg_color       = vtx_color;
             frg_grd_color   = vtx_grd_color;
-            //frg_color_offset_is_positive = vec3(vtx_color_offset_r_is_positive, vtx_color_offset_g_is_positive, vtx_color_offset_b_is_positive);
-            frg_color_offset_is_positive = vec3(1.0, 1.0, 1.0);
-            //frg_color_offset= vec3(vtx_color_offset_r, vtx_color_offset_g, vtx_color_offset_b);
-            frg_color_offset= vec3(0.8, 0.8, 0.8);
+            frg_color_offset_is_positive = vtx_color_offset_is_positive;
+            frg_color_offset= vtx_color_offset;
+            //frg_color_offset= vec3(0.8, 0.8, 0.8);
         }
     )");
 
@@ -689,8 +683,8 @@ void Opengl::renderTest() {
         render_part.common_vdp_data_.draw_type    = DrawType::non_textured_polygon;
         render_part.common_vdp_data_.vdp_type     = VdpType::vdp1;
         render_part.common_vdp_data_.color_offset = {
-            {1,    1,    1   },
-            {0xe0, 0xe0, 0xe0}
+            {true, true, true},
+            {0x80, 0x80, 0x80}
         };
 
         parts.emplace_back(render_part);
@@ -1471,33 +1465,13 @@ auto Opengl::initializeVao(const ShaderName name) -> std::tuple<u32, u32> {
 
             // color offset pointer R sign
             offset += GLintptr(sizeof(Gouraud));
-            glVertexAttribPointer(4, 1, GLenum::GL_UNSIGNED_BYTE, GL_FALSE, sizeof(Vertex), std::bit_cast<GLvoid*>(offset));
+            glVertexAttribPointer(4, 3, GLenum::GL_UNSIGNED_BYTE, GL_FALSE, sizeof(Vertex), std::bit_cast<GLvoid*>(offset));
             glEnableVertexAttribArray(4);
 
             // color offset pointer R value
-            offset += GLintptr(sizeof(u8));
-            glVertexAttribPointer(5, 1, GLenum::GL_UNSIGNED_BYTE, GL_TRUE, sizeof(Vertex), std::bit_cast<GLvoid*>(offset));
+            offset += GLintptr(sizeof(std::array<u8, 3>));
+            glVertexAttribPointer(5, 3, GLenum::GL_UNSIGNED_BYTE, GL_TRUE, sizeof(Vertex), std::bit_cast<GLvoid*>(offset));
             glEnableVertexAttribArray(5);
-
-            // color offset pointer G sign
-            offset += GLintptr(sizeof(u8));
-            glVertexAttribPointer(6, 1, GLenum::GL_UNSIGNED_BYTE, GL_FALSE, sizeof(Vertex), std::bit_cast<GLvoid*>(offset));
-            glEnableVertexAttribArray(6);
-
-            // color offset pointer G value
-            offset += GLintptr(sizeof(u8));
-            glVertexAttribPointer(7, 1, GLenum::GL_UNSIGNED_BYTE, GL_TRUE, sizeof(Vertex), std::bit_cast<GLvoid*>(offset));
-            glEnableVertexAttribArray(7);
-            break;
-            // color offset pointer B sign
-            offset += GLintptr(sizeof(u8));
-            glVertexAttribPointer(8, 1, GLenum::GL_UNSIGNED_BYTE, GL_FALSE, sizeof(Vertex), std::bit_cast<GLvoid*>(offset));
-            glEnableVertexAttribArray(8);
-
-            // color offset pointer B value
-            offset += GLintptr(sizeof(u8));
-            glVertexAttribPointer(9, 1, GLenum::GL_UNSIGNED_BYTE, GL_TRUE, sizeof(Vertex), std::bit_cast<GLvoid*>(offset));
-            glEnableVertexAttribArray(9);
         }
     }
     glBindVertexArray(0);
