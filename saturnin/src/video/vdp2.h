@@ -1709,32 +1709,21 @@ class Vdp2 {
         constexpr auto palette_disp    = u8{8};
         const auto     palette         = screen.bitmap_palette_number << palette_disp;
 
-        BS::timer                                          tmr;
-        std::chrono::time_point<std::chrono::steady_clock> start_time = std::chrono::steady_clock::now();
-        std::chrono::duration<double>                      elapsed_time{};
-
-        // start_time = std::chrono::steady_clock::now();
-
         // for (u32 i = screen.bitmap_start_address; i < end_address; i += (offset * 2)) {
-        //     // if (screen.format == ScrollScreenFormat::bitmap) {
-        //     //    if (current_address == 0x25E26830) DebugBreak();
-        //     //}
-        //     auto row = Dots8Bits{modules_.memory()->read<u32>(current_address)};
-        //     readPalette256Dot<T>(texture_data, screen, palette, row.dot_0);
-        //     readPalette256Dot<T>(texture_data, screen, palette, row.dot_1);
-        //     readPalette256Dot<T>(texture_data, screen, palette, static_cast<u8>(row.dot_2));
-        //     readPalette256Dot<T>(texture_data, screen, palette, row.dot_3);
+        //     auto row     = DataExtraction{};
+        //     row.as_8bits = modules_.memory()->read<u32>(current_address);
+        //     readPalette256Dot<T>(texture_data, screen, palette, row.as_8bits >> DataExtraction::As8Bits::dot0_shift);
+        //     readPalette256Dot<T>(texture_data, screen, palette, row.as_8bits >> DataExtraction::As8Bits::dot1_shift);
+        //     readPalette256Dot<T>(texture_data, screen, palette, row.as_8bits >> DataExtraction::As8Bits::dot2_shift);
+        //     readPalette256Dot<T>(texture_data, screen, palette, row.as_8bits >> DataExtraction::As8Bits::dot3_shift);
         //     current_address += offset;
-        //     row = Dots8Bits{modules_.memory()->read<u32>(current_address)};
-        //     readPalette256Dot<T>(texture_data, screen, palette, row.dot_0);
-        //     readPalette256Dot<T>(texture_data, screen, palette, row.dot_1);
-        //     readPalette256Dot<T>(texture_data, screen, palette, static_cast<u8>(row.dot_2));
-        //     readPalette256Dot<T>(texture_data, screen, palette, row.dot_3);
+        //     row.as_8bits = modules_.memory()->read<u32>(current_address);
+        //     readPalette256Dot<T>(texture_data, screen, palette, row.as_8bits >> DataExtraction::As8Bits::dot0_shift);
+        //     readPalette256Dot<T>(texture_data, screen, palette, row.as_8bits >> DataExtraction::As8Bits::dot1_shift);
+        //     readPalette256Dot<T>(texture_data, screen, palette, row.as_8bits >> DataExtraction::As8Bits::dot2_shift);
+        //     readPalette256Dot<T>(texture_data, screen, palette, row.as_8bits >> DataExtraction::As8Bits::dot3_shift);
         //     current_address += offset;
         // }
-        // elapsed_time = std::chrono::steady_clock::now() - start_time;
-        auto res = (std::chrono::duration_cast<std::chrono::microseconds>(elapsed_time)).count();
-        // core::Log::warning(Logger::vdp2, core::tr(u8"Sequential read {}µs"), res);
 
         //---------------------------------------------------------//
 
@@ -1743,49 +1732,66 @@ class Vdp2 {
         // The main vector can be updated by the various threads concurrently without synchronisation as the data don't
         // overlap.
         texture_data.assign(texture_data.capacity(), 0);
-        constexpr auto chunk_size     = u32{0x1000};
-        auto           readBitmapPart = [&](u32 start_address, u32 texture_offset) {
-            auto       local_texture      = std::vector<u8>{};
-            const auto local_texture_size = chunk_size / offset * 0x10;
-            local_texture.reserve(local_texture_size);
-            auto local_offset = texture_offset;
-            auto row          = DataExtraction{};
-            for (u32 i = start_address; i < (start_address + chunk_size); i += offset) {
-                row.as_8bits = modules_.memory()->read<u32>(i);
-                readPalette256DotBitmap<T>(local_texture, screen, palette, row.as_8bits >> DataExtraction::As8Bits::dot0_shift);
-                local_offset += 4;
-                readPalette256DotBitmap<T>(local_texture, screen, palette, row.as_8bits >> DataExtraction::As8Bits::dot1_shift);
-                local_offset += 4;
-                readPalette256DotBitmap<T>(local_texture, screen, palette, row.as_8bits >> DataExtraction::As8Bits::dot2_shift);
-                local_offset += 4;
-                readPalette256DotBitmap<T>(local_texture, screen, palette, row.as_8bits >> DataExtraction::As8Bits::dot3_shift);
-                local_offset += 4;
-            }
-            std::copy(local_texture.begin(), local_texture.end(), &texture_data[0] + texture_offset * 4);
-        };
-        // start_time          = std::chrono::steady_clock::now();
+        constexpr auto chunk_size = u32{0x1000};
+        // auto           readBitmapPart = [&](u32 start_address, u32 texture_offset) {
+        //     auto       local_texture      = std::vector<u8>{};
+        //     const auto local_texture_size = chunk_size / offset * 0x10;
+        //     local_texture.reserve(local_texture_size);
+        //     auto local_offset = texture_offset;
+        //     auto row          = DataExtraction{};
+        //     for (u32 i = start_address; i < (start_address + chunk_size); i += offset) {
+        //         row.as_8bits = modules_.memory()->read<u32>(i);
+        //         readPalette256DotBitmap<T>(local_texture, screen, palette, row.as_8bits >>
+        //         DataExtraction::As8Bits::dot0_shift); local_offset += 4; readPalette256DotBitmap<T>(local_texture, screen,
+        //         palette, row.as_8bits >> DataExtraction::As8Bits::dot1_shift); local_offset += 4;
+        //         readPalette256DotBitmap<T>(local_texture, screen, palette, row.as_8bits >>
+        //         DataExtraction::As8Bits::dot2_shift); local_offset += 4; readPalette256DotBitmap<T>(local_texture, screen,
+        //         palette, row.as_8bits >> DataExtraction::As8Bits::dot3_shift); local_offset += 4;
+        //     }
+        //     std::copy(local_texture.begin(), local_texture.end(), &texture_data[0] + texture_offset * 4);
+        // };
+
         auto texture_offset = u32{};
 
         // core::Log::warning(Logger::vdp2, u8"Bitmap size {:#x}", end_address - screen.bitmap_start_address);
         for (u32 i = screen.bitmap_start_address; i < end_address; i += chunk_size) {
-            ThreadPool::pool_.push_task(readBitmapPart, current_address, texture_offset);
+            // ThreadPool::pool_.detach_task(readBitmapPart, current_address, texture_offset);
+            ThreadPool::pool_.detach_task([this, current_address, texture_offset, &texture_data, &screen, &palette] {
+                auto       local_texture      = std::vector<u8>{};
+                const auto local_texture_size = chunk_size / offset * 0x10;
+                local_texture.reserve(local_texture_size);
+                auto local_offset = texture_offset;
+                auto row          = DataExtraction{};
+                for (u32 i = current_address; i < (current_address + chunk_size); i += offset) {
+                    row.as_8bits = modules_.memory()->read<u32>(i);
+                    readPalette256DotBitmap<T>(local_texture,
+                                               screen,
+                                               palette,
+                                               row.as_8bits >> DataExtraction::As8Bits::dot0_shift);
+                    local_offset += 4;
+                    readPalette256DotBitmap<T>(local_texture,
+                                               screen,
+                                               palette,
+                                               row.as_8bits >> DataExtraction::As8Bits::dot1_shift);
+                    local_offset += 4;
+                    readPalette256DotBitmap<T>(local_texture,
+                                               screen,
+                                               palette,
+                                               row.as_8bits >> DataExtraction::As8Bits::dot2_shift);
+                    local_offset += 4;
+                    readPalette256DotBitmap<T>(local_texture,
+                                               screen,
+                                               palette,
+                                               row.as_8bits >> DataExtraction::As8Bits::dot3_shift);
+                    local_offset += 4;
+                }
+                std::ranges::copy(local_texture, &texture_data[0] + texture_offset * 4);
+            });
+
             current_address += chunk_size;
             texture_offset += chunk_size;
         }
-        ThreadPool::pool_.wait_for_tasks();
-
-        // elapsed_time = std::chrono::steady_clock::now() - start_time;
-        // res          = (std::chrono::duration_cast<std::chrono::microseconds>(elapsed_time)).count();
-        // core::Log::warning(Logger::vdp2, core::tr(u8"Parallel read {}µs"), res);
-
-        //---------------------
-
-        // if (!texture_data.empty()) {
-        //     std::ofstream outfile("bitmap_seq.dat", std::ofstream::binary);
-        //     // outfile.write(reinterpret_cast<const char*>(texture_data.data(), sizeof(u8) * texture_data.size());
-        //     outfile.write(reinterpret_cast<const char*>(texture_data.data()), sizeof(u8) * texture_data.size());
-        //     outfile.close();
-        // }
+        ThreadPool::pool_.wait();
     }
 
     template<typename T>

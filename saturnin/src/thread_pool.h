@@ -25,7 +25,8 @@
 
 #pragma once
 
-#include <BS_thread_pool.hpp> // thread_pool
+#include <BS_thread_pool.hpp>       // thread_pool
+#include <BS_thread_pool_utils.hpp> // Timer
 
 namespace saturnin::core {
 

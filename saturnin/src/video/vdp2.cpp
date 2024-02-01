@@ -3361,7 +3361,7 @@ void Vdp2::readScrollScreenData(const ScrollScreen s) {
             //     .emplace_back(key, size.w, size.h, screen.priority_number, screen.color_offset.as_float, VdpType::vdp2_plane);
         }
 
-        if (use_concurrent_read_for_cells) { ThreadPool::pool_.wait_for_tasks(); }
+        // if (use_concurrent_read_for_cells) { ThreadPool::pool_.wait_for_tasks(); }
     } else { // ScrollScreenFormat::bitmap
         readBitmapData(screen);
     }
@@ -3721,30 +3721,18 @@ void Vdp2::readCellDispatch(const ScrollScreenStatus& screen,
                                            pnd.palette_number);
 
     if (Texture::isTextureLoadingNeeded(key)) {
-        if (use_concurrent_read_for_cells) {
-            // ThreadPool::pool_.push_task(&Vdp2::readCellMT,
-            //                             this,
-            //                             std::cref(screen),
-            //                             pnd.palette_number,
-            //                             cell_address,
-            //                             key,
-            //                             std::span<const u8>{modules_.memory()->vdp2_vram_});
-            ThreadPool::pool_.push_task(&Vdp2::readCellMT,
-                                        this,
-                                        std::cref(screen),
-                                        pnd.palette_number,
-                                        cell_address,
-                                        key,
-                                        std::span<const u8>{modules_.memory()->vdp2_vram_},
-                                        std::span<const u8>{modules_.memory()->vdp2_cram_});
-            // core::Log::warning(Logger::vdp2,
-            //                    "{} tasks total, {} tasks running, {} tasks queued",
-            //                    ThreadPool::pool_.get_tasks_total(),
-            //                    ThreadPool::pool_.get_tasks_running(),
-            //                    ThreadPool::pool_.get_tasks_queued());
-        } else {
-            readCell(screen, pnd, cell_address, key);
-        }
+        // if (use_concurrent_read_for_cells) {
+        // ThreadPool::pool_.push_task(&Vdp2::readCellMT,
+        //                             this,
+        //                             std::cref(screen),
+        //                             pnd.palette_number,
+        //                             cell_address,
+        //                             key,
+        //                             std::span<const u8>{modules_.memory()->vdp2_vram_},
+        //                             std::span<const u8>{modules_.memory()->vdp2_cram_});
+        //} else {
+        readCell(screen, pnd, cell_address, key);
+        //}
     }
     saveCell(screen, pnd, cell_address, cell_offset, key);
 }
