@@ -276,11 +276,6 @@ struct RamStatus {
     Ramctl::RotationDataBankSelect  vram_b1_rotation_bank_select{Ramctl::RotationDataBankSelect::not_used};
 };
 
-// struct ColorOffset {
-//     ColorS16 as_s16;
-//     ColorF   as_float;
-// };
-
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \struct ScrollScreenStatus
 ///

@@ -287,13 +287,13 @@ void Opengl::displayFramebuffer(core::EmulatorContext& state) {
     auto parts_list = PartsList{};
 
     const auto addVdp2PartsToList = [&](const ScrollScreen s) {
-        const auto& vdp2_planes = state.vdp2()->vdp2Parts(s, VdpType::vdp2_cell);
-        if (!vdp2_planes.empty()) {
-            parts_list.reserve(parts_list.size() + vdp2_planes.size());
-            for (const auto& p : vdp2_planes) {
-                parts_list.emplace_back(p);
-            }
-        }
+        // const auto& vdp2_planes = state.vdp2()->vdp2Parts(s, VdpType::vdp2_cell);
+        // if (!vdp2_planes.empty()) {
+        //     parts_list.reserve(parts_list.size() + vdp2_planes.size());
+        //     for (const auto& p : vdp2_planes) {
+        //         parts_list.emplace_back(p);
+        //     }
+        // }
 
         const auto& vdp2_bitmaps = state.vdp2()->vdp2Parts(s, VdpType::vdp2_bitmap);
         if (!vdp2_bitmaps.empty()) {

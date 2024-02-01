@@ -3404,7 +3404,7 @@ void Vdp2::readBitmapData(const ScrollScreenStatus& screen) {
     // const auto      texture_size = texture_width * texture_height * 4;
     std::vector<u8> texture_data;
     // texture_data.reserve(texture_size);
-    const auto key = Texture::calculateKey(VdpType::vdp2_cell,
+    const auto key = Texture::calculateKey(VdpType::vdp2_bitmap,
                                            screen.bitmap_start_address,
                                            toUnderlying(screen.character_color_number),
                                            screen.bitmap_palette_number);
@@ -3479,7 +3479,7 @@ void Vdp2::readBitmapData(const ScrollScreenStatus& screen) {
                 }
             }
         }
-        Texture::storeTexture(Texture(VdpType::vdp2_cell,
+        Texture::storeTexture(Texture(VdpType::vdp2_bitmap,
                                       scrollScreenToLayer(screen.scroll_screen),
                                       screen.bitmap_start_address,
                                       toUnderlying(screen.character_color_number),
