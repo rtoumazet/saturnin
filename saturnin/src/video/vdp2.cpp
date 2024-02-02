@@ -238,9 +238,11 @@ void Vdp2::calculateDisplayDuration() {
 void Vdp2::onVblankIn() {
     calculateFps();
     Texture::cleanCache(modules_.opengl(), VdpType::vdp2_cell);
+    Texture::cleanCache(modules_.opengl(), VdpType::vdp2_bitmap);
     updateResolution();
     updateRamStatus();
     Texture::setCache(VdpType::vdp2_cell);
+    Texture::setCache(VdpType::vdp2_bitmap);
     populateRenderData();
     resetCacheState();
 }
@@ -3339,29 +3341,7 @@ void Vdp2::readScrollScreenData(const ScrollScreen s) {
 
             current_plane_address_ = addr;
             readPlaneData(screen, addr, offset);
-
-            // auto texture_data = std::vector<u8>{};
-            // texture_data.reserve(vdp2_parts_[util::toUnderlying(screen.scroll_screen)].size() * 8 * 8 * 4);
-            // for (const auto& vp : vdp2_parts_[util::toUnderlying(screen.scroll_screen)]) {
-            //     const auto& t = Texture::getTexture(vp.textureKey());
-            //     texture_data.insert(texture_data.end(), (*t)->rawData().begin(), (*t)->rawData().end());
-            // }
-
-            // const auto key = Texture::storeTexture(Texture(VdpType::vdp2_plane,
-            //                                                scrollScreenToLayer(screen.scroll_screen),
-            //                                                current_plane_address_,
-            //                                                static_cast<u8>(toUnderlying(screen.character_color_number)),
-            //                                                0,
-            //                                                texture_data,
-            //                                                size.w,
-            //                                                size.h));
-            // modules_.opengl()->addOrUpdateTexture(key, scrollScreenToLayer(screen.scroll_screen));
-
-            // vdp2_parts_[util::toUnderlying(screen.scroll_screen)]
-            //     .emplace_back(key, size.w, size.h, screen.priority_number, screen.color_offset.as_float, VdpType::vdp2_plane);
         }
-
-        // if (use_concurrent_read_for_cells) { ThreadPool::pool_.wait_for_tasks(); }
     } else { // ScrollScreenFormat::bitmap
         readBitmapData(screen);
     }

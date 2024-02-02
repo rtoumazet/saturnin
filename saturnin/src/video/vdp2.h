@@ -1727,30 +1727,10 @@ class Vdp2 {
         // The main vector can be updated by the various threads concurrently without synchronisation as the data don't
         // overlap.
         texture_data.assign(texture_data.capacity(), 0);
-        constexpr auto chunk_size = u32{0x1000};
-        // auto           readBitmapPart = [&](u32 start_address, u32 texture_offset) {
-        //     auto       local_texture      = std::vector<u8>{};
-        //     const auto local_texture_size = chunk_size / offset * 0x10;
-        //     local_texture.reserve(local_texture_size);
-        //     auto local_offset = texture_offset;
-        //     auto row          = DataExtraction{};
-        //     for (u32 i = start_address; i < (start_address + chunk_size); i += offset) {
-        //         row.as_8bits = modules_.memory()->read<u32>(i);
-        //         readPalette256DotBitmap<T>(local_texture, screen, palette, row.as_8bits >>
-        //         DataExtraction::As8Bits::dot0_shift); local_offset += 4; readPalette256DotBitmap<T>(local_texture, screen,
-        //         palette, row.as_8bits >> DataExtraction::As8Bits::dot1_shift); local_offset += 4;
-        //         readPalette256DotBitmap<T>(local_texture, screen, palette, row.as_8bits >>
-        //         DataExtraction::As8Bits::dot2_shift); local_offset += 4; readPalette256DotBitmap<T>(local_texture, screen,
-        //         palette, row.as_8bits >> DataExtraction::As8Bits::dot3_shift); local_offset += 4;
-        //     }
-        //     std::copy(local_texture.begin(), local_texture.end(), &texture_data[0] + texture_offset * 4);
-        // };
+        constexpr auto chunk_size     = u32{0x1000};
+        auto           texture_offset = u32{};
 
-        auto texture_offset = u32{};
-
-        // core::Log::warning(Logger::vdp2, u8"Bitmap size {:#x}", end_address - screen.bitmap_start_address);
         for (u32 i = screen.bitmap_start_address; i < end_address; i += chunk_size) {
-            // ThreadPool::pool_.detach_task(readBitmapPart, current_address, texture_offset);
             ThreadPool::pool_.detach_task([this, current_address, texture_offset, &texture_data, &screen, &palette] {
                 auto       local_texture      = std::vector<u8>{};
                 const auto local_texture_size = chunk_size / offset * 0x10;

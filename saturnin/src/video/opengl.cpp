@@ -287,13 +287,13 @@ void Opengl::displayFramebuffer(core::EmulatorContext& state) {
     auto parts_list = PartsList{};
 
     const auto addVdp2PartsToList = [&](const ScrollScreen s) {
-        // const auto& vdp2_planes = state.vdp2()->vdp2Parts(s, VdpType::vdp2_cell);
-        // if (!vdp2_planes.empty()) {
-        //     parts_list.reserve(parts_list.size() + vdp2_planes.size());
-        //     for (const auto& p : vdp2_planes) {
-        //         parts_list.emplace_back(p);
-        //     }
-        // }
+        const auto& vdp2_planes = state.vdp2()->vdp2Parts(s, VdpType::vdp2_cell);
+        if (!vdp2_planes.empty()) {
+            parts_list.reserve(parts_list.size() + vdp2_planes.size());
+            for (const auto& p : vdp2_planes) {
+                parts_list.emplace_back(p);
+            }
+        }
 
         const auto& vdp2_bitmaps = state.vdp2()->vdp2Parts(s, VdpType::vdp2_bitmap);
         if (!vdp2_bitmaps.empty()) {
@@ -1149,7 +1149,6 @@ auto Opengl::readVertexes(const PartsList& parts) -> std::vector<Vertex> {
         if (opengl_tex.has_value()) {
             // Replacing texture coordinates of the vertex by those of the OpenGL texture.
             for (auto& v : p.vertexes) {
-                // v.color_offset = p.color_offset.arrayData();
                 v.color_offset = p.color_offset;
                 if ((v.tex_coords.s == 0.0) && (v.tex_coords.t == 0.0)) {
                     v.tex_coords = opengl_tex->coords[0];
@@ -1170,7 +1169,6 @@ auto Opengl::readVertexes(const PartsList& parts) -> std::vector<Vertex> {
             }
         } else {
             for (auto& v : p.vertexes) {
-                // v.color_offset = {p.color_offset.r, p.color_offset.g, p.color_offset.b};
                 v.color_offset = p.color_offset;
             }
         }
@@ -2046,6 +2044,8 @@ auto generateVertexIndicesAndDrawRanges(const PartsList& parts) -> std::tuple<st
         for (const auto& p : parts) {
             if (!typeToIndices.contains(p.draw_type)) { continue; } // Non drawable parts are skipped
 
+            // current_range.is_textured = typeIsTextured.at(p.draw_type);
+
             if (current_range.draw_type != p.draw_type && current_range.indices_nb > 0) {
                 --current_range.vertex_array_end;
                 current_range.indices_array_start += previous_vertexes_nb;
@@ -2058,6 +2058,8 @@ auto generateVertexIndicesAndDrawRanges(const PartsList& parts) -> std::tuple<st
                 current_range.is_textured        = typeIsTextured.at(p.draw_type);
                 current_range.draw_type          = p.draw_type;
                 current_range.primitive          = typeToPrimitive.at(p.draw_type);
+            } else {
+                current_range.is_textured = typeIsTextured.at(p.draw_type);
             }
 
             std::ranges::transform(typeToIndices.at(p.draw_type), std::back_inserter(indices), [&increment](u32 i) {
