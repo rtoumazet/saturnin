@@ -37,7 +37,7 @@ jobs:
     - name: Restore from cache and install vcpkg
       uses: lukka/run-vcpkg@v10
       with:
-        vcpkgGitCommitId: '08c4e71048eb54733d9b180a28b9b1d7ce637454' #2023.12.05
+        vcpkgGitCommitId: 'c3801cf53c614ffc54c94051d124eba097b057b1' #2024.02.02
         vcpkgDirectory: D:\a\saturnin\saturnin\vcpkg
         
     - name: Install vcpkg dependencies
