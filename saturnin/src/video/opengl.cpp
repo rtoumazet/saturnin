@@ -169,12 +169,15 @@ void Opengl::initializeShaders() {
         attribute vec3 vtx_tex_coord;
         attribute vec4 vtx_color;
         attribute vec4 vtx_grd_color;
+
+        attribute vec3 vtx_color_offset_is_positive;
         attribute vec3 vtx_color_offset;
         
-        varying vec3   frg_tex_coord;
-        varying vec4   frg_color; 
-        varying vec4   frg_grd_color; 
-        varying vec3   frg_color_offset;
+        varying vec3 frg_tex_coord;
+        varying vec4 frg_color; 
+        varying vec4 frg_grd_color; 
+        varying vec3 frg_color_offset_is_positive;
+        varying vec3 frg_color_offset;
         
         uniform mat4 proj_matrix;
 
@@ -183,7 +186,9 @@ void Opengl::initializeShaders() {
             frg_tex_coord   = vec3(vtx_tex_coord);
             frg_color       = vtx_color;
             frg_grd_color   = vtx_grd_color;
+            frg_color_offset_is_positive = vtx_color_offset_is_positive;
             frg_color_offset= vtx_color_offset;
+
         }
     )");
 
@@ -213,7 +218,6 @@ void Opengl::initializeShaders() {
             frg_grd_color   = vtx_grd_color;
             frg_color_offset_is_positive = vtx_color_offset_is_positive;
             frg_color_offset= vtx_color_offset;
-            //frg_color_offset= vec3(0.8, 0.8, 0.8);
         }
     )");
 
@@ -223,16 +227,17 @@ void Opengl::initializeShaders() {
 
     shaders_list_.try_emplace({GlslVersion::glsl_120, ShaderType::fragment, ShaderName::textured}, R"(
         #version 120
+        #extension GL_EXT_texture_array : enable
         
         // Texture array doesn't work for now ...
         varying vec3 frg_tex_coord;
         varying vec4 frg_color;
         varying vec4 frg_grd_color;
+        varying vec3 frg_color_offset_is_positive;
         varying vec3 frg_color_offset;
 
         uniform sampler2DArray texture1;
         uniform bool is_texture_used;
-        // uniform vec3 color_offset;
 
         void main()
         {
@@ -242,9 +247,11 @@ void Opengl::initializeShaders() {
             }else{
                 out_color = frg_color;
             }
-            out_color.rgb += frg_color_offset.rgb;
+            out_color.rgb += frg_grd_color.rgb;
+            if( frg_color_offset_is_positive.r > 0.0 ){ out_color.r += frg_color_offset.r; } else { out_color.r -= frg_color_offset.r;}
+            if( frg_color_offset_is_positive.g > 0.0 ){ out_color.g += frg_color_offset.g; } else { out_color.g -= frg_color_offset.g;}
+            if( frg_color_offset_is_positive.b > 0.0 ){ out_color.b += frg_color_offset.b; } else { out_color.b -= frg_color_offset.b;}
             out_color.rgb = clamp(out_color.rgb, vec3(0.0), vec3(1.0));
-
             gl_FragColor = out_color;
    
         }
@@ -256,7 +263,6 @@ void Opengl::initializeShaders() {
         in vec3 frg_tex_coord;
         in vec4 frg_color;
         in vec4 frg_grd_color;
-        //in vec3 frg_color_offset;
         in vec3 frg_color_offset_is_positive;
         in vec3 frg_color_offset;
 
@@ -276,7 +282,6 @@ void Opengl::initializeShaders() {
             if( frg_color_offset_is_positive.r > 0.0 ){ out_color.r += frg_color_offset.r; } else { out_color.r -= frg_color_offset.r;}
             if( frg_color_offset_is_positive.g > 0.0 ){ out_color.g += frg_color_offset.g; } else { out_color.g -= frg_color_offset.g;}
             if( frg_color_offset_is_positive.b > 0.0 ){ out_color.b += frg_color_offset.b; } else { out_color.b -= frg_color_offset.b;}
-            //out_color.rgb += frg_color_offset.rgb;
             out_color.rgb = clamp(out_color.rgb, vec3(0.0), vec3(1.0));
 
         } 
