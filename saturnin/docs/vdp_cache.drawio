@@ -1,0 +1,49 @@
+<mxfile host="Electron" modified="2024-02-06T15:57:06.692Z" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/23.0.2 Chrome/120.0.6099.109 Electron/28.1.0 Safari/537.36" etag="-J7Iw-nKD-MCD_LNmHd7" version="23.0.2" type="device">
+  <diagram name="Page-1" id="qLgkIeqdQllUKo7gCx5l">
+    <mxGraphModel dx="757" dy="571" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="MS-7pJhKzLg421YMvwHl-1" value="VDP1" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="50" y="70" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="MS-7pJhKzLg421YMvwHl-2" value="VDP2" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="50" y="140" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="MS-7pJhKzLg421YMvwHl-6" value="" style="endArrow=classic;html=1;rounded=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" edge="1" parent="1" source="MS-7pJhKzLg421YMvwHl-1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="280" y="100" as="sourcePoint" />
+            <mxPoint x="300" y="100" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="MS-7pJhKzLg421YMvwHl-7" value="Generate parts" style="edgeLabel;resizable=0;html=1;align=center;verticalAlign=middle;" connectable="0" vertex="1" parent="MS-7pJhKzLg421YMvwHl-6">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="MS-7pJhKzLg421YMvwHl-9" value="" style="endArrow=classic;html=1;rounded=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="170" y="169.70999999999998" as="sourcePoint" />
+            <mxPoint x="300" y="168" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="MS-7pJhKzLg421YMvwHl-10" value="Generate parts" style="edgeLabel;resizable=0;html=1;align=center;verticalAlign=middle;" connectable="0" vertex="1" parent="MS-7pJhKzLg421YMvwHl-9">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="MS-7pJhKzLg421YMvwHl-14" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="MS-7pJhKzLg421YMvwHl-11" target="MS-7pJhKzLg421YMvwHl-13">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="MS-7pJhKzLg421YMvwHl-11" value="Sort parts by priority&lt;br&gt;" style="shape=process;whiteSpace=wrap;html=1;backgroundOutline=1;" vertex="1" parent="1">
+          <mxGeometry x="300" y="90" width="160" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="MS-7pJhKzLg421YMvwHl-17" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="MS-7pJhKzLg421YMvwHl-13" target="MS-7pJhKzLg421YMvwHl-16">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="MS-7pJhKzLg421YMvwHl-13" value="Render parts by priority to related FBO" style="shape=process;whiteSpace=wrap;html=1;backgroundOutline=1;" vertex="1" parent="1">
+          <mxGeometry x="300" y="240" width="160" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="MS-7pJhKzLg421YMvwHl-16" value="Render to framebuffer" style="shape=process;whiteSpace=wrap;html=1;backgroundOutline=1;" vertex="1" parent="1">
+          <mxGeometry x="300" y="370" width="160" height="80" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
