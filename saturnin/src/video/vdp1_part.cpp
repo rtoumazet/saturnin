@@ -61,6 +61,8 @@ Vdp1Part::Vdp1Part(const EmulatorModules& modules,
 };
 
 void Vdp1Part::readParameters(Memory* m, const u32 address) {
+    // const auto ram_chunk = m->read(core::MemoryMapArea::vdp1_ram)
+
     switch (cmdctrl_ >> CmdCtrl::comm_enum) {
         using enum CmdCtrl::CommandSelect;
         case system_clipping: {

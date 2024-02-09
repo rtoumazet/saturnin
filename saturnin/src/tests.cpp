@@ -136,17 +136,17 @@ void runTests() {
         b.run("Block copy", [&] {
             texture_data.clear();
             current_address = u32{0x25e00000};
-            for (u32 i = 0; i < 8; ++i) {
-                const auto data = ec.memory()->read(core::MemoryMapArea::vdp2_video_ram, current_address, 0x40);
+            // for (u32 i = 0; i < 8; ++i) {
+            //     const auto data = ec.memory()->read(core::MemoryMapArea::vdp2_video_ram, current_address, 0x40);
 
-                /*              for (const auto& elem : data) {
-                                  row.as_8bits = elem;
-                                  texture_data.emplace_back(row.as_8bits >> DataExtraction::As8Bits::dot0_shift);
-                                  texture_data.emplace_back(row.as_8bits >> DataExtraction::As8Bits::dot1_shift);
-                                  texture_data.emplace_back(row.as_8bits >> DataExtraction::As8Bits::dot2_shift);
-                                  texture_data.emplace_back(row.as_8bits >> DataExtraction::As8Bits::dot3_shift);
-                              }*/
-            }
+            //                  for (const auto& elem : data) {
+            //                      row.as_8bits = elem;
+            //                      texture_data.emplace_back(row.as_8bits >> DataExtraction::As8Bits::dot0_shift);
+            //                      texture_data.emplace_back(row.as_8bits >> DataExtraction::As8Bits::dot1_shift);
+            //                      texture_data.emplace_back(row.as_8bits >> DataExtraction::As8Bits::dot2_shift);
+            //                      texture_data.emplace_back(row.as_8bits >> DataExtraction::As8Bits::dot3_shift);
+            //                  }
+            //}
 
             // ankerl::nanobench::doNotOptimizeAway(d);
         });
