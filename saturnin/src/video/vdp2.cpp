@@ -3941,6 +3941,7 @@ auto Vdp2::isCacheDirty(const ScrollScreen screen) -> bool {
 void Vdp2::discardCache([[maybe_unused]] const ScrollScreen screen) const {
     // 1) Textures used by the vdp2 parts of the screen are discarded
     Texture::discardCache(VdpType::vdp2_cell);
+    Texture::discardCache(VdpType::vdp2_bitmap);
 
     // 2) Vdp2 parts are deleted
     // clearRenderData(screen);
