@@ -53,7 +53,7 @@ namespace saturnin::core {
 /// \brief  Keys used for accessing configuration data.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class AccessKeys {
+enum class AccessKeys : u8 {
     cfg_global_language,
     cfg_global_hardware_mode,
     cfg_global_area_code,

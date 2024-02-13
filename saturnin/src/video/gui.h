@@ -28,6 +28,7 @@
 #include <vector>
 #include <saturnin/src/emulator_context.h> // EmulatorContext
 #include <saturnin/src/emulator_defs.h>    // s32, u32, Coord
+#include <saturnin/src/smpc.h>
 
 namespace video = saturnin::video;
 
@@ -102,6 +103,25 @@ void showCoreWindow(GuiConfiguration& conf, core::EmulatorContext& state);
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void showMainMenu(GuiConfiguration& conf, core::EmulatorContext& state);
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \fn	void formatStvPlayerControls(const u8 second_column_offset, const std::vector<core::PeripheralKey>& keys, core::StvPlayerControls& controls, const u8 player_number);
+///
+/// \brief	Format ST-V player controls
+///
+/// \author	Runik
+/// \date	13/02/2024
+///
+/// \param 		   	second_column_offset	The second column offset.
+/// \param 		   	keys					The keys.
+/// \param [in,out]	controls				The configuration to load.
+/// \param 		   	player_number			The player number.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void formatStvPlayerControls(const u8                                second_column_offset,
+                             const std::vector<core::PeripheralKey>& keys,
+                             core::StvPlayerControls&                controls,
+                             const u8                                player_number);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \fn	void showRenderingWindow(core::EmulatorContext& state);

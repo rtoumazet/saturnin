@@ -68,6 +68,9 @@ using sh2::Sh2Register;
 using sh2::Sh2Type;
 using video::Vdp2;
 
+constexpr auto stv_player_1 = u8{1};
+constexpr auto stv_player_2 = u8{2};
+
 void showImguiDemoWindow(const bool show_window) {
     // 3. Show the ImGui test window. Most of the sample code is in ImGui::ShowTestWindow()
     if (show_window) {
@@ -707,44 +710,7 @@ void showMainMenu(GuiConfiguration& conf, core::EmulatorContext& state) {
                             controls.fromConfig(
                                 state.config()->readPeripheralConfiguration(core::AccessKeys::cfg_controls_stv_player_1));
 
-                            constexpr auto child_height = u16{220};
-                            ImGui::BeginChild("ChildStvPlayer1", ImVec2(child_width, child_height), true, window_flags);
-
-                            ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x - second_column_offset);
-
-                            ImGui::CenteredText(tr("Player 1"));
-
-                            ImGui::TextUnformatted(tr("Left").c_str());
-                            ImGui::SameLine(second_column_offset);
-                            ImGui::peripheralKeyCombo(keys, controls.direction_left, "direction_left");
-
-                            ImGui::TextUnformatted(tr("Right").c_str());
-                            ImGui::SameLine(second_column_offset);
-                            ImGui::peripheralKeyCombo(keys, controls.direction_right, "direction_right");
-
-                            ImGui::TextUnformatted(tr("Up").c_str());
-                            ImGui::SameLine(second_column_offset);
-                            ImGui::peripheralKeyCombo(keys, controls.direction_up, "direction_up");
-
-                            ImGui::TextUnformatted(tr("Down").c_str());
-                            ImGui::SameLine(second_column_offset);
-                            ImGui::peripheralKeyCombo(keys, controls.direction_down, "direction_down");
-
-                            ImGui::TextUnformatted(tr("Button 1").c_str());
-                            ImGui::SameLine(second_column_offset);
-                            ImGui::peripheralKeyCombo(keys, controls.button_1, "button_1");
-
-                            ImGui::TextUnformatted(tr("Button 2").c_str());
-                            ImGui::SameLine(second_column_offset);
-                            ImGui::peripheralKeyCombo(keys, controls.button_2, "button_2");
-
-                            ImGui::TextUnformatted(tr("Button 3").c_str());
-                            ImGui::SameLine(second_column_offset);
-                            ImGui::peripheralKeyCombo(keys, controls.button_3, "button_3");
-
-                            ImGui::TextUnformatted(tr("Button 4").c_str());
-                            ImGui::SameLine(second_column_offset);
-                            ImGui::peripheralKeyCombo(keys, controls.button_4, "button_4");
+                            formatStvPlayerControls(second_column_offset, keys, controls, stv_player_1);
 
                             state.config()->writeValue(core::AccessKeys::cfg_controls_stv_player_1,
                                                        controls.toConfig(PeripheralLayout::current_layout));
@@ -758,51 +724,13 @@ void showMainMenu(GuiConfiguration& conf, core::EmulatorContext& state) {
                             controls.fromConfig(
                                 state.config()->readPeripheralConfiguration(core::AccessKeys::cfg_controls_stv_player_2));
 
-                            constexpr auto child_height = u16{220};
-                            ImGui::BeginChild("ChildStvPlayer2", ImVec2(child_width, child_height), true, window_flags);
-
-                            ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x - second_column_offset);
-
-                            ImGui::CenteredText(tr("Player 2"));
-
-                            ImGui::TextUnformatted(tr("Left").c_str());
-                            ImGui::SameLine(second_column_offset);
-                            ImGui::peripheralKeyCombo(keys, controls.direction_left, "direction_left");
-
-                            ImGui::TextUnformatted(tr("Right").c_str());
-                            ImGui::SameLine(second_column_offset);
-                            ImGui::peripheralKeyCombo(keys, controls.direction_right, "direction_right");
-
-                            ImGui::TextUnformatted(tr("Up").c_str());
-                            ImGui::SameLine(second_column_offset);
-                            ImGui::peripheralKeyCombo(keys, controls.direction_up, "direction_up");
-
-                            ImGui::TextUnformatted(tr("Down").c_str());
-                            ImGui::SameLine(second_column_offset);
-                            ImGui::peripheralKeyCombo(keys, controls.direction_down, "direction_down");
-
-                            ImGui::TextUnformatted(tr("Button 1").c_str());
-                            ImGui::SameLine(second_column_offset);
-                            ImGui::peripheralKeyCombo(keys, controls.button_1, "button_1");
-
-                            ImGui::TextUnformatted(tr("Button 2").c_str());
-                            ImGui::SameLine(second_column_offset);
-                            ImGui::peripheralKeyCombo(keys, controls.button_2, "button_2");
-
-                            ImGui::TextUnformatted(tr("Button 3").c_str());
-                            ImGui::SameLine(second_column_offset);
-                            ImGui::peripheralKeyCombo(keys, controls.button_3, "button_3");
-
-                            ImGui::TextUnformatted(tr("Button 4").c_str());
-                            ImGui::SameLine(second_column_offset);
-                            ImGui::peripheralKeyCombo(keys, controls.button_4, "button_4");
+                            formatStvPlayerControls(second_column_offset, keys, controls, stv_player_2);
 
                             state.config()->writeValue(core::AccessKeys::cfg_controls_stv_player_2,
                                                        controls.toConfig(PeripheralLayout::current_layout));
 
                             ImGui::EndChild();
                         }
-
                         ImGui::EndTabItem();
                     }
                     ImGui::EndTabBar();
@@ -942,6 +870,55 @@ void showMainMenu(GuiConfiguration& conf, core::EmulatorContext& state) {
 
         ImGui::EndMenuBar();
     }
+}
+
+void formatStvPlayerControls(const u8                          second_column_offset,
+                             const std::vector<PeripheralKey>& keys,
+                             StvPlayerControls&                controls,
+                             const u8                          player_number) {
+    constexpr auto child_height = u16{220};
+    constexpr auto child_width  = u16{260};
+    auto           window_flags = ImGuiWindowFlags{ImGuiWindowFlags_None};
+
+    const auto child_name = std::string("ChildStvPlayer").append(std::to_string(player_number));
+    ImGui::BeginChild(child_name.c_str(), ImVec2(child_width, child_height), true, window_flags);
+
+    ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x - second_column_offset);
+
+    const auto player_name = std::string(tr("Player ")).append(std::to_string(player_number));
+    ImGui::CenteredText(player_name);
+
+    ImGui::TextUnformatted(tr("Left").c_str());
+    ImGui::SameLine(second_column_offset);
+    ImGui::peripheralKeyCombo(keys, controls.direction_left, "direction_left");
+
+    ImGui::TextUnformatted(tr("Right").c_str());
+    ImGui::SameLine(second_column_offset);
+    ImGui::peripheralKeyCombo(keys, controls.direction_right, "direction_right");
+
+    ImGui::TextUnformatted(tr("Up").c_str());
+    ImGui::SameLine(second_column_offset);
+    ImGui::peripheralKeyCombo(keys, controls.direction_up, "direction_up");
+
+    ImGui::TextUnformatted(tr("Down").c_str());
+    ImGui::SameLine(second_column_offset);
+    ImGui::peripheralKeyCombo(keys, controls.direction_down, "direction_down");
+
+    ImGui::TextUnformatted(tr("Button 1").c_str());
+    ImGui::SameLine(second_column_offset);
+    ImGui::peripheralKeyCombo(keys, controls.button_1, "button_1");
+
+    ImGui::TextUnformatted(tr("Button 2").c_str());
+    ImGui::SameLine(second_column_offset);
+    ImGui::peripheralKeyCombo(keys, controls.button_2, "button_2");
+
+    ImGui::TextUnformatted(tr("Button 3").c_str());
+    ImGui::SameLine(second_column_offset);
+    ImGui::peripheralKeyCombo(keys, controls.button_3, "button_3");
+
+    ImGui::TextUnformatted(tr("Button 4").c_str());
+    ImGui::SameLine(second_column_offset);
+    ImGui::peripheralKeyCombo(keys, controls.button_4, "button_4");
 }
 
 void showRenderingWindow(core::EmulatorContext& state) {
