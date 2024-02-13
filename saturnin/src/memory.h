@@ -63,7 +63,7 @@ namespace util = saturnin::utilities;
 
 namespace saturnin::core {
 
-using AreaMask = std::optional<std::tuple<u8*, u32, u32>>; // pointer to area data, data mask, data max size
+using AreaMask = std::optional<std::tuple<u8*, u32>>; // pointer to area data, data mask
 
 // Forward declarations
 class EmulatorContext;
@@ -478,7 +478,8 @@ class Memory {
     /// \returns	A vector of u8.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    auto read(const u32 start_addr, const u32 size) -> std::vector<u8>;
+    // auto read(const u32 start_addr, const u32 size) -> std::vector<u8>;
+    auto read(const u32 start_addr, const u32 size) -> std::span<u8>;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn void Memory::sendFrtInterruptToMaster() const;

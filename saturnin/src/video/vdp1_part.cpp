@@ -36,6 +36,7 @@ using core::EmulatorModules;
 using core::rawRead;
 using core::rawWrite;
 using core::tr;
+using utilities::readAs16;
 using utilities::toUnderlying;
 
 constexpr auto horizontal_multiplier = u8{8};
@@ -61,77 +62,63 @@ Vdp1Part::Vdp1Part(const EmulatorModules& modules,
 };
 
 void Vdp1Part::readParameters(Memory* m, const u32 address) {
-    // const auto ram_chunk = m->read(core::MemoryMapArea::vdp1_ram)
-
+    const auto ram_chunk = m->read(address, 0x20);
     switch (cmdctrl_ >> CmdCtrl::comm_enum) {
         using enum CmdCtrl::CommandSelect;
         case system_clipping: {
-            cmdxc_ = m->read<u16>(address + cmdxc_offset);
-            cmdyc_ = m->read<u16>(address + cmdyc_offset);
+            cmdxc_ = readAs16(ram_chunk.subspan(cmdxc_offset, 2));
+            cmdyc_ = readAs16(ram_chunk.subspan(cmdyc_offset, 2));
             break;
         }
         case user_clipping: {
-            cmdxa_ = m->read<u16>(address + cmdxa_offset);
-            cmdya_ = m->read<u16>(address + cmdya_offset);
-            cmdxc_ = m->read<u16>(address + cmdxc_offset);
-            cmdyc_ = m->read<u16>(address + cmdyc_offset);
+            cmdxa_ = readAs16(ram_chunk.subspan(cmdxa_offset, 2));
+            cmdya_ = readAs16(ram_chunk.subspan(cmdya_offset, 2));
+            cmdxc_ = readAs16(ram_chunk.subspan(cmdxc_offset, 2));
+            cmdyc_ = readAs16(ram_chunk.subspan(cmdyc_offset, 2));
             break;
         }
         case local_coordinate: {
-            cmdxa_ = m->read<u16>(address + cmdxa_offset);
-            cmdya_ = m->read<u16>(address + cmdya_offset);
+            cmdxa_ = readAs16(ram_chunk.subspan(cmdxa_offset, 2));
+            cmdya_ = readAs16(ram_chunk.subspan(cmdya_offset, 2));
             break;
         }
         case normal_sprite_draw: {
-            cmdpmod_ = m->read<u16>(address + cmdpmod_offset);
-            cmdcolr_ = m->read<u16>(address + cmdcolr_offset);
-            cmdsrca_ = m->read<u16>(address + cmdsrca_offset);
-            cmdsize_ = m->read<u16>(address + cmdsize_offset);
-            cmdxa_   = m->read<u16>(address + cmdxa_offset);
-            cmdya_   = m->read<u16>(address + cmdya_offset);
-            cmdgrda_ = m->read<u16>(address + cmdgrda_offset);
-            break;
-        }
-        case scaled_sprite_draw: {
-            cmdpmod_ = m->read<u16>(address + cmdpmod_offset);
-            cmdcolr_ = m->read<u16>(address + cmdcolr_offset);
-            cmdsrca_ = m->read<u16>(address + cmdsrca_offset);
-            cmdsize_ = m->read<u16>(address + cmdsize_offset);
-            cmdxa_   = m->read<u16>(address + cmdxa_offset);
-            cmdya_   = m->read<u16>(address + cmdya_offset);
-            cmdxb_   = m->read<u16>(address + cmdxb_offset);
-            cmdyb_   = m->read<u16>(address + cmdyb_offset);
-            cmdxc_   = m->read<u16>(address + cmdxc_offset);
-            cmdyc_   = m->read<u16>(address + cmdyc_offset);
-            cmdgrda_ = m->read<u16>(address + cmdgrda_offset);
+            cmdpmod_ = readAs16(ram_chunk.subspan(cmdpmod_offset, 2));
+            cmdcolr_ = readAs16(ram_chunk.subspan(cmdcolr_offset, 2));
+            cmdsrca_ = readAs16(ram_chunk.subspan(cmdsrca_offset, 2));
+            cmdsize_ = readAs16(ram_chunk.subspan(cmdsize_offset, 2));
+            cmdxa_   = readAs16(ram_chunk.subspan(cmdxa_offset, 2));
+            cmdya_   = readAs16(ram_chunk.subspan(cmdya_offset, 2));
+            cmdgrda_ = readAs16(ram_chunk.subspan(cmdgrda_offset, 2));
             break;
         }
         case distorted_sprite_draw:
+        case scaled_sprite_draw:
         case polygon_draw:
         case polyline_draw: {
-            cmdpmod_ = m->read<u16>(address + cmdpmod_offset);
-            cmdcolr_ = m->read<u16>(address + cmdcolr_offset);
-            cmdsrca_ = m->read<u16>(address + cmdsrca_offset);
-            cmdsize_ = m->read<u16>(address + cmdsize_offset);
-            cmdxa_   = m->read<u16>(address + cmdxa_offset);
-            cmdya_   = m->read<u16>(address + cmdya_offset);
-            cmdxb_   = m->read<u16>(address + cmdxb_offset);
-            cmdyb_   = m->read<u16>(address + cmdyb_offset);
-            cmdxc_   = m->read<u16>(address + cmdxc_offset);
-            cmdyc_   = m->read<u16>(address + cmdyc_offset);
-            cmdxd_   = m->read<u16>(address + cmdxd_offset);
-            cmdyd_   = m->read<u16>(address + cmdyd_offset);
-            cmdgrda_ = m->read<u16>(address + cmdgrda_offset);
+            cmdpmod_ = readAs16(ram_chunk.subspan(cmdpmod_offset, 2));
+            cmdcolr_ = readAs16(ram_chunk.subspan(cmdcolr_offset, 2));
+            cmdsrca_ = readAs16(ram_chunk.subspan(cmdsrca_offset, 2));
+            cmdsize_ = readAs16(ram_chunk.subspan(cmdsize_offset, 2));
+            cmdxa_   = readAs16(ram_chunk.subspan(cmdxa_offset, 2));
+            cmdya_   = readAs16(ram_chunk.subspan(cmdya_offset, 2));
+            cmdxb_   = readAs16(ram_chunk.subspan(cmdxb_offset, 2));
+            cmdyb_   = readAs16(ram_chunk.subspan(cmdyb_offset, 2));
+            cmdxc_   = readAs16(ram_chunk.subspan(cmdxc_offset, 2));
+            cmdyc_   = readAs16(ram_chunk.subspan(cmdyc_offset, 2));
+            cmdxd_   = readAs16(ram_chunk.subspan(cmdxd_offset, 2)); // not used for scaled sprites
+            cmdyd_   = readAs16(ram_chunk.subspan(cmdyd_offset, 2)); // not used for scaled sprites
+            cmdgrda_ = readAs16(ram_chunk.subspan(cmdgrda_offset, 2));
             break;
         }
         case line_draw: {
-            cmdpmod_ = m->read<u16>(address + cmdpmod_offset);
-            cmdcolr_ = m->read<u16>(address + cmdcolr_offset);
-            cmdxa_   = m->read<u16>(address + cmdxa_offset);
-            cmdya_   = m->read<u16>(address + cmdya_offset);
-            cmdxb_   = m->read<u16>(address + cmdxb_offset);
-            cmdyb_   = m->read<u16>(address + cmdyb_offset);
-            cmdgrda_ = m->read<u16>(address + cmdgrda_offset);
+            cmdpmod_ = readAs16(ram_chunk.subspan(cmdpmod_offset, 2));
+            cmdcolr_ = readAs16(ram_chunk.subspan(cmdcolr_offset, 2));
+            cmdxa_   = readAs16(ram_chunk.subspan(cmdxa_offset, 2));
+            cmdya_   = readAs16(ram_chunk.subspan(cmdya_offset, 2));
+            cmdxb_   = readAs16(ram_chunk.subspan(cmdxb_offset, 2));
+            cmdyb_   = readAs16(ram_chunk.subspan(cmdyb_offset, 2));
+            cmdgrda_ = readAs16(ram_chunk.subspan(cmdgrda_offset, 2));
             break;
         }
     }

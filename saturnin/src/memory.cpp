@@ -27,7 +27,8 @@
 #include <libzippp/libzippp.h>
 #include <saturnin/src/config.h>
 #include <saturnin/src/emulator_context.h>
-#include <saturnin/src/locale.h> // NOLINT(modernize-deprecated-headers)
+#include <saturnin/src/exceptions.h> // MemoryError
+#include <saturnin/src/locale.h>     // NOLINT(modernize-deprecated-headers)
 #include <saturnin/src/sh2/sh2.h>
 #include <saturnin/src/utilities.h> // format
 #include <saturnin/src/cdrom/cdrom.h>
@@ -35,10 +36,11 @@
 #include <saturnin/src/video/vdp1.h>
 #include <saturnin/src/video/vdp2.h>
 
-namespace lzpp = libzippp;
-namespace fs   = std::filesystem;
-namespace sh2  = saturnin::sh2;
-namespace uti  = saturnin::utilities;
+namespace lzpp      = libzippp;
+namespace fs        = std::filesystem;
+namespace sh2       = saturnin::sh2;
+namespace uti       = saturnin::utilities;
+namespace exception = saturnin::exception;
 
 namespace saturnin::core {
 
@@ -454,44 +456,19 @@ auto Memory::isStvProtectionEnabled() const -> bool {
     return cart_[relative_addr] == 0x1;
 }
 
-auto Memory::read(const u32 start_addr, const u32 size) -> std::vector<u8> {
-    // const auto source_area                             = getAreaData(start_addr);
-    // const auto& [source, source_mask, source_max_size] = *source_area;
-    const auto& [source, source_mask, source_max_size] = *getAreaData(start_addr);
+// auto Memory::read(const u32 start_addr, const u32 size) -> std::vector<u8> {
+auto Memory::read(const u32 start_addr, const u32 size) -> std::span<u8> {
+    if (!getAreaData(start_addr)) { Log::exception(Logger::memory, tr("Error while reading address {:x}"), start_addr); }
+    const auto& [area_start, area_mask] = *getAreaData(start_addr);
 
-    auto data = std::vector<u8>{};
-    //  data.reserve(size / 4);
-    //  const auto local_start_addr = start_addr & 0xfffffff;
-    //  switch (area) {
-    //      using enum MemoryMapArea;
-    //      case vdp2_video_ram: {
-    //          if (local_start_addr % 4 != 0) {
-    //              Log::warning(Logger::memory,
-    //                           uti::format(core::tr("Start address read not on multiple of 4 : {}"), local_start_addr));
-    //          }
+    if (size > (area_mask + 1)) {
+        Log::exception(Logger::memory,
+                       tr("Size to copy 0x{:x} is bigger than the underlying container size 0x{:x}"),
+                       size,
+                       (area_mask + 1));
+    }
 
-    //        if (!uti::Range<vdp2_vram_area>::contains(local_start_addr)) {
-    //            Log::exception(Logger::memory,
-    //                           uti::format(core::tr("Start address read out of range : {:#0x}"), local_start_addr));
-    //        }
-    //        if (!uti::Range<vdp2_vram_area>::contains(local_start_addr + size)) {
-    //            Log::exception(Logger::memory,
-    //                           uti::format(core::tr("End address read out of range : {:#0x}"), local_start_addr + size));
-    //        }
-    //        for (auto i = (start_addr & vdp2_vram_memory_mask); i < (start_addr & vdp2_vram_memory_mask) + size; i += 4) {
-    //            data.emplace_back(vdp2_vram_[i] << 24 | vdp2_vram_[i + 1] << 16 | vdp2_vram_[i + 2] << 8 | vdp2_vram_[i + 3]);
-    //        }
-    //        break;
-    //    }
-    //    case vdp1_ram: {
-    //        break;
-    //    }
-    //    default: break;
-    //}
-    // memcpy(destination + (destination_address & destination_mask), source + (source_address & source_mask), amount);
-
-    // std::vector<u8> data(source.begin() + start, originalVector.begin() + start + length);
-    return data;
+    return std::span{area_start + (start_addr & area_mask), size};
 }
 
 void Memory::sendFrtInterruptToMaster() const { modules_.masterSh2()->sendInterruptCaptureSignal(); }
@@ -683,38 +660,41 @@ void Memory::installMinimumBiosRoutines() {
 }
 
 auto Memory::getAreaData(u32 addr) -> AreaMask {
+    // Removing cache through addresses
+    if (((addr >> 28) | 2) == 2) { addr &= 0xFFFFFFF; }
+
     if (uti::Range<rom_area>::contains(addr)) {
-        return std::tuple(rom_.data(), rom_memory_mask, rom_size);
+        return std::tuple(rom_.data(), rom_memory_mask);
     } else if (uti::Range<smpc_area>::contains(addr)) {
-        return std::tuple(smpc_.data(), smpc_memory_mask, smpc_size);
+        return std::tuple(smpc_.data(), smpc_memory_mask);
     } else if (uti::Range<backup_ram_area>::contains(addr)) {
-        return std::tuple(backup_ram_.data(), backup_ram_memory_mask, backup_ram_size);
+        return std::tuple(backup_ram_.data(), backup_ram_memory_mask);
     } else if (uti::Range<workram_low_area>::contains(addr)) {
-        return std::tuple(workram_low_.data(), workram_low_memory_mask, workram_low_size);
+        return std::tuple(workram_low_.data(), workram_low_memory_mask);
     } else if (uti::Range<stv_io_area>::contains(addr)) {
-        return std::tuple(stv_io_.data(), stv_io_memory_mask, stv_io_size);
+        return std::tuple(stv_io_.data(), stv_io_memory_mask);
     } else if (uti::Range<cart_area>::contains(addr)) {
-        return std::tuple(cart_.data(), cart_memory_mask, cart_size);
+        return std::tuple(cart_.data(), cart_memory_mask);
     }
     // else if (scsp_address.start <= addr <= scsp_address.end) {
     //     return std::pair(sound_ram_.data());
     // }
     else if (uti::Range<vdp1_ram_area>::contains(addr)) {
-        return std::tuple(vdp1_vram_.data(), vdp1_ram_memory_mask, vdp1_vram_size);
+        return std::tuple(vdp1_vram_.data(), vdp1_ram_memory_mask);
     } else if (uti::Range<vdp1_fb_area>::contains(addr)) {
-        return std::tuple(vdp1_framebuffer_.data(), vdp1_framebuffer_memory_mask, vdp1_framebuffer_size);
+        return std::tuple(vdp1_framebuffer_.data(), vdp1_framebuffer_memory_mask);
     } else if (uti::Range<vdp1_regs_area>::contains(addr)) {
-        return std::tuple(vdp1_registers_.data(), vdp1_registers_memory_mask, vdp1_registers_size);
+        return std::tuple(vdp1_registers_.data(), vdp1_registers_memory_mask);
     } else if (uti::Range<vdp2_vram_area>::contains(addr)) {
-        return std::tuple(vdp2_vram_.data(), vdp2_vram_memory_mask, vdp2_vram_size);
+        return std::tuple(vdp2_vram_.data(), vdp2_vram_memory_mask);
     } else if (uti::Range<vdp2_cram_area>::contains(addr)) {
-        return std::tuple(vdp2_cram_.data(), vdp2_cram_memory_mask, vdp2_cram_size);
+        return std::tuple(vdp2_cram_.data(), vdp2_cram_memory_mask);
     } else if (uti::Range<vdp2_regs_area>::contains(addr)) {
-        return std::tuple(vdp2_registers_.data(), vdp2_registers_memory_mask, vdp2_registers_size);
+        return std::tuple(vdp2_registers_.data(), vdp2_registers_memory_mask);
     } else if (uti::Range<scu_area>::contains(addr)) {
-        return std::tuple(scu_.data(), scu_memory_mask, scu_size);
+        return std::tuple(scu_.data(), scu_memory_mask);
     } else if (uti::Range<workram_high_area>::contains(addr)) {
-        return std::tuple(workram_high_.data(), workram_high_memory_mask, workram_high_size);
+        return std::tuple(workram_high_.data(), workram_high_memory_mask);
     }
     Log::warning(Logger::memory, core::tr("Unknown address range {:#0x}"), addr);
     return std::nullopt;
@@ -733,8 +713,8 @@ void Memory::burstCopy(const u32 source_address, const u32 destination_address, 
         return;
     }
 
-    const auto& [source, source_mask, source_max_size]          = *source_area;
-    auto& [destination, destination_mask, destination_max_size] = *destination_area;
+    const auto& [source, source_mask]           = *source_area;
+    const auto& [destination, destination_mask] = *destination_area;
 
     memcpy(destination + (destination_address & destination_mask), source + (source_address & source_mask), amount);
 

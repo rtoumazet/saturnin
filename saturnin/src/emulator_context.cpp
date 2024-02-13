@@ -192,19 +192,20 @@ void EmulatorContext::emulationSetup() {
 
 void EmulatorContext::emulationMainThread() {
     Log::info(Logger::main, tr("Emulation main thread started"));
+    try {
+        emulationSetup();
 
-    emulationSetup();
-
-    while (emulationStatus() == EmulationStatus::running) {
-        if (debugStatus() != DebugStatus::paused) {
-            const auto cycles = masterSh2()->run();
-            if (smpc()->isSlaveSh2On()) { slaveSh2()->run(); }
-            smpc()->run(cycles);
-            vdp2()->run(cycles);
-            cdrom()->run(cycles);
-            scsp()->run(cycles);
+        while (emulationStatus() == EmulationStatus::running) {
+            if (debugStatus() != DebugStatus::paused) {
+                const auto cycles = masterSh2()->run();
+                if (smpc()->isSlaveSh2On()) { slaveSh2()->run(); }
+                smpc()->run(cycles);
+                vdp2()->run(cycles);
+                cdrom()->run(cycles);
+                scsp()->run(cycles);
+            }
         }
-    }
+    } catch (...) { Log::error(Logger::main, tr("Exception raised in emulation thread !")); }
     Log::info(Logger::main, tr("Emulation main thread finished"));
     dumpTrace();
 }

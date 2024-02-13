@@ -208,7 +208,11 @@ class Log {
                     case vdp2: throw excpt::Vdp2Error(str);
                 }
             }
-        } catch (const std::runtime_error& e) { loggers_.at("console")->warn(e.what()); }
+            //} catch (const std::runtime_error& e) {
+        } catch (...) {
+            throw;
+            // loggers_.at("console")->warn(e.what());
+        }
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
