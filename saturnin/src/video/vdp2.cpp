@@ -236,13 +236,14 @@ void Vdp2::calculateDisplayDuration() {
 }
 
 void Vdp2::onVblankIn() {
+    using enum VdpType;
     calculateFps();
-    Texture::cleanCache(modules_.opengl(), VdpType::vdp2_cell);
-    Texture::cleanCache(modules_.opengl(), VdpType::vdp2_bitmap);
+    Texture::cleanCache(modules_.opengl(), vdp2_cell);
+    Texture::cleanCache(modules_.opengl(), vdp2_bitmap);
     updateResolution();
     updateRamStatus();
-    Texture::setCache(VdpType::vdp2_cell);
-    Texture::setCache(VdpType::vdp2_bitmap);
+    Texture::setCache(vdp2_cell);
+    Texture::setCache(vdp2_bitmap);
     populateRenderData();
     resetCacheState();
 }

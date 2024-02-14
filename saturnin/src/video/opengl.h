@@ -742,7 +742,6 @@ class Opengl {
     std::vector<PartsList> parts_list_by_type_;
     Vdp1Part               part_to_highlight_; ///< Part that will be highlighted during debug.
     std::vector<DrawRange> draw_range_;
-    // std::vector<RenderPart> render_parts_;
 
     u32                        texture_array_id_;                 ///< Identifier for the texture array.
     TexturesLink               textures_link_;                    ///< Link between the Texture key and the OpenglTexture.
