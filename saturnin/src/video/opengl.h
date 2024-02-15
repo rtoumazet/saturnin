@@ -80,7 +80,7 @@ enum class FboType : u8 {
 using FboData = std::pair<u32, u32>; // 1st is fbo id, 2nd is texture id.
 using FboList = std::unordered_map<FboType, FboData>;
 
-using FboData = std::pair<u32, u32>;
+using LayerFbos = std::unordered_map<Layer, FboList>;
 
 enum class ShaderName { textured };
 enum class ShaderType { vertex, fragment };
@@ -620,6 +620,8 @@ class Opengl {
 
     void initializeFbo(const FboType type);
 
+    auto generateFbo(const FboType type) -> FboData;
+
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn	auto Opengl::initializeTextureArray() const -> u32;
     ///
@@ -732,6 +734,8 @@ class Opengl {
 
     FboList fbo_list_;                ///< List of framebuffer objects used in the program.
     FboType current_rendered_buffer_; ///< The current rendered buffer (front or back)
+
+    LayerFbos layer_fbos_; ///< FBOs by layer (one per priority)
 
     bool is_legacy_opengl_{}; ///< True if rendering in legacy opengl.
 
