@@ -1297,7 +1297,7 @@ auto Opengl::initializeVao(const ShaderName name) -> std::tuple<u32, u32> {
 }
 
 void Opengl::initializeFbos() {
-    // A 7 FBOs are generated for every layer (1 by priority)
+    // 7 FBOs are generated for every layer (one by priority)
     for (const std::array layers = {Layer::nbg0, Layer::nbg1, Layer::nbg2, Layer::nbg3, Layer::rbg0, Layer::sprite};
          const auto&      layer : layers) {
         layer_fbos_[layer].try_emplace(FboType::priority_level_1, generateFbo());

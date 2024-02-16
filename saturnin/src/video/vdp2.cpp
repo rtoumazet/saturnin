@@ -1812,7 +1812,7 @@ auto Vdp2::isScreenDisplayed(ScrollScreen s) -> bool {
             break;
         }
         default: {
-            Log::warning(Logger::vdp2, tr("Scroll scrren not set"));
+            Log::warning(Logger::vdp2, tr("Scroll screen not set"));
         }
     }
 
@@ -2397,11 +2397,7 @@ auto Vdp2::getVramCharacterPatternDataReads(const VramTiming&                 ba
 // DISPLAY methods
 //--------------------------------------------------------------------------------------------------------------
 
-void Vdp2::clearRenderData(const ScrollScreen s) {
-    // std::vector<std::unique_ptr<video::BaseRenderingPart>>().swap(vdp2_parts_[toUnderlying(s)]);
-    std::vector<video::Vdp2Part>().swap(vdp2_parts_[toUnderlying(s)]);
-    //  vdp2_parts_[toUnderlying(s)].clear();
-}
+void Vdp2::clearRenderData(const ScrollScreen s) { std::vector<video::Vdp2Part>().swap(vdp2_parts_[toUnderlying(s)]); }
 
 void Vdp2::populateRenderData() {
     clearRenderData(ScrollScreen::rbg1);
@@ -2447,12 +2443,22 @@ void Vdp2::populateRenderData() {
             // bg_[util::toUnderlying(ScrollScreen::nbg2)] = {};
         }
 
-        clearRenderData(ScrollScreen::nbg3);
-        if (canScrollScreenBeDisplayed(ScrollScreen::nbg3)) {
-            if (isScreenDisplayed(ScrollScreen::nbg3)) {
-                updateScrollScreenStatus(ScrollScreen::nbg3);
-                if (getScreen(ScrollScreen::nbg3).priority_number != 0) { readScrollScreenData(ScrollScreen::nbg3); }
+        // clearRenderData(ScrollScreen::nbg3);
+        // if (canScrollScreenBeDisplayed(ScrollScreen::nbg3)) {
+        //     if (isScreenDisplayed(ScrollScreen::nbg3)) {
+        //         updateScrollScreenStatus(ScrollScreen::nbg3);
+        //         if (getScreen(ScrollScreen::nbg3).priority_number != 0) { readScrollScreenData(ScrollScreen::nbg3); }
+        //     }
+        // }
+
+        // WIP
+        if (canScrollScreenBeDisplayed(ScrollScreen::nbg3) && isScreenDisplayed(ScrollScreen::nbg3)) {
+            updateScrollScreenStatus(ScrollScreen::nbg3);
+            if (isCacheDirty(ScrollScreen::nbg3)) {
+                discardCache(ScrollScreen::nbg3);
+                clearRenderData(ScrollScreen::nbg3);
             }
+            if (getScreen(ScrollScreen::nbg3).priority_number != 0) { readScrollScreenData(ScrollScreen::nbg3); }
         }
     }
 }
