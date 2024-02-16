@@ -1321,53 +1321,6 @@ void Opengl::initializeFbos() {
     glBindFramebuffer(GL_FRAMEBUFFER, getFboTextureId(currentRenderedBuffer()));
 }
 
-void Opengl::initializeFbo(const FboType type) {
-    auto fbo     = u32{};
-    auto texture = u32{};
-    if (is_legacy_opengl_) {
-        glGenFramebuffersEXT(1, &fbo);
-    } else {
-        gl33core::glGenFramebuffers(1, &fbo);
-    }
-    glBindFramebuffer(GL_FRAMEBUFFER, fbo);
-
-    // Creating a texture for the color buffer
-    glGenTextures(1, &texture);
-    glBindTexture(GL_TEXTURE_2D, texture);
-    glTexImage2D(GL_TEXTURE_2D,
-                 0,
-                 GL_RGBA8,
-                 saturn_framebuffer_width,
-                 saturn_framebuffer_height,
-                 0,
-                 GL_RGBA,
-                 GL_UNSIGNED_BYTE,
-                 nullptr);
-
-    // No need for mipmaps, they are turned off
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-    // Attaching the color texture to the fbo
-    glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, texture, 0);
-
-    if (is_legacy_opengl_) {
-        const auto status = glCheckFramebufferStatusEXT(GLenum::GL_FRAMEBUFFER_EXT);
-        if (status != gl::GLenum::GL_FRAMEBUFFER_COMPLETE_EXT) {
-            Log::exception(Logger::opengl, tr("Could not initialize framebuffer object !"));
-        }
-    } else {
-        const auto status = gl33core::glCheckFramebufferStatus(GLenum::GL_FRAMEBUFFER);
-        if (status != gl::GLenum::GL_FRAMEBUFFER_COMPLETE) {
-            Log::exception(Logger::opengl, tr("Could not initialize framebuffer object !"));
-        }
-    }
-    fbo_list_.try_emplace(type, fbo, texture);
-}
-
 auto Opengl::generateFbo(const FboType type) -> FboData {
     auto fbo     = u32{};
     auto texture = u32{};
