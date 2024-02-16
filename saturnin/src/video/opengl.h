@@ -607,17 +607,17 @@ class Opengl {
     void initializeFbos();
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn	auto Opengl::generateFbo(const FboType type) -> FboData;
+    /// \fn	auto Opengl::generateFbo() -> FboData;
     ///
     /// \brief	Generates a framebuffer object.
     ///
     /// \author	Runik
     /// \date	16/02/2024
     ///
-    /// \param 	type	The framebuffer object type to create.
+    /// \returns    The generated framebuffer object data
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    auto generateFbo(const FboType type) -> FboData;
+    auto generateFbo() -> FboData;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn	auto Opengl::initializeTextureArray() const -> u32;

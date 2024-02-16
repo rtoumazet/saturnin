@@ -1303,25 +1303,25 @@ void Opengl::initializeFbos() {
 
     for (const std::array layers = {Layer::nbg0, Layer::nbg1, Layer::nbg2, Layer::nbg3, Layer::rbg0, Layer::sprite};
          const auto&      layer : layers) {
-        layer_fbos_[layer].try_emplace(FboType::priority_level_1, generateFbo(FboType::priority_level_1));
-        layer_fbos_[layer].try_emplace(FboType::priority_level_2, generateFbo(FboType::priority_level_2));
-        layer_fbos_[layer].try_emplace(FboType::priority_level_3, generateFbo(FboType::priority_level_3));
-        layer_fbos_[layer].try_emplace(FboType::priority_level_4, generateFbo(FboType::priority_level_4));
-        layer_fbos_[layer].try_emplace(FboType::priority_level_5, generateFbo(FboType::priority_level_5));
-        layer_fbos_[layer].try_emplace(FboType::priority_level_6, generateFbo(FboType::priority_level_6));
-        layer_fbos_[layer].try_emplace(FboType::priority_level_7, generateFbo(FboType::priority_level_7));
+        layer_fbos_[layer].try_emplace(FboType::priority_level_1, generateFbo());
+        layer_fbos_[layer].try_emplace(FboType::priority_level_2, generateFbo());
+        layer_fbos_[layer].try_emplace(FboType::priority_level_3, generateFbo());
+        layer_fbos_[layer].try_emplace(FboType::priority_level_4, generateFbo());
+        layer_fbos_[layer].try_emplace(FboType::priority_level_5, generateFbo());
+        layer_fbos_[layer].try_emplace(FboType::priority_level_6, generateFbo());
+        layer_fbos_[layer].try_emplace(FboType::priority_level_7, generateFbo());
     }
 
-    fbo_list_.try_emplace(FboType::front_buffer, generateFbo(FboType::front_buffer));
-    fbo_list_.try_emplace(FboType::back_buffer, generateFbo(FboType::back_buffer));
-    fbo_list_.try_emplace(FboType::vdp1_debug_overlay, generateFbo(FboType::vdp1_debug_overlay));
-    fbo_list_.try_emplace(FboType::vdp2_debug_layer, generateFbo(FboType::vdp2_debug_layer));
+    fbo_list_.try_emplace(FboType::front_buffer, generateFbo());
+    fbo_list_.try_emplace(FboType::back_buffer, generateFbo());
+    fbo_list_.try_emplace(FboType::vdp1_debug_overlay, generateFbo());
+    fbo_list_.try_emplace(FboType::vdp2_debug_layer, generateFbo());
 
     currentRenderedBuffer(FboType::front_buffer);
     glBindFramebuffer(GL_FRAMEBUFFER, getFboTextureId(currentRenderedBuffer()));
 }
 
-auto Opengl::generateFbo(const FboType type) -> FboData {
+auto Opengl::generateFbo() -> FboData {
     auto fbo     = u32{};
     auto texture = u32{};
     if (is_legacy_opengl_) {
