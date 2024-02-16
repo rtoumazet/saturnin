@@ -518,20 +518,7 @@ Gouraud shading
             part_detail += uti::format("Texture key: [cccccc]{:#x}[]", common_vdp_data_.texture_key);
             break;
         }
-        case polygon_draw: {
-            part_detail
-                += uti::format("Vertex A [cccccc]({}, {})[]\n", twosComplement(cmdxa_.data()), twosComplement(cmdya_.data()));
-            part_detail
-                += uti::format("Vertex B [cccccc]({}, {})[]\n", twosComplement(cmdxb_.data()), twosComplement(cmdyb_.data()));
-            part_detail
-                += uti::format("Vertex C [cccccc]({}, {})[]\n", twosComplement(cmdxc_.data()), twosComplement(cmdyc_.data()));
-            part_detail
-                += uti::format("Vertex D [cccccc]({}, {})[]\n", twosComplement(cmdxd_.data()), twosComplement(cmdyd_.data()));
-            auto color = Color(cmdcolr_.data());
-            part_detail += uti::format("Color [cccccc]({}, {}, {}, {})[]\n", color.r, color.g, color.b, color.a);
-            part_detail += getGouraudShadingData();
-            break;
-        }
+        case polygon_draw:
         case polyline_draw: {
             part_detail
                 += uti::format("Vertex A [cccccc]({}, {})[]\n", twosComplement(cmdxa_.data()), twosComplement(cmdya_.data()));

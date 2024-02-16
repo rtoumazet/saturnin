@@ -1297,10 +1297,7 @@ auto Opengl::initializeVao(const ShaderName name) -> std::tuple<u32, u32> {
 }
 
 void Opengl::initializeFbos() {
-    // A FBO (and its related texture) is generated for every FboType.
-    // Front and back buffers are switched every frame : one will be used as the last complete rendering by the GUI while the
-    // other will be rendered to.
-
+    // A 7 FBOs are generated for every layer (1 by priority)
     for (const std::array layers = {Layer::nbg0, Layer::nbg1, Layer::nbg2, Layer::nbg3, Layer::rbg0, Layer::sprite};
          const auto&      layer : layers) {
         layer_fbos_[layer].try_emplace(FboType::priority_level_1, generateFbo());
@@ -1311,6 +1308,10 @@ void Opengl::initializeFbos() {
         layer_fbos_[layer].try_emplace(FboType::priority_level_6, generateFbo());
         layer_fbos_[layer].try_emplace(FboType::priority_level_7, generateFbo());
     }
+
+    // A FBO (and its related texture) is generated for every FboType.
+    // Front and back buffers are switched every frame : one will be used as the last complete rendering by the GUI while the
+    // other will be rendered to.
 
     fbo_list_.try_emplace(FboType::front_buffer, generateFbo());
     fbo_list_.try_emplace(FboType::back_buffer, generateFbo());
