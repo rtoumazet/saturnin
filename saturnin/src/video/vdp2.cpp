@@ -2454,11 +2454,13 @@ void Vdp2::populateRenderData() {
         // WIP
         if (canScrollScreenBeDisplayed(ScrollScreen::nbg3) && isScreenDisplayed(ScrollScreen::nbg3)) {
             updateScrollScreenStatus(ScrollScreen::nbg3);
-            if (isCacheDirty(ScrollScreen::nbg3)) {
+            if (isCacheDirty(ScrollScreen::nbg3) && getScreen(ScrollScreen::nbg3).priority_number != 0) {
                 discardCache(ScrollScreen::nbg3);
                 clearRenderData(ScrollScreen::nbg3);
+                readScrollScreenData(ScrollScreen::nbg3);
+            } else {
+                // Clear data (how ?)
             }
-            if (getScreen(ScrollScreen::nbg3).priority_number != 0) { readScrollScreenData(ScrollScreen::nbg3); }
         }
     }
 }

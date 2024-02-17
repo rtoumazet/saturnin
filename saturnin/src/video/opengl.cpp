@@ -109,13 +109,13 @@ void Opengl::shutdown() const {
     glDeleteProgram(program_shader_);
     if (is_legacy_opengl_) {
         glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
-        for (const auto& [type, fbo_data] : fbo_list_) {
+        for (const auto& [type, fbo_data] : fbo_global_list_) {
             glDeleteFramebuffersEXT(1, &fbo_data.first);
             deleteTexture(fbo_data.second);
         }
     } else {
         gl33core::glBindFramebuffer(GL_FRAMEBUFFER_EXT, 0);
-        for (const auto& [type, fbo_data] : fbo_list_) {
+        for (const auto& [type, fbo_data] : fbo_global_list_) {
             glDeleteFramebuffers(1, &fbo_data.first);
             deleteTexture(fbo_data.second);
         }
@@ -123,7 +123,6 @@ void Opengl::shutdown() const {
 }
 
 void Opengl::preRender() {
-    // const auto current_index = 1 - displayed_texture_index_; // toggles the value
     switchRenderedBuffer();
 
     if (is_legacy_opengl_) {
@@ -289,6 +288,11 @@ void Opengl::initializeShaders() {
 }
 
 void Opengl::displayFramebuffer(core::EmulatorContext& state) {
+    // :TODO:
+    // Render each layer + priority to one specific FDO (put render() content in its own
+    // function, and name it renderToFbo())
+    // render() itself must take care of rendering the different FBOs in order
+
     auto parts_list = PartsList{};
 
     const auto addVdp2PartsToList = [&](const ScrollScreen s) {
@@ -1297,26 +1301,18 @@ auto Opengl::initializeVao(const ShaderName name) -> std::tuple<u32, u32> {
 }
 
 void Opengl::initializeFbos() {
-    // 7 FBOs are generated for every layer (one by priority)
-    for (const std::array layers = {Layer::nbg0, Layer::nbg1, Layer::nbg2, Layer::nbg3, Layer::rbg0, Layer::sprite};
-         const auto&      layer : layers) {
-        layer_fbos_[layer].try_emplace(FboType::priority_level_1, generateFbo());
-        layer_fbos_[layer].try_emplace(FboType::priority_level_2, generateFbo());
-        layer_fbos_[layer].try_emplace(FboType::priority_level_3, generateFbo());
-        layer_fbos_[layer].try_emplace(FboType::priority_level_4, generateFbo());
-        layer_fbos_[layer].try_emplace(FboType::priority_level_5, generateFbo());
-        layer_fbos_[layer].try_emplace(FboType::priority_level_6, generateFbo());
-        layer_fbos_[layer].try_emplace(FboType::priority_level_7, generateFbo());
+    // Generating a list of FBOs to be used for by priority rendering.
+    for (u32 i = 0; i < max_fbo_by_priority; ++i) {
+        fbo_priority_list_[i] = generateFbo();
     }
 
     // A FBO (and its related texture) is generated for every FboType.
     // Front and back buffers are switched every frame : one will be used as the last complete rendering by the GUI while the
     // other will be rendered to.
-
-    fbo_list_.try_emplace(FboType::front_buffer, generateFbo());
-    fbo_list_.try_emplace(FboType::back_buffer, generateFbo());
-    fbo_list_.try_emplace(FboType::vdp1_debug_overlay, generateFbo());
-    fbo_list_.try_emplace(FboType::vdp2_debug_layer, generateFbo());
+    fbo_global_list_.try_emplace(FboType::front_buffer, generateFbo());
+    fbo_global_list_.try_emplace(FboType::back_buffer, generateFbo());
+    fbo_global_list_.try_emplace(FboType::vdp1_debug_overlay, generateFbo());
+    fbo_global_list_.try_emplace(FboType::vdp2_debug_layer, generateFbo());
 
     currentRenderedBuffer(FboType::front_buffer);
     glBindFramebuffer(GL_FRAMEBUFFER, getFboTextureId(currentRenderedBuffer()));

@@ -62,6 +62,7 @@ constexpr auto minimum_window_height = u16{512};
 constexpr auto texture_array_width   = u16{1024};
 constexpr auto texture_array_height  = u16{1024};
 constexpr auto texture_array_depth   = u16{64};
+constexpr auto max_fbo_by_priority   = u8{16};
 
 enum class FboType : u8 {
     front_buffer,
@@ -77,10 +78,12 @@ enum class FboType : u8 {
     priority_level_7
 };
 
-using FboData = std::pair<u32, u32>; // 1st is fbo id, 2nd is texture id.
-using FboList = std::unordered_map<FboType, FboData>;
+using FboData       = std::pair<u32, u32>; // Describes a framebuffer object. 1st is fbo id, 2nd is texture id.
+using FboGlobalList = std::unordered_map<FboType, FboData>;
 
-using LayerFbos = std::unordered_map<Layer, FboList>;
+using PriorityKey = std::pair<u8, Layer>; // First is priority number (1 to 7, last on being the highest), second is linked layer.
+using PriorityFbos    = std::map<PriorityKey, u8>;                // Link between a priority to display and its relative FBO.
+using FboPriorityList = std::array<FboData, max_fbo_by_priority>; // List of FBO to be used for rendering by priority.
 
 enum class ShaderName { textured };
 enum class ShaderType { vertex, fragment };
@@ -376,7 +379,7 @@ class Opengl {
     /// \returns    True if framebuffer objects are initialized.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    auto areFbosInitialized() const -> bool { return !fbo_list_.empty(); }
+    auto areFbosInitialized() const -> bool { return !fbo_global_list_.empty(); }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn void Opengl::render();
@@ -632,8 +635,8 @@ class Opengl {
 
     auto initializeTextureArray() const -> u32;
 
-    auto getFboId(const FboType type) const -> u32 { return fbo_list_.at(type).first; };
-    auto getFboTextureId(const FboType type) const -> u32 { return fbo_list_.at(type).second; };
+    auto getFboId(const FboType type) const -> u32 { return fbo_global_list_.at(type).first; };
+    auto getFboTextureId(const FboType type) const -> u32 { return fbo_global_list_.at(type).second; };
     void switchRenderedBuffer();
 
     auto calculateViewportPosAndSize() const -> std::tuple<u32, u32, u32, u32>;
@@ -729,10 +732,10 @@ class Opengl {
 
     core::Config* config_; ///< Configuration object.
 
-    FboList fbo_list_;                ///< List of framebuffer objects used in the program.
-    FboType current_rendered_buffer_; ///< The current rendered buffer (front or back)
+    FboGlobalList fbo_global_list_;         ///< List of framebuffer objects used in the program.
+    FboType       current_rendered_buffer_; ///< The current rendered buffer (front or back)
 
-    LayerFbos layer_fbos_; ///< FBOs by layer (one per priority)
+    FboPriorityList fbo_priority_list_; ///< List of FBOs to be used for by priority rendering.
 
     bool is_legacy_opengl_{}; ///< True if rendering in legacy opengl.
 
