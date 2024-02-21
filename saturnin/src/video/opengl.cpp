@@ -296,6 +296,62 @@ void Opengl::displayFramebuffer(core::EmulatorContext& state) {
     // - displayFramebuffer() must generate one PartList by layer + priority to display to the FBO
     // -
 
+    GlobalPartsList global_parts_list;
+
+    std::unordered_map<ScrollScreen, Layer> screen_to_layer;
+    screen_to_layer[ScrollScreen::nbg3] = Layer::nbg3;
+    screen_to_layer[ScrollScreen::nbg2] = Layer::nbg2;
+    screen_to_layer[ScrollScreen::nbg1] = Layer::nbg1;
+    screen_to_layer[ScrollScreen::nbg0] = Layer::nbg0;
+    screen_to_layer[ScrollScreen::rbg1] = Layer::rbg1;
+    screen_to_layer[ScrollScreen::rbg0] = Layer::rbg0;
+
+    // Step one : get displayable layers
+    std::vector<ScrollScreen> screens_to_display;
+    if (!state.vdp2()->isLayerDisabled(ScrollScreen::nbg3)) screens_to_display.push_back(ScrollScreen::nbg3);
+    if (!state.vdp2()->isLayerDisabled(ScrollScreen::nbg2)) screens_to_display.push_back(ScrollScreen::nbg2);
+    if (!state.vdp2()->isLayerDisabled(ScrollScreen::nbg1)) screens_to_display.push_back(ScrollScreen::nbg1);
+    if (!state.vdp2()->isLayerDisabled(ScrollScreen::nbg0)) screens_to_display.push_back(ScrollScreen::nbg0);
+    if (!state.vdp2()->isLayerDisabled(ScrollScreen::rbg1)) screens_to_display.push_back(ScrollScreen::rbg1);
+    if (!state.vdp2()->isLayerDisabled(ScrollScreen::rbg0)) screens_to_display.push_back(ScrollScreen::rbg0);
+
+    // Step two : populate one FBO for each priority + layer couple
+
+    const auto renderVdp1Parts = [&](const u32 priority) {
+        auto        local_parts = PartsList();
+        const auto& vdp1_parts  = state.vdp1()->vdp1Parts(priority);
+        if (!vdp1_parts.empty()) {
+            local_parts.reserve(vdp1_parts.size());
+            for (const auto& p : vdp1_parts) {
+                local_parts.emplace_back(p);
+            }
+            // Display current screen to FBO for current priority
+            // renderToFbo(parts_list);
+            global_parts_list[{priority, Layer::sprite}] = std::move(local_parts);
+        }
+    };
+
+    const auto renderVdp2Parts = [&](const ScrollScreen screen, const u32 priority) {
+        auto        local_parts = PartsList();
+        const auto& vdp2_parts  = state.vdp2()->vdp2Parts(screen, priority);
+        if (!vdp2_parts.empty()) {
+            local_parts.reserve(vdp2_parts.size());
+            for (const auto& p : vdp2_parts) {
+                local_parts.emplace_back(p);
+            }
+            // Display current screen to FBO for current priority
+            // renderToFbo(parts_list);
+            global_parts_list[{priority, screen_to_layer[screen]}] = std::move(local_parts);
+        }
+    };
+
+    for (auto priority = 7; priority > 0; --priority) {
+        for (const auto& screen : screens_to_display) {
+            renderVdp2Parts(screen, priority);
+        }
+        renderVdp1Parts(priority);
+    }
+
     auto parts_list = PartsList{};
 
     const auto addVdp2PartsToList = [&](const ScrollScreen s) {
@@ -325,48 +381,6 @@ void Opengl::displayFramebuffer(core::EmulatorContext& state) {
             }
         }
     };
-
-    // Step one : get displayable layers
-    std::vector<ScrollScreen> screens_to_display;
-    if (!state.vdp2()->isLayerDisabled(ScrollScreen::nbg3)) screens_to_display.push_back(ScrollScreen::nbg3);
-    if (!state.vdp2()->isLayerDisabled(ScrollScreen::nbg2)) screens_to_display.push_back(ScrollScreen::nbg2);
-    if (!state.vdp2()->isLayerDisabled(ScrollScreen::nbg1)) screens_to_display.push_back(ScrollScreen::nbg1);
-    if (!state.vdp2()->isLayerDisabled(ScrollScreen::nbg0)) screens_to_display.push_back(ScrollScreen::nbg0);
-    if (!state.vdp2()->isLayerDisabled(ScrollScreen::rbg1)) screens_to_display.push_back(ScrollScreen::rbg1);
-    if (!state.vdp2()->isLayerDisabled(ScrollScreen::rbg0)) screens_to_display.push_back(ScrollScreen::rbg0);
-
-    // Step two : populate one FBO for each priority + layer couple
-
-    const auto renderVdp1Parts = [&](const u32 priority) {
-        const auto& vdp1_parts = state.vdp1()->vdp1Parts(priority);
-        if (!vdp1_parts.empty()) {
-            parts_list.reserve(parts_list.size() + vdp1_parts.size());
-            for (const auto& p : vdp1_parts) {
-                parts_list.emplace_back(p);
-            }
-            // Display current screen to FBO for current priority
-            renderToFbo(parts_list);
-        }
-    };
-
-    const auto renderVdp2Parts = [&](const ScrollScreen screen, const u32 priority) {
-        const auto& vdp2_parts = state.vdp2()->vdp2Parts(screen, priority);
-        if (!vdp2_parts.empty()) {
-            parts_list.reserve(parts_list.size() + vdp2_parts.size());
-            for (const auto& p : vdp2_parts) {
-                parts_list.emplace_back(p);
-            }
-            // Display current screen to FBO for current priority
-            renderToFbo(parts_list);
-        }
-    };
-
-    for (auto priority = 7; priority > 0; --priority) {
-        for (const auto& screen : screens_to_display) {
-            renderVdp2Parts(screen, priority);
-        }
-        renderVdp1Parts(priority);
-    }
 
     if (!state.vdp2()->isLayerDisabled(ScrollScreen::nbg3)) { addVdp2PartsToList(ScrollScreen::nbg3); }
     if (!state.vdp2()->isLayerDisabled(ScrollScreen::nbg2)) { addVdp2PartsToList(ScrollScreen::nbg2); }

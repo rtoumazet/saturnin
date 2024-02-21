@@ -156,7 +156,9 @@ struct RenderPart {
         draw_type(p.common_vdp_data_.draw_type),
         priority(p.common_vdp_data_.priority){};
 };
-using PartsList = std::vector<RenderPart>;
+
+using PartsList       = std::vector<RenderPart>;
+using GlobalPartsList = std::map<PriorityKey, PartsList>; // Parts list by priority + layer
 
 using LayerToTextures            = std::unordered_map<Layer, std::vector<OpenglTexture>>;
 using LayerToTextureArrayIndexes = std::unordered_map<Layer, std::vector<u8>>;
@@ -744,8 +746,8 @@ class Opengl {
     ScreenResolution saturn_screen_resolution_{}; ///< Saturn screen resolution.
     ScreenResolution host_screen_resolution_{};   ///< Host screen resolution.
 
-    PartsList              parts_list_; // Will have to be moved to the platform agnostic renderer.
-    std::vector<PartsList> parts_list_by_type_;
+    PartsList              parts_list_;        // Will have to be moved to the platform agnostic renderer.
+    GlobalPartsList        global_parts_list_; // Will have to be moved to the platform agnostic renderer.
     Vdp1Part               part_to_highlight_; ///< Part that will be highlighted during debug.
     std::vector<DrawRange> draw_range_;
 
