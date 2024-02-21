@@ -265,6 +265,8 @@ class Opengl {
 
     void displayFramebuffer(core::EmulatorContext& state);
 
+    void renderToFbo(const PartsList& parts_list);
+
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn void Opengl::onWindowResize(const u16 width, const u16 height);
     ///

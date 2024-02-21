@@ -289,9 +289,12 @@ void Opengl::initializeShaders() {
 
 void Opengl::displayFramebuffer(core::EmulatorContext& state) {
     // :TODO:
-    // Render each layer + priority to one specific FDO (put render() content in its own
-    // function, and name it renderToFbo())
-    // render() itself must take care of rendering the different FBOs in order
+    // - Render each layer + priority to one specific FBO
+    // - Put render() content in its own function, and name it renderToFbo()
+    // - Render() itself must take care of rendering the different FBOs in order
+    // - Find which FBO to use in the FBO priority list
+    // - displayFramebuffer() must generate one PartList by layer + priority to display to the FBO
+    // -
 
     auto parts_list = PartsList{};
 
@@ -323,6 +326,48 @@ void Opengl::displayFramebuffer(core::EmulatorContext& state) {
         }
     };
 
+    // Step one : get displayable layers
+    std::vector<ScrollScreen> screens_to_display;
+    if (!state.vdp2()->isLayerDisabled(ScrollScreen::nbg3)) screens_to_display.push_back(ScrollScreen::nbg3);
+    if (!state.vdp2()->isLayerDisabled(ScrollScreen::nbg2)) screens_to_display.push_back(ScrollScreen::nbg2);
+    if (!state.vdp2()->isLayerDisabled(ScrollScreen::nbg1)) screens_to_display.push_back(ScrollScreen::nbg1);
+    if (!state.vdp2()->isLayerDisabled(ScrollScreen::nbg0)) screens_to_display.push_back(ScrollScreen::nbg0);
+    if (!state.vdp2()->isLayerDisabled(ScrollScreen::rbg1)) screens_to_display.push_back(ScrollScreen::rbg1);
+    if (!state.vdp2()->isLayerDisabled(ScrollScreen::rbg0)) screens_to_display.push_back(ScrollScreen::rbg0);
+
+    // Step two : populate one FBO for each priority + layer couple
+
+    const auto renderVdp1Parts = [&](const u32 priority) {
+        const auto& vdp1_parts = state.vdp1()->vdp1Parts(priority);
+        if (!vdp1_parts.empty()) {
+            parts_list.reserve(parts_list.size() + vdp1_parts.size());
+            for (const auto& p : vdp1_parts) {
+                parts_list.emplace_back(p);
+            }
+            // Display current screen to FBO for current priority
+            renderToFbo(parts_list);
+        }
+    };
+
+    const auto renderVdp2Parts = [&](const ScrollScreen screen, const u32 priority) {
+        const auto& vdp2_parts = state.vdp2()->vdp2Parts(screen, priority);
+        if (!vdp2_parts.empty()) {
+            parts_list.reserve(parts_list.size() + vdp2_parts.size());
+            for (const auto& p : vdp2_parts) {
+                parts_list.emplace_back(p);
+            }
+            // Display current screen to FBO for current priority
+            renderToFbo(parts_list);
+        }
+    };
+
+    for (auto priority = 7; priority > 0; --priority) {
+        for (const auto& screen : screens_to_display) {
+            renderVdp2Parts(screen, priority);
+        }
+        renderVdp1Parts(priority);
+    }
+
     if (!state.vdp2()->isLayerDisabled(ScrollScreen::nbg3)) { addVdp2PartsToList(ScrollScreen::nbg3); }
     if (!state.vdp2()->isLayerDisabled(ScrollScreen::nbg2)) { addVdp2PartsToList(ScrollScreen::nbg2); }
     if (!state.vdp2()->isLayerDisabled(ScrollScreen::nbg1)) { addVdp2PartsToList(ScrollScreen::nbg1); }
@@ -331,6 +376,17 @@ void Opengl::displayFramebuffer(core::EmulatorContext& state) {
     if (!state.vdp2()->isLayerDisabled(ScrollScreen::rbg0)) { addVdp2PartsToList(ScrollScreen::rbg0); }
     addVdp1PartsToList();
     std::ranges::stable_sort(parts_list, [](const RenderPart& a, const RenderPart& b) { return a.priority < b.priority; });
+
+    // Parts to be displayed are correctly ordered by layer + priority
+    // Next step is to create as many PartList as there are different layers + priorities
+
+    // For each part in the same layer + priority combo, display to a specific FBO
+    PriorityFbos priority_fbos;
+    auto         current_priority = u8{7};
+
+    for (const auto& part : parts_list) {
+        auto current_list = PartsList{};
+    }
 
     if constexpr (render_type == RenderType::RenderType_drawElements) {
         if (parts_list_.empty()) {
@@ -358,6 +414,8 @@ void Opengl::displayFramebuffer(core::EmulatorContext& state) {
         }
     }
 }
+
+void Opengl::renderToFbo(const PartsList& parts_list) {}
 
 void Opengl::render() {
     PartsList parts_list;

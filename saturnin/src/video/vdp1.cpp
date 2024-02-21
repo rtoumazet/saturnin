@@ -95,6 +95,17 @@ void Vdp1::onVblankIn() {
     }
 }
 
+auto Vdp1::vdp1Parts() const -> std::vector<Vdp1Part> { return vdp1_parts_; }
+
+auto Vdp1::vdp1Parts(const u32 priority) const -> std::vector<Vdp1Part> {
+    auto parts = std::vector<video::Vdp1Part>{};
+    std::ranges::copy_if(vdp1_parts_, std::back_inserter(parts), [=](const Vdp1Part& part) {
+        return part.common_vdp_data_.priority == priority;
+    });
+
+    return parts;
+}
+
 auto Vdp1::getDebugDrawList() const -> std::vector<std::string> {
     std::vector<std::string> debug_draw_list;
     for (const auto& p : vdp1_parts_) {

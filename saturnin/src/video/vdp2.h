@@ -696,7 +696,7 @@ class Vdp2 {
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn auto Vdp2::vdp2Parts(const ScrollScreen s, const VdpType t)  const -> std::vector<video::Vdp2Part>
     ///
-    /// \brief  Returns the VDP2 parts of a scroll screen.
+    /// \brief  Returns the VDP2 parts of a scroll screen based on the type.
     ///
     /// \author Runik
     /// \date   15/04/2021
@@ -708,6 +708,22 @@ class Vdp2 {
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     auto vdp2Parts(const ScrollScreen s, const VdpType t) const -> std::vector<video::Vdp2Part>;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn auto Vdp2::vdp2Parts(const ScrollScreen s, const u8 p)  const -> std::vector<video::Vdp2Part>
+    ///
+    /// \brief  Returns the VDP2 parts of a scroll screen based on priority.
+    ///
+    /// \author Runik
+    /// \date   20/02/2024
+    ///
+    /// \param  s   A ScrollScreen.
+    /// \param  p   Priority of part to return.
+    ///
+    /// \returns    A reference to a const std::vector&lt;Vdp2Part&gt;
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    auto vdp2Parts(const ScrollScreen s, const u32 p) const -> std::vector<video::Vdp2Part>;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn auto Vdp2::getSpriteColorAddressOffset() const -> u16;
