@@ -2199,7 +2199,7 @@ auto Vdp2::getPatternNameFromCharacterPattern(const Vdp2Regs::VramAccessCommand 
 void Vdp2::setPatternNameAccess(const VramTiming&                   bank,
                                 const Vdp2Regs::VramAccessCommand   pattern,
                                 std::array<bool, vram_timing_size>& pnd_access) {
-    auto it = std::find(bank.begin(), bank.end(), pattern);
+    auto it = std::ranges::find(bank, pattern);
     while (it != bank.end()) {
         pnd_access[std::distance(bank.begin(), it)] = true;
         ++it;
@@ -2465,6 +2465,9 @@ void Vdp2::populateRenderData() {
                 discardCache(ScrollScreen::nbg3);
                 clearRenderData(ScrollScreen::nbg3);
                 readScrollScreenData(ScrollScreen::nbg3);
+                modules_.opengl()->updateFboStatus(getScreen(ScrollScreen::nbg3).priority_number,
+                                                   ScrollScreen::nbg3,
+                                                   FboStatus::to_set);
             } else {
                 // Clear data (how ?)
             }

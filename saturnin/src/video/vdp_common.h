@@ -50,7 +50,7 @@ enum class VdpType : u8 { not_set, vdp1, vdp2_cell, vdp2_bitmap };
 /// \brief	Values that represent rendered layers.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class Layer {
+enum class Layer : s8 {
     nbg0      = 0,
     rbg1      = 0,
     nbg1      = 1,

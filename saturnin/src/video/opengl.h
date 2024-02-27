@@ -53,6 +53,7 @@ namespace saturnin::video {
 
 // Forward declaration
 enum class DrawType : u8;
+enum class ScrollScreen;
 
 using saturnin::core::Config;
 using utilities::toUnderlying;
@@ -78,12 +79,26 @@ enum class FboType : u8 {
     priority_level_7
 };
 
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \enum	FboStatus
+///
+/// \brief	Values that represent status of FBOs in the pool
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum class FboStatus : u8 {
+    reuse,    ///< FBO will be reused as is.
+    unused,   ///< FBO isn't in use.
+    to_clear, ///< FBO will have to be cleared.
+    to_set    ///< FBO will have to be set.
+};
+
 using FboData       = std::pair<u32, u32>; // Describes a framebuffer object. 1st is fbo id, 2nd is texture id.
 using FboGlobalList = std::unordered_map<FboType, FboData>;
 
-using PriorityKey = std::pair<u8, Layer>; // First is priority number (1 to 7, last on being the highest), second is linked layer.
-using PriorityFbos    = std::map<PriorityKey, u8>;                // Link between a priority to display and its relative FBO.
-using FboPriorityList = std::array<FboData, max_fbo_by_priority>; // List of FBO to be used for rendering by priority.
+using FboKey      = std::pair<u8, Layer>; // First is priority number (1 to 7, last on being the highest), second is linked layer.
+using FboKeyToFbo = std::map<FboKey, u8>; // Link between a priority to display and its relative FBO index in the FBO pool.
+using FboPool     = std::array<FboData, max_fbo_by_priority>;     // Pool of FBO to be used for rendering by priority.
+using FboPoolStatus = std::array<FboStatus, max_fbo_by_priority>; // State of the FBOs in the pool.
 
 enum class ShaderName { textured };
 enum class ShaderType { vertex, fragment };
@@ -158,7 +173,7 @@ struct RenderPart {
 };
 
 using PartsList       = std::vector<RenderPart>;
-using GlobalPartsList = std::map<PriorityKey, PartsList>; // Parts list by priority + layer
+using GlobalPartsList = std::map<FboKey, PartsList>; // Parts list by priority + layer
 
 using LayerToTextures            = std::unordered_map<Layer, std::vector<OpenglTexture>>;
 using LayerToTextureArrayIndexes = std::unordered_map<Layer, std::vector<u8>>;
@@ -556,6 +571,25 @@ class Opengl {
 
     auto getOpenglTextureDetails(const size_t key) -> std::string;
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn	auto Opengl::getFboPoolIndex(const u8 priority, const Layer layer) -> std::optional<u8>;
+    ///
+    /// \brief	Gets the index of the relative priority + Layer in the FBO pool.
+    ///
+    /// \author	Runik
+    /// \date	24/02/2024
+    ///
+    /// \param 	priority	The priority.
+    /// \param 	layer   	The layer.
+    ///
+    /// \returns	The FBO pool index if found.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    auto getFboPoolIndex(const u8 priority, const Layer layer) -> std::optional<u8>;
+
+    void updateFboStatus(const u8 priority, const Layer layer, const FboStatus state);
+    void updateFboStatus(const u8 priority, const ScrollScreen screen, const FboStatus state);
+
   private:
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn auto Opengl::getShaderSource(const ShaderType type, const ShaderName name) -> const char*;
@@ -739,7 +773,9 @@ class Opengl {
     FboGlobalList fbo_global_list_;         ///< List of framebuffer objects used in the program.
     FboType       current_rendered_buffer_; ///< The current rendered buffer (front or back)
 
-    FboPriorityList fbo_priority_list_; ///< List of FBOs to be used for by priority rendering.
+    FboKeyToFbo   fbo_key_to_fbo_;  ///< Link between a FBO key and its relative FBO.
+    FboPool       fbo_pool_;        ///< Pool of FBOs to be used for by priority rendering.
+    FboPoolStatus fbo_pool_status_; ///< State of each FBO in the pool.
 
     bool is_legacy_opengl_{}; ///< True if rendering in legacy opengl.
 

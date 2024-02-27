@@ -73,9 +73,19 @@ constexpr auto vertexes_per_line             = u32{2};
 
 constexpr auto check_gl_error = 1;
 
-constexpr enum class RenderType { RenderType_drawArrays, RenderType_drawElements, RenderType_drawTest };
-// constexpr auto render_type = RenderType::RenderType_drawArrays;
+constexpr enum class RenderType { RenderType_drawElements, RenderType_drawTest };
 constexpr auto render_type = RenderType::RenderType_drawElements;
+
+constexpr auto uses_fbo = true;
+
+const std::unordered_map<ScrollScreen, Layer> screen_to_layer = {
+    {ScrollScreen::nbg3, Layer::nbg3},
+    {ScrollScreen::nbg2, Layer::nbg2},
+    {ScrollScreen::nbg1, Layer::nbg1},
+    {ScrollScreen::nbg0, Layer::nbg0},
+    {ScrollScreen::rbg1, Layer::rbg1},
+    {ScrollScreen::rbg0, Layer::rbg0}
+};
 
 Opengl::Opengl(core::Config* config) : config_(config){};
 
@@ -296,134 +306,115 @@ void Opengl::displayFramebuffer(core::EmulatorContext& state) {
     // - displayFramebuffer() must generate one PartList by layer + priority to display to the FBO
     // -
 
-    GlobalPartsList global_parts_list;
+    if constexpr (uses_fbo) {
+        GlobalPartsList global_parts_list;
 
-    std::unordered_map<ScrollScreen, Layer> screen_to_layer;
-    screen_to_layer[ScrollScreen::nbg3] = Layer::nbg3;
-    screen_to_layer[ScrollScreen::nbg2] = Layer::nbg2;
-    screen_to_layer[ScrollScreen::nbg1] = Layer::nbg1;
-    screen_to_layer[ScrollScreen::nbg0] = Layer::nbg0;
-    screen_to_layer[ScrollScreen::rbg1] = Layer::rbg1;
-    screen_to_layer[ScrollScreen::rbg0] = Layer::rbg0;
+        // Step one : get displayable layers
+        std::vector<ScrollScreen> screens_to_display;
+        if (!state.vdp2()->isLayerDisabled(ScrollScreen::nbg3)) screens_to_display.push_back(ScrollScreen::nbg3);
+        if (!state.vdp2()->isLayerDisabled(ScrollScreen::nbg2)) screens_to_display.push_back(ScrollScreen::nbg2);
+        if (!state.vdp2()->isLayerDisabled(ScrollScreen::nbg1)) screens_to_display.push_back(ScrollScreen::nbg1);
+        if (!state.vdp2()->isLayerDisabled(ScrollScreen::nbg0)) screens_to_display.push_back(ScrollScreen::nbg0);
+        if (!state.vdp2()->isLayerDisabled(ScrollScreen::rbg1)) screens_to_display.push_back(ScrollScreen::rbg1);
+        if (!state.vdp2()->isLayerDisabled(ScrollScreen::rbg0)) screens_to_display.push_back(ScrollScreen::rbg0);
 
-    // Step one : get displayable layers
-    std::vector<ScrollScreen> screens_to_display;
-    if (!state.vdp2()->isLayerDisabled(ScrollScreen::nbg3)) screens_to_display.push_back(ScrollScreen::nbg3);
-    if (!state.vdp2()->isLayerDisabled(ScrollScreen::nbg2)) screens_to_display.push_back(ScrollScreen::nbg2);
-    if (!state.vdp2()->isLayerDisabled(ScrollScreen::nbg1)) screens_to_display.push_back(ScrollScreen::nbg1);
-    if (!state.vdp2()->isLayerDisabled(ScrollScreen::nbg0)) screens_to_display.push_back(ScrollScreen::nbg0);
-    if (!state.vdp2()->isLayerDisabled(ScrollScreen::rbg1)) screens_to_display.push_back(ScrollScreen::rbg1);
-    if (!state.vdp2()->isLayerDisabled(ScrollScreen::rbg0)) screens_to_display.push_back(ScrollScreen::rbg0);
+        // Step two : populate one FBO for each priority + layer couple
 
-    // Step two : populate one FBO for each priority + layer couple
-
-    const auto renderVdp1Parts = [&](const u32 priority) {
-        auto        local_parts = PartsList();
-        const auto& vdp1_parts  = state.vdp1()->vdp1Parts(priority);
-        if (!vdp1_parts.empty()) {
-            local_parts.reserve(vdp1_parts.size());
-            for (const auto& p : vdp1_parts) {
-                local_parts.emplace_back(p);
+        const auto renderVdp1Parts = [&](const u32 priority) {
+            auto        local_parts = PartsList();
+            const auto& vdp1_parts  = state.vdp1()->vdp1Parts(priority);
+            if (!vdp1_parts.empty()) {
+                local_parts.reserve(vdp1_parts.size());
+                for (const auto& p : vdp1_parts) {
+                    local_parts.emplace_back(p);
+                }
+                // Display current screen to FBO for current priority
+                // renderToFbo(parts_list);
+                global_parts_list[{priority, Layer::sprite}] = std::move(local_parts);
             }
-            // Display current screen to FBO for current priority
-            // renderToFbo(parts_list);
-            global_parts_list[{priority, Layer::sprite}] = std::move(local_parts);
-        }
-    };
+        };
 
-    const auto renderVdp2Parts = [&](const ScrollScreen screen, const u32 priority) {
-        auto        local_parts = PartsList();
-        const auto& vdp2_parts  = state.vdp2()->vdp2Parts(screen, priority);
-        if (!vdp2_parts.empty()) {
-            local_parts.reserve(vdp2_parts.size());
-            for (const auto& p : vdp2_parts) {
-                local_parts.emplace_back(p);
+        const auto renderVdp2Parts = [&](const ScrollScreen screen, const u32 priority) {
+            auto        local_parts = PartsList();
+            const auto& vdp2_parts  = state.vdp2()->vdp2Parts(screen, priority);
+            if (!vdp2_parts.empty()) {
+                local_parts.reserve(vdp2_parts.size());
+                for (const auto& p : vdp2_parts) {
+                    local_parts.emplace_back(p);
+                }
+                // Display current screen to FBO for current priority
+                // renderToFbo(parts_list);
+                global_parts_list[{priority, screen_to_layer.at(screen)}] = std::move(local_parts);
             }
-            // Display current screen to FBO for current priority
-            // renderToFbo(parts_list);
-            global_parts_list[{priority, screen_to_layer[screen]}] = std::move(local_parts);
+        };
+
+        for (auto priority = 7; priority > 0; --priority) {
+            for (const auto& screen : screens_to_display) {
+                renderVdp2Parts(screen, priority);
+            }
+            renderVdp1Parts(priority);
         }
-    };
 
-    for (auto priority = 7; priority > 0; --priority) {
-        for (const auto& screen : screens_to_display) {
-            renderVdp2Parts(screen, priority);
-        }
-        renderVdp1Parts(priority);
-    }
-
-    auto parts_list = PartsList{};
-
-    const auto addVdp2PartsToList = [&](const ScrollScreen s) {
-        const auto& vdp2_planes = state.vdp2()->vdp2Parts(s, VdpType::vdp2_cell);
-        if (!vdp2_planes.empty()) {
-            parts_list.reserve(parts_list.size() + vdp2_planes.size());
-            for (const auto& p : vdp2_planes) {
-                parts_list.emplace_back(p);
+        if constexpr (render_type == RenderType::RenderType_drawElements) {
+            if (global_parts_list_.empty()) {
+                std::unique_lock lk(parts_list_mutex_);
+                global_parts_list_ = std::move(global_parts_list);
+                data_condition_.wait(lk, [this]() { return global_parts_list_.empty(); });
             }
         }
+    } else {
+        auto parts_list = PartsList{};
 
-        const auto& vdp2_bitmaps = state.vdp2()->vdp2Parts(s, VdpType::vdp2_bitmap);
-        if (!vdp2_bitmaps.empty()) {
-            parts_list.reserve(parts_list.size() + vdp2_bitmaps.size());
-            for (const auto& p : vdp2_bitmaps) {
-                parts_list.emplace_back(p);
+        const auto addVdp2PartsToList = [&](const ScrollScreen s) {
+            if (const auto& vdp2_planes = state.vdp2()->vdp2Parts(s, VdpType::vdp2_cell); !vdp2_planes.empty()) {
+                parts_list.reserve(parts_list.size() + vdp2_planes.size());
+                for (const auto& p : vdp2_planes) {
+                    parts_list.emplace_back(p);
+                }
+            }
+
+            const auto& vdp2_bitmaps = state.vdp2()->vdp2Parts(s, VdpType::vdp2_bitmap);
+            if (!vdp2_bitmaps.empty()) {
+                parts_list.reserve(parts_list.size() + vdp2_bitmaps.size());
+                for (const auto& p : vdp2_bitmaps) {
+                    parts_list.emplace_back(p);
+                }
+            }
+        };
+
+        const auto addVdp1PartsToList = [&]() {
+            const auto& vdp1_parts = state.vdp1()->vdp1Parts();
+            if (!vdp1_parts.empty()) {
+                parts_list.reserve(parts_list.size() + vdp1_parts.size());
+                for (const auto& p : vdp1_parts) {
+                    parts_list.emplace_back(p);
+                }
+            }
+        };
+
+        if (!state.vdp2()->isLayerDisabled(ScrollScreen::nbg3)) { addVdp2PartsToList(ScrollScreen::nbg3); }
+        if (!state.vdp2()->isLayerDisabled(ScrollScreen::nbg2)) { addVdp2PartsToList(ScrollScreen::nbg2); }
+        if (!state.vdp2()->isLayerDisabled(ScrollScreen::nbg1)) { addVdp2PartsToList(ScrollScreen::nbg1); }
+        if (!state.vdp2()->isLayerDisabled(ScrollScreen::nbg0)) { addVdp2PartsToList(ScrollScreen::nbg0); }
+        if (!state.vdp2()->isLayerDisabled(ScrollScreen::rbg1)) { addVdp2PartsToList(ScrollScreen::rbg1); }
+        if (!state.vdp2()->isLayerDisabled(ScrollScreen::rbg0)) { addVdp2PartsToList(ScrollScreen::rbg0); }
+        addVdp1PartsToList();
+        std::ranges::stable_sort(parts_list, [](const RenderPart& a, const RenderPart& b) { return a.priority < b.priority; });
+        if constexpr (render_type == RenderType::RenderType_drawElements) {
+            if (parts_list_.empty()) {
+                std::unique_lock lk(parts_list_mutex_);
+                parts_list_ = std::move(parts_list);
+                data_condition_.wait(lk, [this]() { return parts_list_.empty(); });
             }
         }
-    };
 
-    const auto addVdp1PartsToList = [&]() {
-        const auto& vdp1_parts = state.vdp1()->vdp1Parts();
-        if (!vdp1_parts.empty()) {
-            parts_list.reserve(parts_list.size() + vdp1_parts.size());
-            for (const auto& p : vdp1_parts) {
-                parts_list.emplace_back(p);
-            }
-        }
-    };
-
-    if (!state.vdp2()->isLayerDisabled(ScrollScreen::nbg3)) { addVdp2PartsToList(ScrollScreen::nbg3); }
-    if (!state.vdp2()->isLayerDisabled(ScrollScreen::nbg2)) { addVdp2PartsToList(ScrollScreen::nbg2); }
-    if (!state.vdp2()->isLayerDisabled(ScrollScreen::nbg1)) { addVdp2PartsToList(ScrollScreen::nbg1); }
-    if (!state.vdp2()->isLayerDisabled(ScrollScreen::nbg0)) { addVdp2PartsToList(ScrollScreen::nbg0); }
-    if (!state.vdp2()->isLayerDisabled(ScrollScreen::rbg1)) { addVdp2PartsToList(ScrollScreen::rbg1); }
-    if (!state.vdp2()->isLayerDisabled(ScrollScreen::rbg0)) { addVdp2PartsToList(ScrollScreen::rbg0); }
-    addVdp1PartsToList();
-    std::ranges::stable_sort(parts_list, [](const RenderPart& a, const RenderPart& b) { return a.priority < b.priority; });
-
-    // Parts to be displayed are correctly ordered by layer + priority
-    // Next step is to create as many PartList as there are different layers + priorities
-
-    // For each part in the same layer + priority combo, display to a specific FBO
-    PriorityFbos priority_fbos;
-    auto         current_priority = u8{7};
-
-    for (const auto& part : parts_list) {
-        auto current_list = PartsList{};
-    }
-
-    if constexpr (render_type == RenderType::RenderType_drawElements) {
-        if (parts_list_.empty()) {
-            std::unique_lock lk(parts_list_mutex_);
-            parts_list_ = std::move(parts_list);
-            data_condition_.wait(lk, [this]() { return parts_list_.empty(); });
-        }
-    }
-
-    if constexpr (render_type == RenderType::RenderType_drawArrays) {
-        if (parts_list_.empty()) {
-            std::unique_lock lk(parts_list_mutex_);
-            parts_list_ = std::move(parts_list);
-            data_condition_.wait(lk, [this]() { return parts_list_.empty(); });
-        }
-    }
-
-    if constexpr (render_type == RenderType::RenderType_drawTest) {
-        if (!parts_list.empty()) {
-            std::vector<DrawRange>().swap(draw_range_);
-            for (const auto& p : parts_list) {
-                DrawRange dr{};
-                dr.vertex_array_start = 0;
+        if constexpr (render_type == RenderType::RenderType_drawTest) {
+            if (!parts_list.empty()) {
+                std::vector<DrawRange>().swap(draw_range_);
+                for (const auto& p : parts_list) {
+                    DrawRange dr{};
+                    dr.vertex_array_start = 0;
+                }
             }
         }
     }
@@ -432,73 +423,94 @@ void Opengl::displayFramebuffer(core::EmulatorContext& state) {
 void Opengl::renderToFbo(const PartsList& parts_list) {}
 
 void Opengl::render() {
-    PartsList parts_list;
+    if constexpr (uses_fbo) {
+        GlobalPartsList global_parts_list;
 
-    preRender();
-    {
-        std::lock_guard lock(parts_list_mutex_);
-        if (!parts_list_.empty()) { parts_list = std::move(parts_list_); }
-    }
+        const auto getPartsFromThread = [&]() {
+            std::lock_guard lock(parts_list_mutex_);
+            if (!global_parts_list_.empty()) { global_parts_list = std::move(global_parts_list_); }
+        };
 
-    if (!parts_list.empty()) {
-        const auto [vao, vertex_buffer] = initializeVao(ShaderName::textured);
+        getPartsFromThread();
+        // fbo_priority_list_ contains
+        // Check if FBO has to be displayed
+        // Going through the parts to display, deleting data if the FBO previously used
 
-        glUseProgram(program_shader_);
-        glBindVertexArray(vao);                       // binding VAO
-        glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer); // binding vertex buffer
-
-        // Calculating the ortho projection matrix
-        const auto proj_matrix = calculateDisplayViewportMatrix();
-
-        // Sending the ortho projection matrix to the shader
-        const auto uni_proj_matrix = glGetUniformLocation(program_shader_, "proj_matrix");
-        glUniformMatrix4fv(uni_proj_matrix, 1, GL_FALSE, glm::value_ptr(proj_matrix));
-
-        glActiveTexture(GLenum::GL_TEXTURE0);
-        const auto sampler_loc = glGetUniformLocation(program_shader_, "sampler");
-
-        glUniform1i(sampler_loc, 0);
-        glBindTexture(GL_TEXTURE_2D_ARRAY, texture_array_id_);
-
-        const auto texture_used_loc = glGetUniformLocation(program_shader_, "is_texture_used");
-
-        auto elements_buffer = u32{};
-        glGenBuffers(1, &elements_buffer); // This buffer will be used to send indices data to the GPU
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elements_buffer);
-
-        const auto&& [indices, draw_ranges] = generateVertexIndicesAndDrawRanges(parts_list);
-        const auto vertexes                 = readVertexes(parts_list);
-
-        // Sending data to the GPU
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(u32) * indices.size(), indices.data(), GL_STATIC_DRAW);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * vertexes.size(), vertexes.data(), GL_STATIC_DRAW);
-
-        for (const auto& range : draw_ranges) {
-            const auto is_texture_used = GLboolean(range.is_textured);
-            glUniform1i(texture_used_loc, is_texture_used);
-
-            glDrawRangeElements(range.primitive,
-                                range.vertex_array_start,
-                                range.vertex_array_end,
-                                range.indices_nb,
-                                GL_UNSIGNED_INT,
-                                static_cast<GLuint*>(nullptr) + range.indices_array_start);
+        {
+            std::lock_guard lk(parts_list_mutex_);
+            GlobalPartsList().swap(global_parts_list);
+            data_condition_.notify_one();
         }
 
-        gl::glDeleteBuffers(1, &vertex_buffer);
-        gl::glDeleteVertexArrays(1, &vao);
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-        gl::glDeleteBuffers(1, &elements_buffer);
-        // Texture::cleanCache(this);
-    }
+    } else {
+        PartsList parts_list;
 
-    {
-        std::lock_guard lk(parts_list_mutex_);
-        PartsList().swap(parts_list);
-        data_condition_.notify_one();
-    }
+        preRender();
+        {
+            std::lock_guard lock(parts_list_mutex_);
+            if (!parts_list_.empty()) { parts_list = std::move(parts_list_); }
+        }
 
-    postRender();
+        if (!parts_list.empty()) {
+            const auto [vao, vertex_buffer] = initializeVao(ShaderName::textured);
+
+            glUseProgram(program_shader_);
+            glBindVertexArray(vao);                       // binding VAO
+            glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer); // binding vertex buffer
+
+            // Calculating the ortho projection matrix
+            const auto proj_matrix = calculateDisplayViewportMatrix();
+
+            // Sending the ortho projection matrix to the shader
+            const auto uni_proj_matrix = glGetUniformLocation(program_shader_, "proj_matrix");
+            glUniformMatrix4fv(uni_proj_matrix, 1, GL_FALSE, glm::value_ptr(proj_matrix));
+
+            glActiveTexture(GLenum::GL_TEXTURE0);
+            const auto sampler_loc = glGetUniformLocation(program_shader_, "sampler");
+
+            glUniform1i(sampler_loc, 0);
+            glBindTexture(GL_TEXTURE_2D_ARRAY, texture_array_id_);
+
+            const auto texture_used_loc = glGetUniformLocation(program_shader_, "is_texture_used");
+
+            auto elements_buffer = u32{};
+            glGenBuffers(1, &elements_buffer); // This buffer will be used to send indices data to the GPU
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elements_buffer);
+
+            const auto&& [indices, draw_ranges] = generateVertexIndicesAndDrawRanges(parts_list);
+            const auto vertexes                 = readVertexes(parts_list);
+
+            // Sending data to the GPU
+            glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(u32) * indices.size(), indices.data(), GL_STATIC_DRAW);
+            glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * vertexes.size(), vertexes.data(), GL_STATIC_DRAW);
+
+            for (const auto& range : draw_ranges) {
+                const auto is_texture_used = GLboolean(range.is_textured);
+                glUniform1i(texture_used_loc, is_texture_used);
+
+                glDrawRangeElements(range.primitive,
+                                    range.vertex_array_start,
+                                    range.vertex_array_end,
+                                    range.indices_nb,
+                                    GL_UNSIGNED_INT,
+                                    static_cast<GLuint*>(nullptr) + range.indices_array_start);
+            }
+
+            gl::glDeleteBuffers(1, &vertex_buffer);
+            gl::glDeleteVertexArrays(1, &vao);
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+            gl::glDeleteBuffers(1, &elements_buffer);
+            // Texture::cleanCache(this);
+        }
+
+        {
+            std::lock_guard lk(parts_list_mutex_);
+            PartsList().swap(parts_list);
+            data_condition_.notify_one();
+        }
+
+        postRender();
+    }
 }
 
 void Opengl::renderTest() {
@@ -663,7 +675,13 @@ void Opengl::renderSelector() {
 }
 
 auto Opengl::isThereSomethingToRender() const -> bool {
-    if constexpr (render_type == RenderType::RenderType_drawElements) { return !parts_list_.empty(); }
+    if constexpr (render_type == RenderType::RenderType_drawElements) {
+        if constexpr (uses_fbo) {
+            return !global_parts_list_.empty();
+        } else {
+            return !parts_list_.empty();
+        }
+    }
     if constexpr (render_type == RenderType::RenderType_drawTest) { return true; }
 }
 
@@ -1096,6 +1114,25 @@ auto Opengl::getOpenglTextureDetails(const size_t key) -> std::string {
     return details;
 }
 
+auto Opengl::getFboPoolIndex(const u8 priority, const Layer layer) -> std::optional<u8> {
+    if (fbo_key_to_fbo_.contains({priority, layer})) { return std::optional{fbo_key_to_fbo_[{priority, layer}]}; }
+    return std::nullopt;
+}
+
+void Opengl::updateFboStatus(const u8 priority, const Layer layer, const FboStatus state) {
+    const auto index = getFboPoolIndex(priority, layer);
+    if (!index) {
+        Log::warning(Logger::opengl, "Could not find FBO with priority {} and layer {}", priority, toUnderlying(layer));
+        return;
+    }
+
+    fbo_pool_status_[*index] = state;
+}
+
+void Opengl::updateFboStatus(const u8 priority, const ScrollScreen screen, const FboStatus state) {
+    updateFboStatus(priority, screen_to_layer.at(screen), state);
+}
+
 void Opengl::generateSubTexture(const size_t key) {
     const auto ogl_tex = getOpenglTexture(key);
 
@@ -1375,7 +1412,8 @@ auto Opengl::initializeVao(const ShaderName name) -> std::tuple<u32, u32> {
 void Opengl::initializeFbos() {
     // Generating a list of FBOs to be used for by priority rendering.
     for (u32 i = 0; i < max_fbo_by_priority; ++i) {
-        fbo_priority_list_[i] = generateFbo();
+        fbo_pool_[i]        = generateFbo();
+        fbo_pool_status_[i] = FboStatus::unused;
     }
 
     // A FBO (and its related texture) is generated for every FboType.
@@ -1973,5 +2011,4 @@ auto generateVertexIndicesAndDrawRanges(const PartsList& parts) -> std::tuple<st
 
     return {indices, ranges};
 }
-
 }; // namespace saturnin::video
