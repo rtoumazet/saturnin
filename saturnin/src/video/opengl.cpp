@@ -135,11 +135,7 @@ void Opengl::shutdown() const {
 void Opengl::preRender() {
     switchRenderedBuffer();
 
-    if (is_legacy_opengl_) {
-        glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, getFboId(currentRenderedBuffer()));
-    } else {
-        gl33core::glBindFramebuffer(GL_FRAMEBUFFER, getFboId(currentRenderedBuffer()));
-    }
+    bindFbo(getFboId(currentRenderedBuffer()));
 
     // Viewport is the entire Saturn framebuffer
     glViewport(0, 0, saturn_framebuffer_width, saturn_framebuffer_height);
@@ -156,14 +152,12 @@ void Opengl::preRender() {
     glScissor(scissor_x, scissor_y, scissor_width, scissor_height);
 };
 
-void Opengl::postRender() const {
+void Opengl::postRender() {
     // Framebuffer is released
     checkGlError();
-    if (is_legacy_opengl_) {
-        glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
-    } else {
-        gl33core::glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    }
+
+    unbindFbo();
+
     glDisable(GL_SCISSOR_TEST);
 };
 
@@ -420,7 +414,34 @@ void Opengl::displayFramebuffer(core::EmulatorContext& state) {
     }
 }
 
-void Opengl::renderToFbo(const PartsList& parts_list) {}
+void Opengl::renderToAvailableFbo(const PartsList& parts_list) {
+    // auto index = getAvailableFboIndex();
+}
+
+void Opengl::clearFbos() {
+    for (u8 index = 0; auto& status : fbo_pool_status_) {
+        if (status == FboStatus::to_clear) {
+            bindFbo(fbo_pool_[index].first);
+
+            gl::glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+            glClear(GL_COLOR_BUFFER_BIT);
+
+            unbindFbo();
+
+            status = FboStatus::unused;
+        }
+    }
+}
+
+void Opengl::bindFbo(const u32 fbo_id) {
+    if (is_legacy_opengl_) {
+        glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo_id);
+    } else {
+        gl33core::glBindFramebuffer(GL_FRAMEBUFFER, fbo_id);
+    }
+}
+
+void Opengl::unbindFbo() { bindFbo(0); }
 
 void Opengl::render() {
     if constexpr (uses_fbo) {
@@ -432,6 +453,23 @@ void Opengl::render() {
         };
 
         getPartsFromThread();
+
+        clearFbos();
+
+        // Rendering is done to FBOs depending on the priority and layer combo.
+        // Depending on FBO status, behaviour will change :
+        // - reuse : no change on data to display, FBO will be reused as is.
+        // - unused : FBO isn't used.
+        // - to_clear : FBO was previously used, but not anymore. Cleared during clearFbos() call.
+        // - to_set : FBO will be rendered to with fresh data.
+        for (u8 index = 0; auto& status : fbo_pool_status_) {
+            if (status == FboStatus::to_set) {
+                // renderToAvailableFbo(index);
+                status = FboStatus::reuse;
+            }
+            ++index;
+        }
+
         // fbo_priority_list_ contains
         // Check if FBO has to be displayed
         // Going through the parts to display, deleting data if the FBO previously used
@@ -1115,11 +1153,13 @@ auto Opengl::getOpenglTextureDetails(const size_t key) -> std::string {
 }
 
 auto Opengl::getFboPoolIndex(const u8 priority, const Layer layer) -> std::optional<u8> {
-    if (fbo_key_to_fbo_.contains({priority, layer})) { return std::optional{fbo_key_to_fbo_[{priority, layer}]}; }
+    if (fbo_key_to_fbo_pool_index_.contains({priority, layer})) {
+        return std::optional{fbo_key_to_fbo_pool_index_[{priority, layer}]};
+    }
     return std::nullopt;
 }
 
-void Opengl::updateFboStatus(const u8 priority, const Layer layer, const FboStatus state) {
+void Opengl::setFboStatus(const u8 priority, const Layer layer, const FboStatus state) {
     const auto index = getFboPoolIndex(priority, layer);
     if (!index) {
         Log::warning(Logger::opengl, "Could not find FBO with priority {} and layer {}", priority, toUnderlying(layer));
@@ -1129,8 +1169,8 @@ void Opengl::updateFboStatus(const u8 priority, const Layer layer, const FboStat
     fbo_pool_status_[*index] = state;
 }
 
-void Opengl::updateFboStatus(const u8 priority, const ScrollScreen screen, const FboStatus state) {
-    updateFboStatus(priority, screen_to_layer.at(screen), state);
+void Opengl::setFboStatus(const u8 priority, const ScrollScreen screen, const FboStatus state) {
+    setFboStatus(priority, screen_to_layer.at(screen), state);
 }
 
 void Opengl::generateSubTexture(const size_t key) {

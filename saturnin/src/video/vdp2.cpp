@@ -2465,9 +2465,9 @@ void Vdp2::populateRenderData() {
                 discardCache(ScrollScreen::nbg3);
                 clearRenderData(ScrollScreen::nbg3);
                 readScrollScreenData(ScrollScreen::nbg3);
-                modules_.opengl()->updateFboStatus(getScreen(ScrollScreen::nbg3).priority_number,
-                                                   ScrollScreen::nbg3,
-                                                   FboStatus::to_set);
+                modules_.opengl()->setFboStatus(getScreen(ScrollScreen::nbg3).priority_number,
+                                                ScrollScreen::nbg3,
+                                                FboStatus::to_set);
             } else {
                 // Clear data (how ?)
             }

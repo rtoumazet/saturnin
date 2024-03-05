@@ -248,15 +248,15 @@ class Opengl {
     void preRender();
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn void Opengl::postRender() const;
+    /// \fn	void Opengl::postRender();
     ///
-    /// \brief  Processing done after rendering.
+    /// \brief	Processing done after rendering.
     ///
-    /// \author Runik
-    /// \date   08/04/2021
+    /// \author	Runik
+    /// \date	08/04/2021
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    void postRender() const;
+    void postRender();
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn void Opengl::initializeShaders();
@@ -281,8 +281,6 @@ class Opengl {
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     void displayFramebuffer(core::EmulatorContext& state);
-
-    void renderToFbo(const PartsList& parts_list);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn void Opengl::onWindowResize(const u16 width, const u16 height);
@@ -587,8 +585,21 @@ class Opengl {
 
     auto getFboPoolIndex(const u8 priority, const Layer layer) -> std::optional<u8>;
 
-    void updateFboStatus(const u8 priority, const Layer layer, const FboStatus state);
-    void updateFboStatus(const u8 priority, const ScrollScreen screen, const FboStatus state);
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn	void Opengl::setFboStatus(const u8 priority, const Layer layer, const FboStatus state);
+    ///
+    /// \brief	Sets FBO status
+    ///
+    /// \author	Runik
+    /// \date	03/03/2024
+    ///
+    /// \param 	priority	The priority.
+    /// \param 	layer   	The layer.
+    /// \param 	state   	The new state.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    void setFboStatus(const u8 priority, const Layer layer, const FboStatus state);
+    void setFboStatus(const u8 priority, const ScrollScreen screen, const FboStatus state);
 
   private:
     ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -768,14 +779,51 @@ class Opengl {
 
     auto readVertexes(const PartsList& parts) -> std::vector<Vertex>;
 
+    void renderToAvailableFbo(const PartsList& parts_list);
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn	void Opengl::clearFbos()
+    ///
+    /// \brief	Clears FBOs with the to_clear status.
+    ///
+    /// \author	Runik
+    /// \date	04/03/2024
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    void clearFbos();
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn	void Opengl::bindFbo(const u32 fbo_id);
+    ///
+    /// \brief	Binds a FBO.
+    ///
+    /// \author	Runik
+    /// \date	04/03/2024
+    ///
+    /// \param 	fbo_id	Zero-based index of the FBO. 0 unbinds the FBO.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    void bindFbo(const u32 fbo_id);
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn	void Opengl::unbindFbo();
+    ///
+    /// \brief	Unbinds current bound FBO.
+    ///
+    /// \author	Runik
+    /// \date	04/03/2024
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    void unbindFbo();
+
     core::Config* config_; ///< Configuration object.
 
     FboGlobalList fbo_global_list_;         ///< List of framebuffer objects used in the program.
     FboType       current_rendered_buffer_; ///< The current rendered buffer (front or back)
 
-    FboKeyToFbo   fbo_key_to_fbo_;  ///< Link between a FBO key and its relative FBO.
-    FboPool       fbo_pool_;        ///< Pool of FBOs to be used for by priority rendering.
-    FboPoolStatus fbo_pool_status_; ///< State of each FBO in the pool.
+    FboKeyToFbo   fbo_key_to_fbo_pool_index_; ///< Link between a FBO key and its relative FBO index in the pool.
+    FboPool       fbo_pool_;                  ///< Pool of FBOs to be used for by priority rendering.
+    FboPoolStatus fbo_pool_status_;           ///< State of each FBO in the pool.
 
     bool is_legacy_opengl_{}; ///< True if rendering in legacy opengl.
 
