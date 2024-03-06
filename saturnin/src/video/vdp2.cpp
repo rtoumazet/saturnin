@@ -2471,6 +2471,9 @@ void Vdp2::populateRenderData() {
             } else {
                 // Clear data (how ?)
             }
+        } else {
+            // Clear data
+
         }
     }
 }
