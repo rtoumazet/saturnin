@@ -86,10 +86,9 @@ enum class FboType : u8 {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class FboStatus : u8 {
-    reuse,    ///< FBO will be reused as is.
-    unused,   ///< FBO isn't in use.
-    to_clear, ///< FBO will have to be cleared.
-    to_set    ///< FBO will have to be set.
+    reuse,   ///< FBO will be reused as is.
+    unused,  ///< FBO isn't in use.
+    to_clear ///< FBO will have to be cleared.
 };
 
 using FboData       = std::pair<u32, u32>; // Describes a framebuffer object. 1st is fbo id, 2nd is texture id.

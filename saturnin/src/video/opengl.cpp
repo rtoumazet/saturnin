@@ -294,7 +294,7 @@ void Opengl::initializeShaders() {
 void Opengl::displayFramebuffer(core::EmulatorContext& state) {
     // :TODO:
     // - Render each layer + priority to one specific FBO
-    // - Put render() content in its own function, and name it renderToFbo()
+    // - Put render() content in its own function, and name it renderToAvailableFbo()
     // - Render() itself must take care of rendering the different FBOs in order
     // - Find which FBO to use in the FBO priority list
     // - displayFramebuffer() must generate one PartList by layer + priority to display to the FBO
@@ -304,17 +304,17 @@ void Opengl::displayFramebuffer(core::EmulatorContext& state) {
         GlobalPartsList global_parts_list;
 
         // Step one : get displayable layers
+        using enum ScrollScreen;
         std::vector<ScrollScreen> screens_to_display;
-        if (!state.vdp2()->isLayerDisabled(ScrollScreen::nbg3)) screens_to_display.push_back(ScrollScreen::nbg3);
-        if (!state.vdp2()->isLayerDisabled(ScrollScreen::nbg2)) screens_to_display.push_back(ScrollScreen::nbg2);
-        if (!state.vdp2()->isLayerDisabled(ScrollScreen::nbg1)) screens_to_display.push_back(ScrollScreen::nbg1);
-        if (!state.vdp2()->isLayerDisabled(ScrollScreen::nbg0)) screens_to_display.push_back(ScrollScreen::nbg0);
-        if (!state.vdp2()->isLayerDisabled(ScrollScreen::rbg1)) screens_to_display.push_back(ScrollScreen::rbg1);
-        if (!state.vdp2()->isLayerDisabled(ScrollScreen::rbg0)) screens_to_display.push_back(ScrollScreen::rbg0);
+        if (!state.vdp2()->isLayerDisabled(nbg3)) screens_to_display.push_back(nbg3);
+        if (!state.vdp2()->isLayerDisabled(nbg2)) screens_to_display.push_back(nbg2);
+        if (!state.vdp2()->isLayerDisabled(nbg1)) screens_to_display.push_back(nbg1);
+        if (!state.vdp2()->isLayerDisabled(nbg0)) screens_to_display.push_back(nbg0);
+        if (!state.vdp2()->isLayerDisabled(rbg1)) screens_to_display.push_back(rbg1);
+        if (!state.vdp2()->isLayerDisabled(rbg0)) screens_to_display.push_back(rbg0);
 
-        // Step two : populate one FBO for each priority + layer couple
-
-        const auto renderVdp1Parts = [&](const u32 priority) {
+        // Step two : populate parts list for each priority + layer couple
+        const auto addVdp1PartsToList = [&](const u32 priority) {
             auto        local_parts = PartsList();
             const auto& vdp1_parts  = state.vdp1()->vdp1Parts(priority);
             if (!vdp1_parts.empty()) {
@@ -322,13 +322,11 @@ void Opengl::displayFramebuffer(core::EmulatorContext& state) {
                 for (const auto& p : vdp1_parts) {
                     local_parts.emplace_back(p);
                 }
-                // Display current screen to FBO for current priority
-                // renderToFbo(parts_list);
                 global_parts_list[{priority, Layer::sprite}] = std::move(local_parts);
             }
         };
 
-        const auto renderVdp2Parts = [&](const ScrollScreen screen, const u32 priority) {
+        const auto addVdp2PartsToList = [&](const ScrollScreen screen, const u32 priority) {
             auto        local_parts = PartsList();
             const auto& vdp2_parts  = state.vdp2()->vdp2Parts(screen, priority);
             if (!vdp2_parts.empty()) {
@@ -336,18 +334,32 @@ void Opengl::displayFramebuffer(core::EmulatorContext& state) {
                 for (const auto& p : vdp2_parts) {
                     local_parts.emplace_back(p);
                 }
-                // Display current screen to FBO for current priority
-                // renderToFbo(parts_list);
                 global_parts_list[{priority, screen_to_layer.at(screen)}] = std::move(local_parts);
             }
         };
 
         for (auto priority = 7; priority > 0; --priority) {
             for (const auto& screen : screens_to_display) {
-                renderVdp2Parts(screen, priority);
+                addVdp2PartsToList(screen, priority);
             }
-            renderVdp1Parts(priority);
+            addVdp1PartsToList(priority);
         }
+
+        // Step three : check if
+        // - previously rendered keys are still in use (mark as to be cleared otherwise)
+        // - current key to be rendered already exists (mark as to be cleared otherwise,and severe the link)
+        // To do so, use fbo_key_to_fbo_pool_index_, fbo_pool_status_ and global_parts_list.
+
+        for (auto& [key, parts] : global_parts_list_) {
+            if (fbo_key_to_fbo_pool_index_.contains(key)) {
+                // Key is already used.
+                const auto index = fbo_key_to_fbo_pool_index_[key];
+
+            }
+        }
+        // std::ranges::copy_if(vdp1_parts_, std::back_inserter(parts), [priority](const Vdp1Part& part) {
+        //     return part.common_vdp_data_.priority == priority;
+        // });
 
         if constexpr (render_type == RenderType::RenderType_drawElements) {
             if (global_parts_list_.empty()) {
@@ -457,18 +469,6 @@ void Opengl::render() {
         clearFbos();
 
         // Rendering is done to FBOs depending on the priority and layer combo.
-        // Depending on FBO status, behaviour will change :
-        // - reuse : no change on data to display, FBO will be reused as is.
-        // - unused : FBO isn't used.
-        // - to_clear : FBO was previously used, but not anymore. Cleared during clearFbos() call.
-        // - to_set : FBO will be rendered to with fresh data.
-        for (u8 index = 0; auto& status : fbo_pool_status_) {
-            if (status == FboStatus::to_set) {
-                // renderToAvailableFbo(index);
-                status = FboStatus::reuse;
-            }
-            ++index;
-        }
 
         // fbo_priority_list_ contains
         // Check if FBO has to be displayed
