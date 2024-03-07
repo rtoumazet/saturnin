@@ -350,17 +350,15 @@ void Opengl::displayFramebuffer(core::EmulatorContext& state) {
         // - current key to be rendered already exists (mark as to be cleared otherwise,and severe the link)
         // To do so, use fbo_key_to_fbo_pool_index_, fbo_pool_status_ and global_parts_list.
 
-        for (auto& [key, parts] : global_parts_list_) {
-            if (fbo_key_to_fbo_pool_index_.contains(key)) {
-                // Key is already used.
-                const auto index = fbo_key_to_fbo_pool_index_[key];
+        // for (auto& [key, parts] : global_parts_list_) {
+        //     // If key exists in the map, checking the linked FBO status in the pool.
+        //     if (fbo_key_to_fbo_pool_index_.contains(key)) {
+        //         // Key is already used.
+        //         const auto index = fbo_key_to_fbo_pool_index_[key];
+        //     }
+        // }
 
-            }
-        }
-        // std::ranges::copy_if(vdp1_parts_, std::back_inserter(parts), [priority](const Vdp1Part& part) {
-        //     return part.common_vdp_data_.priority == priority;
-        // });
-
+        // Step three : prepare to send data to the render thread.
         if constexpr (render_type == RenderType::RenderType_drawElements) {
             if (global_parts_list_.empty()) {
                 std::unique_lock lk(parts_list_mutex_);
@@ -1171,6 +1169,12 @@ void Opengl::setFboStatus(const u8 priority, const Layer layer, const FboStatus 
 
 void Opengl::setFboStatus(const u8 priority, const ScrollScreen screen, const FboStatus state) {
     setFboStatus(priority, screen_to_layer.at(screen), state);
+}
+
+void Opengl::setFboStatus(const ScrollScreen screen, const FboStatus state) {
+    for (auto priority = u8{1}; priority < 8; ++priority) {
+        setFboStatus(priority, screen_to_layer.at(screen), state);
+    }
 }
 
 void Opengl::generateSubTexture(const size_t key) {

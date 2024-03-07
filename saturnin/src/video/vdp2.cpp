@@ -2461,19 +2461,32 @@ void Vdp2::populateRenderData() {
         // WIP
         if (canScrollScreenBeDisplayed(ScrollScreen::nbg3) && isScreenDisplayed(ScrollScreen::nbg3)) {
             updateScrollScreenStatus(ScrollScreen::nbg3);
-            if (isCacheDirty(ScrollScreen::nbg3) && getScreen(ScrollScreen::nbg3).priority_number != 0) {
+            const auto isDirty             = isCacheDirty(ScrollScreen::nbg3);
+            const auto priorityIsAboveZero = getScreen(ScrollScreen::nbg3).priority_number != 0;
+            if (isDirty && priorityIsAboveZero) {
                 discardCache(ScrollScreen::nbg3);
                 clearRenderData(ScrollScreen::nbg3);
                 readScrollScreenData(ScrollScreen::nbg3);
-                // modules_.opengl()->setFboStatus(getScreen(ScrollScreen::nbg3).priority_number,
-                //                                 ScrollScreen::nbg3,
-                //                                 FboStatus::to_set);
-            } else {
-                // Clear data (how ?)
+                // Data must be reloaded. Passing the status as 'to_clear' suffice on this side.
+                modules_.opengl()->setFboStatus(getScreen(ScrollScreen::nbg3).priority_number,
+                                                ScrollScreen::nbg3,
+                                                FboStatus::to_clear);
+            }
+
+            if (!priorityIsAboveZero) {
+                // Clear previously used data.
+                modules_.opengl()->setFboStatus(ScrollScreen::nbg3, FboStatus::to_clear);
+            }
+
+            if (!isDirty && priorityIsAboveZero) {
+                // Reuse previous data.
+                modules_.opengl()->setFboStatus(getScreen(ScrollScreen::nbg3).priority_number,
+                                                ScrollScreen::nbg3,
+                                                FboStatus::reuse);
             }
         } else {
-            // Clear data
-
+            // Clear previously used data.
+            modules_.opengl()->setFboStatus(ScrollScreen::nbg3, FboStatus::to_clear);
         }
     }
 }

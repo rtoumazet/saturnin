@@ -600,6 +600,20 @@ class Opengl {
     void setFboStatus(const u8 priority, const Layer layer, const FboStatus state);
     void setFboStatus(const u8 priority, const ScrollScreen screen, const FboStatus state);
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn	void Opengl::setFboStatus(const ScrollScreen screen, const FboStatus state);
+    ///
+    /// \brief	Sets FBO status for every priority of the screen.
+    ///
+    /// \author	Runik
+    /// \date	06/03/2024
+    ///
+    /// \param 	screen	The screen.
+    /// \param 	state 	The new state.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    void setFboStatus(const ScrollScreen screen, const FboStatus state);
+
   private:
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn auto Opengl::getShaderSource(const ShaderType type, const ShaderName name) -> const char*;
