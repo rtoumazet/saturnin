@@ -345,20 +345,7 @@ void Opengl::displayFramebuffer(core::EmulatorContext& state) {
             addVdp1PartsToList(priority);
         }
 
-        // Step three : check if
-        // - previously rendered keys are still in use (mark as to be cleared otherwise)
-        // - current key to be rendered already exists (mark as to be cleared otherwise,and severe the link)
-        // To do so, use fbo_key_to_fbo_pool_index_, fbo_pool_status_ and global_parts_list.
-
-        // for (auto& [key, parts] : global_parts_list_) {
-        //     // If key exists in the map, checking the linked FBO status in the pool.
-        //     if (fbo_key_to_fbo_pool_index_.contains(key)) {
-        //         // Key is already used.
-        //         const auto index = fbo_key_to_fbo_pool_index_[key];
-        //     }
-        // }
-
-        // Step three : prepare to send data to the render thread.
+        // Step three : wait to send data to the render thread.
         if constexpr (render_type == RenderType::RenderType_drawElements) {
             if (global_parts_list_.empty()) {
                 std::unique_lock lk(parts_list_mutex_);
@@ -424,8 +411,10 @@ void Opengl::displayFramebuffer(core::EmulatorContext& state) {
     }
 }
 
-void Opengl::renderToAvailableFbo(const PartsList& parts_list) {
-    // auto index = getAvailableFboIndex();
+void Opengl::renderToAvailableFbo(const FboKey& key, const PartsList& parts_list) {
+    const auto index              = getAvailableFboIndex();
+    const auto& [priority, layer] = key;
+    if (!index) { return; }
 }
 
 void Opengl::clearFbos() {
@@ -443,6 +432,14 @@ void Opengl::clearFbos() {
     }
 }
 
+void Opengl::clearFboKeys() {
+    const auto count = std::erase_if(fbo_key_to_fbo_pool_index_, [this](const auto& item) {
+        auto const& [key, index] = item;
+        return fbo_pool_status_[index] != FboStatus::reuse;
+    });
+    Log::debug(Logger::opengl, "{} FBOs erased", count);
+}
+
 void Opengl::bindFbo(const u32 fbo_id) {
     if (is_legacy_opengl_) {
         glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo_id);
@@ -452,6 +449,17 @@ void Opengl::bindFbo(const u32 fbo_id) {
 }
 
 void Opengl::unbindFbo() { bindFbo(0); }
+
+auto Opengl::getAvailableFboIndex() -> std::optional<u8> {
+    std::array<FboStatus, 1> status = {FboStatus::unused};
+    const auto               result = std::ranges::find_first_of(fbo_pool_status_, status);
+    if (result == fbo_pool_status_.end()) {
+        Log::warning(Logger::opengl, "No FBO available in the pool !");
+        return std::nullopt;
+    } else {
+        return std::optional(static_cast<u8>(std::distance(fbo_pool_status_.begin(), result)));
+    }
+}
 
 void Opengl::render() {
     if constexpr (uses_fbo) {
@@ -465,12 +473,14 @@ void Opengl::render() {
         getPartsFromThread();
 
         clearFbos();
+        clearFboKeys();
 
         // Rendering is done to FBOs depending on the priority and layer combo.
+        for (const auto& [key, parts] : global_parts_list) {
+            renderToAvailableFbo(key, parts);
+        }
 
-        // fbo_priority_list_ contains
-        // Check if FBO has to be displayed
-        // Going through the parts to display, deleting data if the FBO previously used
+        // :TODO: Render the FBOs to the framebuffer
 
         {
             std::lock_guard lk(parts_list_mutex_);
