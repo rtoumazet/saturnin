@@ -865,6 +865,19 @@ class Opengl {
 
     auto getAvailableFboIndex() -> std::optional<u8>;
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn	void Opengl::renderParts(const PartsList& parts_list);
+    ///
+    /// \brief	Renders the parts described by parts_list to the previously bound FBO.
+    ///
+    /// \author	Runik
+    /// \date	09/03/2024
+    ///
+    /// \param 	parts_list	List of parts.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    void renderParts(const PartsList& parts_list);
+
     core::Config* config_; ///< Configuration object.
 
     FboGlobalList fbo_global_list_;         ///< List of framebuffer objects used in the program.

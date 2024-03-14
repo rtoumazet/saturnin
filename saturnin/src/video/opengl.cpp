@@ -412,9 +412,15 @@ void Opengl::displayFramebuffer(core::EmulatorContext& state) {
 }
 
 void Opengl::renderToAvailableFbo(const FboKey& key, const PartsList& parts_list) {
-    const auto index              = getAvailableFboIndex();
-    const auto& [priority, layer] = key;
+    const auto index = getAvailableFboIndex();
     if (!index) { return; }
+
+    bindFbo(fbo_pool_[*index].first);
+    renderParts(parts_list);
+    unbindFbo();
+
+    fbo_pool_status_[*index]        = FboStatus::reuse;
+    fbo_key_to_fbo_pool_index_[key] = *index;
 }
 
 void Opengl::clearFbos() {
@@ -461,6 +467,59 @@ auto Opengl::getAvailableFboIndex() -> std::optional<u8> {
     }
 }
 
+void Opengl::renderParts(const PartsList& parts_list) {
+    if (!parts_list.empty()) {
+        const auto [vao, vertex_buffer] = initializeVao(ShaderName::textured);
+
+        glUseProgram(program_shader_);
+        glBindVertexArray(vao);                       // binding VAO
+        glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer); // binding vertex buffer
+
+        // Calculating the ortho projection matrix
+        const auto proj_matrix = calculateDisplayViewportMatrix();
+
+        // Sending the ortho projection matrix to the shader
+        const auto uni_proj_matrix = glGetUniformLocation(program_shader_, "proj_matrix");
+        glUniformMatrix4fv(uni_proj_matrix, 1, GL_FALSE, glm::value_ptr(proj_matrix));
+
+        glActiveTexture(GLenum::GL_TEXTURE0);
+        const auto sampler_loc = glGetUniformLocation(program_shader_, "sampler");
+
+        glUniform1i(sampler_loc, 0);
+        glBindTexture(GL_TEXTURE_2D_ARRAY, texture_array_id_);
+
+        const auto texture_used_loc = glGetUniformLocation(program_shader_, "is_texture_used");
+
+        auto elements_buffer = u32{};
+        glGenBuffers(1, &elements_buffer); // This buffer will be used to send indices data to the GPU
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elements_buffer);
+
+        const auto&& [indices, draw_ranges] = generateVertexIndicesAndDrawRanges(parts_list);
+        const auto vertexes                 = readVertexes(parts_list);
+
+        // Sending data to the GPU
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(u32) * indices.size(), indices.data(), GL_STATIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * vertexes.size(), vertexes.data(), GL_STATIC_DRAW);
+
+        for (const auto& range : draw_ranges) {
+            const auto is_texture_used = GLboolean(range.is_textured);
+            glUniform1i(texture_used_loc, is_texture_used);
+
+            glDrawRangeElements(range.primitive,
+                                range.vertex_array_start,
+                                range.vertex_array_end,
+                                range.indices_nb,
+                                GL_UNSIGNED_INT,
+                                static_cast<GLuint*>(nullptr) + range.indices_array_start);
+        }
+
+        gl::glDeleteBuffers(1, &vertex_buffer);
+        gl::glDeleteVertexArrays(1, &vao);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+        gl::glDeleteBuffers(1, &elements_buffer);
+    }
+}
+
 void Opengl::render() {
     if constexpr (uses_fbo) {
         GlobalPartsList global_parts_list;
@@ -480,13 +539,23 @@ void Opengl::render() {
             renderToAvailableFbo(key, parts);
         }
 
-        // :TODO: Render the FBOs to the framebuffer
+        preRender();
 
-        {
+        // :TODO: Render the FBOs to the current framebuffer
+        std::ranges::reverse_view rv{fbo_key_to_fbo_pool_index_};
+        for (const auto& [key, index] : rv) {
+            fbo_pool_[index].second;
+        }
+
+        postRender();
+
+        const auto notifyMainThread = [&]() {
             std::lock_guard lk(parts_list_mutex_);
             GlobalPartsList().swap(global_parts_list);
             data_condition_.notify_one();
-        }
+        };
+
+        notifyMainThread();
 
     } else {
         PartsList parts_list;
@@ -497,57 +566,58 @@ void Opengl::render() {
             if (!parts_list_.empty()) { parts_list = std::move(parts_list_); }
         }
 
-        if (!parts_list.empty()) {
-            const auto [vao, vertex_buffer] = initializeVao(ShaderName::textured);
+        renderParts(parts_list);
+        // if (!parts_list.empty()) {
+        //     const auto [vao, vertex_buffer] = initializeVao(ShaderName::textured);
 
-            glUseProgram(program_shader_);
-            glBindVertexArray(vao);                       // binding VAO
-            glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer); // binding vertex buffer
+        //    glUseProgram(program_shader_);
+        //    glBindVertexArray(vao);                       // binding VAO
+        //    glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer); // binding vertex buffer
 
-            // Calculating the ortho projection matrix
-            const auto proj_matrix = calculateDisplayViewportMatrix();
+        //    // Calculating the ortho projection matrix
+        //    const auto proj_matrix = calculateDisplayViewportMatrix();
 
-            // Sending the ortho projection matrix to the shader
-            const auto uni_proj_matrix = glGetUniformLocation(program_shader_, "proj_matrix");
-            glUniformMatrix4fv(uni_proj_matrix, 1, GL_FALSE, glm::value_ptr(proj_matrix));
+        //    // Sending the ortho projection matrix to the shader
+        //    const auto uni_proj_matrix = glGetUniformLocation(program_shader_, "proj_matrix");
+        //    glUniformMatrix4fv(uni_proj_matrix, 1, GL_FALSE, glm::value_ptr(proj_matrix));
 
-            glActiveTexture(GLenum::GL_TEXTURE0);
-            const auto sampler_loc = glGetUniformLocation(program_shader_, "sampler");
+        //    glActiveTexture(GLenum::GL_TEXTURE0);
+        //    const auto sampler_loc = glGetUniformLocation(program_shader_, "sampler");
 
-            glUniform1i(sampler_loc, 0);
-            glBindTexture(GL_TEXTURE_2D_ARRAY, texture_array_id_);
+        //    glUniform1i(sampler_loc, 0);
+        //    glBindTexture(GL_TEXTURE_2D_ARRAY, texture_array_id_);
 
-            const auto texture_used_loc = glGetUniformLocation(program_shader_, "is_texture_used");
+        //    const auto texture_used_loc = glGetUniformLocation(program_shader_, "is_texture_used");
 
-            auto elements_buffer = u32{};
-            glGenBuffers(1, &elements_buffer); // This buffer will be used to send indices data to the GPU
-            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elements_buffer);
+        //    auto elements_buffer = u32{};
+        //    glGenBuffers(1, &elements_buffer); // This buffer will be used to send indices data to the GPU
+        //    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elements_buffer);
 
-            const auto&& [indices, draw_ranges] = generateVertexIndicesAndDrawRanges(parts_list);
-            const auto vertexes                 = readVertexes(parts_list);
+        //    const auto&& [indices, draw_ranges] = generateVertexIndicesAndDrawRanges(parts_list);
+        //    const auto vertexes                 = readVertexes(parts_list);
 
-            // Sending data to the GPU
-            glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(u32) * indices.size(), indices.data(), GL_STATIC_DRAW);
-            glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * vertexes.size(), vertexes.data(), GL_STATIC_DRAW);
+        //    // Sending data to the GPU
+        //    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(u32) * indices.size(), indices.data(), GL_STATIC_DRAW);
+        //    glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * vertexes.size(), vertexes.data(), GL_STATIC_DRAW);
 
-            for (const auto& range : draw_ranges) {
-                const auto is_texture_used = GLboolean(range.is_textured);
-                glUniform1i(texture_used_loc, is_texture_used);
+        //    for (const auto& range : draw_ranges) {
+        //        const auto is_texture_used = GLboolean(range.is_textured);
+        //        glUniform1i(texture_used_loc, is_texture_used);
 
-                glDrawRangeElements(range.primitive,
-                                    range.vertex_array_start,
-                                    range.vertex_array_end,
-                                    range.indices_nb,
-                                    GL_UNSIGNED_INT,
-                                    static_cast<GLuint*>(nullptr) + range.indices_array_start);
-            }
+        //        glDrawRangeElements(range.primitive,
+        //                            range.vertex_array_start,
+        //                            range.vertex_array_end,
+        //                            range.indices_nb,
+        //                            GL_UNSIGNED_INT,
+        //                            static_cast<GLuint*>(nullptr) + range.indices_array_start);
+        //    }
 
-            gl::glDeleteBuffers(1, &vertex_buffer);
-            gl::glDeleteVertexArrays(1, &vao);
-            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-            gl::glDeleteBuffers(1, &elements_buffer);
-            // Texture::cleanCache(this);
-        }
+        //    gl::glDeleteBuffers(1, &vertex_buffer);
+        //    gl::glDeleteVertexArrays(1, &vao);
+        //    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+        //    gl::glDeleteBuffers(1, &elements_buffer);
+        //    // Texture::cleanCache(this);
+        //}
 
         {
             std::lock_guard lk(parts_list_mutex_);
