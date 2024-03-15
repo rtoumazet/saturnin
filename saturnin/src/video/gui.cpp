@@ -775,6 +775,11 @@ void showMainMenu(GuiConfiguration& conf, core::EmulatorContext& state) {
                 ImGui::SameLine(second_column_offset);
                 setupLog(core::AccessKeys::cfg_log_memory, "##log_memory", levels);
 
+                // opengl
+                ImGui::TextUnformatted(tr("OpenGL").c_str());
+                ImGui::SameLine(second_column_offset);
+                setupLog(core::AccessKeys::cfg_log_opengl, "##log_opengl", levels);
+
                 // sh2
                 ImGui::TextUnformatted(tr("Sh2").c_str());
                 ImGui::SameLine(second_column_offset);

@@ -87,6 +87,20 @@ const std::unordered_map<ScrollScreen, Layer> screen_to_layer = {
     {ScrollScreen::rbg0, Layer::rbg0}
 };
 
+const std::unordered_map<Layer, std::string> layer_to_name = {
+    {Layer::nbg0,      "nbg0"     },
+    {Layer::rbg1,      "rbg1"     },
+    {Layer::nbg1,      "nbg1"     },
+    {Layer::exbg,      "exbg"     },
+    {Layer::nbg2,      "nbg2"     },
+    {Layer::nbg3,      "nbg3"     },
+    {Layer::rbg0,      "rbg0"     },
+    {Layer::back,      "back"     },
+    {Layer::sprite,    "sprite"   },
+    {Layer::plane,     "plane"    },
+    {Layer::undefined, "undefined"}
+};
+
 Opengl::Opengl(core::Config* config) : config_(config){};
 
 Opengl::~Opengl() { shutdown(); }
@@ -112,6 +126,10 @@ void Opengl::initialize() {
     // Clear texture array indexes data
     for (auto& [layer, indexes] : layer_to_texture_array_indexes_) {
         std::vector<u8>().swap(indexes);
+    }
+
+    for (auto& status : fbo_pool_status_) {
+        status = FboStatus::unused;
     }
 }
 
@@ -412,20 +430,38 @@ void Opengl::displayFramebuffer(core::EmulatorContext& state) {
 }
 
 void Opengl::renderToAvailableFbo(const FboKey& key, const PartsList& parts_list) {
+    Log::debug(Logger::opengl, "renderToAvailableFbo() call");
     const auto index = getAvailableFboIndex();
-    if (!index) { return; }
+    if (!index) {
+        Log::debug(Logger::opengl, "No FBO available for rendering");
+        Log::debug(Logger::opengl, "renderToAvailableFbo() return");
+        return;
+    }
+
+    const auto& [priority, layer] = key;
+    Log::debug(Logger::opengl,
+               "Rendering key [priority={}, layer={}] to FBO with index {}",
+               priority,
+               layer_to_name.at(layer),
+               *index);
 
     bindFbo(fbo_pool_[*index].first);
     renderParts(parts_list);
     unbindFbo();
 
+    Log::debug(Logger::opengl, "Changing FBO status at index {} to 'reuse'", *index);
+
     fbo_pool_status_[*index]        = FboStatus::reuse;
     fbo_key_to_fbo_pool_index_[key] = *index;
+
+    Log::debug(Logger::opengl, "renderToAvailableFbo() return");
 }
 
 void Opengl::clearFbos() {
+    Log::debug(Logger::opengl, "clearFbos() call");
     for (u8 index = 0; auto& status : fbo_pool_status_) {
         if (status == FboStatus::to_clear) {
+            Log::debug(Logger::opengl, "Clearing FBO at index {}", index);
             bindFbo(fbo_pool_[index].first);
 
             gl::glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
@@ -433,17 +469,21 @@ void Opengl::clearFbos() {
 
             unbindFbo();
 
+            Log::debug(Logger::opengl, "Changing FBO status at index {} to 'unused'", index);
             status = FboStatus::unused;
         }
     }
+    Log::debug(Logger::opengl, "clearFbos() return");
 }
 
 void Opengl::clearFboKeys() {
+    Log::debug(Logger::opengl, "clearFboKeys() call");
     const auto count = std::erase_if(fbo_key_to_fbo_pool_index_, [this](const auto& item) {
         auto const& [key, index] = item;
         return fbo_pool_status_[index] != FboStatus::reuse;
     });
-    Log::debug(Logger::opengl, "{} FBOs erased", count);
+    Log::debug(Logger::opengl, "{} FBO keys erased", count);
+    Log::debug(Logger::opengl, "clearFboKeys() return");
 }
 
 void Opengl::bindFbo(const u32 fbo_id) {
@@ -463,7 +503,9 @@ auto Opengl::getAvailableFboIndex() -> std::optional<u8> {
         Log::warning(Logger::opengl, "No FBO available in the pool !");
         return std::nullopt;
     } else {
-        return std::optional(static_cast<u8>(std::distance(fbo_pool_status_.begin(), result)));
+        const auto index = static_cast<u8>(std::distance(fbo_pool_status_.begin(), result));
+        Log::debug(Logger::opengl, "Available FBO index : {}", index);
+        return std::optional(index);
     }
 }
 
@@ -544,7 +586,7 @@ void Opengl::render() {
         // :TODO: Render the FBOs to the current framebuffer
         std::ranges::reverse_view rv{fbo_key_to_fbo_pool_index_};
         for (const auto& [key, index] : rv) {
-            fbo_pool_[index].second;
+            // fbo_pool_[index].second;
         }
 
         postRender();
@@ -1239,10 +1281,7 @@ auto Opengl::getFboPoolIndex(const u8 priority, const Layer layer) -> std::optio
 
 void Opengl::setFboStatus(const u8 priority, const Layer layer, const FboStatus state) {
     const auto index = getFboPoolIndex(priority, layer);
-    if (!index) {
-        Log::warning(Logger::opengl, "Could not find FBO with priority {} and layer {}", priority, toUnderlying(layer));
-        return;
-    }
+    if (!index) { return; }
 
     fbo_pool_status_[*index] = state;
 }

@@ -79,6 +79,7 @@ enum class AccessKeys : u8 {
     cfg_log_config,
     cfg_log_main,
     cfg_log_memory,
+    cfg_log_opengl,
     cfg_log_sh2,
     cfg_log_scu,
     cfg_log_vdp1,
