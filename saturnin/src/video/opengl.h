@@ -878,6 +878,19 @@ class Opengl {
 
     void renderParts(const PartsList& parts_list);
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn	void Opengl::renderFboTexture(const u32 texture_id);
+    ///
+    /// \brief	Renders the fbo texture described by texture_id
+    ///
+    /// \author	Runik
+    /// \date	16/03/2024
+    ///
+    /// \param 	texture_id	Identifier for the texture.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    void renderFboTexture(const u32 texture_id);
+
     core::Config* config_; ///< Configuration object.
 
     FboGlobalList fbo_global_list_;         ///< List of framebuffer objects used in the program.

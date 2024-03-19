@@ -341,6 +341,8 @@ void Opengl::displayFramebuffer(core::EmulatorContext& state) {
                     local_parts.emplace_back(p);
                 }
                 global_parts_list[{priority, Layer::sprite}] = std::move(local_parts);
+                // Sprite layer is recalculated every time, there's no cache for now.
+                setFboStatus(priority, Layer::sprite, FboStatus::to_clear);
             }
         };
 
@@ -433,14 +435,14 @@ void Opengl::renderToAvailableFbo(const FboKey& key, const PartsList& parts_list
     Log::debug(Logger::opengl, "renderToAvailableFbo() call");
     const auto index = getAvailableFboIndex();
     if (!index) {
-        Log::debug(Logger::opengl, "No FBO available for rendering");
+        Log::debug(Logger::opengl, "- No FBO available for rendering");
         Log::debug(Logger::opengl, "renderToAvailableFbo() return");
         return;
     }
 
     const auto& [priority, layer] = key;
     Log::debug(Logger::opengl,
-               "Rendering key [priority={}, layer={}] to FBO with index {}",
+               "- Rendering key [priority={}, layer={}] to FBO with index {}",
                priority,
                layer_to_name.at(layer),
                *index);
@@ -449,7 +451,7 @@ void Opengl::renderToAvailableFbo(const FboKey& key, const PartsList& parts_list
     renderParts(parts_list);
     unbindFbo();
 
-    Log::debug(Logger::opengl, "Changing FBO status at index {} to 'reuse'", *index);
+    Log::debug(Logger::opengl, "- Changing FBO status at index {} to 'reuse'", *index);
 
     fbo_pool_status_[*index]        = FboStatus::reuse;
     fbo_key_to_fbo_pool_index_[key] = *index;
@@ -461,7 +463,7 @@ void Opengl::clearFbos() {
     Log::debug(Logger::opengl, "clearFbos() call");
     for (u8 index = 0; auto& status : fbo_pool_status_) {
         if (status == FboStatus::to_clear) {
-            Log::debug(Logger::opengl, "Clearing FBO at index {}", index);
+            Log::debug(Logger::opengl, "    Clearing FBO at index {}", index);
             bindFbo(fbo_pool_[index].first);
 
             gl::glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
@@ -469,7 +471,7 @@ void Opengl::clearFbos() {
 
             unbindFbo();
 
-            Log::debug(Logger::opengl, "Changing FBO status at index {} to 'unused'", index);
+            Log::debug(Logger::opengl, "- Changing FBO status at index {} to 'unused'", index);
             status = FboStatus::unused;
         }
     }
@@ -482,7 +484,7 @@ void Opengl::clearFboKeys() {
         auto const& [key, index] = item;
         return fbo_pool_status_[index] != FboStatus::reuse;
     });
-    Log::debug(Logger::opengl, "{} FBO keys erased", count);
+    Log::debug(Logger::opengl, "- {} FBO key(s) erased", count);
     Log::debug(Logger::opengl, "clearFboKeys() return");
 }
 
@@ -562,6 +564,73 @@ void Opengl::renderParts(const PartsList& parts_list) {
     }
 }
 
+void Opengl::renderFboTexture(const u32 texture_id) {
+    const auto [vao, vertex_buffer] = initializeVao(ShaderName::textured);
+
+    glUseProgram(program_shader_);
+    glBindVertexArray(vao);                       // binding VAO
+    glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer); // binding vertex buffer
+
+    // Calculating the ortho projection matrix
+    const auto proj_matrix = calculateDisplayViewportMatrix();
+
+    // Sending the ortho projection matrix to the shader
+    const auto uni_proj_matrix = glGetUniformLocation(program_shader_, "proj_matrix");
+    glUniformMatrix4fv(uni_proj_matrix, 1, GL_FALSE, glm::value_ptr(proj_matrix));
+
+    glActiveTexture(GLenum::GL_TEXTURE0);
+    const auto sampler_loc = glGetUniformLocation(program_shader_, "sampler");
+
+    glUniform1i(sampler_loc, 0);
+    glBindTexture(GL_TEXTURE_2D, texture_id);
+
+    const auto texture_used_loc = glGetUniformLocation(program_shader_, "is_texture_used");
+    glUniform1i(texture_used_loc, GLboolean(true));
+
+    auto vertexes = std::vector<Vertex>{
+        {0,    0,    0.0f, 0.0f, 0.0f, 0, 0, 0xff, 0xff, Gouraud()},
+        {0,    2048, 1.0f, 0.0f, 0.0f, 0, 0, 0xff, 0xff, Gouraud()},
+        {2048, 2048, 1.0f, 1.0f, 0.0f, 0, 0, 0xff, 0xff, Gouraud()},
+        {0,    0,    0.0f, 0.0f, 0.0f, 0, 0, 0xff, 0xff, Gouraud()},
+        {2048, 2048, 1.0f, 1.0f, 0.0f, 0, 0, 0xff, 0xff, Gouraud()},
+        {2048, 0,    0.0f, 1.0f, 0.0f, 0, 0, 0xff, 0xff, Gouraud()}
+    };
+
+    // Sending vertex buffer data to the GPU
+    glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * vertexes.size(), vertexes.data(), GL_STATIC_DRAW);
+
+    // Drawing the list
+    glDrawArrays(GL_TRIANGLES, 0, vertexes_per_tessellated_quad);
+
+    // auto elements_buffer = u32{};
+    // glGenBuffers(1, &elements_buffer); // This buffer will be used to send indices data to the GPU
+    // glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elements_buffer);
+
+    // const auto&& [indices, draw_ranges] = generateVertexIndicesAndDrawRanges(parts_list);
+    // const auto vertexes                 = readVertexes(parts_list);
+
+    //// Sending data to the GPU
+    // glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(u32) * indices.size(), indices.data(), GL_STATIC_DRAW);
+    // glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * vertexes.size(), vertexes.data(), GL_STATIC_DRAW);
+
+    // for (const auto& range : draw_ranges) {
+    //     const auto is_texture_used = GLboolean(range.is_textured);
+    //     glUniform1i(texture_used_loc, is_texture_used);
+
+    //    glDrawRangeElements(range.primitive,
+    //                        range.vertex_array_start,
+    //                        range.vertex_array_end,
+    //                        range.indices_nb,
+    //                        GL_UNSIGNED_INT,
+    //                        static_cast<GLuint*>(nullptr) + range.indices_array_start);
+    //}
+
+    gl::glDeleteBuffers(1, &vertex_buffer);
+    gl::glDeleteVertexArrays(1, &vao);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+    // gl::glDeleteBuffers(1, &elements_buffer);
+}
+
 void Opengl::render() {
     if constexpr (uses_fbo) {
         GlobalPartsList global_parts_list;
@@ -586,7 +655,7 @@ void Opengl::render() {
         // :TODO: Render the FBOs to the current framebuffer
         std::ranges::reverse_view rv{fbo_key_to_fbo_pool_index_};
         for (const auto& [key, index] : rv) {
-            // fbo_pool_[index].second;
+            renderFboTexture(fbo_pool_[index].second);
         }
 
         postRender();
