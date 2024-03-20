@@ -65,27 +65,15 @@ constexpr auto texture_array_height  = u16{1024};
 constexpr auto texture_array_depth   = u16{64};
 constexpr auto max_fbo_by_priority   = u8{16};
 
-enum class FboType : u8 {
-    front_buffer,
-    back_buffer,
-    vdp1_debug_overlay,
-    vdp2_debug_layer,
-    priority_level_1,
-    priority_level_2,
-    priority_level_3,
-    priority_level_4,
-    priority_level_5,
-    priority_level_6,
-    priority_level_7
-};
+enum class FboType : u8 { front_buffer, back_buffer, vdp1_debug_overlay, vdp2_debug_layer, priority };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum	FboStatus
+/// \enum	FboTextureStatus
 ///
-/// \brief	Values that represent status of FBOs in the pool
+/// \brief	Values that represent status of FBO textures in the pool
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class FboStatus : u8 {
+enum class FboTextureStatus : u8 {
     reuse,   ///< FBO will be reused as is.
     unused,  ///< FBO isn't in use.
     to_clear ///< FBO will have to be cleared.
@@ -96,8 +84,8 @@ using FboGlobalList = std::unordered_map<FboType, FboData>;
 
 using FboKey      = std::pair<u8, Layer>; // First is priority number (1 to 7, last on being the highest), second is linked layer.
 using FboKeyToFbo = std::map<FboKey, u8>; // Link between a priority to display and its relative FBO index in the FBO pool.
-using FboPool     = std::array<FboData, max_fbo_by_priority>;     // Pool of FBO to be used for rendering by priority.
-using FboPoolStatus = std::array<FboStatus, max_fbo_by_priority>; // State of the FBOs in the pool.
+using FboTexturePool       = std::array<u32, max_fbo_by_priority>; // Pool of textures ids to be used for rendering by priority.
+using FboTexturePoolStatus = std::array<FboTextureStatus, max_fbo_by_priority>; // State of the FBOs in the pool.
 
 enum class ShaderName { textured };
 enum class ShaderType { vertex, fragment };
@@ -585,7 +573,7 @@ class Opengl {
     auto getFboPoolIndex(const u8 priority, const Layer layer) -> std::optional<u8>;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn	void Opengl::setFboStatus(const u8 priority, const Layer layer, const FboStatus state);
+    /// \fn	void Opengl::setFboTextureStatus(const u8 priority, const Layer layer, const FboTextureStatus state);
     ///
     /// \brief	Sets FBO status
     ///
@@ -597,13 +585,13 @@ class Opengl {
     /// \param 	state   	The new state.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    void setFboStatus(const u8 priority, const Layer layer, const FboStatus state);
-    void setFboStatus(const u8 priority, const ScrollScreen screen, const FboStatus state);
+    void setFboTextureStatus(const u8 priority, const Layer layer, const FboTextureStatus state);
+    void setFboTextureStatus(const u8 priority, const ScrollScreen screen, const FboTextureStatus state);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn	void Opengl::setFboStatus(const ScrollScreen screen, const FboStatus state);
+    /// \fn	void Opengl::setFboTextureStatus(const ScrollScreen screen, const FboTextureStatus state);
     ///
-    /// \brief	Sets FBO status for every priority of the screen.
+    /// \brief	Sets FBO texture status for every priority of the screen.
     ///
     /// \author	Runik
     /// \date	06/03/2024
@@ -612,7 +600,7 @@ class Opengl {
     /// \param 	state 	The new state.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    void setFboStatus(const ScrollScreen screen, const FboStatus state);
+    void setFboTextureStatus(const ScrollScreen screen, const FboTextureStatus state);
 
   private:
     ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -672,17 +660,17 @@ class Opengl {
     void initializeFbos();
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn	auto Opengl::generateFbo() -> FboData;
+    /// \fn	auto Opengl::generateFboTexture() -> u32;
     ///
-    /// \brief	Generates a framebuffer object.
+    /// \brief	Generates a texture to be used with a framebuffer object.
     ///
     /// \author	Runik
     /// \date	16/02/2024
     ///
-    /// \returns    The generated framebuffer object data
+    /// \returns    The generated texture id.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    auto generateFbo() -> FboData;
+    auto generateFboTexture() -> u32;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn	auto Opengl::initializeTextureArray() const -> u32;
@@ -793,7 +781,7 @@ class Opengl {
     auto readVertexes(const PartsList& parts) -> std::vector<Vertex>;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn	void Opengl::renderToAvailableFbo(const FboKey& key, const PartsList& parts_list)
+    /// \fn	void Opengl::renderToAvailableTexture(const FboKey& key, const PartsList& parts_list)
     ///
     /// \brief	Clears FBOs in the pool with the 'to_clear' status.
     ///
@@ -804,18 +792,18 @@ class Opengl {
     /// \param 	parts	The parts to render.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    void renderToAvailableFbo(const FboKey& key, const PartsList& parts_list);
+    void renderToAvailableTexture(const FboKey& key, const PartsList& parts_list);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn	void Opengl::clearFbos()
+    /// \fn	void Opengl::clearFboTextures()
     ///
-    /// \brief	Clears FBOs in the pool with the 'to_clear' status.
+    /// \brief	Clears FBO textures in the pool with the 'to_clear' status.
     ///
     /// \author	Runik
     /// \date	04/03/2024
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    void clearFbos();
+    void clearFboTextures();
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn	void Opengl::clearFboKeys()
@@ -853,30 +841,31 @@ class Opengl {
     void unbindFbo();
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn	auto Opengl::getAvailableFboIndex() -> std::optional<u8>;
+    /// \fn	auto Opengl::getAvailableFboTextureIndex() -> std::optional<u8>;
     ///
-    /// \brief	Returns the next available FBO index (with status 'unused').
+    /// \brief	Returns the next available FBO texture index (with status 'unused').
     ///
     /// \author	Runik
     /// \date	08/03/2024
     ///
-    /// \returns	The FBO pool index if found.
+    /// \returns	The FBO texture pool index if found.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    auto getAvailableFboIndex() -> std::optional<u8>;
+    auto getAvailableFboTextureIndex() -> std::optional<u8>;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn	void Opengl::renderParts(const PartsList& parts_list);
+    /// \fn	void Opengl::renderParts(const PartsList& parts_list, const u32 texture_id);
     ///
-    /// \brief	Renders the parts described by parts_list to the previously bound FBO.
+    /// \brief	Renders the parts described by parts_list to the texture.
     ///
     /// \author	Runik
     /// \date	09/03/2024
     ///
     /// \param 	parts_list	List of parts.
+    /// \param 	texture_id	Id of the texture to render to.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    void renderParts(const PartsList& parts_list);
+    void renderParts(const PartsList& parts_list, const u32 texture_id);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn	void Opengl::renderFboTexture(const u32 texture_id);
@@ -896,9 +885,9 @@ class Opengl {
     FboGlobalList fbo_global_list_;         ///< List of framebuffer objects used in the program.
     FboType       current_rendered_buffer_; ///< The current rendered buffer (front or back)
 
-    FboKeyToFbo   fbo_key_to_fbo_pool_index_; ///< Link between a FBO key and its relative FBO index in the pool.
-    FboPool       fbo_pool_;                  ///< Pool of FBOs to be used for by priority rendering.
-    FboPoolStatus fbo_pool_status_;           ///< State of each FBO in the pool.
+    FboKeyToFbo          fbo_key_to_fbo_pool_index_; ///< Link between a FBO key and its relative FBO index in the pool.
+    FboTexturePool       fbo_texture_pool_;          ///< Pool of textures to be used for by priority rendering.
+    FboTexturePoolStatus fbo_texture_pool_status_;   ///< State of each texture in the pool.
 
     bool is_legacy_opengl_{}; ///< True if rendering in legacy opengl.
 

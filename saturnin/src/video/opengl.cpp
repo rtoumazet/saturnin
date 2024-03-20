@@ -128,8 +128,8 @@ void Opengl::initialize() {
         std::vector<u8>().swap(indexes);
     }
 
-    for (auto& status : fbo_pool_status_) {
-        status = FboStatus::unused;
+    for (auto& status : fbo_texture_pool_status_) {
+        status = FboTextureStatus::unused;
     }
 }
 
@@ -342,7 +342,7 @@ void Opengl::displayFramebuffer(core::EmulatorContext& state) {
                 }
                 global_parts_list[{priority, Layer::sprite}] = std::move(local_parts);
                 // Sprite layer is recalculated every time, there's no cache for now.
-                setFboStatus(priority, Layer::sprite, FboStatus::to_clear);
+                setFboTextureStatus(priority, Layer::sprite, FboTextureStatus::to_clear);
             }
         };
 
@@ -431,9 +431,9 @@ void Opengl::displayFramebuffer(core::EmulatorContext& state) {
     }
 }
 
-void Opengl::renderToAvailableFbo(const FboKey& key, const PartsList& parts_list) {
+void Opengl::renderToAvailableTexture(const FboKey& key, const PartsList& parts_list) {
     Log::debug(Logger::opengl, "renderToAvailableFbo() call");
-    const auto index = getAvailableFboIndex();
+    const auto index = getAvailableFboTextureIndex();
     if (!index) {
         Log::debug(Logger::opengl, "- No FBO available for rendering");
         Log::debug(Logger::opengl, "renderToAvailableFbo() return");
@@ -447,22 +447,20 @@ void Opengl::renderToAvailableFbo(const FboKey& key, const PartsList& parts_list
                layer_to_name.at(layer),
                *index);
 
-    bindFbo(fbo_pool_[*index].first);
-    renderParts(parts_list);
-    unbindFbo();
+    renderParts(parts_list, fbo_texture_pool_[*index]);
 
     Log::debug(Logger::opengl, "- Changing FBO status at index {} to 'reuse'", *index);
 
-    fbo_pool_status_[*index]        = FboStatus::reuse;
-    fbo_key_to_fbo_pool_index_[key] = *index;
+    fbo_texture_pool_status_[*index] = FboTextureStatus::reuse;
+    fbo_key_to_fbo_pool_index_[key]  = *index;
 
     Log::debug(Logger::opengl, "renderToAvailableFbo() return");
 }
 
-void Opengl::clearFbos() {
-    Log::debug(Logger::opengl, "clearFbos() call");
-    for (u8 index = 0; auto& status : fbo_pool_status_) {
-        if (status == FboStatus::to_clear) {
+void Opengl::clearFboTextures() {
+    Log::debug(Logger::opengl, "clearFboTextures() call");
+    for (u8 index = 0; auto& status : fbo_texture_pool_status_) {
+        if (status == FboTextureStatus::to_clear) {
             Log::debug(Logger::opengl, "    Clearing FBO at index {}", index);
             bindFbo(fbo_pool_[index].first);
 
@@ -472,7 +470,7 @@ void Opengl::clearFbos() {
             unbindFbo();
 
             Log::debug(Logger::opengl, "- Changing FBO status at index {} to 'unused'", index);
-            status = FboStatus::unused;
+            status = FboTextureStatus::unused;
         }
     }
     Log::debug(Logger::opengl, "clearFbos() return");
@@ -498,20 +496,20 @@ void Opengl::bindFbo(const u32 fbo_id) {
 
 void Opengl::unbindFbo() { bindFbo(0); }
 
-auto Opengl::getAvailableFboIndex() -> std::optional<u8> {
-    std::array<FboStatus, 1> status = {FboStatus::unused};
-    const auto               result = std::ranges::find_first_of(fbo_pool_status_, status);
-    if (result == fbo_pool_status_.end()) {
+auto Opengl::getAvailableFboTextureIndex() -> std::optional<u8> {
+    std::array<FboTextureStatus, 1> status = {FboTextureStatus::unused};
+    const auto                      result = std::ranges::find_first_of(fbo_texture_pool_status_, status);
+    if (result == fbo_texture_pool_status_.end()) {
         Log::warning(Logger::opengl, "No FBO available in the pool !");
         return std::nullopt;
     } else {
-        const auto index = static_cast<u8>(std::distance(fbo_pool_status_.begin(), result));
+        const auto index = static_cast<u8>(std::distance(fbo_texture_pool_status_.begin(), result));
         Log::debug(Logger::opengl, "Available FBO index : {}", index);
         return std::optional(index);
     }
 }
 
-void Opengl::renderParts(const PartsList& parts_list) {
+void Opengl::renderParts(const PartsList& parts_list, const u32 texture_id) {
     if (!parts_list.empty()) {
         const auto [vao, vertex_buffer] = initializeVao(ShaderName::textured);
 
@@ -530,7 +528,7 @@ void Opengl::renderParts(const PartsList& parts_list) {
         const auto sampler_loc = glGetUniformLocation(program_shader_, "sampler");
 
         glUniform1i(sampler_loc, 0);
-        glBindTexture(GL_TEXTURE_2D_ARRAY, texture_array_id_);
+        glBindTexture(GL_TEXTURE_2D_ARRAY, texture_id);
 
         const auto texture_used_loc = glGetUniformLocation(program_shader_, "is_texture_used");
 
@@ -642,12 +640,12 @@ void Opengl::render() {
 
         getPartsFromThread();
 
-        clearFbos();
+        clearFboTextures();
         clearFboKeys();
 
         // Rendering is done to FBOs depending on the priority and layer combo.
         for (const auto& [key, parts] : global_parts_list) {
-            renderToAvailableFbo(key, parts);
+            renderToAvailableTexture(key, parts);
         }
 
         preRender();
@@ -655,7 +653,7 @@ void Opengl::render() {
         // :TODO: Render the FBOs to the current framebuffer
         std::ranges::reverse_view rv{fbo_key_to_fbo_pool_index_};
         for (const auto& [key, index] : rv) {
-            renderFboTexture(fbo_pool_[index].second);
+            renderFboTexture(fbo_texture_pool_[index]);
         }
 
         postRender();
@@ -677,7 +675,7 @@ void Opengl::render() {
             if (!parts_list_.empty()) { parts_list = std::move(parts_list_); }
         }
 
-        renderParts(parts_list);
+        renderParts(parts_list, texture_array_id_);
         // if (!parts_list.empty()) {
         //     const auto [vao, vertex_buffer] = initializeVao(ShaderName::textured);
 
@@ -1348,20 +1346,20 @@ auto Opengl::getFboPoolIndex(const u8 priority, const Layer layer) -> std::optio
     return std::nullopt;
 }
 
-void Opengl::setFboStatus(const u8 priority, const Layer layer, const FboStatus state) {
+void Opengl::setFboTextureStatus(const u8 priority, const Layer layer, const FboTextureStatus state) {
     const auto index = getFboPoolIndex(priority, layer);
     if (!index) { return; }
 
-    fbo_pool_status_[*index] = state;
+    fbo_texture_pool_status_[*index] = state;
 }
 
-void Opengl::setFboStatus(const u8 priority, const ScrollScreen screen, const FboStatus state) {
-    setFboStatus(priority, screen_to_layer.at(screen), state);
+void Opengl::setFboTextureStatus(const u8 priority, const ScrollScreen screen, const FboTextureStatus state) {
+    setFboTextureStatus(priority, screen_to_layer.at(screen), state);
 }
 
-void Opengl::setFboStatus(const ScrollScreen screen, const FboStatus state) {
+void Opengl::setFboTextureStatus(const ScrollScreen screen, const FboTextureStatus state) {
     for (auto priority = u8{1}; priority < 8; ++priority) {
-        setFboStatus(priority, screen_to_layer.at(screen), state);
+        setFboTextureStatus(priority, screen_to_layer.at(screen), state);
     }
 }
 
@@ -1643,10 +1641,10 @@ auto Opengl::initializeVao(const ShaderName name) -> std::tuple<u32, u32> {
 
 void Opengl::initializeFbos() {
     // Generating a list of FBOs to be used for by priority rendering.
-    for (u32 i = 0; i < max_fbo_by_priority; ++i) {
-        fbo_pool_[i]        = generateFbo();
-        fbo_pool_status_[i] = FboStatus::unused;
-    }
+    // for (u32 i = 0; i < max_fbo_by_priority; ++i) {
+    //    fbo_pool_[i]        = generateFbo();
+    //    fbo_pool_status_[i] = FboStatus::unused;
+    //}
 
     // A FBO (and its related texture) is generated for every FboType.
     // Front and back buffers are switched every frame : one will be used as the last complete rendering by the GUI while the
@@ -1655,12 +1653,13 @@ void Opengl::initializeFbos() {
     fbo_global_list_.try_emplace(FboType::back_buffer, generateFbo());
     fbo_global_list_.try_emplace(FboType::vdp1_debug_overlay, generateFbo());
     fbo_global_list_.try_emplace(FboType::vdp2_debug_layer, generateFbo());
+    fbo_global_list_.try_emplace(FboType::priority, generateFbo());
 
     currentRenderedBuffer(FboType::front_buffer);
     glBindFramebuffer(GL_FRAMEBUFFER, getFboTextureId(currentRenderedBuffer()));
 }
 
-auto Opengl::generateFbo() -> FboData {
+auto Opengl::generateFboTexture() -> u32 {
     auto fbo     = u32{};
     auto texture = u32{};
     if (is_legacy_opengl_) {
