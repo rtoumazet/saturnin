@@ -294,13 +294,13 @@ auto Vdp2::getSpritePriority(const u8 register_number) const -> u8 {
 }
 
 // NOLINTNEXTLINE(readability-convert-member-functions-to-static)
-auto Vdp2::getColorOffset(const Layer layer) -> ColorOffset {
+auto Vdp2::getColorOffset(const VdpLayer layer) -> ColorOffset {
     using Clofen    = Vdp2Regs::Clofen;
     using Clofsl    = Vdp2Regs::Clofsl;
     auto enable_bit = Clofen::ColorOffsetEnable{};
     auto select_bit = Clofsl::ColorOffsetSelect{};
     switch (layer) {
-        using enum Layer;
+        using enum VdpLayer;
         case nbg0: {
             enable_bit = regs_.clofen >> Clofen::n0coen_enum;
             select_bit = regs_.clofsl >> Clofsl::n0cosl_enum;
@@ -2702,7 +2702,7 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
             screen.screen_scroll_vertical_fractional   = static_cast<u8>(regs_.scydn0 >> Scdn::nscd_shft);
 
             // Color offset
-            screen.color_offset = getColorOffset(Layer::nbg0);
+            screen.color_offset = getColorOffset(VdpLayer::nbg0);
 
             break;
         case nbg1:
@@ -2760,7 +2760,7 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
             screen.screen_scroll_vertical_fractional   = static_cast<u8>(regs_.scydn1 >> Scdn::nscd_shft);
 
             // Color offset
-            screen.color_offset = getColorOffset(Layer::nbg1);
+            screen.color_offset = getColorOffset(VdpLayer::nbg1);
             break;
         case nbg2:
             // Color RAM
@@ -2809,7 +2809,7 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
             screen.screen_scroll_vertical_integer   = regs_.scyn2 >> Scin::nsci_shft;
 
             // Color offset
-            screen.color_offset = getColorOffset(Layer::nbg2);
+            screen.color_offset = getColorOffset(VdpLayer::nbg2);
             break;
 
         case nbg3:
@@ -2859,7 +2859,7 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
             screen.screen_scroll_vertical_integer   = regs_.scyn3 >> Scin::nsci_shft;
 
             // Color offset
-            screen.color_offset = getColorOffset(Layer::nbg3);
+            screen.color_offset = getColorOffset(VdpLayer::nbg3);
             break;
 
         case rbg0:
@@ -2924,7 +2924,7 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
             screen.bitmap_start_address             = getBitmapStartAddress(screen.map_offset);
 
             // Color offset
-            screen.color_offset = getColorOffset(Layer::rbg0);
+            screen.color_offset = getColorOffset(VdpLayer::rbg0);
             break;
 
         case rbg1:
@@ -2983,7 +2983,7 @@ void Vdp2::updateScrollScreenStatus(const ScrollScreen s) {
             screen.cell_size = cell_size * getDotSize(screen.character_color_number) / bits_in_a_byte;
 
             // Color offset
-            screen.color_offset = getColorOffset(Layer::rbg1);
+            screen.color_offset = getColorOffset(VdpLayer::rbg1);
             break;
         default: Log::warning(Logger::vdp2, tr("Scroll screen not set !"));
     }
@@ -4219,16 +4219,16 @@ auto screenName(const ScrollScreen& ss) -> std::string {
     }
 }
 
-auto scrollScreenToLayer(const ScrollScreen& ss) -> Layer {
+auto scrollScreenToLayer(const ScrollScreen& ss) -> VdpLayer {
     switch (ss) {
         using enum ScrollScreen;
-        case nbg0: return Layer::nbg0;
-        case nbg1: return Layer::nbg1;
-        case nbg2: return Layer::nbg2;
-        case nbg3: return Layer::nbg3;
-        case rbg0: return Layer::rbg0;
-        case rbg1: return Layer::rbg1;
-        default: return Layer::undefined;
+        case nbg0: return VdpLayer::nbg0;
+        case nbg1: return VdpLayer::nbg1;
+        case nbg2: return VdpLayer::nbg2;
+        case nbg3: return VdpLayer::nbg3;
+        case rbg0: return VdpLayer::rbg0;
+        case rbg1: return VdpLayer::rbg1;
+        default: return VdpLayer::undefined;
     }
 }
 

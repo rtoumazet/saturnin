@@ -78,27 +78,27 @@ constexpr auto render_type = RenderType::RenderType_drawElements;
 
 constexpr auto uses_fbo = true;
 
-const std::unordered_map<ScrollScreen, Layer> screen_to_layer = {
-    {ScrollScreen::nbg3, Layer::nbg3},
-    {ScrollScreen::nbg2, Layer::nbg2},
-    {ScrollScreen::nbg1, Layer::nbg1},
-    {ScrollScreen::nbg0, Layer::nbg0},
-    {ScrollScreen::rbg1, Layer::rbg1},
-    {ScrollScreen::rbg0, Layer::rbg0}
+const std::unordered_map<ScrollScreen, VdpLayer> screen_to_layer = {
+    {ScrollScreen::nbg3, VdpLayer::nbg3},
+    {ScrollScreen::nbg2, VdpLayer::nbg2},
+    {ScrollScreen::nbg1, VdpLayer::nbg1},
+    {ScrollScreen::nbg0, VdpLayer::nbg0},
+    {ScrollScreen::rbg1, VdpLayer::rbg1},
+    {ScrollScreen::rbg0, VdpLayer::rbg0}
 };
 
-const std::unordered_map<Layer, std::string> layer_to_name = {
-    {Layer::nbg0,      "nbg0"     },
-    {Layer::rbg1,      "rbg1"     },
-    {Layer::nbg1,      "nbg1"     },
-    {Layer::exbg,      "exbg"     },
-    {Layer::nbg2,      "nbg2"     },
-    {Layer::nbg3,      "nbg3"     },
-    {Layer::rbg0,      "rbg0"     },
-    {Layer::back,      "back"     },
-    {Layer::sprite,    "sprite"   },
-    {Layer::plane,     "plane"    },
-    {Layer::undefined, "undefined"}
+const std::unordered_map<VdpLayer, std::string> layer_to_name = {
+    {VdpLayer::nbg0,      "nbg0"     },
+    {VdpLayer::rbg1,      "rbg1"     },
+    {VdpLayer::nbg1,      "nbg1"     },
+    {VdpLayer::exbg,      "exbg"     },
+    {VdpLayer::nbg2,      "nbg2"     },
+    {VdpLayer::nbg3,      "nbg3"     },
+    {VdpLayer::rbg0,      "rbg0"     },
+    {VdpLayer::back,      "back"     },
+    {VdpLayer::sprite,    "sprite"   },
+    {VdpLayer::plane,     "plane"    },
+    {VdpLayer::undefined, "undefined"}
 };
 
 Opengl::Opengl(core::Config* config) : config_(config){};
@@ -112,7 +112,7 @@ void Opengl::initialize() {
 
     glbinding::initialize(glfwGetProcAddress);
 
-    initializeFbos();
+    initializeFbo();
     initializeShaders();
     const auto vertex_textured   = createVertexShader(ShaderName::textured);
     const auto fragment_textured = createFragmentShader(ShaderName::textured);
@@ -121,7 +121,7 @@ void Opengl::initialize() {
     const auto shaders_to_delete = std::vector<u32>{vertex_textured, fragment_textured};
     deleteShaders(shaders_to_delete);
 
-    texture_array_id_ = initializeTextureArray();
+    texture_array_id_ = initializeTextureArray(texture_array_width, texture_array_height, texture_array_depth);
 
     // Clear texture array indexes data
     for (auto& [layer, indexes] : layer_to_texture_array_indexes_) {
@@ -340,9 +340,9 @@ void Opengl::displayFramebuffer(core::EmulatorContext& state) {
                 for (const auto& p : vdp1_parts) {
                     local_parts.emplace_back(p);
                 }
-                global_parts_list[{priority, Layer::sprite}] = std::move(local_parts);
+                global_parts_list[{priority, VdpLayer::sprite}] = std::move(local_parts);
                 // Sprite layer is recalculated every time, there's no cache for now.
-                setFboTextureStatus(priority, Layer::sprite, FboTextureStatus::to_clear);
+                setFboTextureStatus(priority, VdpLayer::sprite, FboTextureStatus::to_clear);
             }
         };
 
@@ -461,7 +461,7 @@ void Opengl::clearFboTextures() {
     Log::debug(Logger::opengl, "clearFboTextures() call");
     for (u8 index = 0; auto& status : fbo_texture_pool_status_) {
         if (status == FboTextureStatus::to_clear) {
-            Log::debug(Logger::opengl, "    Clearing FBO at index {}", index);
+            Log::debug(Logger::opengl, "- Clearing FBO at index {}", index);
             bindFbo(fbo_pool_[index].first);
 
             gl::glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
@@ -469,7 +469,7 @@ void Opengl::clearFboTextures() {
 
             unbindFbo();
 
-            Log::debug(Logger::opengl, "- Changing FBO status at index {} to 'unused'", index);
+            Log::debug(Logger::opengl, "- Changing FBO texture status at index {} to 'unused'", index);
             status = FboTextureStatus::unused;
         }
     }
@@ -1098,7 +1098,7 @@ void Opengl::renderVdp2DebugLayer(core::EmulatorContext& state) {
     }
 };
 
-void Opengl::addOrUpdateTexture(const size_t key, const Layer layer) {
+void Opengl::addOrUpdateTexture(const size_t key, const VdpLayer layer) {
     // If the key doesn't exist it will be automatically added.
     // If it does, opengl link will be reset in order to regenerate the texture.
     // const auto opengl_tex = getOpenglTexture(key);
@@ -1197,7 +1197,7 @@ void Opengl::generateTextures() {
 // Using the simplest (and fastest) method to pack textures in the atlas. Better algorithms could be used to
 // improve packing, but there's a non trivial performance tradeoff, with a big increase in complexity.
 // So for now, keeping things simple.
-void Opengl::packTextures(std::vector<OpenglTexture>& textures, const Layer layer) {
+void Opengl::packTextures(std::vector<OpenglTexture>& textures, const VdpLayer layer) {
     // First, indexes used by the layer are cleared and removed from the used list.
     auto empty_data = std::vector<u8>(texture_array_width * texture_array_height * 4);
     if (!layer_to_texture_array_indexes_[layer].empty()) {
@@ -1339,14 +1339,14 @@ auto Opengl::getOpenglTextureDetails(const size_t key) -> std::string {
     return details;
 }
 
-auto Opengl::getFboPoolIndex(const u8 priority, const Layer layer) -> std::optional<u8> {
+auto Opengl::getFboPoolIndex(const u8 priority, const VdpLayer layer) -> std::optional<u8> {
     if (fbo_key_to_fbo_pool_index_.contains({priority, layer})) {
         return std::optional{fbo_key_to_fbo_pool_index_[{priority, layer}]};
     }
     return std::nullopt;
 }
 
-void Opengl::setFboTextureStatus(const u8 priority, const Layer layer, const FboTextureStatus state) {
+void Opengl::setFboTextureStatus(const u8 priority, const VdpLayer layer, const FboTextureStatus state) {
     const auto index = getFboPoolIndex(priority, layer);
     if (!index) { return; }
 
@@ -1385,7 +1385,7 @@ void Opengl::generateSubTexture(const size_t key) {
     }
 }
 
-auto Opengl::getCurrentTextureArrayIndex(const Layer layer) -> u8 {
+auto Opengl::getCurrentTextureArrayIndex(const VdpLayer layer) -> u8 {
     if (layer_to_texture_array_indexes_.at(layer).empty()) {
         auto index = getNextAvailableTextureArrayIndex();
         layer_to_texture_array_indexes_.at(layer).push_back(index);
@@ -1639,16 +1639,21 @@ auto Opengl::initializeVao(const ShaderName name) -> std::tuple<u32, u32> {
     return std::make_tuple(vao, vertex_buffer);
 }
 
-void Opengl::initializeFbos() {
-    // Generating a list of FBOs to be used for by priority rendering.
+void Opengl::initializeFbo() {
+    // Generating texture array that will linked to the FBO and used for various renders.
+    fbo_texture_array_id_ = initializeTextureArray(saturn_framebuffer_width, saturn_framebuffer_height, fbo_texture_array_depth);
+
+    // Generating a the main FBO used by the renderer.
+    fbo_ = generateFbo();
+
     // for (u32 i = 0; i < max_fbo_by_priority; ++i) {
     //    fbo_pool_[i]        = generateFbo();
     //    fbo_pool_status_[i] = FboStatus::unused;
     //}
 
     // A FBO (and its related texture) is generated for every FboType.
-    // Front and back buffers are switched every frame : one will be used as the last complete rendering by the GUI while the
-    // other will be rendered to.
+    // Front and back buffers are switched every frame : one will be used as the last complete rendering by the GUI while
+    // the other will be rendered to.
     fbo_global_list_.try_emplace(FboType::front_buffer, generateFbo());
     fbo_global_list_.try_emplace(FboType::back_buffer, generateFbo());
     fbo_global_list_.try_emplace(FboType::vdp1_debug_overlay, generateFbo());
@@ -1659,9 +1664,9 @@ void Opengl::initializeFbos() {
     glBindFramebuffer(GL_FRAMEBUFFER, getFboTextureId(currentRenderedBuffer()));
 }
 
-auto Opengl::generateFboTexture() -> u32 {
-    auto fbo     = u32{};
-    auto texture = u32{};
+auto Opengl::generateFbo() -> u32 {
+    auto fbo = u32{};
+    // auto texture = u32{};
     if (is_legacy_opengl_) {
         glGenFramebuffersEXT(1, &fbo);
     } else {
@@ -1669,28 +1674,16 @@ auto Opengl::generateFboTexture() -> u32 {
     }
     glBindFramebuffer(GL_FRAMEBUFFER, fbo);
 
-    // Creating a texture for the color buffer
-    glGenTextures(1, &texture);
-    glBindTexture(GL_TEXTURE_2D, texture);
-    glTexImage2D(GL_TEXTURE_2D,
-                 0,
-                 GL_RGBA8,
-                 saturn_framebuffer_width,
-                 saturn_framebuffer_height,
-                 0,
-                 GL_RGBA,
-                 GL_UNSIGNED_BYTE,
-                 nullptr);
-
-    // No need for mipmaps, they are turned off
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     // Attaching the color texture to the fbo
-    glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, texture, 0);
+    const auto layer = 0;
+    if (is_legacy_opengl_) {
+        glFramebufferTextureLayerEXT(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, fbo_texture_array_id_, 0, layer);
+    } else {
+        glFramebufferTextureLayer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, fbo_texture_array_id_, 0, layer);
+    }
 
     if (is_legacy_opengl_) {
         const auto status = glCheckFramebufferStatusEXT(GLenum::GL_FRAMEBUFFER_EXT);
@@ -1704,10 +1697,10 @@ auto Opengl::generateFboTexture() -> u32 {
         }
     }
 
-    return std::make_pair(fbo, texture);
+    return fbo;
 }
 
-auto Opengl::initializeTextureArray() const -> u32 {
+auto Opengl::initializeTextureArray(const u32 width, const u32 height, const u32 depth) const -> u32 {
     auto texture = u32{};
     glGenTextures(1, &texture);
     glActiveTexture(GLenum::GL_TEXTURE0);
@@ -1718,9 +1711,9 @@ auto Opengl::initializeTextureArray() const -> u32 {
     glTexImage3D(GL_TEXTURE_2D_ARRAY,
                  0,                        // mipmap level
                  GL_RGBA,                  // gpu texel format
-                 texture_array_width,      // width
-                 texture_array_height,     // height
-                 texture_array_depth,      // depth
+                 width,                    // width
+                 height,                   // height
+                 depth,                    // depth
                  0,                        // border
                  GLenum::GL_RGBA,          // cpu pixel format
                  GLenum::GL_UNSIGNED_BYTE, // cpu pixel coord type

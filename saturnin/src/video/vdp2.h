@@ -780,19 +780,19 @@ class Vdp2 {
     auto getSpritePriority(const u8 register_number) const -> u8;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn	auto Vdp2::getColorOffset(const Layer layer) -> ColorOffset;
+    /// \fn	auto Vdp2::getColorOffset(const VdpLayer layer) -> ColorOffset;
     ///
     /// \brief	Returns the color offset for the specified layer.
     ///
     /// \author	Runik
     /// \date	11/08/2022
     ///
-    /// \param 	layer	The layer.
+    /// \param 	layer	The VDP layer.
     ///
     /// \returns	The color offset.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    auto getColorOffset(const Layer layer) -> ColorOffset;
+    auto getColorOffset(const VdpLayer layer) -> ColorOffset;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn	void Vdp2::refreshRegisters();
@@ -1979,7 +1979,7 @@ auto getPatternNameData1Word4CellsOver16Colors12Bits(const u32 data, const Scrol
 auto screenName(const ScrollScreen& ss) -> std::string;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \fn	auto scrollScreenToLayer(const ScrollScreen& ss) -> Layer;
+/// \fn	auto scrollScreenToLayer(const ScrollScreen& ss) -> VdpLayer;
 ///
 /// \brief	Gets the layer linked to the ScrollScreen.
 ///
@@ -1988,8 +1988,8 @@ auto screenName(const ScrollScreen& ss) -> std::string;
 ///
 /// \param 	ss	The ScrollScreen
 ///
-/// \returns	A Layer.
+/// \returns	A VdpLayer.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-auto scrollScreenToLayer(const ScrollScreen& ss) -> Layer;
+auto scrollScreenToLayer(const ScrollScreen& ss) -> VdpLayer;
 } // namespace saturnin::video

@@ -58,14 +58,15 @@ enum class ScrollScreen;
 using saturnin::core::Config;
 using utilities::toUnderlying;
 
-constexpr auto minimum_window_width  = u16{512};
-constexpr auto minimum_window_height = u16{512};
-constexpr auto texture_array_width   = u16{1024};
-constexpr auto texture_array_height  = u16{1024};
-constexpr auto texture_array_depth   = u16{64};
-constexpr auto max_fbo_by_priority   = u8{16};
+constexpr auto minimum_window_width    = u16{512};
+constexpr auto minimum_window_height   = u16{512};
+constexpr auto texture_array_width     = u16{1024};
+constexpr auto texture_array_height    = u16{1024};
+constexpr auto texture_array_depth     = u16{64};
+constexpr auto fbo_texture_array_depth = u16{20};
+constexpr auto max_fbo_by_priority     = u8{16};
 
-enum class FboType : u8 { front_buffer, back_buffer, vdp1_debug_overlay, vdp2_debug_layer, priority };
+enum class FboTextureType : u8 { front_buffer, back_buffer, vdp1_debug_overlay, vdp2_debug_layer, priority };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \enum	FboTextureStatus
@@ -79,12 +80,12 @@ enum class FboTextureStatus : u8 {
     to_clear ///< FBO will have to be cleared.
 };
 
-using FboData       = std::pair<u32, u32>; // Describes a framebuffer object. 1st is fbo id, 2nd is texture id.
-using FboGlobalList = std::unordered_map<FboType, FboData>;
+using FboData        = std::pair<u32, u32>; // Describes a framebuffer object. 1st is fbo id, 2nd is texture id.
+using FboTextureList = std::unordered_map<FboType, FboData>;
 
-using FboKey      = std::pair<u8, Layer>; // First is priority number (1 to 7, last on being the highest), second is linked layer.
-using FboKeyToFbo = std::map<FboKey, u8>; // Link between a priority to display and its relative FBO index in the FBO pool.
-using FboTexturePool       = std::array<u32, max_fbo_by_priority>; // Pool of textures ids to be used for rendering by priority.
+using FboKey = std::pair<u8, VdpLayer>; // First is priority number (1 to 7, last on being the highest), second is linked layer.
+using FboKeyToFbo    = std::map<FboKey, u8>; // Link between a priority to display and its relative FBO index in the FBO pool.
+using FboTexturePool = std::array<u32, max_fbo_by_priority>; // Pool of textures ids to be used for rendering by priority.
 using FboTexturePoolStatus = std::array<FboTextureStatus, max_fbo_by_priority>; // State of the FBOs in the pool.
 
 enum class ShaderName { textured };
@@ -162,9 +163,9 @@ struct RenderPart {
 using PartsList       = std::vector<RenderPart>;
 using GlobalPartsList = std::map<FboKey, PartsList>; // Parts list by priority + layer
 
-using LayerToTextures            = std::unordered_map<Layer, std::vector<OpenglTexture>>;
-using LayerToTextureArrayIndexes = std::unordered_map<Layer, std::vector<u8>>;
-using LayerToCacheReloadState    = std::unordered_map<Layer, bool>;
+using LayerToTextures            = std::unordered_map<VdpLayer, std::vector<OpenglTexture>>;
+using LayerToTextureArrayIndexes = std::unordered_map<VdpLayer, std::vector<u8>>;
+using LayerToCacheReloadState    = std::unordered_map<VdpLayer, bool>;
 using AddressToPlaneTexture      = std::unordered_map<u32, PlaneTexture>;
 
 using TexturesLink = std::unordered_map<size_t, OpenglTexture>;
@@ -185,7 +186,7 @@ class Opengl {
     ///@{
     /// Accessors / Mutators
     [[nodiscard]] auto currentRenderedBuffer() const { return current_rendered_buffer_; };
-    void               currentRenderedBuffer(const FboType type) { current_rendered_buffer_ = type; };
+    void               currentRenderedBuffer(const FboTextureType type) { current_rendered_buffer_ = type; };
     [[nodiscard]] auto vdp1DebugOverlayTextureId() const { return getFboTextureId(FboType::vdp1_debug_overlay); };
     [[nodiscard]] auto vdp2DebugLayerTextureId() const -> u32 { return getFboTextureId(FboType::vdp2_debug_layer); };
     [[nodiscard]] auto fps() const { return fps_; };
@@ -450,7 +451,7 @@ class Opengl {
     void renderVdp2DebugLayer(core::EmulatorContext& state);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn void saturnin::video::Opengl::addOrUpdateTexture(const size_t key, const Layer layer);
+    /// \fn void saturnin::video::Opengl::addOrUpdateTexture(const size_t key, const VdpLayer layer);
     ///
     /// \brief  Adds a texture to be created or updated on OpenGL.
     ///
@@ -460,7 +461,7 @@ class Opengl {
     /// \param  key The texture key.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    void addOrUpdateTexture(const size_t key, const Layer layer);
+    void addOrUpdateTexture(const size_t key, const VdpLayer layer);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn void saturnin::video::Opengl::removeTextureLink(const size_t key);
@@ -570,10 +571,10 @@ class Opengl {
     /// \returns	The FBO pool index if found.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    auto getFboPoolIndex(const u8 priority, const Layer layer) -> std::optional<u8>;
+    auto getFboPoolIndex(const u8 priority, const VdpLayer layer) -> std::optional<u8>;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn	void Opengl::setFboTextureStatus(const u8 priority, const Layer layer, const FboTextureStatus state);
+    /// \fn	void Opengl::setFboTextureStatus(const u8 priority, const VdpLayer layer, const FboTextureStatus state);
     ///
     /// \brief	Sets FBO status
     ///
@@ -581,11 +582,11 @@ class Opengl {
     /// \date	03/03/2024
     ///
     /// \param 	priority	The priority.
-    /// \param 	layer   	The layer.
+    /// \param 	layer   	The VDP layer.
     /// \param 	state   	The new state.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    void setFboTextureStatus(const u8 priority, const Layer layer, const FboTextureStatus state);
+    void setFboTextureStatus(const u8 priority, const VdpLayer layer, const FboTextureStatus state);
     void setFboTextureStatus(const u8 priority, const ScrollScreen screen, const FboTextureStatus state);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -649,41 +650,45 @@ class Opengl {
     static auto initializeVao(const ShaderName name) -> std::tuple<u32, u32>;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn void Opengl::initializeFbos();
+    /// \fn	void Opengl::initializeFbo();
     ///
-    /// \brief  Initializes the framebuffer objects.
+    /// \brief	Initializes the framebuffer object and related elements.
     ///
-    /// \author Runik
-    /// \date   25/04/2021
+    /// \author	Runik
+    /// \date	20/03/2024
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    void initializeFbos();
+    void initializeFbo();
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn	auto Opengl::generateFboTexture() -> u32;
+    /// \fn	auto Opengl::generateFbo() -> u32;
     ///
-    /// \brief	Generates a texture to be used with a framebuffer object.
+    /// \brief	Generates a framebuffer object.
     ///
     /// \author	Runik
     /// \date	16/02/2024
     ///
-    /// \returns    The generated texture id.
+    /// \returns	The generated fbo id.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    auto generateFboTexture() -> u32;
+    auto generateFbo() -> u32;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn	auto Opengl::initializeTextureArray() const -> u32;
+    /// \fn	auto Opengl::initializeTextureArray(const u32 width, const u32 height, const u32 depth) const -> u32;
     ///
-    /// \brief	Initializes the texture array.
+    /// \brief	Initializes a texture array.
     ///
     /// \author	Runik
     /// \date	15/09/2022
     ///
+    /// \param 	width 	The width of each texture in the array.
+    /// \param 	height	The height of each texture in the array.
+    /// \param 	depth 	The number of textures in the array.
+    ///
     /// \returns	The generated texture array id.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    auto initializeTextureArray() const -> u32;
+    auto initializeTextureArray(const u32 width, const u32 height, const u32 depth) const -> u32;
 
     auto getFboId(const FboType type) const -> u32 { return fbo_global_list_.at(type).first; };
     auto getFboTextureId(const FboType type) const -> u32 { return fbo_global_list_.at(type).second; };
@@ -692,7 +697,7 @@ class Opengl {
     auto calculateViewportPosAndSize() const -> std::tuple<u32, u32, u32, u32>;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn	void Opengl::packTextures(std::vector<OpenglTexture>& textures, const Layer layer);
+    /// \fn	void Opengl::packTextures(std::vector<OpenglTexture>& textures, const VdpLayer layer);
     ///
     /// \brief	Pack textures in a texture array of texture atlases for the selected layer.
     ///
@@ -703,7 +708,7 @@ class Opengl {
     /// \param 		   	layer   	The layer.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    void packTextures(std::vector<OpenglTexture>& textures, const Layer layer);
+    void packTextures(std::vector<OpenglTexture>& textures, const VdpLayer layer);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn	void Opengl::generateSubTexture(const size_t key);
@@ -719,19 +724,19 @@ class Opengl {
     void generateSubTexture(const size_t key);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn	auto Opengl::getCurrentTextureArrayIndex(const Layer layer) -> u8;
+    /// \fn	auto Opengl::getCurrentTextureArrayIndex(const VdpLayer layer) -> u8;
     ///
     /// \brief	Returns the current texture array index used by one layer.
     ///
     /// \author	Runik
     /// \date	15/09/2023
     ///
-    /// \param 	layer	Layer.
+    /// \param 	layer	VDP layer.
     ///
     /// \returns	The current texture array index used by the layer.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    auto getCurrentTextureArrayIndex(const Layer layer) -> u8;
+    auto getCurrentTextureArrayIndex(const VdpLayer layer) -> u8;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn	void Opengl::getNextAvailableTextureArrayIndex() const;
@@ -882,8 +887,10 @@ class Opengl {
 
     core::Config* config_; ///< Configuration object.
 
-    FboGlobalList fbo_global_list_;         ///< List of framebuffer objects used in the program.
-    FboType       current_rendered_buffer_; ///< The current rendered buffer (front or back)
+    u32            fbo_;                     ///< The main framebuffer object.
+    u32            fbo_texture_array_id_;    ///< Identifier for the texture array used by the FBO.
+    FboGlobalList  fbo_global_list_;         ///< List of framebuffer objects used in the program.
+    FboTextureType current_rendered_buffer_; ///< The current rendered buffer (front or back)
 
     FboKeyToFbo          fbo_key_to_fbo_pool_index_; ///< Link between a FBO key and its relative FBO index in the pool.
     FboTexturePool       fbo_texture_pool_;          ///< Pool of textures to be used for by priority rendering.

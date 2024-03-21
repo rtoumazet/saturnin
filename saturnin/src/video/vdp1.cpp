@@ -126,7 +126,7 @@ void Vdp1::populateRenderData() {
     vdp1_parts_.clear();
     // Texture::discardCache(modules_.opengl(), VdpType::vdp1);
 
-    color_offset_ = modules_.vdp2()->getColorOffset(Layer::sprite);
+    color_offset_ = modules_.vdp2()->getColorOffset(VdpLayer::sprite);
 
     while ((cmdctrl >> CmdCtrl::end_enum) == CmdCtrl::EndBit::command_selection_valid) {
         auto skip_table = false;
