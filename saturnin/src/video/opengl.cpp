@@ -1459,6 +1459,31 @@ auto Opengl::generateTextureFromTextureArrayLayer(const u32 layer, const size_t 
     }
 
     return texture_array_debug_layer_id_;
+}
+auto Opengl::getTextureId(const TextureArrayType type) -> u32 {
+    // There are 2 texture arrays used in the program :
+    // - one is used as a texture atlas for VDP parts rendering (texture_array_id_)
+    // - the other as framebuffers linked to the main FBO, handling debug layers, priority rendering, front and back framebuffer
+    // (fbo_texture_array_id_), etc.
+
+    switch (type) {
+        using enum TextureArrayType;
+        case saturn_part: {
+            // Checking if the texture already exists. If not it'll be created.
+            if (texture_array_debug_layer_id_ == 0) {
+                texture_array_debug_layer_id_ = generateTexture(texture_array_width, texture_array_height, std::vector<u8>{});
+            }
+            // :TODO: update texture data based on the texture array layer specified.
+
+            return texture_array_debug_layer_id_;
+        }
+        case framebuffer: {
+            // :TODO: Search in the texture pool the id of the texture ... is it really needed ?
+            break;
+        }
+    }
+
+    return u32();
 };
 
 void Opengl::onWindowResize(const u16 width, const u16 height) { hostScreenResolution({width, height}); }
@@ -1651,17 +1676,17 @@ void Opengl::initializeFbo() {
     //    fbo_pool_status_[i] = FboStatus::unused;
     //}
 
-    // A FBO (and its related texture) is generated for every FboType.
+    // Some layers of the texture array are setup as a specific types in the FBO texture pool.
     // Front and back buffers are switched every frame : one will be used as the last complete rendering by the GUI while
     // the other will be rendered to.
-    fbo_global_list_.try_emplace(FboType::front_buffer, generateFbo());
-    fbo_global_list_.try_emplace(FboType::back_buffer, generateFbo());
-    fbo_global_list_.try_emplace(FboType::vdp1_debug_overlay, generateFbo());
-    fbo_global_list_.try_emplace(FboType::vdp2_debug_layer, generateFbo());
-    fbo_global_list_.try_emplace(FboType::priority, generateFbo());
+    // Layers not yet linked to a type will be used as a 'priority' type on demand when rendering.
+    fbo_texture_type_to_layer_.try_emplace(FboTextureType::front_buffer, getAvailableFboTextureIndex());
+    fbo_texture_type_to_layer_.try_emplace(FboTextureType::back_buffer, getAvailableFboTextureIndex());
+    fbo_texture_type_to_layer_.try_emplace(FboTextureType::vdp1_debug_overlay, getAvailableFboTextureIndex());
+    fbo_texture_type_to_layer_.try_emplace(FboTextureType::vdp2_debug_layer, getAvailableFboTextureIndex());
 
-    currentRenderedBuffer(FboType::front_buffer);
-    glBindFramebuffer(GL_FRAMEBUFFER, getFboTextureId(currentRenderedBuffer()));
+    currentRenderedBuffer(FboTextureType::front_buffer);
+    glBindFramebuffer(GL_FRAMEBUFFER, fbo_);
 }
 
 auto Opengl::generateFbo() -> u32 {

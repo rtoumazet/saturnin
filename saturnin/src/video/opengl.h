@@ -66,6 +66,7 @@ constexpr auto texture_array_depth     = u16{64};
 constexpr auto fbo_texture_array_depth = u16{20};
 constexpr auto max_fbo_by_priority     = u8{16};
 
+enum class TextureArrayType : u8 { saturn_part, framebuffer };
 enum class FboTextureType : u8 { front_buffer, back_buffer, vdp1_debug_overlay, vdp2_debug_layer, priority };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -80,8 +81,9 @@ enum class FboTextureStatus : u8 {
     to_clear ///< FBO will have to be cleared.
 };
 
-using FboData        = std::pair<u32, u32>; // Describes a framebuffer object. 1st is fbo id, 2nd is texture id.
-using FboTextureList = std::unordered_map<FboType, FboData>;
+using FboData = std::pair<u32, u32>; // Describes a framebuffer object. 1st is fbo id, 2nd is texture id.
+using FboTextureTypeToFboTextureLayer
+    = std::unordered_map<FboTextureType, u32>; // Defines the type of the FBO texture array layer.
 
 using FboKey = std::pair<u8, VdpLayer>; // First is priority number (1 to 7, last on being the highest), second is linked layer.
 using FboKeyToFbo    = std::map<FboKey, u8>; // Link between a priority to display and its relative FBO index in the FBO pool.
@@ -187,8 +189,8 @@ class Opengl {
     /// Accessors / Mutators
     [[nodiscard]] auto currentRenderedBuffer() const { return current_rendered_buffer_; };
     void               currentRenderedBuffer(const FboTextureType type) { current_rendered_buffer_ = type; };
-    [[nodiscard]] auto vdp1DebugOverlayTextureId() const { return getFboTextureId(FboType::vdp1_debug_overlay); };
-    [[nodiscard]] auto vdp2DebugLayerTextureId() const -> u32 { return getFboTextureId(FboType::vdp2_debug_layer); };
+    [[nodiscard]] auto vdp1DebugOverlayTextureId() const { return getFboTextureId(FboTextureType::vdp1_debug_overlay); };
+    [[nodiscard]] auto vdp2DebugLayerTextureId() const -> u32 { return getFboTextureId(FboTextureType::vdp2_debug_layer); };
     [[nodiscard]] auto fps() const { return fps_; };
     void               fps(std::string_view fps) { fps_ = fps; };
     void               saturnScreenResolution(const ScreenResolution& res) { saturn_screen_resolution_ = res; };
@@ -542,6 +544,8 @@ class Opengl {
 
     auto generateTextureFromTextureArrayLayer(const u32 layer, const size_t texture_key) -> u32;
 
+    auto getTextureId(const TextureArrayType type) -> u32;
+
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn	auto Opengl::getOpenglTextureDetails(const size_t key) -> std::string;
     ///
@@ -690,8 +694,8 @@ class Opengl {
 
     auto initializeTextureArray(const u32 width, const u32 height, const u32 depth) const -> u32;
 
-    auto getFboId(const FboType type) const -> u32 { return fbo_global_list_.at(type).first; };
-    auto getFboTextureId(const FboType type) const -> u32 { return fbo_global_list_.at(type).second; };
+    auto getFboTextureLayer(const FboTextureType type) const -> u32 { return fbo_texture_type_to_layer_.at(type); };
+
     void switchRenderedBuffer();
 
     auto calculateViewportPosAndSize() const -> std::tuple<u32, u32, u32, u32>;
@@ -887,14 +891,15 @@ class Opengl {
 
     core::Config* config_; ///< Configuration object.
 
-    u32            fbo_;                     ///< The main framebuffer object.
-    u32            fbo_texture_array_id_;    ///< Identifier for the texture array used by the FBO.
-    FboGlobalList  fbo_global_list_;         ///< List of framebuffer objects used in the program.
-    FboTextureType current_rendered_buffer_; ///< The current rendered buffer (front or back)
+    u32                             fbo_;                       ///< The main framebuffer object.
+    u32                             fbo_texture_array_id_;      ///< Identifier for the texture array used by the FBO.
+    FboTextureTypeToFboTextureLayer fbo_texture_type_to_layer_; ///< Links the used FBO texture array layer to a texture type.
+    FboTextureType                  current_rendered_buffer_;   ///< The current rendered buffer (front or back)
 
-    FboKeyToFbo          fbo_key_to_fbo_pool_index_; ///< Link between a FBO key and its relative FBO index in the pool.
-    FboTexturePool       fbo_texture_pool_;          ///< Pool of textures to be used for by priority rendering.
-    FboTexturePoolStatus fbo_texture_pool_status_;   ///< State of each texture in the pool.
+    FboKeyToFbo fbo_key_to_fbo_pool_index_; ///< Link between a FBO key and its relative FBO index in the pool.
+    // FboTexturePool        fbo_texture_pool_; ///< Pool of textures to be used by the FBO. Not using a texture array to ease
+    // ImGUI interaction.
+    FboTexturePoolStatus fbo_texture_pool_status_; ///< State of each texture in the pool.
 
     bool is_legacy_opengl_{}; ///< True if rendering in legacy opengl.
 
