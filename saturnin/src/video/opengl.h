@@ -693,7 +693,7 @@ class Opengl {
 
     auto initializeTextureArray(const u32 width, const u32 height, const u32 depth) const -> u32;
 
-    auto getFboTextureLayer(const FboTextureType type) const -> u32 { return fbo_texture_type_to_layer_.at(type); };
+    auto getFboTextureId(const FboTextureType type) const -> u32 { return fbo_texture_type_to_id_.at(type); };
 
     void switchRenderedBuffer();
 
@@ -710,6 +710,19 @@ class Opengl {
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     void attachTextureLayerToFbo(const u32 texture_id, const u8 layer);
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn	void Opengl::attachTextureToFbo(const u32 texture_id);
+    ///
+    /// \brief	Attachs a texture to the curently bound FBO.
+    ///
+    /// \author	Runik
+    /// \date	27/03/2024
+    ///
+    /// \param 	texture_id	Identifier for the texture.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    void attachTextureToFbo(const u32 texture_id);
 
     auto calculateViewportPosAndSize() const -> std::tuple<u32, u32, u32, u32>;
 

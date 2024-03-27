@@ -43,7 +43,7 @@ class Texture {
     /// Constructors / Destructors
     Texture() = delete;
     Texture(const VdpType    vp,
-            const Layer      layer,
+            const VdpLayer   layer,
             const u32        address,
             const u8         color_count,
             const u16        palette_number,
@@ -307,15 +307,15 @@ class Texture {
     static SharedMutex                         storage_mutex_;         ///< Used for multithreading access to the texture pool.
     static AddressToPlaneData                  address_to_plane_data_; ///< Information describing the address to plane
 
-    VdpType vdp_type_{VdpType::not_set}; ///< What kind of VDP type is linked to this texture.
-    Layer   layer_;                      ///< Layer linked to this texture.
-    u16     width_{};                    ///< The texture width.
-    u16     height_{};                   ///< The texture height.
-    bool    is_discarded_{false};        ///< True if the texture is discarded.
-    bool    is_recently_used_{true};     ///< True if the texture was used during the current frame.
-                                         //    bool    delete_on_gpu_{false};       ///< True to delete the texture on the GPU.
-    size_t key_{};                       ///< The key of the part.
-    u32    api_handle_{};                ///< Handle to the graphics API.
+    VdpType  vdp_type_{VdpType::not_set}; ///< What kind of VDP type is linked to this texture.
+    VdpLayer layer_;                      ///< Layer linked to this texture.
+    u16      width_{};                    ///< The texture width.
+    u16      height_{};                   ///< The texture height.
+    bool     is_discarded_{false};        ///< True if the texture is discarded.
+    bool     is_recently_used_{true};     ///< True if the texture was used during the current frame.
+                                          //    bool    delete_on_gpu_{false};       ///< True to delete the texture on the GPU.
+    size_t key_{};                        ///< The key of the part.
+    u32    api_handle_{};                 ///< Handle to the graphics API.
 
     std::vector<u8> raw_data_{}; ///< Raw texture data.
 };

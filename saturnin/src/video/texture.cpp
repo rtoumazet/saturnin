@@ -35,7 +35,7 @@ SharedMutex                         Texture::storage_mutex_;
 AddressToPlaneData                  Texture::address_to_plane_data_;
 
 Texture::Texture(const VdpType    vp,
-                 const Layer      layer,
+                 const VdpLayer   layer,
                  const u32        address,
                  const u8         color_count,
                  const u16        palette_number,

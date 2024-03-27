@@ -76,7 +76,7 @@ constexpr auto check_gl_error = 1;
 constexpr enum class RenderType { RenderType_drawElements, RenderType_drawTest };
 constexpr auto render_type = RenderType::RenderType_drawElements;
 
-constexpr auto uses_fbo = true;
+constexpr auto uses_fbo = false;
 
 const std::unordered_map<ScrollScreen, VdpLayer> screen_to_layer = {
     {ScrollScreen::nbg3, VdpLayer::nbg3},
@@ -150,7 +150,7 @@ void Opengl::shutdown() const {
 void Opengl::preRender() {
     switchRenderedBuffer();
 
-    attachTextureLayerToFbo(fbo_texture_array_id_, getFboTextureLayer(currentRenderedBuffer()));
+    attachTextureToFbo(getFboTextureId(currentRenderedBuffer()));
 
     // Viewport is the entire Saturn framebuffer
     glViewport(0, 0, saturn_framebuffer_width, saturn_framebuffer_height);
@@ -453,30 +453,32 @@ void Opengl::renderToAvailableTexture(const FboKey& key, const PartsList& parts_
 }
 
 void Opengl::clearFboTextures() {
-    Log::debug(Logger::opengl, "clearFboTextures() call");
-    for (u8 index = 0; auto& status : fbo_texture_pool_status_) {
-        if (status == FboTextureStatus::to_clear) {
-            Log::debug(Logger::opengl, "- Clearing texture at index {}", index);
-            attachTextureLayerToFbo(fbo_texture_array_id_, index);
+    // Log::debug(Logger::opengl, "clearFboTextures() call");
+    // for (u8 index = 0; auto& status : fbo_texture_pool_status_) {
+    //     if (status == FboTextureStatus::to_clear) {
+    //         // :WIP:
+    //         // Log::debug(Logger::opengl, "- Clearing texture at index {}", index);
+    //         // attachTextureLayerToFbo(fbo_texture_array_id_, index);
+    //         // attachTextureToFbo(getFboTextureId(FboTextureType::vdp2_debug_layer));
 
-            gl::glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-            glClear(GL_COLOR_BUFFER_BIT);
+    //        // gl::glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+    //        // glClear(GL_COLOR_BUFFER_BIT);
 
-            Log::debug(Logger::opengl, "- Changing FBO texture status at index {} to 'unused'", index);
-            status = FboTextureStatus::unused;
-        }
-    }
-    Log::debug(Logger::opengl, "clearFbos() return");
+    //        // Log::debug(Logger::opengl, "- Changing FBO texture status at index {} to 'unused'", index);
+    //        // status = FboTextureStatus::unused;
+    //    }
+    //}
+    // Log::debug(Logger::opengl, "clearFbos() return");
 }
 
 void Opengl::clearFboKeys() {
-    Log::debug(Logger::opengl, "clearFboKeys() call");
-    const auto count = std::erase_if(fbo_key_to_fbo_pool_index_, [this](const auto& item) {
-        auto const& [key, index] = item;
-        return fbo_pool_status_[index] != FboStatus::reuse;
-    });
-    Log::debug(Logger::opengl, "- {} FBO key(s) erased", count);
-    Log::debug(Logger::opengl, "clearFboKeys() return");
+    // Log::debug(Logger::opengl, "clearFboKeys() call");
+    // const auto count = std::erase_if(fbo_key_to_fbo_pool_index_, [this](const auto& item) {
+    //     auto const& [key, index] = item;
+    //     return fbo_pool_status_[index] != FboStatus::reuse;
+    // });
+    // Log::debug(Logger::opengl, "- {} FBO key(s) erased", count);
+    // Log::debug(Logger::opengl, "clearFboKeys() return");
 }
 
 void Opengl::bindFbo(const u32 fbo_id) {
@@ -907,7 +909,7 @@ auto Opengl::getRenderedBufferTextureId() const -> u32 { return getFboTextureId(
 
 void Opengl::renderVdp1DebugOverlay() {
     //----------- Pre render -----------//
-    attachTextureLayerToFbo(fbo_texture_array_id_, fbo_texture_type_to_layer_.at(FboTextureType::vdp1_debug_overlay));
+    attachTextureToFbo(getFboTextureId(FboTextureType::vdp1_debug_overlay));
 
     // Viewport is the entire Saturn framebuffer
     glViewport(0, 0, saturn_framebuffer_width, saturn_framebuffer_height);
@@ -971,7 +973,7 @@ void Opengl::renderVdp1DebugOverlay() {
 
 void Opengl::renderVdp2DebugLayer(core::EmulatorContext& state) {
     //----------- Pre render -----------//
-    attachTextureLayerToFbo(fbo_texture_array_id_, fbo_texture_type_to_layer_.at(FboTextureType::vdp2_debug_layer));
+    attachTextureToFbo(getFboTextureId(FboTextureType::vdp2_debug_layer));
 
     // Viewport is the entire Saturn framebuffer
     glViewport(0, 0, saturn_framebuffer_width, saturn_framebuffer_height);
@@ -1650,25 +1652,25 @@ void Opengl::initializeFbo() {
         fbo_texture_pool_status_[i] = FboTextureStatus::unused;
     }
 
-    // Generating a the main FBO used by the renderer.
-    fbo_ = generateFbo();
-
     // Some textures are setup as a specific types in the FBO texture pool.
     // Front and back buffers are switched every frame : one will be used as the last complete rendering by the GUI while
     // the other will be rendered to.
     // Textures not yet linked to a type will be used as a 'priority' type on demand when rendering.
-    fbo_texture_type_to_id_.try_emplace(FboTextureType::front_buffer, getAvailableFboTextureIndex());
-    fbo_texture_type_to_id_.try_emplace(FboTextureType::back_buffer, getAvailableFboTextureIndex());
-    fbo_texture_type_to_id_.try_emplace(FboTextureType::vdp1_debug_overlay, getAvailableFboTextureIndex());
-    fbo_texture_type_to_id_.try_emplace(FboTextureType::vdp2_debug_layer, getAvailableFboTextureIndex());
+    fbo_texture_type_to_id_.try_emplace(FboTextureType::front_buffer, fbo_texture_pool_[*getAvailableFboTextureIndex()]);
+    fbo_texture_type_to_id_.try_emplace(FboTextureType::back_buffer, fbo_texture_pool_[*getAvailableFboTextureIndex()]);
+    fbo_texture_type_to_id_.try_emplace(FboTextureType::vdp1_debug_overlay, fbo_texture_pool_[*getAvailableFboTextureIndex()]);
+    fbo_texture_type_to_id_.try_emplace(FboTextureType::vdp2_debug_layer, fbo_texture_pool_[*getAvailableFboTextureIndex()]);
 
     currentRenderedBuffer(FboTextureType::front_buffer);
+
+    // Generating the main FBO used by the renderer.
+    fbo_ = generateFbo();
+
     glBindFramebuffer(GL_FRAMEBUFFER, fbo_);
 }
 
 auto Opengl::generateFbo() -> u32 {
     auto fbo = u32{};
-    // auto texture = u32{};
     if (is_legacy_opengl_) {
         glGenFramebuffersEXT(1, &fbo);
     } else {
@@ -1679,9 +1681,8 @@ auto Opengl::generateFbo() -> u32 {
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    // Attaching the color texture to the fbo
-    const auto layer = 0;
-    attachTextureLayerToFbo(fbo_texture_array_id_, layer);
+    // Attaching the color texture currently used as framebuffer to the FBO.
+    attachTextureToFbo(getFboTextureId(currentRenderedBuffer()));
 
     if (is_legacy_opengl_) {
         const auto status = glCheckFramebufferStatusEXT(GLenum::GL_FRAMEBUFFER_EXT);
@@ -1740,6 +1741,14 @@ void Opengl::attachTextureLayerToFbo(const u32 texture_id, const u8 layer) {
         glFramebufferTextureLayerEXT(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, texture_id, 0, layer);
     } else {
         glFramebufferTextureLayer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, texture_id, 0, layer);
+    }
+}
+
+void Opengl::attachTextureToFbo(const u32 texture_id) {
+    if (is_legacy_opengl_) {
+        glFramebufferTextureEXT(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, texture_id, 0);
+    } else {
+        glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, texture_id, 0);
     }
 }
 
