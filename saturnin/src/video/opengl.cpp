@@ -523,7 +523,7 @@ void Opengl::renderParts(const PartsList& parts_list, const u32 texture_id) {
         const auto sampler_loc = glGetUniformLocation(program_shader_, "sampler");
 
         glUniform1i(sampler_loc, 0);
-        glBindTexture(GL_TEXTURE_2D_ARRAY, texture_id);
+        glBindTexture(GL_TEXTURE_2D, texture_id);
 
         const auto texture_used_loc = glGetUniformLocation(program_shader_, "is_texture_used");
 
@@ -670,7 +670,9 @@ void Opengl::render() {
             if (!parts_list_.empty()) { parts_list = std::move(parts_list_); }
         }
 
-        renderParts(parts_list, texture_array_id_);
+        // renderParts(parts_list, texture_array_id_);
+        renderParts(parts_list, getFboTextureId(currentRenderedBuffer()));
+
         // if (!parts_list.empty()) {
         //     const auto [vao, vertex_buffer] = initializeVao(ShaderName::textured);
 
