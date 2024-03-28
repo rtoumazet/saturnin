@@ -116,7 +116,7 @@ void Opengl::initialize() {
     initializeShaders();
     const auto vertex_textured   = createVertexShader(ShaderName::textured);
     const auto fragment_textured = createFragmentShader(ShaderName::textured);
-    program_shader_              = createProgramShader(vertex_textured, fragment_textured);
+    program_shaders_.push_back(createProgramShader(vertex_textured, fragment_textured));
 
     const auto shaders_to_delete = std::vector<u32>{vertex_textured, fragment_textured};
     deleteShaders(shaders_to_delete);
@@ -127,14 +127,13 @@ void Opengl::initialize() {
     for (auto& [layer, indexes] : layer_to_texture_array_indexes_) {
         std::vector<u8>().swap(indexes);
     }
-
-    for (auto& status : fbo_texture_pool_status_) {
-        status = FboTextureStatus::unused;
-    }
 }
 
 void Opengl::shutdown() const {
-    glDeleteProgram(program_shader_);
+    for (const auto shader : program_shaders_) {
+        glDeleteProgram(shader);
+    }
+
     if (is_legacy_opengl_) {
         glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
         glDeleteFramebuffersEXT(1, &fbo_);
@@ -284,13 +283,15 @@ void Opengl::initializeShaders() {
 
         out vec4 out_color;
 
-        uniform sampler2DArray sampler;
+        //uniform sampler2DArray sampler;
+        uniform sampler2D sampler;
         uniform bool is_texture_used;
 
         void main()
         {
             if(is_texture_used){
-                out_color = texture(sampler, frg_tex_coord.xyz);
+                //out_color = texture(sampler, frg_tex_coord.xyz);
+                out_color = texture(sampler, frg_tex_coord.xy);
             }else{
                 out_color = frg_color;
             }

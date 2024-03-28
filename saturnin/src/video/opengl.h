@@ -92,9 +92,11 @@ using FboTexturePoolStatus = std::array<FboTextureStatus, max_fbo_texture>; // S
 enum class ShaderName { textured };
 enum class ShaderType { vertex, fragment };
 enum class GlslVersion { glsl_120, glsl_330 };
+enum class ProgramShaderName { texture_array, texture };
 
-using ShaderKey   = std::tuple<GlslVersion, ShaderType, ShaderName>;
-using ShadersList = std::map<ShaderKey, const char*>;
+using ShaderKey          = std::tuple<GlslVersion, ShaderType, ShaderName>;
+using ShadersList        = std::map<ShaderKey, const char*>;
+using ProgramShadersList = std::map<ProgramShaderName, u32>;
 
 struct OpenglTexture {
     size_t                          key;                 ///< The Saturn texture key.
@@ -951,8 +953,8 @@ class Opengl {
     PartsList parts_list_debug_; ///< List of parts used to generate textures for debugging
                                  // Will have to be moved to the platform agnostic renderer.
 
-    u32         program_shader_; ///< Program shader used to render parts.
-    ShadersList shaders_list_;   ///< List of shaders.
+    ProgramShadersList program_shaders_; ///< List of program shaders used to render parts
+    ShadersList        shaders_list_;    ///< List of shaders.
 
     std::string fps_; ///< The frames per second.
 };
