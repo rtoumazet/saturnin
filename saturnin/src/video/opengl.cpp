@@ -114,9 +114,9 @@ void Opengl::initialize() {
 
     initializeFbo();
     initializeShaders();
-    const auto vertex_textured   = createVertexShader(ShaderName::textured);
-    const auto fragment_textured = createFragmentShader(ShaderName::textured);
-    program_shaders_.push_back(createProgramShader(vertex_textured, fragment_textured));
+    const auto vertex_textured                               = createVertexShader(ShaderName::textured);
+    const auto fragment_textured                             = createFragmentShader(ShaderName::textured);
+    program_shaders_[ProgramShaderName::using_texture_array] = createProgramShader(vertex_textured, fragment_textured);
 
     const auto shaders_to_delete = std::vector<u32>{vertex_textured, fragment_textured};
     deleteShaders(shaders_to_delete);
@@ -130,7 +130,7 @@ void Opengl::initialize() {
 }
 
 void Opengl::shutdown() const {
-    for (const auto shader : program_shaders_) {
+    for (const auto& [name, shader] : program_shaders_) {
         glDeleteProgram(shader);
     }
 
@@ -507,9 +507,10 @@ auto Opengl::getAvailableFboTextureIndex() -> std::optional<u8> {
 
 void Opengl::renderParts(const PartsList& parts_list, const u32 texture_id) {
     if (!parts_list.empty()) {
+        const auto current_program      = program_shaders_[ProgramShaderName::using_texture_array];
         const auto [vao, vertex_buffer] = initializeVao(ShaderName::textured);
 
-        glUseProgram(program_shader_);
+        glUseProgram(current_program);
         glBindVertexArray(vao);                       // binding VAO
         glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer); // binding vertex buffer
 
@@ -517,16 +518,16 @@ void Opengl::renderParts(const PartsList& parts_list, const u32 texture_id) {
         const auto proj_matrix = calculateDisplayViewportMatrix();
 
         // Sending the ortho projection matrix to the shader
-        const auto uni_proj_matrix = glGetUniformLocation(program_shader_, "proj_matrix");
+        const auto uni_proj_matrix = glGetUniformLocation(current_program, "proj_matrix");
         glUniformMatrix4fv(uni_proj_matrix, 1, GL_FALSE, glm::value_ptr(proj_matrix));
 
         glActiveTexture(GLenum::GL_TEXTURE0);
-        const auto sampler_loc = glGetUniformLocation(program_shader_, "sampler");
+        const auto sampler_loc = glGetUniformLocation(current_program, "sampler");
 
         glUniform1i(sampler_loc, 0);
-        glBindTexture(GL_TEXTURE_2D, texture_id);
+        glBindTexture(GL_TEXTURE_2D_ARRAY, texture_id);
 
-        const auto texture_used_loc = glGetUniformLocation(program_shader_, "is_texture_used");
+        const auto texture_used_loc = glGetUniformLocation(current_program, "is_texture_used");
 
         auto elements_buffer = u32{};
         glGenBuffers(1, &elements_buffer); // This buffer will be used to send indices data to the GPU
@@ -560,8 +561,9 @@ void Opengl::renderParts(const PartsList& parts_list, const u32 texture_id) {
 
 void Opengl::renderFboTexture(const u32 texture_id) {
     const auto [vao, vertex_buffer] = initializeVao(ShaderName::textured);
+    const auto current_program      = program_shaders_[ProgramShaderName::using_texture_array];
 
-    glUseProgram(program_shader_);
+    glUseProgram(current_program);
     glBindVertexArray(vao);                       // binding VAO
     glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer); // binding vertex buffer
 
@@ -569,16 +571,16 @@ void Opengl::renderFboTexture(const u32 texture_id) {
     const auto proj_matrix = calculateDisplayViewportMatrix();
 
     // Sending the ortho projection matrix to the shader
-    const auto uni_proj_matrix = glGetUniformLocation(program_shader_, "proj_matrix");
+    const auto uni_proj_matrix = glGetUniformLocation(current_program, "proj_matrix");
     glUniformMatrix4fv(uni_proj_matrix, 1, GL_FALSE, glm::value_ptr(proj_matrix));
 
     glActiveTexture(GLenum::GL_TEXTURE0);
-    const auto sampler_loc = glGetUniformLocation(program_shader_, "sampler");
+    const auto sampler_loc = glGetUniformLocation(current_program, "sampler");
 
     glUniform1i(sampler_loc, 0);
     glBindTexture(GL_TEXTURE_2D, texture_id);
 
-    const auto texture_used_loc = glGetUniformLocation(program_shader_, "is_texture_used");
+    const auto texture_used_loc = glGetUniformLocation(current_program, "is_texture_used");
     glUniform1i(texture_used_loc, GLboolean(true));
 
     auto vertexes = std::vector<Vertex>{
@@ -671,8 +673,8 @@ void Opengl::render() {
             if (!parts_list_.empty()) { parts_list = std::move(parts_list_); }
         }
 
-        // renderParts(parts_list, texture_array_id_);
-        renderParts(parts_list, getFboTextureId(currentRenderedBuffer()));
+        renderParts(parts_list, texture_array_id_);
+        // renderParts(parts_list, getFboTextureId(currentRenderedBuffer()));
 
         // if (!parts_list.empty()) {
         //     const auto [vao, vertex_buffer] = initializeVao(ShaderName::textured);
@@ -740,8 +742,9 @@ void Opengl::renderTest() {
     preRender();
 
     const auto [vao, vertex_buffer] = initializeVao(ShaderName::textured);
+    const auto current_program      = program_shaders_[ProgramShaderName::using_texture_array];
 
-    glUseProgram(program_shader_);
+    glUseProgram(current_program);
     glBindVertexArray(vao);                       // binding VAO
     glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer); // binding vertex buffer
 
@@ -749,16 +752,16 @@ void Opengl::renderTest() {
     const auto proj_matrix = calculateDisplayViewportMatrix();
 
     // Sending the ortho projection matrix to the shader
-    const auto uni_proj_matrix = glGetUniformLocation(program_shader_, "proj_matrix");
+    const auto uni_proj_matrix = glGetUniformLocation(current_program, "proj_matrix");
     glUniformMatrix4fv(uni_proj_matrix, 1, GL_FALSE, glm::value_ptr(proj_matrix));
 
     glActiveTexture(GLenum::GL_TEXTURE0);
-    const auto sampler_loc = glGetUniformLocation(program_shader_, "sampler");
+    const auto sampler_loc = glGetUniformLocation(current_program, "sampler");
     // glUniform1i(sampler_loc, GLenum::GL_TEXTURE0);
     glUniform1i(sampler_loc, 0);
     glBindTexture(GL_TEXTURE_2D_ARRAY, texture_array_id_);
 
-    const auto texture_used_loc = glGetUniformLocation(program_shader_, "is_texture_used");
+    const auto texture_used_loc = glGetUniformLocation(current_program, "is_texture_used");
     // Sending the variable to configure the shader to use texture data.
     const auto is_texture_used = GLboolean(false);
     glUniform1i(texture_used_loc, is_texture_used);
@@ -949,7 +952,8 @@ void Opengl::renderVdp1DebugOverlay() {
         vertexes.emplace_back(part.common_vdp_data_.vertexes[2]);
         vertexes.emplace_back(part.common_vdp_data_.vertexes[3]);
 
-        glUseProgram(program_shader_);
+        const auto current_program = program_shaders_[ProgramShaderName::using_texture_array];
+        glUseProgram(current_program);
         glBindVertexArray(vao_simple);                       // binding VAO
         glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer_simple); // binding vertex buffer
 
@@ -957,11 +961,11 @@ void Opengl::renderVdp1DebugOverlay() {
         glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * vertexes.size(), vertexes.data(), GL_STATIC_DRAW);
 
         // Sending the ortho projection matrix to the shader
-        const auto uni_proj_matrix = glGetUniformLocation(program_shader_, "proj_matrix");
+        const auto uni_proj_matrix = glGetUniformLocation(current_program, "proj_matrix");
         glUniformMatrix4fv(uni_proj_matrix, 1, GL_FALSE, glm::value_ptr(proj_matrix));
 
         // Sending the variable to configure the shader to use color.
-        const auto uni_use_texture = glGetUniformLocation(program_shader_, "is_texture_used");
+        const auto uni_use_texture = glGetUniformLocation(current_program, "is_texture_used");
         const auto is_texture_used = GLboolean(false);
         glUniform1i(uni_use_texture, is_texture_used);
 
@@ -1008,20 +1012,21 @@ void Opengl::renderVdp2DebugLayer(core::EmulatorContext& state) {
 
         // const auto vao_ids_array           = std::array<u32, elements_nb>{vao};
         // const auto vertex_buffer_ids_array = std::array<u32, elements_nb>{vertex_buffer};
+        const auto current_program = program_shaders_[ProgramShaderName::using_texture_array];
 
         for (auto& part : parts_list) {
             if (part.vertexes.empty()) { continue; }
 
-            glUseProgram(program_shader_);
+            glUseProgram(current_program);
             glBindVertexArray(vao);                       // binding VAO
             glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer); // binding vertex buffer
 
             // Sending the ortho projection matrix to the shader
-            const auto uni_proj_matrix = glGetUniformLocation(program_shader_, "proj_matrix");
+            const auto uni_proj_matrix = glGetUniformLocation(current_program, "proj_matrix");
             glUniformMatrix4fv(uni_proj_matrix, 1, GL_FALSE, glm::value_ptr(proj_matrix));
 
             // Sending the variable to configure the shader to use texture data.
-            const auto uni_use_texture = glGetUniformLocation(program_shader_, "is_texture_used");
+            const auto uni_use_texture = glGetUniformLocation(current_program, "is_texture_used");
             const auto is_texture_used = GLboolean(true);
             glUniform1i(uni_use_texture, is_texture_used);
 
@@ -1102,43 +1107,6 @@ void Opengl::addOrUpdateTexture(const size_t key, const VdpLayer layer) {
 
 void Opengl::removeTextureLink(const size_t key) { textures_link_.erase(key); }
 
-void Opengl::generatePlanesTextures() {
-    // A texture will be generated from each plane currently displayed, identified by its start address.
-    // One plane size can be 512*512px, 1024*512px or 1024*1024px, meaning up to 4 planes can be stored in one
-    // texture array level.
-
-    auto current_index         = getNextAvailableTextureArrayIndex();
-    auto address_to_plane_data = std::move(Texture::getPlaneData());
-    for (const auto& [addr, plane_data] : address_to_plane_data) {
-        for (const auto& part_pos : plane_data.parts_position) {
-            const auto tex = Texture::getTexture(part_pos.key);
-            if (tex) {
-                glTexSubImage3D(GL_TEXTURE_2D_ARRAY,
-                                0,
-                                part_pos.plane_position.x,
-                                part_pos.plane_position.y,
-                                current_index,
-                                8,
-                                8,
-                                1,
-                                GLenum::GL_RGBA,
-                                GLenum::GL_UNSIGNED_BYTE,
-                                (*tex)->rawData().data());
-                checkGlError();
-            }
-        }
-        auto pt = PlaneTexture{};
-        // pt.screen_offset                 = 0;
-        pt.texture_array_index = current_index;
-        pt.size                = plane_data.plane_size;
-        // pt.pos                           = 0;
-        pt.coords                        = calculateTextureCoordinates(pt.pos, pt.size, current_index);
-        address_to_plane_textures_[addr] = pt;
-    }
-
-    // layer_to_texture_array_indexes_.at(layer).push_back(current_index);
-}
-
 void Opengl::generateTextures() {
     // Textures are generated in a 128 layers texture array, each layer being a texture atlas of
     // 1024*1024 pixels.
@@ -1168,9 +1136,6 @@ void Opengl::generateTextures() {
     for (auto& [layer, textures] : layer_to_textures) {
         if (layer_to_cache_reload_state_[layer]) { packTextures(textures, layer); }
     }
-
-    // Generate planes textures, based on previously generated vdp2 parts textures.
-    // generatePlanesTextures();
 
     // Reset cache reload state
     for (auto& [layer, state] : layer_to_cache_reload_state_) {
@@ -1243,8 +1208,9 @@ void Opengl::packTextures(std::vector<OpenglTexture>& textures, const VdpLayer l
     // texture_array_max_used_layer_ = current_layer;
 }
 
-auto Opengl::calculateTextureCoordinates(const ScreenPos& pos, const Size& size, const u8 texture_array_index) const
-    -> std::vector<TextureCoordinates> {
+auto Opengl::calculateTextureCoordinates(const ScreenPos& pos,
+                                         const Size&      size,
+                                         const u8         texture_array_index) const -> std::vector<TextureCoordinates> {
     // Calculating the texture coordinates in the atlas
     // (x1,y1)     (x2,y1)
     //        .---.

@@ -92,7 +92,7 @@ using FboTexturePoolStatus = std::array<FboTextureStatus, max_fbo_texture>; // S
 enum class ShaderName { textured };
 enum class ShaderType { vertex, fragment };
 enum class GlslVersion { glsl_120, glsl_330 };
-enum class ProgramShaderName { texture_array, texture };
+enum class ProgramShaderName { using_texture_array, using_regular_texture };
 
 using ShaderKey          = std::tuple<GlslVersion, ShaderType, ShaderName>;
 using ShadersList        = std::map<ShaderKey, const char*>;
@@ -491,17 +491,6 @@ class Opengl {
     void generateTextures();
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn void Opengl::generateTextures();
-    ///
-    /// \brief  Generates the planes textures that will be used during rendering.
-    ///
-    /// \author Runik
-    /// \date   18/10/2023
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    void generatePlanesTextures();
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn	auto Opengl::getOpenglTexture(const size_t key) -> std::optional<OpenglTexture>;
     ///
     /// \brief	Gets texture identifier corresponding to the key.
@@ -799,8 +788,9 @@ class Opengl {
     /// \returns	The calculated texture coordinates of the texture.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    auto calculateTextureCoordinates(const ScreenPos& pos, const Size& size, const u8 texture_array_index) const
-        -> std::vector<TextureCoordinates>;
+    auto calculateTextureCoordinates(const ScreenPos& pos,
+                                     const Size&      size,
+                                     const u8         texture_array_index) const -> std::vector<TextureCoordinates>;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn	auto readVertexes(const PartsList& parts) -> std::vector<Vertex>
