@@ -864,7 +864,7 @@ auto Opengl::isThereSomethingToRender() const -> bool {
     if constexpr (render_type == RenderType::RenderType_drawTest) { return true; }
 }
 
-auto Opengl::getRenderedBufferTextureId() const -> u32 {
+auto Opengl::getRenderedBufferTextureId(const GuiTextureType type) const -> u32 {
     // :FIXME:
     return getFboTextureLayer(current_rendered_buffer_);
 }
@@ -1583,7 +1583,7 @@ void Opengl::initializeFbo() {
     fbo_texture_type_to_layer_.try_emplace(FboTextureType::back_buffer, 1);
     fbo_texture_type_to_layer_.try_emplace(FboTextureType::vdp1_debug_overlay, 2);
     fbo_texture_type_to_layer_.try_emplace(FboTextureType::vdp2_debug_layer, 3);
-    for (size_t i = 4; i < fbo_texture_array_depth; ++i) {
+    for (u8 i = 4; i < fbo_texture_array_depth; ++i) {
         fbo_texture_type_to_layer_.try_emplace(FboTextureType::priority, i);
     }
 

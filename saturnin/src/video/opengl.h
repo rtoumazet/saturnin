@@ -418,17 +418,19 @@ class Opengl {
     auto isThereSomethingToRender() const -> bool;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn auto Opengl::getRenderedBufferTextureId() const -> u32;
+    /// \fn auto Opengl::getRenderedBufferTextureId(const GuiTextureType type) const -> u32;
     ///
     /// \brief  Gets the texture ID of the buffer currently rendered to.
     ///
     /// \author Runik
     /// \date   06/10/2021
     ///
+    /// \param  type The texture type to get.
+    ///
     /// \returns    The rendered buffer texture identifier.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    auto getRenderedBufferTextureId() const -> u32;
+    auto getRenderedBufferTextureId(const GuiTextureType type) const -> u32;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn void Opengl::renderVdp1DebugOverlay();
@@ -464,6 +466,7 @@ class Opengl {
     /// \date   05/11/2021
     ///
     /// \param  key The texture key.
+    /// \param  layer The VDP layer.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     void addOrUpdateTexture(const size_t key, const VdpLayer layer);
