@@ -864,9 +864,10 @@ auto Opengl::isThereSomethingToRender() const -> bool {
     if constexpr (render_type == RenderType::RenderType_drawTest) { return true; }
 }
 
-auto Opengl::getRenderedBufferTextureId(const GuiTextureType type) const -> u32 {
-    // :FIXME:
-    return getFboTextureLayer(current_rendered_buffer_);
+auto Opengl::getRenderedBufferTextureId(const GuiTextureType type) -> u32 {
+    return generateTextureFromTextureArrayLayer(fbo_texture_array_id_,
+                                                getFboTextureLayer(currentRenderedBuffer()),
+                                                GuiTextureType::render_buffer);
 }
 
 void Opengl::renderVdp1DebugOverlay() {
@@ -1318,10 +1319,10 @@ auto Opengl::isSaturnResolutionSet() const -> bool {
     return (saturn_screen_resolution_.width == 0 || saturn_screen_resolution_.height == 0) ? false : true;
 }
 
-auto Opengl::generateTextureFromTextureArrayLayer(const u32            src_texture_id,
-                                                  const u32            layer,
-                                                  const size_t         texture_key,
-                                                  const GuiTextureType dst_texture_type) -> u32 {
+auto Opengl::generateTextureFromTextureArrayLayer(const u32                   src_texture_id,
+                                                  const u32                   layer,
+                                                  const GuiTextureType        dst_texture_type,
+                                                  const std::optional<size_t> texture_key) -> u32 {
     glCopyImageSubData(src_texture_id,
                        GL_TEXTURE_2D_ARRAY,
                        0,
@@ -1334,30 +1335,34 @@ auto Opengl::generateTextureFromTextureArrayLayer(const u32            src_textu
                        0,
                        0,
                        0,
-                       texture_array_width,
-                       texture_array_height,
+                       // texture_array_width,
+                       // texture_array_height,
+                       fbo_texture_array_width,  // Will have to be parametrized
+                       fbo_texture_array_height, // Will have to be parametrized
                        1);
 
-    if (texture_key > 0) {
-        const auto& tex_ogl       = getOpenglTexture(texture_key);
-        const auto& tex           = Texture::getTexture(texture_key);
-        auto        original_data = (*tex)->rawData();
-        for (auto i = 0; i < original_data.size(); i += 4) {
-            original_data[i] = 0xff;
+    if (texture_key.has_value()) {
+        if (*texture_key > 0) {
+            const auto& tex_ogl       = getOpenglTexture(*texture_key);
+            const auto& tex           = Texture::getTexture(*texture_key);
+            auto        original_data = (*tex)->rawData();
+            for (auto i = 0; i < original_data.size(); i += 4) {
+                original_data[i] = 0xff;
+            }
+
+            glBindTexture(GL_TEXTURE_2D, gui_texture_type_to_id_[dst_texture_type]);
+
+            glTexSubImage2D(GL_TEXTURE_2D,
+                            0,
+                            tex_ogl->pos.x,
+                            tex_ogl->pos.y,
+                            tex_ogl->size.w,
+                            tex_ogl->size.h,
+                            GLenum::GL_RGBA,
+                            GLenum::GL_UNSIGNED_BYTE,
+                            original_data.data());
+            glBindTexture(GL_TEXTURE_2D, 0);
         }
-
-        glBindTexture(GL_TEXTURE_2D, gui_texture_type_to_id_[dst_texture_type]);
-
-        glTexSubImage2D(GL_TEXTURE_2D,
-                        0,
-                        tex_ogl->pos.x,
-                        tex_ogl->pos.y,
-                        tex_ogl->size.w,
-                        tex_ogl->size.h,
-                        GLenum::GL_RGBA,
-                        GLenum::GL_UNSIGNED_BYTE,
-                        original_data.data());
-        glBindTexture(GL_TEXTURE_2D, 0);
     }
 
     return gui_texture_type_to_id_[dst_texture_type];

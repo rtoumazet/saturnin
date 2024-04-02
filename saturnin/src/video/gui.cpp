@@ -956,7 +956,10 @@ void showRenderingWindow(core::EmulatorContext& state) {
             state.opengl()->renderSelector();
         }
         const auto alpha = 0xff;
-        gui::addTextureToDrawList(state.opengl()->getRenderedBufferTextureId(), width, height, alpha);
+        gui::addTextureToDrawList(state.opengl()->getRenderedBufferTextureId(video::GuiTextureType::render_buffer),
+                                  width,
+                                  height,
+                                  alpha);
         if ((state.debugStatus() != core::DebugStatus::disabled) && state.opengl()->isSaturnResolutionSet()) {
             state.opengl()->renderVdp1DebugOverlay();
             const auto overlay_alpha = 0x80;

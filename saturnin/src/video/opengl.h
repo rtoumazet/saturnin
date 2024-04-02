@@ -430,7 +430,7 @@ class Opengl {
     /// \returns    The rendered buffer texture identifier.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    auto getRenderedBufferTextureId(const GuiTextureType type) const -> u32;
+    auto getRenderedBufferTextureId(const GuiTextureType type) -> u32;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn void Opengl::renderVdp1DebugOverlay();
@@ -524,8 +524,8 @@ class Opengl {
     auto isSaturnResolutionSet() const -> bool;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn	auto Opengl::generateTextureFromTextureArrayLayer(const u32 src_texture_id, const u32 layer, const size_t texture_key,
-    /// const GuiTextureType dst_texture_type) -> u32;
+    /// \fn	auto Opengl::generateTextureFromTextureArrayLayer(const u32 src_texture_id, const u32 layer, const GuiTextureType
+    /// dst_texture_type, const std::optional<size_t> texture_key = std::nullopt) -> u32;
     ///
     /// \brief	Generates a texture from a texture array layer.
     ///
@@ -534,16 +534,16 @@ class Opengl {
     ///
     /// \param 	src_texture_id  	Identifier for the source texture.
     /// \param 	layer				Layer of the texture array to get data from.
-    /// \param 	texture_key			The key of the texture to highlight.
     /// \param 	dst_texture_type	Type of the destination texture.
+    /// \param 	texture_key			(Optional) The key of the texture to highlight if any.
     ///
     /// \returns	The texture id generated from texture array layer.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    auto generateTextureFromTextureArrayLayer(const u32            src_texture_id,
-                                              const u32            layer,
-                                              const size_t         texture_key,
-                                              const GuiTextureType dst_texture_type) -> u32;
+    auto generateTextureFromTextureArrayLayer(const u32                   src_texture_id,
+                                              const u32                   layer,
+                                              const GuiTextureType        dst_texture_type,
+                                              const std::optional<size_t> texture_key = std::nullopt) -> u32;
 
     auto getTextureId(const TextureArrayType type) -> u32;
 
