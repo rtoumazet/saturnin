@@ -1163,8 +1163,9 @@ void Opengl::packTextures(std::vector<OpenglTexture>& textures, const VdpLayer l
     // texture_array_max_used_layer_ = current_layer;
 }
 
-auto Opengl::calculateTextureCoordinates(const ScreenPos& pos, const Size& size, const u8 texture_array_index) const
-    -> std::vector<TextureCoordinates> {
+auto Opengl::calculateTextureCoordinates(const ScreenPos& pos,
+                                         const Size&      size,
+                                         const u8         texture_array_index) const -> std::vector<TextureCoordinates> {
     // Calculating the texture coordinates in the atlas
     // (x1,y1)     (x2,y1)
     //        .---.
@@ -1584,12 +1585,12 @@ void Opengl::initializeFbo() {
     // Front and back buffers are switched every frame : one will be used as the last complete rendering by the GUI while
     // the other will be rendered to.
     // Textures not yet linked to a type will be used as a 'priority' type on demand when rendering.
-    fbo_texture_type_to_layer_.try_emplace(FboTextureType::front_buffer, 0);
-    fbo_texture_type_to_layer_.try_emplace(FboTextureType::back_buffer, 1);
-    fbo_texture_type_to_layer_.try_emplace(FboTextureType::vdp1_debug_overlay, 2);
-    fbo_texture_type_to_layer_.try_emplace(FboTextureType::vdp2_debug_layer, 3);
+    fbo_texture_type_to_layer_ = {FboTextureType::front_buffer,
+                                  FboTextureType::back_buffer,
+                                  FboTextureType::vdp1_debug_overlay,
+                                  FboTextureType::vdp2_debug_layer};
     for (u8 i = 4; i < fbo_texture_array_depth; ++i) {
-        fbo_texture_type_to_layer_.try_emplace(FboTextureType::priority, i);
+        fbo_texture_type_to_layer_[i] = FboTextureType::priority;
     }
 
     currentRenderedBuffer(FboTextureType::front_buffer);
@@ -1661,6 +1662,12 @@ auto Opengl::initializeTextureArray(const u32 width, const u32 height, const u32
     glTexParameteri(GLenum::GL_TEXTURE_2D_ARRAY, GLenum::GL_TEXTURE_MAG_FILTER, GLenum::GL_NEAREST);
 
     return texture;
+}
+
+inline auto Opengl::getFboTextureLayer(const FboTextureType type) const -> u8 {
+    // int x = std::distance(fbo_texture_type_to_layer_, std::find(fbo_texture_type_to_layer_, type));
+    //  return fbo_texture_type_to_layer_.at(type);
+    return 0;
 }
 
 void Opengl::switchRenderedBuffer() {

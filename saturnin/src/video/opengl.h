@@ -85,8 +85,9 @@ enum class FboTextureStatus : u8 {
 };
 
 using FboData               = std::pair<u32, u32>; // Describes a framebuffer object. 1st is fbo id, 2nd is texture id.
-using FboTextureTypeToLayer = std::unordered_map<FboTextureType, u8>;  // Defines the type of each FBO texture layer.
-using GuiTextureTypeToId    = std::unordered_map<GuiTextureType, u32>; // Defines the type of each texture used to render to GUI.
+using FboTextureTypeToLayer = std::array<FboTextureType, fbo_texture_array_depth>; // Defines the type of each FBO texture layer,
+                                                                                   // the index of the array being the layer.
+using GuiTextureTypeToId = std::unordered_map<GuiTextureType, u32>; // Defines the type of each texture used to render to GUI.
 
 using FboKey = std::pair<u8, VdpLayer>; // First is priority number (1 to 7, last on being the highest), second is linked layer.
 using FboKeyToFbo    = std::map<FboKey, u8>; // Link between a priority to display and its relative FBO index in the FBO pool.
@@ -708,7 +709,7 @@ class Opengl {
     /// \returns	The FBO texture layer.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    auto getFboTextureLayer(const FboTextureType type) const -> u8 { return fbo_texture_type_to_layer_.at(type); };
+    auto getFboTextureLayer(const FboTextureType type) const -> u8;
 
     void switchRenderedBuffer();
 
@@ -812,8 +813,9 @@ class Opengl {
     /// \returns	The calculated texture coordinates of the texture.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    auto calculateTextureCoordinates(const ScreenPos& pos, const Size& size, const u8 texture_array_index) const
-        -> std::vector<TextureCoordinates>;
+    auto calculateTextureCoordinates(const ScreenPos& pos,
+                                     const Size&      size,
+                                     const u8         texture_array_index) const -> std::vector<TextureCoordinates>;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn	auto readVertexes(const PartsList& parts) -> std::vector<Vertex>
@@ -934,9 +936,10 @@ class Opengl {
 
     u32                   fbo_;                       ///< The main framebuffer object.
     u32                   fbo_texture_array_id_;      ///< Identifier for the FBO texture array.
-    FboTextureTypeToLayer fbo_texture_type_to_layer_; ///< Links the used FBO texture layer to a texture type.
-    FboTextureType        current_rendered_buffer_;   ///< The current rendered buffer (front or back)
-    GuiTextureTypeToId    gui_texture_type_to_id_;    ///< Links the texture to be used in the GUI to a type.
+    FboTextureTypeToLayer fbo_texture_type_to_layer_; ///< Links the used FBO texture layer to a texture type. Index of the array
+                                                      ///< is the layer, content is the type.
+    FboTextureType     current_rendered_buffer_;      ///< The current rendered buffer (front or back)
+    GuiTextureTypeToId gui_texture_type_to_id_;       ///< Links the texture to be used in the GUI to a type.
 
     FboKeyToFbo          fbo_key_to_fbo_pool_index_; ///< Link between a FBO key and its relative FBO index in the pool.
     FboTexturePool       fbo_texture_pool_;          ///< Pool of textures to be used by the FBO.
