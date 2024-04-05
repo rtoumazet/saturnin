@@ -562,6 +562,7 @@ void Opengl::renderParts(const PartsList& parts_list, const u32 texture_id) {
         gl::glDeleteBuffers(1, &vertex_buffer);
         gl::glDeleteVertexArrays(1, &vao);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+        glBindTexture(GL_TEXTURE_2D_ARRAY, 0);
         gl::glDeleteBuffers(1, &elements_buffer);
     }
 }
@@ -630,6 +631,7 @@ void Opengl::renderFboTexture(const u32 texture_id) {
     gl::glDeleteBuffers(1, &vertex_buffer);
     gl::glDeleteVertexArrays(1, &vao);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+    glBindTexture(GL_TEXTURE_2D, 0);
     // gl::glDeleteBuffers(1, &elements_buffer);
 }
 
@@ -843,6 +845,7 @@ void Opengl::renderTest() {
     gl::glDeleteBuffers(1, &vertex_buffer);
     gl::glDeleteVertexArrays(1, &vao);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+    glBindTexture(GL_TEXTURE_2D_ARRAY, 0);
     gl::glDeleteBuffers(1, &elements_buffer);
 
     postRender();
@@ -1102,6 +1105,7 @@ void Opengl::generateTextures() {
 // improve packing, but there's a non trivial performance tradeoff, with a big increase in complexity.
 // So for now, keeping things simple.
 void Opengl::packTextures(std::vector<OpenglTexture>& textures, const VdpLayer layer) {
+    glBindTexture(GL_TEXTURE_2D_ARRAY, texture_array_id_);
     // First, indexes used by the layer are cleared and removed from the used list.
     auto empty_data = std::vector<u8>(texture_array_width * texture_array_height * 4);
     if (!layer_to_texture_array_indexes_[layer].empty()) {
@@ -1161,6 +1165,7 @@ void Opengl::packTextures(std::vector<OpenglTexture>& textures, const VdpLayer l
         if (texture.size.h > current_row_max_height) { current_row_max_height = texture.size.h; }
     }
     // texture_array_max_used_layer_ = current_layer;
+    glBindTexture(GL_TEXTURE_2D_ARRAY, 0);
 }
 
 auto Opengl::calculateTextureCoordinates(const ScreenPos& pos,
@@ -1468,6 +1473,8 @@ auto Opengl::generateTexture(const u32 width, const u32 height, const std::vecto
                  GLenum::GL_UNSIGNED_BYTE,
                  data.data());
 
+    glBindTexture(GLenum::GL_TEXTURE_2D, 0);
+
     return texture;
 }
 
@@ -1629,6 +1636,8 @@ auto Opengl::generateFbo() -> u32 {
         }
     }
 
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
     return fbo;
 }
 
@@ -1661,13 +1670,13 @@ auto Opengl::initializeTextureArray(const u32 width, const u32 height, const u32
     glTexParameteri(GLenum::GL_TEXTURE_2D_ARRAY, GLenum::GL_TEXTURE_MIN_FILTER, GLenum::GL_NEAREST);
     glTexParameteri(GLenum::GL_TEXTURE_2D_ARRAY, GLenum::GL_TEXTURE_MAG_FILTER, GLenum::GL_NEAREST);
 
+    glBindTexture(GLenum::GL_TEXTURE_2D_ARRAY, 0);
     return texture;
 }
 
 inline auto Opengl::getFboTextureLayer(const FboTextureType type) const -> u8 {
-    // int x = std::distance(fbo_texture_type_to_layer_, std::find(fbo_texture_type_to_layer_, type));
-    //  return fbo_texture_type_to_layer_.at(type);
-    return 0;
+    return static_cast<u8>(
+        std::distance(fbo_texture_type_to_layer_.begin(), std::ranges::find(fbo_texture_type_to_layer_, type)));
 }
 
 void Opengl::switchRenderedBuffer() {
