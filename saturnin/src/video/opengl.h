@@ -714,18 +714,19 @@ class Opengl {
     void switchRenderedBuffer();
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn	void Opengl::attachTextureLayerToFbo(const u32 texture_id, const u8 layer);
+    /// \fn	void Opengl::attachTextureLayerToFbo(const u32 texture_id, const u8 layer, const gl::GLenum color_attachment);
     ///
     /// \brief	Attachs a texture array layer to the curently bound FBO.
     ///
     /// \author	Runik
     /// \date	23/03/2024
     ///
-    /// \param 	texture_id	Identifier for the texture array.
-    /// \param 	layer	  	The texture array layer.
+    /// \param 	texture_id			Identifier for the texture array.
+    /// \param 	layer				The texture array layer.
+    /// \param 	color_attachment	The color attachment point.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    void attachTextureLayerToFbo(const u32 texture_id, const u8 layer);
+    void attachTextureLayerToFbo(const u32 texture_id, const u8 layer, const gl::GLenum color_attachment);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn	void Opengl::attachTextureToFbo(const u32 texture_id);
@@ -813,9 +814,8 @@ class Opengl {
     /// \returns	The calculated texture coordinates of the texture.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    auto calculateTextureCoordinates(const ScreenPos& pos,
-                                     const Size&      size,
-                                     const u8         texture_array_index) const -> std::vector<TextureCoordinates>;
+    auto calculateTextureCoordinates(const ScreenPos& pos, const Size& size, const u8 texture_array_index) const
+        -> std::vector<TextureCoordinates>;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn	auto readVertexes(const PartsList& parts) -> std::vector<Vertex>
@@ -938,8 +938,10 @@ class Opengl {
     u32                   fbo_texture_array_id_;      ///< Identifier for the FBO texture array.
     FboTextureTypeToLayer fbo_texture_type_to_layer_; ///< Links the used FBO texture layer to a texture type. Index of the array
                                                       ///< is the layer, content is the type.
-    FboTextureType     current_rendered_buffer_;      ///< The current rendered buffer (front or back)
-    GuiTextureTypeToId gui_texture_type_to_id_;       ///< Links the texture to be used in the GUI to a type.
+    u32 fbo_copy_to_regular_texture_;
+
+    FboTextureType     current_rendered_buffer_; ///< The current rendered buffer (front or back)
+    GuiTextureTypeToId gui_texture_type_to_id_;  ///< Links the texture to be used in the GUI to a type.
 
     FboKeyToFbo          fbo_key_to_fbo_pool_index_; ///< Link between a FBO key and its relative FBO index in the pool.
     FboTexturePool       fbo_texture_pool_;          ///< Pool of textures to be used by the FBO.

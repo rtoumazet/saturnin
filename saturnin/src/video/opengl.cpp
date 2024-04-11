@@ -28,7 +28,6 @@
 #include <ranges>
 #include <sstream> // stringstream
 #include <glbinding/glbinding.h>
-// #include <glbinding/gl/gl.h>
 #include <glbinding/Version.h>
 #include <glbinding-aux/ContextInfo.h>
 #include <glbinding/gl21/gl.h>
@@ -159,7 +158,7 @@ void Opengl::shutdown() const {
 void Opengl::preRender() {
     switchRenderedBuffer();
 
-    attachTextureLayerToFbo(fbo_texture_array_id_, getFboTextureLayer(currentRenderedBuffer()));
+    attachTextureLayerToFbo(fbo_texture_array_id_, getFboTextureLayer(currentRenderedBuffer()), GLenum::GL_COLOR_ATTACHMENT0);
 
     // Viewport is the entire Saturn framebuffer
     glViewport(0, 0, saturn_framebuffer_width, saturn_framebuffer_height);
@@ -868,14 +867,22 @@ auto Opengl::isThereSomethingToRender() const -> bool {
 }
 
 auto Opengl::getRenderedBufferTextureId(const GuiTextureType type) -> u32 {
-    return generateTextureFromTextureArrayLayer(fbo_texture_array_id_,
-                                                getFboTextureLayer(currentRenderedBuffer()),
-                                                GuiTextureType::render_buffer);
+    // auto texture2D = s32{};
+    // glGetIntegerv(GLenum::GL_TEXTURE_BINDING_2D, &texture2D);
+    // auto texture2DArray = s32{};
+    // glGetIntegerv(GLenum::GL_TEXTURE_BINDING_2D_ARRAY, &texture2DArray);
+
+    auto texture_id = generateTextureFromTextureArrayLayer(fbo_texture_array_id_,
+                                                           getFboTextureLayer(currentRenderedBuffer()),
+                                                           GuiTextureType::render_buffer);
+    return texture_id;
 }
 
 void Opengl::renderVdp1DebugOverlay() {
     //----------- Pre render -----------//
-    attachTextureLayerToFbo(fbo_texture_array_id_, getFboTextureLayer(FboTextureType::vdp1_debug_overlay));
+    attachTextureLayerToFbo(fbo_texture_array_id_,
+                            getFboTextureLayer(FboTextureType::vdp1_debug_overlay),
+                            GLenum::GL_COLOR_ATTACHMENT0);
 
     // Viewport is the entire Saturn framebuffer
     glViewport(0, 0, saturn_framebuffer_width, saturn_framebuffer_height);
@@ -939,7 +946,9 @@ void Opengl::renderVdp1DebugOverlay() {
 
 void Opengl::renderVdp2DebugLayer(core::EmulatorContext& state) {
     //----------- Pre render -----------//
-    attachTextureLayerToFbo(fbo_texture_array_id_, getFboTextureLayer(FboTextureType::vdp2_debug_layer));
+    attachTextureLayerToFbo(fbo_texture_array_id_,
+                            getFboTextureLayer(FboTextureType::vdp2_debug_layer),
+                            GLenum::GL_COLOR_ATTACHMENT0);
 
     // Viewport is the entire Saturn framebuffer
     glViewport(0, 0, saturn_framebuffer_width, saturn_framebuffer_height);
@@ -1168,9 +1177,8 @@ void Opengl::packTextures(std::vector<OpenglTexture>& textures, const VdpLayer l
     glBindTexture(GL_TEXTURE_2D_ARRAY, 0);
 }
 
-auto Opengl::calculateTextureCoordinates(const ScreenPos& pos,
-                                         const Size&      size,
-                                         const u8         texture_array_index) const -> std::vector<TextureCoordinates> {
+auto Opengl::calculateTextureCoordinates(const ScreenPos& pos, const Size& size, const u8 texture_array_index) const
+    -> std::vector<TextureCoordinates> {
     // Calculating the texture coordinates in the atlas
     // (x1,y1)     (x2,y1)
     //        .---.
@@ -1279,17 +1287,17 @@ void Opengl::generateSubTexture(const size_t key) {
     if (ogl_tex) {
         const auto tex = Texture::getTexture(key);
         if (tex) {
-            glTexSubImage3D(GL_TEXTURE_2D_ARRAY,
-                            0,
-                            ogl_tex->pos.x,
-                            ogl_tex->pos.y,
-                            ogl_tex->texture_array_index,
-                            ogl_tex->size.w,
-                            ogl_tex->size.h,
-                            1,
-                            GLenum::GL_RGBA,
-                            GLenum::GL_UNSIGNED_BYTE,
-                            (*tex)->rawData().data());
+            (GL_TEXTURE_2D_ARRAY,
+             0,
+             ogl_tex->pos.x,
+             ogl_tex->pos.y,
+             ogl_tex->texture_array_index,
+             ogl_tex->size.w,
+             ogl_tex->size.h,
+             1,
+             GLenum::GL_RGBA,
+             GLenum::GL_UNSIGNED_BYTE,
+             (*tex)->rawData().data());
             checkGlError();
         }
     }
@@ -1329,23 +1337,27 @@ auto Opengl::generateTextureFromTextureArrayLayer(const u32                   sr
                                                   const u32                   layer,
                                                   const GuiTextureType        dst_texture_type,
                                                   const std::optional<size_t> texture_key) -> u32 {
-    glCopyImageSubData(src_texture_id,
-                       GL_TEXTURE_2D_ARRAY,
-                       0,
-                       0,
-                       0,
-                       layer,
-                       gui_texture_type_to_id_[dst_texture_type],
-                       GL_TEXTURE_2D,
-                       0,
-                       0,
-                       0,
-                       0,
-                       // texture_array_width,
-                       // texture_array_height,
-                       fbo_texture_array_width,  // Will have to be parametrized
-                       fbo_texture_array_height, // Will have to be parametrized
-                       1);
+    // glCopyImageSubData(src_texture_id,
+    //                    GL_TEXTURE_2D_ARRAY,
+    //                    0,
+    //                    0,
+    //                    0,
+    //                    layer,
+    //                    gui_texture_type_to_id_[dst_texture_type],
+    //                    GL_TEXTURE_2D,
+    //                    0,
+    //                    0,
+    //                    0,
+    //                    0,
+    //                    // texture_array_width,
+    //                    // texture_array_height,
+    //                    fbo_texture_array_width,  // Will have to be parametrized
+    //                    fbo_texture_array_height, // Will have to be parametrized
+    //                    1);
+
+    glBindTexture(GL_TEXTURE_2D_ARRAY, src_texture_id);
+    glCopyTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, layer, 0, 0, fbo_texture_array_width, fbo_texture_array_height);
+    // glBlitFramebufferEXT
 
     if (texture_key.has_value()) {
         if (*texture_key > 0) {
@@ -1622,7 +1634,7 @@ auto Opengl::generateFbo() -> u32 {
 
     // Attaching the color texture currently used as framebuffer to the FBO.
     // attachTextureToFbo(getFboTextureId(currentRenderedBuffer()));
-    attachTextureLayerToFbo(fbo_texture_array_id_, getFboTextureLayer(currentRenderedBuffer()));
+    attachTextureLayerToFbo(fbo_texture_array_id_, getFboTextureLayer(currentRenderedBuffer()), GLenum::GL_COLOR_ATTACHMENT0);
 
     if (is_legacy_opengl_) {
         const auto status = glCheckFramebufferStatusEXT(GLenum::GL_FRAMEBUFFER_EXT);
@@ -1684,11 +1696,11 @@ void Opengl::switchRenderedBuffer() {
         = (current_rendered_buffer_ == FboTextureType::back_buffer) ? FboTextureType::front_buffer : FboTextureType::back_buffer;
 }
 
-void Opengl::attachTextureLayerToFbo(const u32 texture_id, const u8 layer) {
+void Opengl::attachTextureLayerToFbo(const u32 texture_id, const u8 layer, const gl::GLenum color_attachment) {
     if (is_legacy_opengl_) {
-        glFramebufferTextureLayerEXT(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, texture_id, 0, layer);
+        glFramebufferTextureLayerEXT(GL_FRAMEBUFFER, color_attachment, texture_id, 0, layer);
     } else {
-        glFramebufferTextureLayer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, texture_id, 0, layer);
+        glFramebufferTextureLayer(GL_FRAMEBUFFER, color_attachment, texture_id, 0, layer);
     }
 }
 
