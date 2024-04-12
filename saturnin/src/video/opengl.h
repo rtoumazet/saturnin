@@ -71,7 +71,7 @@ constexpr auto max_fbo_texture          = u8{20};
 enum class TextureArrayType : u8 { saturn_part, framebuffer };
 enum class FboTextureType : u8 { front_buffer, back_buffer, vdp1_debug_overlay, vdp2_debug_layer, priority };
 enum class GuiTextureType : u8 { render_buffer, vdp1_debug_buffer, vdp2_debug_buffer };
-
+enum class FboType : u8 { general, for_gui };
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \enum	FboTextureStatus
 ///
@@ -667,17 +667,19 @@ class Opengl {
     void initializeFbo();
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn	auto Opengl::generateFbo() -> u32;
+    /// \fn	auto Opengl::generateFbo(const FboType fbo_type) -> u32;
     ///
     /// \brief	Generates a framebuffer object.
     ///
     /// \author	Runik
     /// \date	16/02/2024
     ///
+    /// \param 	fbo_type 	Type of the FBO to generate
+    ///
     /// \returns	The generated fbo id.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    auto generateFbo() -> u32;
+    auto generateFbo(const FboType fbo_type) -> u32;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn	auto Opengl::initializeTextureArray(const u32 width, const u32 height, const u32 depth) const -> u32;
@@ -723,10 +725,14 @@ class Opengl {
     ///
     /// \param 	texture_id			Identifier for the texture array.
     /// \param 	layer				The texture array layer.
+    /// \param 	framebuffer_target	The framebuffer target.
     /// \param 	color_attachment	The color attachment point.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    void attachTextureLayerToFbo(const u32 texture_id, const u8 layer, const gl::GLenum color_attachment);
+    void attachTextureLayerToFbo(const u32        texture_id,
+                                 const u8         layer,
+                                 const gl::GLenum framebuffer_target,
+                                 const gl::GLenum color_attachment);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn	void Opengl::attachTextureToFbo(const u32 texture_id);
@@ -739,7 +745,7 @@ class Opengl {
     /// \param 	texture_id	Identifier for the texture.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    // void attachTextureToFbo(const u32 texture_id);
+    void attachTextureToFbo(const u32 texture_id, const gl::GLenum framebuffer_target, const gl::GLenum color_attachment);
 
     auto calculateViewportPosAndSize() const -> std::tuple<u32, u32, u32, u32>;
 
@@ -814,8 +820,9 @@ class Opengl {
     /// \returns	The calculated texture coordinates of the texture.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    auto calculateTextureCoordinates(const ScreenPos& pos, const Size& size, const u8 texture_array_index) const
-        -> std::vector<TextureCoordinates>;
+    auto calculateTextureCoordinates(const ScreenPos& pos,
+                                     const Size&      size,
+                                     const u8         texture_array_index) const -> std::vector<TextureCoordinates>;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn	auto readVertexes(const PartsList& parts) -> std::vector<Vertex>
@@ -938,7 +945,7 @@ class Opengl {
     u32                   fbo_texture_array_id_;      ///< Identifier for the FBO texture array.
     FboTextureTypeToLayer fbo_texture_type_to_layer_; ///< Links the used FBO texture layer to a texture type. Index of the array
                                                       ///< is the layer, content is the type.
-    u32 fbo_copy_to_regular_texture_;
+    u32 fbo_for_gui_;
 
     FboTextureType     current_rendered_buffer_; ///< The current rendered buffer (front or back)
     GuiTextureTypeToId gui_texture_type_to_id_;  ///< Links the texture to be used in the GUI to a type.
