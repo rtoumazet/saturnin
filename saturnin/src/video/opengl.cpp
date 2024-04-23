@@ -74,6 +74,7 @@ constexpr auto check_gl_error = 1;
 
 constexpr enum class RenderType { RenderType_drawElements, RenderType_drawTest };
 constexpr auto render_type = RenderType::RenderType_drawElements;
+// constexpr auto render_type = RenderType::RenderType_drawTest;
 
 constexpr auto uses_fbo = false;
 
@@ -152,6 +153,11 @@ void Opengl::shutdown() const {
 void Opengl::preRender() {
     switchRenderedBuffer();
 
+    // GLint drawFboId = 0;
+    // glGetIntegerv(GL_FRAMEBUFFER_BINDING, &drawFboId);
+
+    glBindFramebuffer(GLenum::GL_FRAMEBUFFER, fbo_);
+
     attachTextureLayerToFbo(fbo_texture_array_id_,
                             getFboTextureLayer(currentRenderedBuffer()),
                             GLenum::GL_FRAMEBUFFER,
@@ -177,6 +183,8 @@ void Opengl::postRender() {
     checkGlError();
 
     glDisable(GL_SCISSOR_TEST);
+
+    glBindFramebuffer(GLenum::GL_FRAMEBUFFER, 0);
 };
 
 void Opengl::initializeShaders() {
@@ -1284,11 +1292,10 @@ auto Opengl::generateTextureFromTextureArrayLayer(const u32                   sr
     //                    1);
 
     //
-    glBindFramebuffer(GLenum::GL_READ_FRAMEBUFFER, fbo_);
-    glReadBuffer(GLenum::GL_COLOR_ATTACHMENT0);
+    // glBindFramebuffer(GLenum::GL_READ_FRAMEBUFFER, fbo_);
+    // glReadBuffer(GLenum::GL_COLOR_ATTACHMENT0);
 
-    glBindFramebuffer(GLenum::GL_DRAW_FRAMEBUFFER, fbo_for_gui_);
-    glDrawBuffer(GLenum::GL_COLOR_ATTACHMENT0);
+    glBindFramebuffer(GLenum::GL_FRAMEBUFFER, fbo_for_gui_);
 
     glBlitFramebuffer(0,
                       0,
@@ -1301,8 +1308,9 @@ auto Opengl::generateTextureFromTextureArrayLayer(const u32                   sr
                       gl::GL_COLOR_BUFFER_BIT,
                       GLenum::GL_LINEAR);
 
+    glBindFramebuffer(GLenum::GL_FRAMEBUFFER, 0);
+
     // glCopyTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, layer, 0, 0, fbo_texture_array_width, fbo_texture_array_height);
-    //  glBlitFramebufferEXT
 
     if (texture_key.has_value()) {
         if (*texture_key > 0) {
@@ -1591,15 +1599,32 @@ auto Opengl::generateFbo(const FboType fbo_type) -> u32 {
         case for_gui: {
             glBindFramebuffer(GLenum::GL_FRAMEBUFFER, fbo);
 
-            glBindTexture(GLenum::GL_TEXTURE_2D, gui_texture_type_to_id_[GuiTextureType::render_buffer]);
+            // glFramebufferTextureLayer(GL_READ_FRAMEBUFFER,
+            //                           GL_COLOR_ATTACHMENT0,
+            //                           fbo_texture_array_id_,
+            //                           0,
+            //                           getFboTextureLayer(currentRenderedBuffer()));
+            attachTextureLayerToFbo(fbo_texture_array_id_,
+                                    getFboTextureLayer(currentRenderedBuffer()),
+                                    GLenum::GL_FRAMEBUFFER,
+                                    GLenum::GL_COLOR_ATTACHMENT0);
 
-            glEnable(GLenum::GL_BLEND);
-            glBlendFunc(GLenum::GL_SRC_ALPHA, GLenum::GL_ONE_MINUS_SRC_ALPHA);
+            glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER,
+                                   GL_COLOR_ATTACHMENT1,
+                                   GL_TEXTURE_2D,
+                                   gui_texture_type_to_id_[GuiTextureType::render_buffer],
+                                   0);
+            glDrawBuffer(GL_COLOR_ATTACHMENT1);
+
+            // glBindTexture(GLenum::GL_TEXTURE_2D, gui_texture_type_to_id_[GuiTextureType::render_buffer]);
+
+            // glEnable(GLenum::GL_BLEND);
+            // glBlendFunc(GLenum::GL_SRC_ALPHA, GLenum::GL_ONE_MINUS_SRC_ALPHA);
 
             // Attaching the color texture currently used as framebuffer to the FBO.
-            attachTextureToFbo(gui_texture_type_to_id_[GuiTextureType::render_buffer],
-                               GLenum::GL_FRAMEBUFFER,
-                               GLenum::GL_COLOR_ATTACHMENT0);
+            // attachTextureToFbo(gui_texture_type_to_id_[GuiTextureType::render_buffer],
+            //                   GLenum::GL_FRAMEBUFFER,
+            //                   GLenum::GL_COLOR_ATTACHMENT0);
 
             break;
         }
