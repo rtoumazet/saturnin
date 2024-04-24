@@ -817,6 +817,8 @@ auto Opengl::getRenderedBufferTextureId(const GuiTextureType type) -> u32 {
 
 void Opengl::renderVdp1DebugOverlay() {
     //----------- Pre render -----------//
+    glBindFramebuffer(GLenum::GL_FRAMEBUFFER, fbo_);
+
     attachTextureLayerToFbo(fbo_texture_array_id_,
                             getFboTextureLayer(FboTextureType::vdp1_debug_overlay),
                             GLenum::GL_FRAMEBUFFER,
@@ -880,6 +882,7 @@ void Opengl::renderVdp1DebugOverlay() {
     //------ Post render --------//
 
     glDisable(GL_SCISSOR_TEST);
+    glBindFramebuffer(GLenum::GL_FRAMEBUFFER, 0);
 };
 
 void Opengl::renderVdp2DebugLayer(core::EmulatorContext& state) {
@@ -1113,8 +1116,9 @@ void Opengl::packTextures(std::vector<OpenglTexture>& textures, const VdpLayer l
     glBindTexture(GL_TEXTURE_2D_ARRAY, 0);
 }
 
-auto Opengl::calculateTextureCoordinates(const ScreenPos& pos, const Size& size, const u8 texture_array_index) const
-    -> std::vector<TextureCoordinates> {
+auto Opengl::calculateTextureCoordinates(const ScreenPos& pos,
+                                         const Size&      size,
+                                         const u8         texture_array_index) const -> std::vector<TextureCoordinates> {
     // Calculating the texture coordinates in the atlas
     // (x1,y1)     (x2,y1)
     //        .---.
