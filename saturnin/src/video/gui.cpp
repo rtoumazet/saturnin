@@ -1407,7 +1407,8 @@ void showDebugVdp1Window(core::EmulatorContext& state, bool* opened) {
             // Draw list
             ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2());
             const auto child_size = ImVec2(310, 280);
-            ImGui::BeginChild("ChildDrawList", child_size, true, window_flags | ImGuiWindowFlags_MenuBar);
+            // ImGui::BeginChild("ChildDrawList", child_size, true, window_flags | ImGuiWindowFlags_MenuBar);
+            ImGui::BeginChild("ChildDrawList", child_size, true);
 
             if (ImGui::BeginMenuBar()) {
                 ImGui::TextUnformatted(tr("Draw list").c_str());
@@ -1441,17 +1442,7 @@ void showDebugVdp1Window(core::EmulatorContext& state, bool* opened) {
                 const auto content_size = ImVec2(512, 280);
 
                 ImGui::SetNextWindowContentSize(content_size);
-                ImGui::BeginChild("ChildPartDetail",
-                                  child_size,
-                                  true,
-                                  window_flags | ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_HorizontalScrollbar
-                                      | ImGuiWindowFlags_AlwaysAutoResize);
-
-                if (ImGui::BeginMenuBar()) {
-                    ImGui::TextUnformatted(draw_list[current_part_idx].debugHeader().c_str());
-
-                    ImGui::EndMenuBar();
-                }
+                ImGui::BeginChild("ChildPartDetail", child_size, true);
                 ImGui::TextWithColors(draw_list[current_part_idx].getDebugDetail().c_str());
                 state.opengl()->partToHighlight(draw_list[current_part_idx]);
                 ImGui::EndChild();
@@ -1464,7 +1455,7 @@ void showDebugVdp1Window(core::EmulatorContext& state, bool* opened) {
             if (!draw_list.empty()) {
                 const auto child_size = ImVec2(260, 280);
                 ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2());
-                ImGui::BeginChild("ChildPartTexture", child_size, true, window_flags | ImGuiWindowFlags_MenuBar);
+                ImGui::BeginChild("ChildPartTexture", child_size, true);
 
                 if (ImGui::BeginMenuBar()) {
                     ImGui::TextUnformatted(tr("Texture").c_str());
