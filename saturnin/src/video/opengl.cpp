@@ -241,7 +241,11 @@ void Opengl::initializeShaders() {
         void main()
         {
             if(is_texture_used){
-                out_color = texture(sampler, frg_tex_coord.xyz);
+                //out_color = texture(sampler, frg_tex_coord.xyz);
+                float x = frg_tex_coord.x;
+                float y = frg_tex_coord.y;
+                float layer = frg_tex_coord.z;
+                out_color = texture(sampler, vec3(x,y,layer)); 
             }else{
                 out_color = frg_color;
             }
@@ -887,6 +891,8 @@ void Opengl::renderVdp1DebugOverlay() {
 
 void Opengl::renderVdp2DebugLayer(core::EmulatorContext& state) {
     //----------- Pre render -----------//
+    glBindFramebuffer(GLenum::GL_FRAMEBUFFER, fbo_);
+
     attachTextureLayerToFbo(fbo_texture_array_id_,
                             getFboTextureLayer(FboTextureType::vdp2_debug_layer),
                             GLenum::GL_FRAMEBUFFER,
@@ -1116,9 +1122,8 @@ void Opengl::packTextures(std::vector<OpenglTexture>& textures, const VdpLayer l
     glBindTexture(GL_TEXTURE_2D_ARRAY, 0);
 }
 
-auto Opengl::calculateTextureCoordinates(const ScreenPos& pos,
-                                         const Size&      size,
-                                         const u8         texture_array_index) const -> std::vector<TextureCoordinates> {
+auto Opengl::calculateTextureCoordinates(const ScreenPos& pos, const Size& size, const u8 texture_array_index) const
+    -> std::vector<TextureCoordinates> {
     // Calculating the texture coordinates in the atlas
     // (x1,y1)     (x2,y1)
     //        .---.
@@ -1227,17 +1232,17 @@ void Opengl::generateSubTexture(const size_t key) {
     if (ogl_tex) {
         const auto tex = Texture::getTexture(key);
         if (tex) {
-            (GL_TEXTURE_2D_ARRAY,
-             0,
-             ogl_tex->pos.x,
-             ogl_tex->pos.y,
-             ogl_tex->texture_array_index,
-             ogl_tex->size.w,
-             ogl_tex->size.h,
-             1,
-             GLenum::GL_RGBA,
-             GLenum::GL_UNSIGNED_BYTE,
-             (*tex)->rawData().data());
+            glTexSubImage3D(GL_TEXTURE_2D_ARRAY,
+                            0,
+                            ogl_tex->pos.x,
+                            ogl_tex->pos.y,
+                            ogl_tex->texture_array_index,
+                            ogl_tex->size.w,
+                            ogl_tex->size.h,
+                            1,
+                            GLenum::GL_RGBA,
+                            GLenum::GL_UNSIGNED_BYTE,
+                            (*tex)->rawData().data());
             checkGlError();
         }
     }

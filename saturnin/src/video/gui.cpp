@@ -1732,11 +1732,10 @@ void showDebugVdp2Window(core::EmulatorContext& state, bool* opened) {
                     ImGui::BeginChild("child_part_texture", child_size, true, window_flags);
 
                     if (state.debugStatus() != core::DebugStatus::disabled) {
-                        // if (state.vdp2()->screenInDebug() != video::ScrollScreen::none) {
-                        //     state.opengl()->renderVdp2DebugLayer(state);
-                        // }
-                        // const auto tex_id       = state.opengl()->vdp2DebugLayerTextureId();
-                        const auto tex_id       = 1;
+                        if (state.vdp2()->screenInDebug() != video::ScrollScreen::none) {
+                            state.opengl()->renderVdp2DebugLayer(state);
+                        }
+                        const auto tex_id       = state.opengl()->vdp2DebugLayerTextureId();
                         const auto preview_size = ImVec2(500, 500);
                         ImGui::Image(reinterpret_cast<ImTextureID>(static_cast<uptr>(tex_id)), preview_size);
                     } else {
