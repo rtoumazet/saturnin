@@ -808,14 +808,25 @@ auto Opengl::isThereSomethingToRender() const -> bool {
 }
 
 auto Opengl::getRenderedBufferTextureId(const GuiTextureType type) -> u32 {
-    // auto texture2D = s32{};
-    // glGetIntegerv(GLenum::GL_TEXTURE_BINDING_2D, &texture2D);
-    // auto texture2DArray = s32{};
-    // glGetIntegerv(GLenum::GL_TEXTURE_BINDING_2D_ARRAY, &texture2DArray);
+    auto layer = u8{};
 
-    auto texture_id = generateTextureFromTextureArrayLayer(fbo_texture_array_id_,
-                                                           getFboTextureLayer(currentRenderedBuffer()),
-                                                           GuiTextureType::render_buffer);
+    switch (type) {
+        using enum GuiTextureType;
+        case render_buffer: {
+            layer = getFboTextureLayer(currentRenderedBuffer());
+            break;
+        }
+        case vdp1_debug_buffer: {
+            layer = getFboTextureLayer(FboTextureType::vdp1_debug_overlay);
+            break;
+        }
+        case vdp2_debug_buffer: {
+            layer = getFboTextureLayer(FboTextureType::vdp2_debug_layer);
+            break;
+        }
+    }
+
+    auto texture_id = generateTextureFromTextureArrayLayer(fbo_texture_array_id_, layer, type);
     return texture_id;
 }
 
@@ -997,7 +1008,7 @@ void Opengl::renderVdp2DebugLayer(core::EmulatorContext& state) {
     // Framebuffer is released
 
     gl33core::glBindFramebuffer(GL_FRAMEBUFFER, 0);
-};
+}; // namespace saturnin::video
 
 void Opengl::addOrUpdateTexture(const size_t key, const VdpLayer layer) {
     // If the key doesn't exist it will be automatically added.
@@ -1122,8 +1133,9 @@ void Opengl::packTextures(std::vector<OpenglTexture>& textures, const VdpLayer l
     glBindTexture(GL_TEXTURE_2D_ARRAY, 0);
 }
 
-auto Opengl::calculateTextureCoordinates(const ScreenPos& pos, const Size& size, const u8 texture_array_index) const
-    -> std::vector<TextureCoordinates> {
+auto Opengl::calculateTextureCoordinates(const ScreenPos& pos,
+                                         const Size&      size,
+                                         const u8         texture_array_index) const -> std::vector<TextureCoordinates> {
     // Calculating the texture coordinates in the atlas
     // (x1,y1)     (x2,y1)
     //        .---.
@@ -1279,32 +1291,20 @@ auto Opengl::isSaturnResolutionSet() const -> bool {
 }
 
 auto Opengl::generateTextureFromTextureArrayLayer(const u32                   src_texture_id,
-                                                  const u32                   layer,
+                                                  const u8                    layer,
                                                   const GuiTextureType        dst_texture_type,
                                                   const std::optional<size_t> texture_key) -> u32 {
-    // glCopyImageSubData(src_texture_id,
-    //                    GL_TEXTURE_2D_ARRAY,
-    //                    0,
-    //                    0,
-    //                    0,
-    //                    layer,
-    //                    gui_texture_type_to_id_[dst_texture_type],
-    //                    GL_TEXTURE_2D,
-    //                    0,
-    //                    0,
-    //                    0,
-    //                    0,
-    //                    // texture_array_width,
-    //                    // texture_array_height,
-    //                    fbo_texture_array_width,  // Will have to be parametrized
-    //                    fbo_texture_array_height, // Will have to be parametrized
-    //                    1);
-
-    //
-    // glBindFramebuffer(GLenum::GL_READ_FRAMEBUFFER, fbo_);
-    // glReadBuffer(GLenum::GL_COLOR_ATTACHMENT0);
-
     glBindFramebuffer(GLenum::GL_FRAMEBUFFER, fbo_for_gui_);
+
+    // :TODO: improve texture attachment handling + check VDP1 overlay wich is too bright
+
+    attachTextureLayerToFbo(fbo_texture_array_id_, layer, GLenum::GL_FRAMEBUFFER, GLenum::GL_COLOR_ATTACHMENT0);
+
+    glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER,
+                           GL_COLOR_ATTACHMENT1,
+                           GL_TEXTURE_2D,
+                           gui_texture_type_to_id_[dst_texture_type],
+                           0);
 
     glBlitFramebuffer(0,
                       0,

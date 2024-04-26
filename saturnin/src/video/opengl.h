@@ -525,7 +525,7 @@ class Opengl {
     auto isSaturnResolutionSet() const -> bool;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn	auto Opengl::generateTextureFromTextureArrayLayer(const u32 src_texture_id, const u32 layer, const GuiTextureType
+    /// \fn	auto Opengl::generateTextureFromTextureArrayLayer(const u32 src_texture_id, const u8 layer, const GuiTextureType
     /// dst_texture_type, const std::optional<size_t> texture_key = std::nullopt) -> u32;
     ///
     /// \brief	Generates a texture from a texture array layer.
@@ -542,7 +542,7 @@ class Opengl {
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     auto generateTextureFromTextureArrayLayer(const u32                   src_texture_id,
-                                              const u32                   layer,
+                                              const u8                    layer,
                                               const GuiTextureType        dst_texture_type,
                                               const std::optional<size_t> texture_key = std::nullopt) -> u32;
 
@@ -820,8 +820,9 @@ class Opengl {
     /// \returns	The calculated texture coordinates of the texture.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    auto calculateTextureCoordinates(const ScreenPos& pos, const Size& size, const u8 texture_array_index) const
-        -> std::vector<TextureCoordinates>;
+    auto calculateTextureCoordinates(const ScreenPos& pos,
+                                     const Size&      size,
+                                     const u8         texture_array_index) const -> std::vector<TextureCoordinates>;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn	auto readVertexes(const PartsList& parts) -> std::vector<Vertex>
@@ -944,7 +945,8 @@ class Opengl {
     u32                   fbo_texture_array_id_;      ///< Identifier for the FBO texture array.
     FboTextureTypeToLayer fbo_texture_type_to_layer_; ///< Links the used FBO texture layer to a texture type. Index of the array
                                                       ///< is the layer, content is the type.
-    u32 fbo_for_gui_;
+    u32 fbo_for_gui_; ///< FBO used to create a regular 2D texture from a 2D texture array to ease display in ImGUI. (ImGUI
+                      ///< can't work directly with a 2D texture array layer)
 
     FboTextureType     current_rendered_buffer_; ///< The current rendered buffer (front or back)
     GuiTextureTypeToId gui_texture_type_to_id_;  ///< Links the texture to be used in the GUI to a type.
