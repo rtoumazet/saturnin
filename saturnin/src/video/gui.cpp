@@ -1739,7 +1739,8 @@ void showDebugVdp2Window(core::EmulatorContext& state, bool* opened) {
                         if (state.vdp2()->screenInDebug() != video::ScrollScreen::none) {
                             state.opengl()->renderVdp2DebugLayer(state);
                         }
-                        const auto tex_id       = state.opengl()->vdp2DebugLayerTextureId();
+                        // const auto tex_id       = state.opengl()->vdp2DebugLayerTextureId();
+                        const auto tex_id = state.opengl()->getRenderedBufferTextureId(video::GuiTextureType::vdp2_debug_buffer);
                         const auto preview_size = ImVec2(500, 500);
                         ImGui::Image(reinterpret_cast<ImTextureID>(static_cast<uptr>(tex_id)), preview_size);
                     } else {
@@ -1876,7 +1877,9 @@ void showDebugTexturesWindow(core::EmulatorContext& state, bool* opened) {
                     const auto  opengl_tex = state.opengl()->getOpenglTexture(key);
 
                     // auto tex_id = state.opengl()->generateTextureFromTextureArrayLayer(opengl_tex->texture_array_index, key);
-                    u32 tex_id = 0; // :FIXME:
+                    auto tex_id = state.opengl()->generateTextureFromTextureArrayLayer(video::GuiTextureType::layer_buffer, key);
+                    // auto tex_id = state.opengl()->getRenderedBufferTextureId(video::GuiTextureType::layer_buffer);
+                    //  u32 tex_id = 0; // :FIXME:
                     ImGui::SetCursorPos(layer_window_pos);
                     const auto child_size = ImVec2(area_3_width, ImGui::GetContentRegionAvail().y);
                     ImGui::BeginChild("ChildTextureLayer", child_size, false, window_flags);
@@ -1898,8 +1901,8 @@ void showDebugTexturesWindow(core::EmulatorContext& state, bool* opened) {
                 static auto layers        = std::vector<std::string>{"0", "1", "2", "3", "4", "5"};
                 static auto current_layer = int{};
                 if (ImGui::Combo("Layer", &current_layer, layers)) {}
-                // auto tex_id = state.opengl()->generateTextureFromTextureArrayLayer(current_layer, 0);
-                u32 tex_id = 0; // :FIXME:
+                auto tex_id
+                    = state.opengl()->generateTextureFromTextureArrayLayer(video::GuiTextureType::layer_buffer, current_layer);
 
                 ImGui::BeginChild("child_part_texture", child_size, true, window_flags);
                 const auto preview_size = ImVec2(500, 500);

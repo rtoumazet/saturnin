@@ -70,7 +70,7 @@ constexpr auto max_fbo_texture          = u8{20};
 
 enum class TextureArrayType : u8 { saturn_part, framebuffer };
 enum class FboTextureType : u8 { front_buffer, back_buffer, vdp1_debug_overlay, vdp2_debug_layer, priority };
-enum class GuiTextureType : u8 { render_buffer, vdp1_debug_buffer, vdp2_debug_buffer };
+enum class GuiTextureType : u8 { render_buffer, vdp1_debug_buffer, vdp2_debug_buffer, layer_buffer };
 enum class FboType : u8 { general, for_gui };
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \enum	FboTextureStatus
@@ -525,26 +525,20 @@ class Opengl {
     auto isSaturnResolutionSet() const -> bool;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn	auto Opengl::generateTextureFromTextureArrayLayer(const u32 src_texture_id, const u8 layer, const GuiTextureType
-    /// dst_texture_type, const std::optional<size_t> texture_key = std::nullopt) -> u32;
+    /// \fn	auto Opengl::generateTextureFromTextureArrayLayer(const GuiTextureType dst_texture_id, const u8 layer) -> u32;
     ///
     /// \brief	Generates a texture from a texture array layer.
     ///
     /// \author	Runik
     /// \date	10/12/2022
     ///
-    /// \param 	src_texture_id  	Identifier for the source texture.
-    /// \param 	layer				Layer of the texture array to get data from.
     /// \param 	dst_texture_type	Type of the destination texture.
-    /// \param 	texture_key			(Optional) The key of the texture to highlight if any.
+    /// \param 	layer				Layer of the texture array to get data from.
     ///
     /// \returns	The texture id generated from texture array layer.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    auto generateTextureFromTextureArrayLayer(const u32                   src_texture_id,
-                                              const u8                    layer,
-                                              const GuiTextureType        dst_texture_type,
-                                              const std::optional<size_t> texture_key = std::nullopt) -> u32;
+    auto generateTextureFromTextureArrayLayer(const GuiTextureType dst_texture_type, const u8 layer) -> u32;
 
     auto getTextureId(const TextureArrayType type) -> u32;
 
@@ -820,9 +814,8 @@ class Opengl {
     /// \returns	The calculated texture coordinates of the texture.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    auto calculateTextureCoordinates(const ScreenPos& pos,
-                                     const Size&      size,
-                                     const u8         texture_array_index) const -> std::vector<TextureCoordinates>;
+    auto calculateTextureCoordinates(const ScreenPos& pos, const Size& size, const u8 texture_array_index) const
+        -> std::vector<TextureCoordinates>;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn	auto readVertexes(const PartsList& parts) -> std::vector<Vertex>
