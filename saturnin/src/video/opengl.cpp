@@ -122,8 +122,8 @@ void Opengl::initialize() {
 
     initializeFbo();
     initializeShaders();
-    const auto vertex_textured   = createVertexShader(ShaderName::textured);
-    const auto fragment_textured = createFragmentShader(ShaderName::textured);
+    const auto vertex_textured   = createVertexShader("main.vert");
+    const auto fragment_textured = createFragmentShader("main.frag");
     program_shader_              = createProgramShader(vertex_textured, fragment_textured);
 
     const auto shaders_to_delete = std::vector<u32>{vertex_textured, fragment_textured};
@@ -141,7 +141,9 @@ void Opengl::shutdown() const {
     glDeleteProgram(program_shader_);
 
     gl33core::glBindFramebuffer(GL_FRAMEBUFFER_EXT, 0);
-    glDeleteFramebuffers(1, &fbo_);
+    glDeleteFramebuffers(1, &fbo_type_to_id_.at(FboType::general));
+    glDeleteFramebuffers(1, &fbo_type_to_id_.at(FboType::for_gui));
+    glDeleteFramebuffers(1, &fbo_type_to_id_.at(FboType::vdp2_debug));
 
     for (size_t i = 0; i < max_fbo_texture; ++i) {
         deleteTexture(fbo_texture_pool_[i]);
@@ -158,7 +160,7 @@ void Opengl::preRender() {
     // GLint drawFboId = 0;
     // glGetIntegerv(GL_FRAMEBUFFER_BINDING, &drawFboId);
 
-    glBindFramebuffer(GLenum::GL_FRAMEBUFFER, fbo_);
+    glBindFramebuffer(GLenum::GL_FRAMEBUFFER, fbo_type_to_id_[FboType::general]);
 
     attachTextureLayerToFbo(fbo_texture_array_id_,
                             getFboTextureLayer(currentRenderedBuffer()),
@@ -190,75 +192,19 @@ void Opengl::postRender() {
 };
 
 void Opengl::initializeShaders() {
-    //-----------------------------
-    // Vertex shaders
-    //-----------------------------
-    shaders_list_.try_emplace({GlslVersion::glsl_330, ShaderType::vertex, ShaderName::textured}, R"(
-        #version 330 core
+    const auto readFile = [](const std::string& filename) {
+        std::ifstream input_file("./shaders/" + filename, std::ios::in);
+        if (!input_file) { Log::exception(Logger::opengl, tr("Could not load shader '{}' !"), filename); }
 
-        layout (location = 0) in vec2 vtx_position;
-        layout (location = 1) in vec3 vtx_tex_coord;
-        layout (location = 2) in vec4 vtx_color;
-        layout (location = 3) in vec4 vtx_grd_color;
-        
-        layout (location = 4) in vec3 vtx_color_offset_is_positive;
-        layout (location = 5) in vec3 vtx_color_offset;
+        auto buffer = std::stringstream{};
+        buffer << input_file.rdbuf();
+        input_file.close();
 
-        out vec3 frg_tex_coord;
-        out vec4 frg_color;
-        out vec4 frg_grd_color;
-        out vec3 frg_color_offset_is_positive;
-        out vec3 frg_color_offset;
+        return buffer.str();
+    };
 
-        uniform mat4 proj_matrix;
-
-        void main() {
-            gl_Position     = proj_matrix * vec4(vtx_position, 0.0, 1.0);
-            frg_tex_coord   = vec3(vtx_tex_coord);
-            frg_color       = vtx_color;
-            frg_grd_color   = vtx_grd_color;
-            frg_color_offset_is_positive = vtx_color_offset_is_positive;
-            frg_color_offset= vtx_color_offset;
-        }
-    )");
-
-    //-----------------------------
-    // Fragment shaders
-    //-----------------------------
-
-    shaders_list_.try_emplace({GlslVersion::glsl_330, ShaderType::fragment, ShaderName::textured}, R"(
-        #version 330 core
-        
-        in vec3 frg_tex_coord;
-        in vec4 frg_color;
-        in vec4 frg_grd_color;
-        in vec3 frg_color_offset_is_positive;
-        in vec3 frg_color_offset;
-
-        out vec4 out_color;
-
-        uniform sampler2DArray sampler;
-        uniform bool is_texture_used;
-
-        void main()
-        {
-            if(is_texture_used){
-                //out_color = texture(sampler, frg_tex_coord.xyz);
-                float x = frg_tex_coord.x;
-                float y = frg_tex_coord.y;
-                float layer = frg_tex_coord.z;
-                out_color = texture(sampler, vec3(x,y,layer)); 
-            }else{
-                out_color = frg_color;
-            }
-            out_color.rgb += frg_grd_color.rgb;
-            if( frg_color_offset_is_positive.r > 0.0 ){ out_color.r += frg_color_offset.r; } else { out_color.r -= frg_color_offset.r;}
-            if( frg_color_offset_is_positive.g > 0.0 ){ out_color.g += frg_color_offset.g; } else { out_color.g -= frg_color_offset.g;}
-            if( frg_color_offset_is_positive.b > 0.0 ){ out_color.b += frg_color_offset.b; } else { out_color.b -= frg_color_offset.b;}
-            out_color.rgb = clamp(out_color.rgb, vec3(0.0), vec3(1.0));
-
-        } 
-    )");
+    shaders_list_.try_emplace("main.vert", readFile("main.vert"));
+    shaders_list_.try_emplace("main.frag", readFile("main.frag"));
 }
 
 void Opengl::displayFramebuffer(core::EmulatorContext& state) {
@@ -457,7 +403,7 @@ auto Opengl::getAvailableFboTextureIndex() -> std::optional<u8> {
 
 void Opengl::renderParts(const PartsList& parts_list, const u32 texture_id) {
     if (!parts_list.empty()) {
-        const auto [vao, vertex_buffer] = initializeVao(ShaderName::textured);
+        const auto [vao, vertex_buffer] = initializeVao();
 
         glUseProgram(program_shader_);
         glBindVertexArray(vao);                       // binding VAO
@@ -510,7 +456,7 @@ void Opengl::renderParts(const PartsList& parts_list, const u32 texture_id) {
 }
 
 void Opengl::renderFboTexture(const u32 texture_id) {
-    const auto [vao, vertex_buffer] = initializeVao(ShaderName::textured);
+    const auto [vao, vertex_buffer] = initializeVao();
 
     glUseProgram(program_shader_);
     glBindVertexArray(vao);                       // binding VAO
@@ -639,7 +585,7 @@ void Opengl::render() {
 void Opengl::renderTest() {
     preRender();
 
-    const auto [vao, vertex_buffer] = initializeVao(ShaderName::textured);
+    const auto [vao, vertex_buffer] = initializeVao();
 
     glUseProgram(program_shader_);
     glBindVertexArray(vao);                       // binding VAO
@@ -834,7 +780,7 @@ auto Opengl::getRenderedBufferTextureId(const GuiTextureType type) -> u32 {
 
 void Opengl::renderVdp1DebugOverlay() {
     //----------- Pre render -----------//
-    glBindFramebuffer(GLenum::GL_FRAMEBUFFER, fbo_);
+    glBindFramebuffer(GLenum::GL_FRAMEBUFFER, fbo_type_to_id_[FboType::general]);
 
     attachTextureLayerToFbo(fbo_texture_array_id_,
                             getFboTextureLayer(FboTextureType::vdp1_debug_overlay),
@@ -854,7 +800,7 @@ void Opengl::renderVdp1DebugOverlay() {
 
     //----------- Render -----------------//
     // Calculating the ortho projection matrix
-    const auto [vao_simple, vertex_buffer_simple] = initializeVao(ShaderName::textured);
+    const auto [vao_simple, vertex_buffer_simple] = initializeVao();
     const auto proj_matrix                        = calculateDisplayViewportMatrix();
 
     auto part = partToHighlight();
@@ -904,12 +850,12 @@ void Opengl::renderVdp1DebugOverlay() {
 
 void Opengl::renderVdp2DebugLayer(core::EmulatorContext& state) {
     //----------- Pre render -----------//
-    glBindFramebuffer(GLenum::GL_FRAMEBUFFER, fbo_);
+    glBindFramebuffer(GLenum::GL_FRAMEBUFFER, fbo_type_to_id_[FboType::vdp2_debug]);
 
-    attachTextureLayerToFbo(fbo_texture_array_id_,
-                            getFboTextureLayer(FboTextureType::vdp2_debug_layer),
-                            GLenum::GL_FRAMEBUFFER,
-                            GLenum::GL_COLOR_ATTACHMENT0);
+    // attachTextureLayerToFbo(fbo_texture_array_id_,
+    //                         getFboTextureLayer(FboTextureType::vdp2_debug_layer),
+    //                         GLenum::GL_DRAW_FRAMEBUFFER,
+    //                         GLenum::GL_COLOR_ATTACHMENT0);
 
     // Viewport is the entire Saturn framebuffer
     glViewport(0, 0, saturn_framebuffer_width, saturn_framebuffer_height);
@@ -924,23 +870,16 @@ void Opengl::renderVdp2DebugLayer(core::EmulatorContext& state) {
         if (!vdp2_parts.empty()) {
             parts_list.reserve(parts_list.size() + vdp2_parts.size());
             for (const auto& p : vdp2_parts) {
-                // parts_list.push_back(std::make_unique<Vdp2Part>(p));
                 parts_list.emplace_back(p);
             }
         }
-
-        // parts_list = state.vdp2()->vdp2Parts(state.vdp2()->screenInDebug());
     }
     if (!parts_list.empty()) {
         constexpr auto vertexes_per_tessellated_quad = u32{6}; // 2 triangles
-        // constexpr auto elements_nb                   = u8{2};
 
         // Calculating the ortho projection matrix
-        const auto [vao, vertex_buffer] = initializeVao(ShaderName::textured);
+        const auto [vao, vertex_buffer] = initializeVao();
         const auto proj_matrix          = calculateDisplayViewportMatrix();
-
-        // const auto vao_ids_array           = std::array<u32, elements_nb>{vao};
-        // const auto vertex_buffer_ids_array = std::array<u32, elements_nb>{vertex_buffer};
 
         for (auto& part : parts_list) {
             if (part.vertexes.empty()) { continue; }
@@ -958,29 +897,29 @@ void Opengl::renderVdp2DebugLayer(core::EmulatorContext& state) {
             const auto is_texture_used = GLboolean(true);
             glUniform1i(uni_use_texture, is_texture_used);
 
-            const auto opengl_tex = getOpenglTexture(part.texture_key);
-            if (opengl_tex.has_value()) {
-                // Replacing texture coordinates of the vertex by those of the OpenGL texture.
-                for (auto& v : part.vertexes) {
-                    if ((v.tex_coords.s == 0.0) && (v.tex_coords.t == 0.0)) {
-                        v.tex_coords = opengl_tex->coords[0];
-                        continue;
-                    }
-                    if ((v.tex_coords.s == 1.0) && (v.tex_coords.t == 0.0)) {
-                        v.tex_coords = opengl_tex->coords[1];
-                        continue;
-                    }
-                    if ((v.tex_coords.s == 1.0) && (v.tex_coords.t == 1.0)) {
-                        v.tex_coords = opengl_tex->coords[2];
-                        continue;
-                    }
-                    if ((v.tex_coords.s == 0.0) && (v.tex_coords.t == 1.0)) {
-                        v.tex_coords = opengl_tex->coords[3];
-                        continue;
-                    }
-                }
-                glBindTexture(GL_TEXTURE_2D, (*opengl_tex).opengl_id);
-            }
+            // const auto opengl_tex = getOpenglTexture(part.texture_key);
+            // if (opengl_tex.has_value()) {
+            //     // Replacing texture coordinates of the vertex by those of the OpenGL texture.
+            //     for (auto& v : part.vertexes) {
+            //         if ((v.tex_coords.s == 0.0) && (v.tex_coords.t == 0.0)) {
+            //             v.tex_coords = opengl_tex->coords[0];
+            //             continue;
+            //         }
+            //         if ((v.tex_coords.s == 1.0) && (v.tex_coords.t == 0.0)) {
+            //             v.tex_coords = opengl_tex->coords[1];
+            //             continue;
+            //         }
+            //         if ((v.tex_coords.s == 1.0) && (v.tex_coords.t == 1.0)) {
+            //             v.tex_coords = opengl_tex->coords[2];
+            //             continue;
+            //         }
+            //         if ((v.tex_coords.s == 0.0) && (v.tex_coords.t == 1.0)) {
+            //             v.tex_coords = opengl_tex->coords[3];
+            //             continue;
+            //         }
+            //     }
+            //     glBindTexture(GL_TEXTURE_2D, (*opengl_tex).opengl_id);
+            // }
 
             // Quad is tessellated into 2 triangles, using a texture
 
@@ -1008,8 +947,8 @@ void Opengl::renderVdp2DebugLayer(core::EmulatorContext& state) {
 
     //------ Post render --------//
     // Framebuffer is released
+    gl::glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-    gl33core::glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }; // namespace saturnin::video
 
 void Opengl::addOrUpdateTexture(const size_t key, const VdpLayer layer) {
@@ -1314,7 +1253,7 @@ auto Opengl::generateTextureFromTextureArrayLayer(const GuiTextureType dst_textu
         }
     }
 
-    glBindFramebuffer(GLenum::GL_FRAMEBUFFER, fbo_for_gui_);
+    glBindFramebuffer(GLenum::GL_FRAMEBUFFER, fbo_type_to_id_[FboType::for_gui]);
 
     attachTextureLayerToFbo(src_texture_id, layer, GLenum::GL_FRAMEBUFFER, GLenum::GL_COLOR_ATTACHMENT0);
 
@@ -1338,8 +1277,8 @@ auto Opengl::generateTextureFromTextureArrayLayer(const GuiTextureType dst_textu
 auto Opengl::getTextureId(const TextureArrayType type) -> u32 {
     // There are 2 texture arrays used in the program :
     // - one is used as a texture atlas for VDP parts rendering (texture_array_id_)
-    // - the other as framebuffers linked to the main FBO, handling debug layers, priority rendering, front and back framebuffer
-    // (fbo_texture_array_id_), etc.
+    // - the other as framebuffers linked to the main FBO, handling debug layers, priority rendering, front and back
+    // framebuffer (fbo_texture_array_id_), etc.
 
     switch (type) {
         using enum TextureArrayType;
@@ -1363,9 +1302,9 @@ auto Opengl::getTextureId(const TextureArrayType type) -> u32 {
 
 void Opengl::onWindowResize(const u16 width, const u16 height) { hostScreenResolution({width, height}); }
 
-auto Opengl::createVertexShader(const ShaderName name) -> u32 {
+auto Opengl::createVertexShader(std::string_view name) -> u32 {
     const auto vertex_shader = glCreateShader(GL_VERTEX_SHADER);
-    auto       source        = getShaderSource(ShaderType::vertex, name);
+    auto       source        = getShaderSource(name);
     glShaderSource(vertex_shader, 1, &source, nullptr);
     glCompileShader(vertex_shader);
     checkShaderCompilation(vertex_shader);
@@ -1373,9 +1312,9 @@ auto Opengl::createVertexShader(const ShaderName name) -> u32 {
     return vertex_shader;
 }
 
-auto Opengl::createFragmentShader(const ShaderName name) -> u32 {
+auto Opengl::createFragmentShader(std::string_view name) -> u32 {
     const auto fragment_shader = glCreateShader(GL_FRAGMENT_SHADER);
-    auto       source          = getShaderSource(ShaderType::fragment, name);
+    auto       source          = getShaderSource(name);
     glShaderSource(fragment_shader, 1, &source, nullptr);
     glCompileShader(fragment_shader);
 
@@ -1448,9 +1387,13 @@ void Opengl::deleteTexture(const u32 texture) {
 
 static void error_callback(int error, const char* description) { fprintf(stderr, "Error %d: %s\n", error, description); }
 
-auto Opengl::getShaderSource(const ShaderType type, const ShaderName name) -> const char* {
-    const auto glsl_version = GlslVersion::glsl_330;
-    return shaders_list_[{glsl_version, type, name}];
+auto Opengl::getShaderSource(std::string_view name) -> const char* {
+    if (auto search = shaders_list_.find(name); search != shaders_list_.end()) {
+        return search->second.c_str();
+
+    } else {
+        Log::exception(Logger::opengl, "Shader {} not found !", name);
+    }
 }
 
 auto Opengl::calculateDisplayViewportMatrix() const -> glm::highp_mat4 {
@@ -1490,7 +1433,7 @@ auto Opengl::calculateDisplayViewportMatrix() const -> glm::highp_mat4 {
 }
 
 // static
-auto Opengl::initializeVao(const ShaderName name) -> std::tuple<u32, u32> {
+auto Opengl::initializeVao() -> std::tuple<u32, u32> {
     auto vao = u32{};
     glGenVertexArrays(1, &vao);
 
@@ -1504,39 +1447,35 @@ auto Opengl::initializeVao(const ShaderName name) -> std::tuple<u32, u32> {
     //// Declaring vertex buffer data
     glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
 
-    switch (name) {
-        using enum ShaderName;
-        case textured: {
-            // position pointer
-            glVertexAttribPointer(0, 2, GLenum::GL_SHORT, GL_FALSE, sizeof(Vertex), 0); // NOLINT: this is an index
-            glEnableVertexAttribArray(0);                                               // NOLINT: this is an index
+    // position pointer
+    glVertexAttribPointer(0, 2, GLenum::GL_SHORT, GL_FALSE, sizeof(Vertex), 0); // NOLINT: this is an index
+    glEnableVertexAttribArray(0);                                               // NOLINT: this is an index
 
-            // texture coords pointer
-            auto offset = GLintptr(sizeof(VertexPosition));
-            glVertexAttribPointer(1, 3, GLenum::GL_FLOAT, GL_FALSE, sizeof(Vertex), std::bit_cast<GLvoid*>(offset));
-            glEnableVertexAttribArray(1);
+    // texture coords pointer
+    auto offset = GLintptr(sizeof(VertexPosition));
+    glVertexAttribPointer(1, 3, GLenum::GL_FLOAT, GL_FALSE, sizeof(Vertex), std::bit_cast<GLvoid*>(offset));
+    glEnableVertexAttribArray(1);
 
-            // color pointer
-            offset += GLintptr(sizeof(TextureCoordinates));
-            glVertexAttribPointer(2, 4, GLenum::GL_UNSIGNED_BYTE, GL_TRUE, sizeof(Vertex), std::bit_cast<GLvoid*>(offset));
-            glEnableVertexAttribArray(2);
+    // color pointer
+    offset += GLintptr(sizeof(TextureCoordinates));
+    glVertexAttribPointer(2, 4, GLenum::GL_UNSIGNED_BYTE, GL_TRUE, sizeof(Vertex), std::bit_cast<GLvoid*>(offset));
+    glEnableVertexAttribArray(2);
 
-            // gouraud color pointer
-            offset += GLintptr(sizeof(VertexColor));
-            glVertexAttribPointer(3, 3, GLenum::GL_BYTE, GL_TRUE, sizeof(Vertex), std::bit_cast<GLvoid*>(offset));
-            glEnableVertexAttribArray(3);
+    // gouraud color pointer
+    offset += GLintptr(sizeof(VertexColor));
+    glVertexAttribPointer(3, 3, GLenum::GL_BYTE, GL_TRUE, sizeof(Vertex), std::bit_cast<GLvoid*>(offset));
+    glEnableVertexAttribArray(3);
 
-            // color offset pointer R sign
-            offset += GLintptr(sizeof(Gouraud));
-            glVertexAttribPointer(4, 3, GLenum::GL_UNSIGNED_BYTE, GL_FALSE, sizeof(Vertex), std::bit_cast<GLvoid*>(offset));
-            glEnableVertexAttribArray(4);
+    // color offset pointer R sign
+    offset += GLintptr(sizeof(Gouraud));
+    glVertexAttribPointer(4, 3, GLenum::GL_UNSIGNED_BYTE, GL_FALSE, sizeof(Vertex), std::bit_cast<GLvoid*>(offset));
+    glEnableVertexAttribArray(4);
 
-            // color offset pointer R value
-            offset += GLintptr(sizeof(std::array<u8, 3>));
-            glVertexAttribPointer(5, 3, GLenum::GL_UNSIGNED_BYTE, GL_TRUE, sizeof(Vertex), std::bit_cast<GLvoid*>(offset));
-            glEnableVertexAttribArray(5);
-        }
-    }
+    // color offset pointer R value
+    offset += GLintptr(sizeof(std::array<u8, 3>));
+    glVertexAttribPointer(5, 3, GLenum::GL_UNSIGNED_BYTE, GL_TRUE, sizeof(Vertex), std::bit_cast<GLvoid*>(offset));
+    glEnableVertexAttribArray(5);
+
     glBindVertexArray(0);
     return std::make_tuple(vao, vertex_buffer);
 }
@@ -1546,8 +1485,8 @@ void Opengl::initializeFbo() {
 
     // Generating a pool of textures to be used with the FBO.
     // for (size_t i = 0; i < max_fbo_texture; ++i) {
-    //    fbo_texture_pool_[i]        = generateTexture(saturn_framebuffer_width, saturn_framebuffer_height, std::vector<u8>());
-    //    fbo_texture_pool_status_[i] = FboTextureStatus::unused;
+    //    fbo_texture_pool_[i]        = generateTexture(saturn_framebuffer_width, saturn_framebuffer_height,
+    //    std::vector<u8>()); fbo_texture_pool_status_[i] = FboTextureStatus::unused;
     //}
 
     // Some textures are setup as a specific types in the FBO texture pool.
@@ -1565,11 +1504,13 @@ void Opengl::initializeFbo() {
     currentRenderedBuffer(FboTextureType::front_buffer);
 
     // Generating the main FBO used by the renderer.
-    fbo_ = generateFbo(FboType::general);
+    // fbo_ = generateFbo(FboType::general);
 
-    fbo_for_gui_ = generateFbo(FboType::for_gui);
+    fbo_type_to_id_[FboType::general]    = generateFbo(FboType::general);
+    fbo_type_to_id_[FboType::for_gui]    = generateFbo(FboType::for_gui);
+    fbo_type_to_id_[FboType::vdp2_debug] = generateFbo(FboType::vdp2_debug);
 
-    glBindFramebuffer(GL_FRAMEBUFFER, fbo_);
+    glBindFramebuffer(GL_FRAMEBUFFER, fbo_type_to_id_[FboType::general]);
 }
 
 auto Opengl::generateFbo(const FboType fbo_type) -> u32 {
@@ -1607,6 +1548,28 @@ auto Opengl::generateFbo(const FboType fbo_type) -> u32 {
 
             glDrawBuffer(GL_COLOR_ATTACHMENT1);
 
+            break;
+        }
+        case vdp2_debug: {
+            glBindFramebuffer(GLenum::GL_FRAMEBUFFER, fbo);
+
+            glBindTexture(GLenum::GL_TEXTURE_2D_ARRAY, fbo_texture_array_id_);
+
+            glEnable(GLenum::GL_BLEND);
+            glBlendFunc(GLenum::GL_SRC_ALPHA, GLenum::GL_ONE_MINUS_SRC_ALPHA);
+
+            // Attaching the color texture currently used as framebuffer to the FBO.
+            attachTextureLayerToFbo(fbo_texture_array_id_,
+                                    getFboTextureLayer(currentRenderedBuffer()),
+                                    GLenum::GL_READ_FRAMEBUFFER,
+                                    GLenum::GL_COLOR_ATTACHMENT0);
+
+            attachTextureLayerToFbo(gui_texture_type_to_id_[GuiTextureType::vdp2_debug_buffer],
+                                    getFboTextureLayer(FboTextureType::vdp2_debug_layer),
+                                    GLenum::GL_DRAW_FRAMEBUFFER,
+                                    GLenum::GL_COLOR_ATTACHMENT1);
+
+            glDrawBuffer(GL_COLOR_ATTACHMENT1);
             break;
         }
     }

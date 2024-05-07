@@ -1739,7 +1739,7 @@ void showDebugVdp2Window(core::EmulatorContext& state, bool* opened) {
                         if (state.vdp2()->screenInDebug() != video::ScrollScreen::none) {
                             state.opengl()->renderVdp2DebugLayer(state);
                         }
-                        // const auto tex_id       = state.opengl()->vdp2DebugLayerTextureId();
+                        // const auto tex_id = state.opengl()->vdp2DebugLayerTextureId();
                         const auto tex_id = state.opengl()->getRenderedBufferTextureId(video::GuiTextureType::vdp2_debug_buffer);
                         const auto preview_size = ImVec2(500, 500);
                         ImGui::Image(reinterpret_cast<ImTextureID>(static_cast<uptr>(tex_id)), preview_size);

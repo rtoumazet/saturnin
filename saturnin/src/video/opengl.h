@@ -71,7 +71,7 @@ constexpr auto max_fbo_texture          = u8{20};
 enum class TextureArrayType : u8 { saturn_part, framebuffer };
 enum class FboTextureType : u8 { front_buffer, back_buffer, vdp1_debug_overlay, vdp2_debug_layer, priority };
 enum class GuiTextureType : u8 { render_buffer, vdp1_debug_buffer, vdp2_debug_buffer, layer_buffer };
-enum class FboType : u8 { general, for_gui };
+enum class FboType : u8 { general, for_gui, vdp2_debug };
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \enum	FboTextureStatus
 ///
@@ -88,18 +88,23 @@ using FboData               = std::pair<u32, u32>; // Describes a framebuffer ob
 using FboTextureTypeToLayer = std::array<FboTextureType, fbo_texture_array_depth>; // Defines the type of each FBO texture layer,
                                                                                    // the index of the array being the layer.
 using GuiTextureTypeToId = std::unordered_map<GuiTextureType, u32>; // Defines the type of each texture used to render to GUI.
+using FboTypeToId        = std::unordered_map<FboType, u32>;        // Link between a FboType and its id.
 
 using FboKey = std::pair<u8, VdpLayer>; // First is priority number (1 to 7, last on being the highest), second is linked layer.
 using FboKeyToFbo    = std::map<FboKey, u8>; // Link between a priority to display and its relative FBO index in the FBO pool.
 using FboTexturePool = std::array<u32, max_fbo_texture>; // Pool of textures ids to be used for rendering by priority.
 using FboTexturePoolStatus = std::array<FboTextureStatus, max_fbo_texture>; // State of the textures in the pool.
 
-enum class ShaderName { textured };
 enum class ShaderType { vertex, fragment };
-enum class GlslVersion { glsl_120, glsl_330 };
 
-using ShaderKey   = std::tuple<GlslVersion, ShaderType, ShaderName>;
-using ShadersList = std::map<ShaderKey, const char*>;
+struct string_hash {
+    using is_transparent = void;
+    [[nodiscard]] size_t operator()(const char* txt) const { return std::hash<std::string_view>{}(txt); }
+    [[nodiscard]] size_t operator()(std::string_view txt) const { return std::hash<std::string_view>{}(txt); }
+    [[nodiscard]] size_t operator()(const std::string& txt) const { return std::hash<std::string>{}(txt); }
+};
+
+using ShadersList = std::unordered_map<std::string, std::string, string_hash, std::equal_to<>>; ///< Shader name + shader content
 
 struct OpenglTexture {
     size_t                          key;                 ///< The Saturn texture key.
@@ -194,7 +199,10 @@ class Opengl {
     [[nodiscard]] auto currentRenderedBuffer() const { return current_rendered_buffer_; };
     void               currentRenderedBuffer(const FboTextureType type) { current_rendered_buffer_ = type; };
     [[nodiscard]] auto vdp1DebugOverlayTextureId() const { return getFboTextureLayer(FboTextureType::vdp1_debug_overlay); };
-    [[nodiscard]] auto vdp2DebugLayerTextureId() const -> u32 { return getFboTextureLayer(FboTextureType::vdp2_debug_layer); };
+    //[[nodiscard]] auto vdp2DebugLayerTextureId() const -> u32 { return getFboTextureLayer(FboTextureType::vdp2_debug_layer); };
+    [[nodiscard]] auto vdp2DebugLayerTextureId() const -> u32 {
+        return gui_texture_type_to_id_.at(GuiTextureType::vdp2_debug_buffer);
+    };
     [[nodiscard]] auto fps() const { return fps_; };
     void               fps(std::string_view fps) { fps_ = fps; };
     void               saturnScreenResolution(const ScreenResolution& res) { saturn_screen_resolution_ = res; };
@@ -291,34 +299,34 @@ class Opengl {
     void onWindowResize(const u16 width, const u16 height);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn auto Opengl::createVertexShader(const ShaderName name) -> u32;
+    /// \fn	auto Opengl::createVertexShader(std::string_view name) -> u32;
     ///
-    /// \brief  Creates a vertex shader.
+    /// \brief	Creates a vertex shader.
     ///
-    /// \author Runik
-    /// \date   26/04/2021
+    /// \author	Runik
+    /// \date	26/04/2021
     ///
-    /// \param  name    The vertex shader name.
+    /// \param 	name	The vertex shader name.
     ///
-    /// \returns    The vertex shader id.
+    /// \returns	The vertex shader id.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    auto createVertexShader(const ShaderName name) -> u32;
+    auto createVertexShader(std::string_view name) -> u32;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn auto Opengl::createFragmentShader(const ShaderName name) -> u32;
+    /// \fn	auto Opengl::createFragmentShader(std::string_view name) -> u32;
     ///
-    /// \brief  Creates a fragment shader.
+    /// \brief	Creates a fragment shader.
     ///
-    /// \author Runik
-    /// \date   26/04/2021
+    /// \author	Runik
+    /// \date	26/04/2021
     ///
-    /// \param  name    The fragment shader name.
+    /// \param 	name	The fragment shader name.
     ///
-    /// \returns    The fragment shader id.
+    /// \returns	The fragment shader id.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    auto createFragmentShader(const ShaderName name) -> u32;
+    auto createFragmentShader(std::string_view name) -> u32;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn static auto Opengl::createProgramShader(u32 vertex_shader, u32 fragment_shader) -> u32;
@@ -390,7 +398,7 @@ class Opengl {
     /// \returns    True if framebuffer objects are initialized.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    auto areFbosInitialized() const -> bool { return fbo_ != 0; }
+    auto areFbosInitialized() const -> bool { return fbo_type_to_id_.at(FboType::general) != 0; }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn void Opengl::render();
@@ -605,20 +613,19 @@ class Opengl {
 
   private:
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn auto Opengl::getShaderSource(const ShaderType type, const ShaderName name) -> const char*;
+    /// \fn	auto Opengl::getShaderSource(std::string_view name) -> const char*;
     ///
-    /// \brief  Gets the shader source depending on the configuration
+    /// \brief	Gets the shader source depending on the configuration
     ///
-    /// \author Runik
-    /// \date   08/04/2021
+    /// \author	Runik
+    /// \date	08/04/2021
     ///
-    /// \param  type    The shader type.
-    /// \param  name    The shader name.
+    /// \param 	name	The shader name.
     ///
-    /// \returns    Null if it fails, else the shader source.
+    /// \returns	Null if it fails, else the shader source.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    auto getShaderSource(const ShaderType type, const ShaderName name) -> const char*;
+    auto getShaderSource(std::string_view name) -> const char*;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn auto Opengl::calculateDisplayViewportMatrix() const -> glm::highp_mat4;
@@ -635,19 +642,17 @@ class Opengl {
     auto calculateDisplayViewportMatrix() const -> glm::highp_mat4;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn static auto Opengl::initializeVao(const ShaderName name) -> std::tuple<u32, u32>;
+    /// \fn	static auto Opengl::initializeVao() -> std::tuple<u32, u32>;
     ///
-    /// \brief  Initializes a vao.
+    /// \brief	Initializes a vao.
     ///
-    /// \author Runik
-    /// \date   16/04/2021
+    /// \author	Runik
+    /// \date	16/04/2021
     ///
-    /// \param  name    Name of the related shader.
-    ///
-    /// \returns    The generated VAO id and the vertex buffer id.
+    /// \returns	The generated VAO id and the vertex buffer id.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    static auto initializeVao(const ShaderName name) -> std::tuple<u32, u32>;
+    static auto initializeVao() -> std::tuple<u32, u32>;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn	void Opengl::initializeFbo();
@@ -934,12 +939,13 @@ class Opengl {
 
     core::Config* config_; ///< Configuration object.
 
-    u32                   fbo_;                       ///< The main framebuffer object.
+    FboTypeToId fbo_type_to_id_; ///< The framebuffer objects used in the app.
+    // u32                   fbo_;                       ///< The main framebuffer object.
     u32                   fbo_texture_array_id_;      ///< Identifier for the FBO texture array.
     FboTextureTypeToLayer fbo_texture_type_to_layer_; ///< Links the used FBO texture layer to a texture type. Index of the array
                                                       ///< is the layer, content is the type.
-    u32 fbo_for_gui_; ///< FBO used to create a regular 2D texture from a 2D texture array to ease display in ImGUI. (ImGUI
-                      ///< can't work directly with a 2D texture array layer)
+    // u32 fbo_for_gui_; ///< FBO used to create a regular 2D texture from a 2D texture array to ease display in ImGUI. (ImGUI
+    ///< can't work directly with a 2D texture array layer)
 
     FboTextureType     current_rendered_buffer_; ///< The current rendered buffer (front or back)
     GuiTextureTypeToId gui_texture_type_to_id_;  ///< Links the texture to be used in the GUI to a type.
