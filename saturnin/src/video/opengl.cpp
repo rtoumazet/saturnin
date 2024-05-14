@@ -1564,10 +1564,9 @@ auto Opengl::generateFbo(const FboType fbo_type) -> u32 {
                                     GLenum::GL_READ_FRAMEBUFFER,
                                     GLenum::GL_COLOR_ATTACHMENT0);
 
-            attachTextureLayerToFbo(gui_texture_type_to_id_[GuiTextureType::vdp2_debug_buffer],
-                                    getFboTextureLayer(FboTextureType::vdp2_debug_layer),
-                                    GLenum::GL_DRAW_FRAMEBUFFER,
-                                    GLenum::GL_COLOR_ATTACHMENT1);
+            attachTextureToFbo(gui_texture_type_to_id_[GuiTextureType::vdp2_debug_buffer],
+                               GLenum::GL_DRAW_FRAMEBUFFER,
+                               GLenum::GL_COLOR_ATTACHMENT1);
 
             glDrawBuffer(GL_COLOR_ATTACHMENT1);
             break;
