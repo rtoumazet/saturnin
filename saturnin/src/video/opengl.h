@@ -72,6 +72,8 @@ enum class TextureArrayType : u8 { saturn_part, framebuffer };
 enum class FboTextureType : u8 { front_buffer, back_buffer, vdp1_debug_overlay, vdp2_debug_layer, priority };
 enum class GuiTextureType : u8 { render_buffer, vdp1_debug_buffer, vdp2_debug_buffer, layer_buffer };
 enum class FboType : u8 { general, for_gui, vdp2_debug };
+enum class ProgramShader : u8 { main, vdp2_debug };
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \enum	FboTextureStatus
 ///
@@ -95,8 +97,6 @@ using FboKeyToFbo    = std::map<FboKey, u8>; // Link between a priority to displ
 using FboTexturePool = std::array<u32, max_fbo_texture>; // Pool of textures ids to be used for rendering by priority.
 using FboTexturePoolStatus = std::array<FboTextureStatus, max_fbo_texture>; // State of the textures in the pool.
 
-enum class ShaderType { vertex, fragment };
-
 struct string_hash {
     using is_transparent = void;
     [[nodiscard]] size_t operator()(const char* txt) const { return std::hash<std::string_view>{}(txt); }
@@ -105,6 +105,7 @@ struct string_hash {
 };
 
 using ShadersList = std::unordered_map<std::string, std::string, string_hash, std::equal_to<>>; ///< Shader name + shader content
+using ProgramShaders = std::unordered_map<ProgramShader, u32>; ///< Program shader name + its OpenGL id.
 
 struct OpenglTexture {
     size_t                          key;                 ///< The Saturn texture key.
@@ -819,8 +820,9 @@ class Opengl {
     /// \returns	The calculated texture coordinates of the texture.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    auto calculateTextureCoordinates(const ScreenPos& pos, const Size& size, const u8 texture_array_index) const
-        -> std::vector<TextureCoordinates>;
+    auto calculateTextureCoordinates(const ScreenPos& pos,
+                                     const Size&      size,
+                                     const u8         texture_array_index) const -> std::vector<TextureCoordinates>;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn	auto readVertexes(const PartsList& parts) -> std::vector<Vertex>
@@ -978,8 +980,8 @@ class Opengl {
     PartsList parts_list_debug_; ///< List of parts used to generate textures for debugging
                                  // Will have to be moved to the platform agnostic renderer.
 
-    u32         program_shader_; ///< Program shaders used to render parts
-    ShadersList shaders_list_;   ///< List of shaders.
+    ShadersList    shaders_list_;    ///< List of shaders.
+    ProgramShaders program_shaders_; ///< List of program shaders.
 
     std::string fps_; ///< The frames per second.
 };
