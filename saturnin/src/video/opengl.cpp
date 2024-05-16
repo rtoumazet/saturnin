@@ -1095,9 +1095,8 @@ void Opengl::packTextures(std::vector<OpenglTexture>& textures, const VdpLayer l
     glBindTexture(GL_TEXTURE_2D_ARRAY, 0);
 }
 
-auto Opengl::calculateTextureCoordinates(const ScreenPos& pos,
-                                         const Size&      size,
-                                         const u8         texture_array_index) const -> std::vector<TextureCoordinates> {
+auto Opengl::calculateTextureCoordinates(const ScreenPos& pos, const Size& size, const u8 texture_array_index) const
+    -> std::vector<TextureCoordinates> {
     // Calculating the texture coordinates in the atlas
     // (x1,y1)     (x2,y1)
     //        .---.
@@ -1574,16 +1573,16 @@ auto Opengl::generateFbo(const FboType fbo_type) -> u32 {
             glBlendFunc(GLenum::GL_SRC_ALPHA, GLenum::GL_ONE_MINUS_SRC_ALPHA);
 
             // Attaching the color texture currently used as framebuffer to the FBO.
-            attachTextureLayerToFbo(fbo_texture_array_id_,
-                                    getFboTextureLayer(currentRenderedBuffer()),
-                                    GLenum::GL_READ_FRAMEBUFFER,
-                                    GLenum::GL_COLOR_ATTACHMENT0);
+            // attachTextureLayerToFbo(fbo_texture_array_id_,
+            //                        getFboTextureLayer(FboTextureType::vdp2_debug_layer),
+            //                        GLenum::GL_DRAW_FRAMEBUFFER,
+            //                        GLenum::GL_COLOR_ATTACHMENT0);
 
             attachTextureToFbo(gui_texture_type_to_id_[GuiTextureType::vdp2_debug_buffer],
                                GLenum::GL_DRAW_FRAMEBUFFER,
-                               GLenum::GL_COLOR_ATTACHMENT1);
+                               GLenum::GL_COLOR_ATTACHMENT0);
 
-            glDrawBuffer(GL_COLOR_ATTACHMENT1);
+            glDrawBuffer(GL_COLOR_ATTACHMENT0);
             break;
         }
     }
