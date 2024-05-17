@@ -854,20 +854,15 @@ void Opengl::renderVdp2DebugLayer(core::EmulatorContext& state) {
     //----------- Pre render -----------//
     glBindFramebuffer(GLenum::GL_FRAMEBUFFER, fbo_type_to_id_[FboType::vdp2_debug]);
 
-    // attachTextureLayerToFbo(fbo_texture_array_id_,
-    //                         getFboTextureLayer(FboTextureType::vdp2_debug_layer),
-    //                         GLenum::GL_DRAW_FRAMEBUFFER,
-    //                         GLenum::GL_COLOR_ATTACHMENT0);
-
     // Viewport is the entire Saturn framebuffer
     glViewport(0, 0, saturn_framebuffer_width, saturn_framebuffer_height);
 
-    gl::glClearColor(1.0f, 1.0f, 1.0f, 0.0f);
+    gl::glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
 
     //----------- Render -----------------//
     PartsList parts_list;
-    if constexpr (false) {
+    if constexpr (true) {
         if (state.vdp2()->screenInDebug() != video::ScrollScreen::none) {
             const auto vdp2_parts = state.vdp2()->vdp2Parts(state.vdp2()->screenInDebug(), VdpType::vdp2_cell);
             if (!vdp2_parts.empty()) {
@@ -918,29 +913,29 @@ void Opengl::renderVdp2DebugLayer(core::EmulatorContext& state) {
             const auto is_texture_used = GLboolean(true);
             glUniform1i(uni_use_texture, is_texture_used);
 
-            // const auto opengl_tex = getOpenglTexture(part.texture_key);
-            // if (opengl_tex.has_value()) {
-            //     // Replacing texture coordinates of the vertex by those of the OpenGL texture.
-            //     for (auto& v : part.vertexes) {
-            //         if ((v.tex_coords.s == 0.0) && (v.tex_coords.t == 0.0)) {
-            //             v.tex_coords = opengl_tex->coords[0];
-            //             continue;
-            //         }
-            //         if ((v.tex_coords.s == 1.0) && (v.tex_coords.t == 0.0)) {
-            //             v.tex_coords = opengl_tex->coords[1];
-            //             continue;
-            //         }
-            //         if ((v.tex_coords.s == 1.0) && (v.tex_coords.t == 1.0)) {
-            //             v.tex_coords = opengl_tex->coords[2];
-            //             continue;
-            //         }
-            //         if ((v.tex_coords.s == 0.0) && (v.tex_coords.t == 1.0)) {
-            //             v.tex_coords = opengl_tex->coords[3];
-            //             continue;
-            //         }
-            //     }
-            //     glBindTexture(GL_TEXTURE_2D, (*opengl_tex).opengl_id);
-            // }
+            const auto opengl_tex = getOpenglTexture(part.texture_key);
+            if (opengl_tex.has_value()) {
+                // Replacing texture coordinates of the vertex by those of the OpenGL texture.
+                for (auto& v : part.vertexes) {
+                    if ((v.tex_coords.s == 0.0) && (v.tex_coords.t == 0.0)) {
+                        v.tex_coords = opengl_tex->coords[0];
+                        continue;
+                    }
+                    if ((v.tex_coords.s == 1.0) && (v.tex_coords.t == 0.0)) {
+                        v.tex_coords = opengl_tex->coords[1];
+                        continue;
+                    }
+                    if ((v.tex_coords.s == 1.0) && (v.tex_coords.t == 1.0)) {
+                        v.tex_coords = opengl_tex->coords[2];
+                        continue;
+                    }
+                    if ((v.tex_coords.s == 0.0) && (v.tex_coords.t == 1.0)) {
+                        v.tex_coords = opengl_tex->coords[3];
+                        continue;
+                    }
+                }
+                glBindTexture(GL_TEXTURE_2D, (*opengl_tex).opengl_id);
+            }
 
             // Quad is tessellated into 2 triangles, using a texture
 
@@ -1095,8 +1090,9 @@ void Opengl::packTextures(std::vector<OpenglTexture>& textures, const VdpLayer l
     glBindTexture(GL_TEXTURE_2D_ARRAY, 0);
 }
 
-auto Opengl::calculateTextureCoordinates(const ScreenPos& pos, const Size& size, const u8 texture_array_index) const
-    -> std::vector<TextureCoordinates> {
+auto Opengl::calculateTextureCoordinates(const ScreenPos& pos,
+                                         const Size&      size,
+                                         const u8         texture_array_index) const -> std::vector<TextureCoordinates> {
     // Calculating the texture coordinates in the atlas
     // (x1,y1)     (x2,y1)
     //        .---.
@@ -1566,6 +1562,8 @@ auto Opengl::generateFbo(const FboType fbo_type) -> u32 {
         }
         case vdp2_debug: {
             glBindFramebuffer(GLenum::GL_FRAMEBUFFER, fbo);
+
+            glActiveTexture(GLenum::GL_TEXTURE0);
 
             glBindTexture(GLenum::GL_TEXTURE_2D_ARRAY, fbo_texture_array_id_);
 
