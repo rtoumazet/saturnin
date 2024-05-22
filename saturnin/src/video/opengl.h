@@ -155,21 +155,21 @@ struct DrawRange {
 struct RenderPart {
     std::vector<Vertex> vertexes;     ///< The vertexes used for rendering.
     ColorOffset         color_offset; ///< Color offset.
-    size_t              texture_key;  ///< Link to the texture.
     DrawType            draw_type;    ///< Type of the draw.
     u8                  priority{0};  ///< Priority (used for sorting).
+    size_t              texture_key;  ///< Link to the texture.
     explicit RenderPart(const Vdp1Part& p) :
         vertexes(p.common_vdp_data_.vertexes),
         color_offset(p.common_vdp_data_.color_offset),
-        texture_key(p.common_vdp_data_.texture_key),
         draw_type(p.common_vdp_data_.draw_type),
-        priority(p.common_vdp_data_.priority){};
+        priority(p.common_vdp_data_.priority),
+        texture_key(p.common_vdp_data_.texture_key){};
     explicit RenderPart(const Vdp2Part& p) :
         vertexes(p.common_vdp_data_.vertexes),
         color_offset(p.common_vdp_data_.color_offset),
-        texture_key(p.common_vdp_data_.texture_key),
         draw_type(p.common_vdp_data_.draw_type),
-        priority(p.common_vdp_data_.priority){};
+        priority(p.common_vdp_data_.priority),
+        texture_key(p.common_vdp_data_.texture_key){};
 };
 
 using PartsList       = std::vector<RenderPart>;
@@ -820,8 +820,9 @@ class Opengl {
     /// \returns	The calculated texture coordinates of the texture.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    auto calculateTextureCoordinates(const ScreenPos& pos, const Size& size, const u8 texture_array_index) const
-        -> std::vector<TextureCoordinates>;
+    auto calculateTextureCoordinates(const ScreenPos& pos,
+                                     const Size&      size,
+                                     const u8         texture_array_index) const -> std::vector<TextureCoordinates>;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn	auto readVertexes(const PartsList& parts) -> std::vector<Vertex>

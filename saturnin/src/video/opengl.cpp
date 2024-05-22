@@ -890,76 +890,7 @@ void Opengl::renderVdp2DebugLayer(core::EmulatorContext& state) {
         parts_list.emplace_back(render_part);
     }
 
-    if (!parts_list.empty()) {
-        constexpr auto vertexes_per_tessellated_quad = u32{6}; // 2 triangles
-
-        // Calculating the ortho projection matrix
-        const auto [vao, vertex_buffer] = initializeVao();
-        const auto proj_matrix          = calculateDisplayViewportMatrix();
-
-        for (auto& part : parts_list) {
-            if (part.vertexes.empty()) { continue; }
-
-            glUseProgram(program_shaders_[ProgramShader::main]);
-            glBindVertexArray(vao);                       // binding VAO
-            glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer); // binding vertex buffer
-
-            // Sending the ortho projection matrix to the shader
-            const auto uni_proj_matrix = glGetUniformLocation(program_shaders_[ProgramShader::main], "proj_matrix");
-            glUniformMatrix4fv(uni_proj_matrix, 1, GL_FALSE, glm::value_ptr(proj_matrix));
-
-            // Sending the variable to configure the shader to use texture data.
-            const auto uni_use_texture = glGetUniformLocation(program_shaders_[ProgramShader::main], "is_texture_used");
-            const auto is_texture_used = GLboolean(true);
-            glUniform1i(uni_use_texture, is_texture_used);
-
-            const auto opengl_tex = getOpenglTexture(part.texture_key);
-            if (opengl_tex.has_value()) {
-                // Replacing texture coordinates of the vertex by those of the OpenGL texture.
-                for (auto& v : part.vertexes) {
-                    if ((v.tex_coords.s == 0.0) && (v.tex_coords.t == 0.0)) {
-                        v.tex_coords = opengl_tex->coords[0];
-                        continue;
-                    }
-                    if ((v.tex_coords.s == 1.0) && (v.tex_coords.t == 0.0)) {
-                        v.tex_coords = opengl_tex->coords[1];
-                        continue;
-                    }
-                    if ((v.tex_coords.s == 1.0) && (v.tex_coords.t == 1.0)) {
-                        v.tex_coords = opengl_tex->coords[2];
-                        continue;
-                    }
-                    if ((v.tex_coords.s == 0.0) && (v.tex_coords.t == 1.0)) {
-                        v.tex_coords = opengl_tex->coords[3];
-                        continue;
-                    }
-                }
-                glBindTexture(GL_TEXTURE_2D, (*opengl_tex).opengl_id);
-            }
-
-            // Quad is tessellated into 2 triangles, using a texture
-
-            auto vertexes = std::vector<Vertex>{};
-
-            vertexes.reserve(vertexes_per_tessellated_quad);
-            // Transforming one quad in 2 triangles
-            vertexes.emplace_back(part.vertexes[0]);
-            vertexes.emplace_back(part.vertexes[1]);
-            vertexes.emplace_back(part.vertexes[2]);
-            vertexes.emplace_back(part.vertexes[0]);
-            vertexes.emplace_back(part.vertexes[2]);
-            vertexes.emplace_back(part.vertexes[3]);
-
-            // Sending vertex buffer data to the GPU
-            glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * vertexes.size(), vertexes.data(), GL_STATIC_DRAW);
-            // glActiveTexture(GLenum::GL_TEXTURE0);
-
-            glDrawArrays(GL_TRIANGLES, 0, vertexes_per_tessellated_quad);
-        }
-
-        gl::glDeleteBuffers(1, &vertex_buffer);
-        gl::glDeleteVertexArrays(1, &vao);
-    }
+    if (!parts_list.empty()) { renderParts(parts_list, texture_array_id_); }
 
     //------ Post render --------//
     // Framebuffer is released
