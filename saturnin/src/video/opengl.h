@@ -200,7 +200,6 @@ class Opengl {
     [[nodiscard]] auto currentRenderedBuffer() const { return current_rendered_buffer_; };
     void               currentRenderedBuffer(const FboTextureType type) { current_rendered_buffer_ = type; };
     [[nodiscard]] auto vdp1DebugOverlayTextureId() const { return getFboTextureLayer(FboTextureType::vdp1_debug_overlay); };
-    //[[nodiscard]] auto vdp2DebugLayerTextureId() const -> u32 { return getFboTextureLayer(FboTextureType::vdp2_debug_layer); };
     [[nodiscard]] auto vdp2DebugLayerTextureId() const -> u32 {
         return gui_texture_type_to_id_.at(GuiTextureType::vdp2_debug_buffer);
     };

@@ -1496,16 +1496,8 @@ auto Opengl::generateFbo(const FboType fbo_type) -> u32 {
 
             glActiveTexture(GLenum::GL_TEXTURE0);
 
-            glBindTexture(GLenum::GL_TEXTURE_2D_ARRAY, fbo_texture_array_id_);
-
             glEnable(GLenum::GL_BLEND);
             glBlendFunc(GLenum::GL_SRC_ALPHA, GLenum::GL_ONE_MINUS_SRC_ALPHA);
-
-            // Attaching the color texture currently used as framebuffer to the FBO.
-            // attachTextureLayerToFbo(fbo_texture_array_id_,
-            //                        getFboTextureLayer(FboTextureType::vdp2_debug_layer),
-            //                        GLenum::GL_DRAW_FRAMEBUFFER,
-            //                        GLenum::GL_COLOR_ATTACHMENT0);
 
             attachTextureToFbo(gui_texture_type_to_id_[GuiTextureType::vdp2_debug_buffer],
                                GLenum::GL_DRAW_FRAMEBUFFER,
@@ -1516,8 +1508,8 @@ auto Opengl::generateFbo(const FboType fbo_type) -> u32 {
         }
     }
 
-    const auto status = gl33core::glCheckFramebufferStatus(GLenum::GL_FRAMEBUFFER);
-    if (status != gl::GLenum::GL_FRAMEBUFFER_COMPLETE) {
+    if (const auto status = gl33core::glCheckFramebufferStatus(GLenum::GL_FRAMEBUFFER);
+        status != gl::GLenum::GL_FRAMEBUFFER_COMPLETE) {
         Log::exception(Logger::opengl, tr("Could not initialize framebuffer object !"));
     }
 
