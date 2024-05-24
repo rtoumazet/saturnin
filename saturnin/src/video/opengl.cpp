@@ -74,7 +74,6 @@ constexpr auto check_gl_error = 1;
 
 constexpr enum class RenderType { RenderType_drawElements, RenderType_drawTest };
 constexpr auto render_type = RenderType::RenderType_drawElements;
-// constexpr auto render_type = RenderType::RenderType_drawTest;
 
 constexpr auto uses_fbo = false;
 
@@ -158,9 +157,6 @@ void Opengl::shutdown() const {
 
 void Opengl::preRender() {
     switchRenderedBuffer();
-
-    // GLint drawFboId = 0;
-    // glGetIntegerv(GL_FRAMEBUFFER_BINDING, &drawFboId);
 
     glBindFramebuffer(GLenum::GL_FRAMEBUFFER, fbo_type_to_id_[FboType::general]);
 
@@ -533,7 +529,6 @@ void Opengl::render() {
             std::lock_guard lock(parts_list_mutex_);
             if (!global_parts_list_.empty()) { global_parts_list = std::move(global_parts_list_); }
         };
-
         getPartsFromThread();
 
         clearFboTextures();
@@ -554,31 +549,32 @@ void Opengl::render() {
 
         postRender();
 
-        const auto notifyMainThread = [&]() {
+        const auto notifyMainThread = [this, &global_parts_list]() {
             std::lock_guard lk(parts_list_mutex_);
             GlobalPartsList().swap(global_parts_list);
             data_condition_.notify_one();
         };
-
         notifyMainThread();
 
     } else {
         PartsList parts_list;
 
         preRender();
-        {
+
+        const auto getParts = [this, &parts_list]() {
             std::lock_guard lock(parts_list_mutex_);
             if (!parts_list_.empty()) { parts_list = std::move(parts_list_); }
-        }
+        };
+        getParts();
 
         renderParts(parts_list, texture_array_id_);
-        // renderParts(parts_list, getFboTextureId(currentRenderedBuffer()));
 
-        {
+        const auto notifyMainThread = [this, &parts_list]() {
             std::lock_guard lk(parts_list_mutex_);
             PartsList().swap(parts_list);
             data_condition_.notify_one();
-        }
+        };
+        notifyMainThread();
 
         postRender();
     }
@@ -862,32 +858,14 @@ void Opengl::renderVdp2DebugLayer(core::EmulatorContext& state) {
 
     //----------- Render -----------------//
     PartsList parts_list;
-    if constexpr (true) {
-        if (state.vdp2()->screenInDebug() != video::ScrollScreen::none) {
-            const auto vdp2_parts = state.vdp2()->vdp2Parts(state.vdp2()->screenInDebug(), VdpType::vdp2_cell);
-            if (!vdp2_parts.empty()) {
-                parts_list.reserve(parts_list.size() + vdp2_parts.size());
-                for (const auto& p : vdp2_parts) {
-                    parts_list.emplace_back(p);
-                }
+    if (state.vdp2()->screenInDebug() != video::ScrollScreen::none) {
+        const auto vdp2_parts = state.vdp2()->vdp2Parts(state.vdp2()->screenInDebug(), VdpType::vdp2_cell);
+        if (!vdp2_parts.empty()) {
+            parts_list.reserve(parts_list.size() + vdp2_parts.size());
+            for (const auto& p : vdp2_parts) {
+                parts_list.emplace_back(p);
             }
         }
-    } else {
-        auto render_part                      = Vdp1Part{};
-        render_part.common_vdp_data_.vertexes = {
-            {100, 100, 0.0f, 0.0f, 0.0f, 0xff, 0, 0, 0xff, Gouraud()},
-            {100, 150, 1.0f, 0.0f, 0.0f, 0xff, 0, 0, 0xff, Gouraud()},
-            {150, 150, 1.0f, 1.0f, 0.0f, 0xff, 0, 0, 0xff, Gouraud()},
-            {150, 100, 0.0f, 1.0f, 0.0f, 0xff, 0, 0, 0xff, Gouraud()}
-        };
-        render_part.common_vdp_data_.draw_type    = DrawType::non_textured_polygon;
-        render_part.common_vdp_data_.vdp_type     = VdpType::vdp1;
-        render_part.common_vdp_data_.color_offset = {
-            {true, true, true},
-            {0x80, 0x80, 0x80}
-        };
-
-        parts_list.emplace_back(render_part);
     }
 
     if (!parts_list.empty()) { renderParts(parts_list, texture_array_id_); }
