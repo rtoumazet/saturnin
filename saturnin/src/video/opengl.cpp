@@ -228,7 +228,7 @@ void Opengl::displayFramebuffer(core::EmulatorContext& state) {
         if (!state.vdp2()->isLayerDisabled(rbg0)) screens_to_display.push_back(rbg0);
 
         // Step two : populate parts list for each priority + layer couple
-        const auto addVdp1PartsToList = [&](const u32 priority) {
+        const auto addVdp1PartsToList = [&](const u8 priority) {
             auto        local_parts = PartsList();
             const auto& vdp1_parts  = state.vdp1()->vdp1Parts(priority);
             if (!vdp1_parts.empty()) {
@@ -314,43 +314,30 @@ void Opengl::displayFramebuffer(core::EmulatorContext& state) {
                 data_condition_.wait(lk, [this]() { return parts_list_.empty(); });
             }
         }
-
-        if constexpr (render_type == RenderType::RenderType_drawTest) {
-            if (!parts_list.empty()) {
-                std::vector<DrawRange>().swap(draw_range_);
-                for (const auto& p : parts_list) {
-                    DrawRange dr{};
-                    dr.vertex_array_start = 0;
-                }
-            }
-        }
     }
 }
 
 void Opengl::renderToAvailableTexture(const FboKey& key, const PartsList& parts_list) {
-    Log::debug(Logger::opengl, "renderToAvailableFbo() call");
+    using enum Logger;
+    Log::debug(opengl, "renderToAvailableFbo() call");
     const auto index = getAvailableFboTextureIndex();
     if (!index) {
-        Log::debug(Logger::opengl, "- No FBO available for rendering");
-        Log::debug(Logger::opengl, "renderToAvailableFbo() return");
+        Log::debug(opengl, "- No FBO available for rendering");
+        Log::debug(opengl, "renderToAvailableFbo() return");
         return;
     }
 
     const auto& [priority, layer] = key;
-    Log::debug(Logger::opengl,
-               "- Rendering key [priority={}, layer={}] to FBO with index {}",
-               priority,
-               layer_to_name.at(layer),
-               *index);
+    Log::debug(opengl, "- Rendering key [priority={}, layer={}] to FBO with index {}", priority, layer_to_name.at(layer), *index);
 
     renderParts(parts_list, fbo_texture_pool_[*index]);
 
-    Log::debug(Logger::opengl, "- Changing FBO status at index {} to 'reuse'", *index);
+    Log::debug(opengl, "- Changing FBO status at index {} to 'reuse'", *index);
 
     fbo_texture_pool_status_[*index] = FboTextureStatus::reuse;
     fbo_key_to_fbo_pool_index_[key]  = *index;
 
-    Log::debug(Logger::opengl, "renderToAvailableFbo() return");
+    Log::debug(opengl, "renderToAvailableFbo() return");
 }
 
 void Opengl::clearFboTextures() {
@@ -1412,24 +1399,21 @@ void Opengl::initializeFbo() {
     // Front and back buffers are switched every frame : one will be used as the last complete rendering by the GUI while
     // the other will be rendered to.
     // Textures not yet linked to a type will be used as a 'priority' type on demand when rendering.
-    fbo_texture_type_to_layer_ = {FboTextureType::front_buffer,
-                                  FboTextureType::back_buffer,
-                                  FboTextureType::vdp1_debug_overlay,
-                                  FboTextureType::vdp2_debug_layer};
+    using enum FboTextureType;
+    fbo_texture_type_to_layer_ = {front_buffer, back_buffer, vdp1_debug_overlay, vdp2_debug_layer};
     for (u8 i = 4; i < fbo_texture_array_depth; ++i) {
-        fbo_texture_type_to_layer_[i] = FboTextureType::priority;
+        fbo_texture_type_to_layer_[i] = priority;
     }
 
-    currentRenderedBuffer(FboTextureType::front_buffer);
+    currentRenderedBuffer(front_buffer);
 
-    // Generating the main FBO used by the renderer.
-    // fbo_ = generateFbo(FboType::general);
+    // Generating FBOs used by the renderer.
+    using enum FboType;
+    fbo_type_to_id_[general]    = generateFbo(general);
+    fbo_type_to_id_[for_gui]    = generateFbo(for_gui);
+    fbo_type_to_id_[vdp2_debug] = generateFbo(vdp2_debug);
 
-    fbo_type_to_id_[FboType::general]    = generateFbo(FboType::general);
-    fbo_type_to_id_[FboType::for_gui]    = generateFbo(FboType::for_gui);
-    fbo_type_to_id_[FboType::vdp2_debug] = generateFbo(FboType::vdp2_debug);
-
-    glBindFramebuffer(GL_FRAMEBUFFER, fbo_type_to_id_[FboType::general]);
+    glBindFramebuffer(GL_FRAMEBUFFER, fbo_type_to_id_[general]);
 }
 
 auto Opengl::generateFbo(const FboType fbo_type) -> u32 {
@@ -1955,36 +1939,38 @@ auto generateVertexIndicesAndDrawRanges(const PartsList& parts) -> std::tuple<st
     const auto indices_per_polyline = std::vector<u32>{0, 1, 2, 3};
     const auto indices_per_line     = std::vector<u32>{0, 1};
 
-    using TypeToIndices      = std::map<const DrawType, const std::vector<u32>>;
+    using TypeToIndices = std::map<const DrawType, const std::vector<u32>>;
+
+    using enum DrawType;
     const auto typeToIndices = TypeToIndices{
-        {DrawType::textured_polygon,     indices_per_polygon },
-        {DrawType::non_textured_polygon, indices_per_polygon },
-        {DrawType::polyline,             indices_per_polyline},
-        {DrawType::line,                 indices_per_line    }
+        {textured_polygon,     indices_per_polygon },
+        {non_textured_polygon, indices_per_polygon },
+        {polyline,             indices_per_polyline},
+        {line,                 indices_per_line    }
     };
 
     using TypeToVertexIncrement      = std::map<const DrawType, const u32>;
     const auto typeToVertexIncrement = TypeToVertexIncrement{
-        {DrawType::textured_polygon,     4},
-        {DrawType::non_textured_polygon, 4},
-        {DrawType::polyline,             4},
-        {DrawType::line,                 2}
+        {textured_polygon,     4},
+        {non_textured_polygon, 4},
+        {polyline,             4},
+        {line,                 2}
     };
 
     using TypeIsTextured      = std::map<const DrawType, const bool>;
     const auto typeIsTextured = TypeIsTextured{
-        {DrawType::textured_polygon,     true },
-        {DrawType::non_textured_polygon, false},
-        {DrawType::polyline,             false},
-        {DrawType::line,                 false}
+        {textured_polygon,     true },
+        {non_textured_polygon, false},
+        {polyline,             false},
+        {line,                 false}
     };
 
     using TypeToPrimitive      = std::map<const DrawType, const gl::GLenum>;
     const auto typeToPrimitive = TypeToPrimitive{
-        {DrawType::textured_polygon,     gl::GL_TRIANGLES},
-        {DrawType::non_textured_polygon, gl::GL_TRIANGLES},
-        {DrawType::polyline,             gl::GL_LINE_LOOP},
-        {DrawType::line,                 gl::GL_LINES    }
+        {textured_polygon,     gl::GL_TRIANGLES},
+        {non_textured_polygon, gl::GL_TRIANGLES},
+        {polyline,             gl::GL_LINE_LOOP},
+        {line,                 gl::GL_LINES    }
     };
 
     auto indices              = std::vector<u32>{};

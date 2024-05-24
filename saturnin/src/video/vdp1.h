@@ -157,7 +157,7 @@ class Vdp1 {
     auto vdp1Parts() const -> std::vector<Vdp1Part>;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn auto Vdp1::vdp1Parts(const u32 priority) const -> const std::vector<Vdp1Part>
+    /// \fn auto Vdp1::vdp1Parts(const u8 priority) const -> const std::vector<Vdp1Part>
     ///
     /// \brief  Returns the current VDP1 draw list for given priority.
     ///
@@ -169,7 +169,7 @@ class Vdp1 {
     /// \returns    A reference to a const std::vector&lt;Vdp1Part&gt;
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    auto vdp1Parts(const u32 priority) const -> std::vector<Vdp1Part>;
+    auto vdp1Parts(const u8 priority) const -> std::vector<Vdp1Part>;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn auto Vdp1::getDebugDrawList() const -> std::vector<std::string>;
