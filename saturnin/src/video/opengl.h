@@ -72,7 +72,7 @@ enum class TextureArrayType : u8 { saturn_part, framebuffer };
 enum class FboTextureType : u8 { front_buffer, back_buffer, vdp1_debug_overlay, vdp2_debug_layer, priority };
 enum class GuiTextureType : u8 { render_buffer, vdp1_debug_buffer, vdp2_debug_buffer, layer_buffer };
 enum class FboType : u8 { general, for_gui, vdp2_debug };
-enum class ProgramShader : u8 { main, vdp2_debug };
+enum class ProgramShader : u8 { main };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \enum	FboTextureStatus
@@ -92,7 +92,7 @@ using FboTextureTypeToLayer = std::array<FboTextureType, fbo_texture_array_depth
 using GuiTextureTypeToId = std::unordered_map<GuiTextureType, u32>; // Defines the type of each texture used to render to GUI.
 using FboTypeToId        = std::unordered_map<FboType, u32>;        // Link between a FboType and its id.
 
-using FboKey = std::pair<u8, VdpLayer>; // First is priority number (1 to 7, last on being the highest), second is linked layer.
+using FboKey = std::pair<u8, VdpLayer>; // First is priority number (1 to 7, last one being the highest), second is linked layer.
 using FboKeyToFbo    = std::map<FboKey, u8>; // Link between a priority to display and its relative FBO index in the FBO pool.
 using FboTexturePool = std::array<u32, max_fbo_texture>; // Pool of textures ids to be used for rendering by priority.
 using FboTexturePoolStatus = std::array<FboTextureStatus, max_fbo_texture>; // State of the textures in the pool.
@@ -940,16 +940,12 @@ class Opengl {
 
     core::Config* config_; ///< Configuration object.
 
-    FboTypeToId fbo_type_to_id_; ///< The framebuffer objects used in the app.
-    // u32                   fbo_;                       ///< The main framebuffer object.
+    FboTypeToId           fbo_type_to_id_;            ///< The framebuffer objects used in the app.
     u32                   fbo_texture_array_id_;      ///< Identifier for the FBO texture array.
     FboTextureTypeToLayer fbo_texture_type_to_layer_; ///< Links the used FBO texture layer to a texture type. Index of the array
                                                       ///< is the layer, content is the type.
-    // u32 fbo_for_gui_; ///< FBO used to create a regular 2D texture from a 2D texture array to ease display in ImGUI. (ImGUI
-    ///< can't work directly with a 2D texture array layer)
-
-    FboTextureType     current_rendered_buffer_; ///< The current rendered buffer (front or back)
-    GuiTextureTypeToId gui_texture_type_to_id_;  ///< Links the texture to be used in the GUI to a type.
+    FboTextureType     current_rendered_buffer_;      ///< The current rendered buffer (front or back)
+    GuiTextureTypeToId gui_texture_type_to_id_;       ///< Links the texture to be used in the GUI to a type.
 
     FboKeyToFbo          fbo_key_to_fbo_pool_index_; ///< Link between a FBO key and its relative FBO index in the pool.
     FboTexturePool       fbo_texture_pool_;          ///< Pool of textures to be used by the FBO.

@@ -60,7 +60,6 @@ enum class VdpLayer : s8 {
     rbg0      = 4,
     back      = 5,
     sprite    = 6,
-    plane     = 7,
     undefined = -1
 };
 

@@ -96,7 +96,6 @@ const std::unordered_map<VdpLayer, std::string> layer_to_name = {
     {VdpLayer::rbg0,      "rbg0"     },
     {VdpLayer::back,      "back"     },
     {VdpLayer::sprite,    "sprite"   },
-    {VdpLayer::plane,     "plane"    },
     {VdpLayer::undefined, "undefined"}
 };
 
