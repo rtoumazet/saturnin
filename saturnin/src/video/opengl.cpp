@@ -75,7 +75,7 @@ constexpr auto check_gl_error = 1;
 constexpr enum class RenderType { RenderType_drawElements, RenderType_drawTest };
 constexpr auto render_type = RenderType::RenderType_drawElements;
 
-constexpr auto uses_fbo = false;
+// constexpr auto uses_fbo = false;
 
 const std::unordered_map<ScrollScreen, VdpLayer> screen_to_layer = {
     {ScrollScreen::nbg3, VdpLayer::nbg3},

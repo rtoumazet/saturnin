@@ -2052,8 +2052,8 @@ auto Vdp2::getReductionSetting(Vdp2Regs::Zmctl::ZoomQuarter zq, Vdp2Regs::Zmctl:
 };
 
 // static
-auto Vdp2::calculateRequiredVramCharacterPatternReads(ReductionSetting r, Vdp2Regs::CharacterColorNumber3Bits ccn)
-    -> VramAccessNumber {
+auto Vdp2::calculateRequiredVramCharacterPatternReads(ReductionSetting                    r,
+                                                      Vdp2Regs::CharacterColorNumber3Bits ccn) -> VramAccessNumber {
     switch (ccn) {
         using enum Vdp2Regs::CharacterColorNumber3Bits;
         case palette_16:
@@ -2099,8 +2099,8 @@ auto Vdp2::calculateRequiredVramCharacterPatternReads(ReductionSetting r, Vdp2Re
 }
 
 // static
-auto Vdp2::calculateRequiredVramCharacterPatternReads(ReductionSetting r, Vdp2Regs::CharacterColorNumber2Bits ccn)
-    -> VramAccessNumber {
+auto Vdp2::calculateRequiredVramCharacterPatternReads(ReductionSetting                    r,
+                                                      Vdp2Regs::CharacterColorNumber2Bits ccn) -> VramAccessNumber {
     switch (ccn) {
         using enum Vdp2Regs::CharacterColorNumber2Bits;
         case palette_16:
@@ -2139,8 +2139,8 @@ auto Vdp2::calculateRequiredVramCharacterPatternReads(ReductionSetting r, Vdp2Re
 }
 
 // static
-auto Vdp2::calculateRequiredVramCharacterPatternReads(ReductionSetting r, Vdp2Regs::CharacterColorNumber1Bit ccn)
-    -> VramAccessNumber {
+auto Vdp2::calculateRequiredVramCharacterPatternReads(ReductionSetting                   r,
+                                                      Vdp2Regs::CharacterColorNumber1Bit ccn) -> VramAccessNumber {
     switch (ccn) {
         using enum Vdp2Regs::CharacterColorNumber1Bit;
         case palette_16:
@@ -2450,44 +2450,46 @@ void Vdp2::populateRenderData() {
             // bg_[util::toUnderlying(ScrollScreen::nbg2)] = {};
         }
 
-        clearRenderData(ScrollScreen::nbg3);
-        if (canScrollScreenBeDisplayed(ScrollScreen::nbg3)) {
-            if (isScreenDisplayed(ScrollScreen::nbg3)) {
+        if (uses_fbo) {
+            // WIP
+            if (canScrollScreenBeDisplayed(ScrollScreen::nbg3) && isScreenDisplayed(ScrollScreen::nbg3)) {
                 updateScrollScreenStatus(ScrollScreen::nbg3);
-                if (getScreen(ScrollScreen::nbg3).priority_number != 0) { readScrollScreenData(ScrollScreen::nbg3); }
+                const auto isDirty             = isCacheDirty(ScrollScreen::nbg3);
+                const auto priorityIsAboveZero = getScreen(ScrollScreen::nbg3).priority_number != 0;
+                //    if (isDirty && priorityIsAboveZero) {
+                //        discardCache(ScrollScreen::nbg3);
+                //        clearRenderData(ScrollScreen::nbg3);
+                //        readScrollScreenData(ScrollScreen::nbg3);
+                //        // Data must be reloaded. Passing the status as 'to_clear' suffice on this side.
+                //        modules_.opengl()->setFboStatus(getScreen(ScrollScreen::nbg3).priority_number,
+                //                                        ScrollScreen::nbg3,
+                //                                        FboStatus::to_clear);
+                //    }
+
+                //    if (!priorityIsAboveZero) {
+                //        // Clear previously used data.
+                //        modules_.opengl()->setFboStatus(ScrollScreen::nbg3, FboStatus::to_clear);
+                //    }
+
+                //    if (!isDirty && priorityIsAboveZero) {
+                //        // Reuse previous data.
+                //        modules_.opengl()->setFboStatus(getScreen(ScrollScreen::nbg3).priority_number,
+                //                                        ScrollScreen::nbg3,
+                //                                        FboStatus::reuse);
+                //    }
+            } else {
+                //    // Clear previously used data.
+                //    modules_.opengl()->setFboStatus(ScrollScreen::nbg3, FboStatus::to_clear);
+            }
+        } else {
+            clearRenderData(ScrollScreen::nbg3);
+            if (canScrollScreenBeDisplayed(ScrollScreen::nbg3)) {
+                if (isScreenDisplayed(ScrollScreen::nbg3)) {
+                    updateScrollScreenStatus(ScrollScreen::nbg3);
+                    if (getScreen(ScrollScreen::nbg3).priority_number != 0) { readScrollScreenData(ScrollScreen::nbg3); }
+                }
             }
         }
-
-        // WIP
-        //if (canScrollScreenBeDisplayed(ScrollScreen::nbg3) && isScreenDisplayed(ScrollScreen::nbg3)) {
-        //    updateScrollScreenStatus(ScrollScreen::nbg3);
-        //    const auto isDirty             = isCacheDirty(ScrollScreen::nbg3);
-        //    const auto priorityIsAboveZero = getScreen(ScrollScreen::nbg3).priority_number != 0;
-        //    if (isDirty && priorityIsAboveZero) {
-        //        discardCache(ScrollScreen::nbg3);
-        //        clearRenderData(ScrollScreen::nbg3);
-        //        readScrollScreenData(ScrollScreen::nbg3);
-        //        // Data must be reloaded. Passing the status as 'to_clear' suffice on this side.
-        //        modules_.opengl()->setFboStatus(getScreen(ScrollScreen::nbg3).priority_number,
-        //                                        ScrollScreen::nbg3,
-        //                                        FboStatus::to_clear);
-        //    }
-
-        //    if (!priorityIsAboveZero) {
-        //        // Clear previously used data.
-        //        modules_.opengl()->setFboStatus(ScrollScreen::nbg3, FboStatus::to_clear);
-        //    }
-
-        //    if (!isDirty && priorityIsAboveZero) {
-        //        // Reuse previous data.
-        //        modules_.opengl()->setFboStatus(getScreen(ScrollScreen::nbg3).priority_number,
-        //                                        ScrollScreen::nbg3,
-        //                                        FboStatus::reuse);
-        //    }
-        //} else {
-        //    // Clear previously used data.
-        //    modules_.opengl()->setFboStatus(ScrollScreen::nbg3, FboStatus::to_clear);
-        //}
     }
 }
 
@@ -3592,8 +3594,8 @@ void Vdp2::readPageData(const ScrollScreenStatus& screen, const u32 page_address
 
     // Assigning the current configuration function to a function pointer
     // Not using std::function here because of the performance cost.
-    using PatterNameDataFunc                                       = PatternNameData (*)(const u32, const ScrollScreenStatus&);
-    auto                                       readPatternNameData = PatterNameDataFunc();
+    using PatterNameDataFunc = PatternNameData (*)(const u32, const ScrollScreenStatus&);
+    auto readPatternNameData = PatterNameDataFunc();
     switch (current_pnd_config) {
         using enum PatternNameDataEnum;
         case two_words: readPatternNameData = std::bit_cast<PatterNameDataFunc>(&getPatternNameData2Words); break;
