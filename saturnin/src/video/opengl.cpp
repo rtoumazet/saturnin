@@ -1256,30 +1256,23 @@ void Opengl::deleteShaders(const std::vector<u32>& shaders) {
 
 // static
 auto Opengl::generateTexture(const u32 width, const u32 height, const std::vector<u8>& data) -> u32 {
+    using enum GLenum;
     auto texture = u32{};
     glGenTextures(1, &texture);
-    glActiveTexture(GLenum::GL_TEXTURE0);
-    glBindTexture(GLenum::GL_TEXTURE_2D, texture);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, texture);
 
     // set the texture wrapping parameters
-    glTexParameteri(GLenum::GL_TEXTURE_2D, GLenum::GL_TEXTURE_WRAP_S, GLenum::GL_REPEAT);
-    glTexParameteri(GLenum::GL_TEXTURE_2D, GLenum::GL_TEXTURE_WRAP_T, GLenum::GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
     // set texture filtering parameters
-    glTexParameteri(GLenum::GL_TEXTURE_2D, GLenum::GL_TEXTURE_MIN_FILTER, GLenum::GL_NEAREST);
-    glTexParameteri(GLenum::GL_TEXTURE_2D, GLenum::GL_TEXTURE_MAG_FILTER, GLenum::GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
-    glTexImage2D(GLenum::GL_TEXTURE_2D,
-                 0,
-                 GLenum::GL_RGBA,
-                 width,
-                 height,
-                 0,
-                 GLenum::GL_RGBA,
-                 GLenum::GL_UNSIGNED_BYTE,
-                 data.data());
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data.data());
 
-    glBindTexture(GLenum::GL_TEXTURE_2D, 0);
+    glBindTexture(GL_TEXTURE_2D, 0);
 
     return texture;
 }
@@ -1353,8 +1346,8 @@ auto Opengl::initializeVao() -> std::tuple<u32, u32> {
     glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
 
     // position pointer
-    glVertexAttribPointer(0, 2, GLenum::GL_SHORT, GL_FALSE, sizeof(Vertex), 0); // NOLINT: this is an index
-    glEnableVertexAttribArray(0);                                               // NOLINT: this is an index
+    glVertexAttribPointer(0, 2, GLenum::GL_SHORT, GL_FALSE, sizeof(Vertex), nullptr); // NOLINT: this is an index
+    glEnableVertexAttribArray(0);                                                     // NOLINT: this is an index
 
     // texture coords pointer
     auto offset = GLintptr(sizeof(VertexPosition));
@@ -1503,8 +1496,6 @@ auto Opengl::initializeTextureArray(const u32 width, const u32 height, const u32
     glTexParameteri(GLenum::GL_TEXTURE_2D_ARRAY, GLenum::GL_TEXTURE_WRAP_T, GLenum::GL_REPEAT);
 
     // disabling mipmaps
-    // glTexParameteri(GLenum::GL_TEXTURE_2D_ARRAY, GLenum::GL_TEXTURE_MIN_FILTER, GLenum::GL_LINEAR);
-    // glTexParameteri(GLenum::GL_TEXTURE_2D_ARRAY, GLenum::GL_TEXTURE_MAG_FILTER, GLenum::GL_LINEAR);
     glTexParameteri(GLenum::GL_TEXTURE_2D_ARRAY, GLenum::GL_TEXTURE_MIN_FILTER, GLenum::GL_NEAREST);
     glTexParameteri(GLenum::GL_TEXTURE_2D_ARRAY, GLenum::GL_TEXTURE_MAG_FILTER, GLenum::GL_NEAREST);
 
@@ -1606,17 +1597,16 @@ void windowCloseCallback(GLFWwindow* window) {
     sleep_for(time_to_sleep);
 }
 
-void glDebugOutput(gl::GLenum   source,
-                   gl::GLenum   type,
-                   unsigned int id,
-                   gl::GLenum   severity,
-                   gl::GLsizei  length,
-                   const char*  message,
-                   const void*  userParam) {
+void glDebugOutput(gl::GLenum                   source,
+                   gl::GLenum                   type,
+                   unsigned int                 id,
+                   gl::GLenum                   severity,
+                   [[maybe_unused]] gl::GLsizei length,
+                   const char*                  message,
+                   [[maybe_unused]] const void* userParam) {
     // ignore non-significant error/warning codes
     if (id == 131169 || id == 131185 || id == 131218 || id == 131204) return;
 
-    // Log::warning(Logger::opengl, "OpenGL error : {}", (int)error); }
     Log::warning(Logger::opengl, "---------------");
     Log::warning(Logger::opengl, "Debug message ({}): {}", id, message);
 
@@ -1627,7 +1617,14 @@ void glDebugOutput(gl::GLenum   source,
         case GL_DEBUG_SOURCE_SHADER_COMPILER: source_str = "Shader Compiler"; break;
         case GL_DEBUG_SOURCE_THIRD_PARTY: source_str = "Third Party"; break;
         case GL_DEBUG_SOURCE_APPLICATION: source_str = "Application"; break;
-        case GL_DEBUG_SOURCE_OTHER: source_str = "Other"; break;
+        case GL_DEBUG_SOURCE_OTHER: {
+            source_str = "Other";
+            break;
+        }
+        [[fallthrough]] default: {
+            source_str = "Unknown";
+            break;
+        }
     }
     Log::warning(Logger::opengl, "Source: {}", source_str);
 
@@ -1641,7 +1638,14 @@ void glDebugOutput(gl::GLenum   source,
         case GL_DEBUG_TYPE_MARKER: type_str = "Marker"; break;
         case GL_DEBUG_TYPE_PUSH_GROUP: type_str = "Type: Push Group"; break;
         case GL_DEBUG_TYPE_POP_GROUP: type_str = "Type: Pop Group"; break;
-        case GL_DEBUG_TYPE_OTHER: type_str = "Type: Other"; break;
+        case GL_DEBUG_TYPE_OTHER: {
+            type_str = "Type: Other";
+            break;
+        }
+        [[fallthrough]] default: {
+            type_str = "Type: Unknown";
+            break;
+        }
     }
     Log::warning(Logger::opengl, "Type: {}", type_str);
 
@@ -1650,10 +1654,16 @@ void glDebugOutput(gl::GLenum   source,
         case GL_DEBUG_SEVERITY_HIGH: severity_str = "high"; break;
         case GL_DEBUG_SEVERITY_MEDIUM: severity_str = "medium"; break;
         case GL_DEBUG_SEVERITY_LOW: severity_str = "low"; break;
-        case GL_DEBUG_SEVERITY_NOTIFICATION: severity_str = "notification"; break;
+        case GL_DEBUG_SEVERITY_NOTIFICATION: {
+            severity_str = "notification";
+            break;
+        }
+        [[fallthrough]] default: {
+            severity_str = "unknown";
+            break;
+        }
     }
     Log::warning(Logger::opengl, "Severity: {}", severity_str);
-    // std::cout << std::endl;
 }
 
 auto runOpengl(core::EmulatorContext& state) -> s32 {
@@ -1856,8 +1866,8 @@ auto loadPngImage(const char* filename) -> GLFWimage {
     auto       image  = GLFWimage{};
     auto       width  = u32{};
     auto       height = u32{};
-    const auto error  = lodepng_decode32_file(&(image.pixels), &width, &height, full_path.string().c_str());
-    if (error != 0) {
+
+    if (const auto error = lodepng_decode32_file(&(image.pixels), &width, &height, full_path.string().c_str()); error != 0) {
         Log::warning(Logger::opengl, lodepng_error_text(error));
         return image;
     }
@@ -1868,12 +1878,11 @@ auto loadPngImage(const char* filename) -> GLFWimage {
 }
 
 auto loadPngImage(const u8* data, const size_t size) -> GLFWimage {
-    // const auto full_path{std::filesystem::current_path() / "res" / filename};
-    auto       image  = GLFWimage{};
-    auto       width  = u32{};
-    auto       height = u32{};
-    const auto error  = lodepng_decode32(&(image.pixels), &width, &height, data, size);
-    if (error != 0) {
+    auto image  = GLFWimage{};
+    auto width  = u32{};
+    auto height = u32{};
+
+    if (const auto error = lodepng_decode32(&(image.pixels), &width, &height, data, size); error != 0) {
         Log::warning(Logger::opengl, lodepng_error_text(error));
         return image;
     }
@@ -1883,9 +1892,9 @@ auto loadPngImage(const u8* data, const size_t size) -> GLFWimage {
     return image;
 }
 
-void windowSizeCallback(GLFWwindow* window, int width, int height) {
+void windowSizeCallback(GLFWwindow* window, const int width, const int height) {
     const auto state = std::bit_cast<core::EmulatorContext*>(glfwGetWindowUserPointer(window));
-    state->opengl()->onWindowResize(width, height);
+    state->opengl()->onWindowResize(static_cast<u16>(width), static_cast<u16>(height));
 }
 
 void checkShaderCompilation(const u32 shader) {
@@ -1991,8 +2000,6 @@ auto generateVertexIndicesAndDrawRanges(const PartsList& parts) -> std::tuple<st
                         * indices_per_polygon.size()); // Size will be a bit bigger than needed, but that's not important.
         for (const auto& p : parts) {
             if (!typeToIndices.contains(p.draw_type)) { continue; } // Non drawable parts are skipped
-
-            // current_range.is_textured = typeIsTextured.at(p.draw_type);
 
             if (current_range.draw_type != p.draw_type && current_range.indices_nb > 0) {
                 --current_range.vertex_array_end;
