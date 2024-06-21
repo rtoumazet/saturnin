@@ -1621,7 +1621,8 @@ void glDebugOutput(gl::GLenum                   source,
             source_str = "Other";
             break;
         }
-        [[fallthrough]] default: {
+            [[fallthrough]];
+        default: {
             source_str = "Unknown";
             break;
         }
@@ -1642,7 +1643,8 @@ void glDebugOutput(gl::GLenum                   source,
             type_str = "Type: Other";
             break;
         }
-        [[fallthrough]] default: {
+            [[fallthrough]];
+        default: {
             type_str = "Type: Unknown";
             break;
         }
@@ -1658,7 +1660,8 @@ void glDebugOutput(gl::GLenum                   source,
             severity_str = "notification";
             break;
         }
-        [[fallthrough]] default: {
+            [[fallthrough]];
+        default: {
             severity_str = "unknown";
             break;
         }
