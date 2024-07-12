@@ -65,8 +65,13 @@ constexpr auto texture_array_height     = u16{1024};
 constexpr auto texture_array_depth      = u16{64};
 constexpr auto fbo_texture_array_width  = u16{2048};
 constexpr auto fbo_texture_array_height = u16{2048};
-constexpr auto fbo_texture_array_depth  = u16{20};
-constexpr auto max_fbo_texture          = u8{20};
+
+// Number max of needed FBO :
+// - 2 display buffers (front + back)
+// - 2 debug layers (vdp1 + vdp2)
+// - 10 priority layers (4 NBG layers + 1 sprite layers, 2 priorities possible by layer using special function)
+constexpr auto fbo_texture_array_depth = u16{14};
+constexpr auto max_fbo_texture         = u8{20};
 
 enum class TextureArrayType : u8 { saturn_part, framebuffer };
 enum class FboTextureType : u8 { front_buffer, back_buffer, vdp1_debug_overlay, vdp2_debug_layer, priority };
