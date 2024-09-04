@@ -23,7 +23,7 @@
 #include <istream>
 #include <saturnin/src/emulator_context.h>
 #include <saturnin/src/locale.h>
-#include <saturnin/src/log.h>       // Log
+#include <saturnin/src/log.h> // Log
 #include <saturnin/src/smpc.h>
 #include <saturnin/src/utilities.h> // toUnderlying, format
 #include <saturnin/src/cdrom/scsi.h>
@@ -819,7 +819,7 @@ void Cdrom::executeCommand() {
         //				int32_t buffPart=CR3>>8;
         //
         //				#ifdef _LOGS
-        //				EmuState::pLog->CdBlockWrite("Clearing buffer partition data of buffer n°",buffPart);
+        //				EmuState::pLog->CdBlockWrite("Clearing buffer partition data of buffer no",buffPart);
         //				#endif
         //
         //				for (int32_t j=0;j<MAX_SECTORS;j++)
@@ -828,7 +828,7 @@ void Cdrom::executeCommand() {
         //					{
         //						// we erase corresponding sector in the sector buffer
         //						#ifdef _LOGS
-        //						EmuState::pLog->CdBlockWrite("Erasing in sector buffer sector n°",j);
+        //						EmuState::pLog->CdBlockWrite("Erasing in sector buffer sector no",j);
         //						#endif
         //
         //						memset(bufferPartitions[buffPart].sectors[j]->data,0,SECTOR_SIZE);
@@ -936,7 +936,7 @@ void Cdrom::executeCommand() {
         //			HIRQREQ|=CMOK;
         //			#ifdef _LOGS
         //			EmuState::pLog->CdBlockWrite("-=Get buffer size=- executed");
-        //			EmuState::pLog->CdBlockWrite("buffer n° 0x",buffNum2);
+        //			EmuState::pLog->CdBlockWrite("buffer no 0x",buffNum2);
         //			EmuState::pLog->CdBlockWrite("size = 0x",bufferPartitions[buffNum2].size);
         //			#endif
         //			break;
@@ -1130,7 +1130,7 @@ void Cdrom::executeCommand() {
         //			posOfSectorsToDelete=sectorNumInBuffer;
         //
         //			#ifdef _LOGS
-        //			EmuState::pLog->CdBlockWrite("*deleting sectors in buffer partition n°0x",fetchedBuffer);
+        //			EmuState::pLog->CdBlockWrite("*deleting sectors in buffer partition no0x",fetchedBuffer);
         //			EmuState::pLog->CdBlockWrite("old buffer size (in sectors): 0x",bufferPartitions[fetchedBuffer].size);
         //			EmuState::pLog->CdBlockWrite("position of sector to delete in buffer: 0x",posOfSectorsToDelete);
         //			EmuState::pLog->CdBlockWrite("number of sectors to delete: 0x",numberOfSectorsToDelete);
@@ -1150,7 +1150,7 @@ void Cdrom::executeCommand() {
         //				if (bufferPartitions[fetchedBuffer].sectors[j])
         //				{
         //					#ifdef _LOGS
-        //					EmuState::pLog->CdBlockWrite("deleting in buffer partion sector n°",j);
+        //					EmuState::pLog->CdBlockWrite("deleting in buffer partion sector no",j);
         //					#endif
         //					bufferPartitions[fetchedBuffer].sectors[j]->size=0;
         //					bufferPartitions[fetchedBuffer].sectors[j]=NULL;
@@ -1174,7 +1174,7 @@ void Cdrom::executeCommand() {
         //				// let's check if the hole is positioned before the end of used sectors
         //				if (holeStart<bufferPartitions[fetchedBuffer].size)
         //				{
-        //					//log("there is a hole at sector n°%d\n",holeStart);
+        //					//log("there is a hole at sector no%d\n",holeStart);
         //					// let's get the position of the end of the hole
         //					int32_t holeEnd=holeStart;
         //					for (;holeEnd<MAX_SECTORS;holeEnd++)
@@ -1188,7 +1188,7 @@ void Cdrom::executeCommand() {
         //					{
         //						if ((k+holeEnd)>MAX_SECTORS) break;
         //						bufferPartitions[fetchedBuffer].sectors[holeStart+k]=bufferPartitions[fetchedBuffer].sectors[holeEnd+k];
-        //						//EmuState::pLog->CdBlockWrite("sector n°%d shifted to sector n°%d\n",holeEnd+i,holeStart+i);
+        //						//EmuState::pLog->CdBlockWrite("sector no%d shifted to sector no%d\n",holeEnd+i,holeStart+i);
         //					}
         //					for (;k<MAX_SECTORS;k++)
         //					{
@@ -2103,7 +2103,7 @@ void Cdrom::reset() {
 
     regs_.hirqmask = {u16_max};
 
-    constexpr auto cr1_default = u8{0x43};    // 'C'
+    constexpr auto cr1_default = u8{0x43}; // 'C'
     regs_.cr1.upd(Cr::loByte(cr1_default));
     constexpr auto cr2_default = u16{0x4442}; // 'DB'
     regs_.cr2                  = cr2_default;
@@ -2218,7 +2218,7 @@ void Cdrom::endDataTransfer() {
     //			if (DeleteSectorDataExecuted)
     //			{
     //				#ifdef _LOGS
-    //				EmuState::pLog->CdBlockWrite("*Deleting sectors in buffer partition n°0x",fetchedBuffer);
+    //				EmuState::pLog->CdBlockWrite("*Deleting sectors in buffer partition no0x",fetchedBuffer);
     //				EmuState::pLog->CdBlockWrite("Old buffer size: 0x",bufferPartitions[fetchedBuffer].size);
     //				EmuState::pLog->CdBlockWrite("Position of sector to delete in buffer: 0x",posOfSectorsToDelete);
     //				EmuState::pLog->CdBlockWrite("Number of sectors to delete: 0x",numberOfSectorsToDelete);
@@ -2237,7 +2237,7 @@ void Cdrom::endDataTransfer() {
     //					if (bufferPartitions[fetchedBuffer].sectors[i])
     //					{
     //						#ifdef _LOGS
-    //						EmuState::pLog->CdBlockWrite("Deleting in buffer partition sector n° ",i);
+    //						EmuState::pLog->CdBlockWrite("Deleting in buffer partition sector no ",i);
     //						#endif
     //						bufferPartitions[fetchedBuffer].sectors[i]->size=0;
     //						bufferPartitions[fetchedBuffer].sectors[i]=NULL;
@@ -2263,7 +2263,7 @@ void Cdrom::endDataTransfer() {
     //					// let's check if the hole is positioned before the end of used sectors
     //					if (holeStart<bufferPartitions[fetchedBuffer].size)
     //					{
-    //						EmuState::pLog->CdBlockWrite("There is a hole at sector n°",holeStart);
+    //						EmuState::pLog->CdBlockWrite("There is a hole at sector no",holeStart);
     //						// let's get the position of the end of the hole
     //						int32_t holeEnd=holeStart;
     //						for (;holeEnd<MAX_SECTORS;holeEnd++)
@@ -2278,8 +2278,8 @@ void Cdrom::endDataTransfer() {
     //							if ((i+holeEnd)>MAX_SECTORS) break;
     //							bufferPartitions[fetchedBuffer].sectors[holeStart+i]=bufferPartitions[fetchedBuffer].sectors[holeEnd+i];
     //							#ifdef _LOGS
-    //							EmuState::pLog->CdBlockWrite("Sector n°",holeEnd+i);
-    //							EmuState::pLog->CdBlockWrite("shifted to sector n°",holeStart+i);
+    //							EmuState::pLog->CdBlockWrite("Sector no",holeEnd+i);
+    //							EmuState::pLog->CdBlockWrite("shifted to sector no",holeStart+i);
     //							#endif
     //						}
     //						for (;i<MAX_SECTORS;i++)

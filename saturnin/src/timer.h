@@ -57,7 +57,7 @@ class Timer {
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn	auto Timer::micros() const -> std::chrono::microseconds::rep;
     ///
-    /// \brief	Returns elapsed time in µs.
+    /// \brief	Returns elapsed time in micros.
     ///
     /// \author	Runik
     /// \date	24/08/2023

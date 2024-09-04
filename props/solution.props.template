@@ -26,10 +26,12 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>saturnin/src/pch.h</PrecompiledHeaderFile>
       <LanguageStandard>stdcpp20</LanguageStandard>
+      <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <PostBuildEvent>
       <Command>xcopy $(MSBuildProjectDirectory)\stv\*.* $(LocalDebuggerWorkingDirectory)stv\ /Y
 xcopy $(MSBuildProjectDirectory)\lang\exe $(LocalDebuggerWorkingDirectory)lang\ /Y /S</Command>
+xcopy $(MSBuildProjectDirectory)\src\video\shaders $(LocalDebuggerWorkingDirectory)shaders\ /Y /S</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
