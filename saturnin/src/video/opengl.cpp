@@ -99,7 +99,7 @@ const std::unordered_map<VdpLayer, std::string> layer_to_name = {
     {VdpLayer::undefined, "undefined"}
 };
 
-Opengl::Opengl(core::Config* config) : config_(config){};
+Opengl::Opengl(core::Config* config) : config_(config) {};
 
 Opengl::~Opengl() { shutdown(); }
 
@@ -253,7 +253,7 @@ void Opengl::displayFramebuffer(core::EmulatorContext& state) {
             }
         };
 
-        for (auto priority = 7; priority > 0; --priority) {
+        for (u8 priority = 7; priority > 0; --priority) {
             for (const auto& screen : screens_to_display) {
                 addVdp2PartsToList(screen, priority);
             }
