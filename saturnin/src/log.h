@@ -28,8 +28,8 @@
 #include <iosfwd> // ostringstream
 #include <map>    // map
 #include <string> // string
-#define SPDLOG_FMT_EXTERNAL
-#define FMT_HEADER_ONLY
+// #define SPDLOG_FMT_EXTERNAL
+// #define FMT_HEADER_ONLY
 #include <spdlog/spdlog.h>
 #include <spdlog/sinks/basic_file_sink.h>
 #include <spdlog/sinks/stdout_color_sinks.h>
