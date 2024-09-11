@@ -40,6 +40,9 @@
     <Filter Include="Fichiers sources\sh2\fast_interpreter">
       <UniqueIdentifier>{dab72cf9-6b96-42c9-9a49-b64d257fa361}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Fichiers sources\video\opengl">
+      <UniqueIdentifier>{789e1ad2-891d-45fa-979a-d33b7c19045e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\config.cpp">
@@ -86,9 +89,6 @@
     </ClCompile>
     <ClCompile Include="lib\imgui\imgui_custom_controls.cpp">
       <Filter>Fichiers sources\imgui</Filter>
-    </ClCompile>
-    <ClCompile Include="src\video\opengl.cpp">
-      <Filter>Fichiers sources\video</Filter>
     </ClCompile>
     <ClCompile Include="src\smpc.cpp">
       <Filter>Fichiers sources</Filter>
@@ -165,6 +165,15 @@
     <ClCompile Include="src\timer.cpp">
       <Filter>Fichiers sources</Filter>
     </ClCompile>
+    <ClCompile Include="src\video\opengl.cpp">
+      <Filter>Fichiers sources\video\opengl</Filter>
+    </ClCompile>
+    <ClCompile Include="src\video\opengl\opengl_shaders.cpp">
+      <Filter>Fichiers sources\video\opengl</Filter>
+    </ClCompile>
+    <ClCompile Include="src\video\opengl\opengl_utilities.cpp">
+      <Filter>Fichiers sources\video\opengl</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\config.h">
@@ -229,9 +238,6 @@
     </ClInclude>
     <ClInclude Include="lib\imgui\imgui_custom_controls.h">
       <Filter>Fichiers sources\imgui</Filter>
-    </ClInclude>
-    <ClInclude Include="src\video\opengl.h">
-      <Filter>Fichiers sources\video</Filter>
     </ClInclude>
     <ClInclude Include="src\smpc.h">
       <Filter>Fichiers sources</Filter>
@@ -346,6 +352,9 @@
     </ClInclude>
     <ClInclude Include="src\timer.h">
       <Filter>Fichiers sources</Filter>
+    </ClInclude>
+    <ClInclude Include="src\video\opengl.h">
+      <Filter>Fichiers sources\video\opengl</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -96,8 +96,8 @@ struct Color {
     explicit Color(const u16 raw_data) :
         r(static_cast<u8>((raw_data & 0x1F) << 3)),
         g((raw_data & 0x3E0) >> 2),
-        b((raw_data & 0x7C00) >> 7){};
-    explicit Color(const u32 raw_data) : r(raw_data & 0x0000FF), g((raw_data & 0x00FF00) >> 8), b((raw_data & 0xFF0000) >> 16){};
+        b((raw_data & 0x7C00) >> 7) {};
+    explicit Color(const u32 raw_data) : r(raw_data & 0x0000FF), g((raw_data & 0x00FF00) >> 8), b((raw_data & 0xFF0000) >> 16) {};
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -162,7 +162,7 @@ struct ColorF {
 struct VertexPosition {
     s16 x;
     s16 y;
-    VertexPosition(const s16 x, const s16 y) : x(x), y(y){};
+    VertexPosition(const s16 x, const s16 y) : x(x), y(y) {};
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -179,7 +179,7 @@ struct VertexColor {
     u8 g; // green
     u8 b; // blue
     u8 a; // alpha
-    VertexColor(const u8 r, const u8 g, const u8 b, const u8 a) : r(r), g(g), b(b), a(a){};
+    VertexColor(const u8 r, const u8 g, const u8 b, const u8 a) : r(r), g(g), b(b), a(a) {};
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -195,8 +195,8 @@ struct TextureCoordinates {
     float s;
     float t;
     float p;
-    TextureCoordinates(const float s, const float t, const float p) : s(s), t(t), p(p){};
-    TextureCoordinates(const float s, const float t) : s(s), t(t), p(0.0f){};
+    TextureCoordinates(const float s, const float t, const float p) : s(s), t(t), p(p) {};
+    TextureCoordinates(const float s, const float t) : s(s), t(t), p(0.0f) {};
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -219,7 +219,7 @@ struct Vertex {
         pos(VertexPosition(x, y)),
         tex_coords(TextureCoordinates(s, t, 0.0f)),
         color(VertexColor(0, 0, 0, 0)),
-        gouraud(Gouraud()){};
+        gouraud(Gouraud()) {};
 
     Vertex(const s16     x,
            const s16     y,
@@ -234,7 +234,7 @@ struct Vertex {
         pos(VertexPosition(x, y)),
         tex_coords(TextureCoordinates(s, t, p)),
         color(VertexColor(r, g, b, a)),
-        gouraud(grd){};
+        gouraud(grd) {};
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -431,7 +431,7 @@ struct DataExtraction {
 struct Vdp2PartPosition {
     ScreenPos plane_position; ///< Position of the part in the plane.
     size_t    key;            ///< Key of the part, used to get the correct part texture.
-    Vdp2PartPosition(const ScreenPos plane_position, const size_t key) : plane_position(plane_position), key(key){};
+    Vdp2PartPosition(const ScreenPos plane_position, const size_t key) : plane_position(plane_position), key(key) {};
 };
 
 struct Vdp2PlaneData {

@@ -30,7 +30,7 @@
 #include <saturnin/src/scu_registers.h>
 #include <saturnin/src/timer.h>
 #include <saturnin/src/utilities.h> // toUnderlying
-#include <saturnin/src/video/opengl.h>
+#include <saturnin/src/video/opengl/opengl.h>
 #include <saturnin/src/video/texture.h>
 #include <saturnin/src/video/vdp1.h>
 #include <saturnin/src/video/vdp2_registers.h>
