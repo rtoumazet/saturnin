@@ -371,7 +371,9 @@
     <ClCompile Include="src\tests.cpp" />
     <ClCompile Include="src\thread_pool.cpp" />
     <ClCompile Include="src\timer.cpp" />
+    <ClCompile Include="src\video\opengl\opengl_render.cpp" />
     <ClCompile Include="src\video\opengl\opengl_shaders.cpp" />
+    <ClCompile Include="src\video\opengl\opengl_textures.cpp" />
     <ClCompile Include="src\video\opengl\opengl_utilities.cpp" />
     <ClCompile Include="src\video\texture.cpp" />
     <ClCompile Include="src\video\vdp1_part.cpp" />
@@ -460,6 +462,7 @@
     <ClInclude Include="src\tests.h" />
     <ClInclude Include="src\thread_pool.h" />
     <ClInclude Include="src\timer.h" />
+    <ClInclude Include="src\video\opengl\opengl.h" />
     <ClInclude Include="src\video\texture.h" />
     <ClInclude Include="src\video\vdp1_part.h" />
     <ClInclude Include="src\video\vdp1_registers.h" />
@@ -500,7 +503,6 @@
     <ClInclude Include="src\utilities.h" />
     <ClInclude Include="src\video\gui.h" />
     <ClInclude Include="src\video\imgui_wrapper.h" />
-    <ClInclude Include="src\video\opengl.h" />
     <ClInclude Include="src\video\vdp1.h" />
     <ClInclude Include="src\video\vdp2.h" />
     <ClInclude Include="src\video\vdp2_part.h" />

@@ -58,6 +58,15 @@ void Opengl::deleteShaders(const std::vector<u32>& shaders) {
     }
 }
 
+auto Opengl::getShaderSource(std::string_view name) -> const char* {
+    if (auto search = shaders_list_.find(name); search != shaders_list_.end()) {
+        return search->second.c_str();
+
+    } else {
+        Log::exception(Logger::opengl, "Shader {} not found !", name);
+    }
+}
+
 auto Opengl::createVertexShader(std::string_view name) -> u32 {
     const auto vertex_shader = glCreateShader(GL_VERTEX_SHADER);
     auto       source        = getShaderSource(name);

@@ -31,7 +31,7 @@
     <PostBuildEvent>
       <Command>xcopy $(MSBuildProjectDirectory)\stv\*.* $(LocalDebuggerWorkingDirectory)stv\ /Y
 xcopy $(MSBuildProjectDirectory)\lang\exe $(LocalDebuggerWorkingDirectory)lang\ /Y /S
-xcopy $(MSBuildProjectDirectory)\src\video\shaders $(LocalDebuggerWorkingDirectory)shaders\ /Y /S</Command>
+xcopy $(MSBuildProjectDirectory)\src\video\opengl\shaders $(LocalDebuggerWorkingDirectory)shaders\ /Y /S</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>

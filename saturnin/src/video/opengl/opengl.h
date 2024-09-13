@@ -58,13 +58,17 @@ enum class ScrollScreen;
 using saturnin::core::Config;
 using utilities::toUnderlying;
 
-constexpr auto minimum_window_width     = u16{512};
-constexpr auto minimum_window_height    = u16{512};
-constexpr auto texture_array_width      = u16{1024};
-constexpr auto texture_array_height     = u16{1024};
-constexpr auto texture_array_depth      = u16{64};
-constexpr auto fbo_texture_array_width  = u16{2048};
-constexpr auto fbo_texture_array_height = u16{2048};
+constexpr auto minimum_window_width          = u16{512};
+constexpr auto minimum_window_height         = u16{512};
+constexpr auto texture_array_width           = u16{1024};
+constexpr auto texture_array_height          = u16{1024};
+constexpr auto texture_array_depth           = u16{64};
+constexpr auto fbo_texture_array_width       = u16{2048};
+constexpr auto fbo_texture_array_height      = u16{2048};
+constexpr auto check_gl_error                = 1;
+constexpr auto vertexes_per_tessellated_quad = u32{6}; // 2 triangles
+constexpr auto vertexes_per_polyline         = u32{4};
+constexpr auto vertexes_per_line             = u32{2};
 
 // Number max of needed FBO :
 // - 2 display buffers (front + back)
@@ -72,6 +76,9 @@ constexpr auto fbo_texture_array_height = u16{2048};
 // - 10 priority layers (4 NBG layers + 1 sprite layers, 2 priorities possible by layer using special function)
 constexpr auto fbo_texture_array_depth = u16{14};
 constexpr auto max_fbo_texture         = u8{20};
+
+constexpr enum class RenderType { RenderType_drawElements, RenderType_drawTest };
+constexpr auto render_type = RenderType::RenderType_drawElements;
 
 enum class TextureArrayType : u8 { saturn_part, framebuffer };
 enum class FboTextureType : u8 { front_buffer, back_buffer, vdp1_debug_overlay, vdp2_debug_layer, priority };
@@ -168,13 +175,13 @@ struct RenderPart {
         color_offset(p.common_vdp_data_.color_offset),
         draw_type(p.common_vdp_data_.draw_type),
         priority(p.common_vdp_data_.priority),
-        texture_key(p.common_vdp_data_.texture_key){};
+        texture_key(p.common_vdp_data_.texture_key) {};
     explicit RenderPart(const Vdp2Part& p) :
         vertexes(p.common_vdp_data_.vertexes),
         color_offset(p.common_vdp_data_.color_offset),
         draw_type(p.common_vdp_data_.draw_type),
         priority(p.common_vdp_data_.priority),
-        texture_key(p.common_vdp_data_.texture_key){};
+        texture_key(p.common_vdp_data_.texture_key) {};
 };
 
 using PartsList       = std::vector<RenderPart>;
@@ -186,6 +193,19 @@ using LayerToCacheReloadState    = std::unordered_map<VdpLayer, bool>;
 using AddressToPlaneTexture      = std::unordered_map<u32, PlaneTexture>;
 
 using TexturesLink = std::unordered_map<size_t, OpenglTexture>;
+
+const std::unordered_map<VdpLayer, std::string> layer_to_name = {
+    {VdpLayer::nbg0,      "nbg0"     },
+    {VdpLayer::rbg1,      "rbg1"     },
+    {VdpLayer::nbg1,      "nbg1"     },
+    {VdpLayer::exbg,      "exbg"     },
+    {VdpLayer::nbg2,      "nbg2"     },
+    {VdpLayer::nbg3,      "nbg3"     },
+    {VdpLayer::rbg0,      "rbg0"     },
+    {VdpLayer::back,      "back"     },
+    {VdpLayer::sprite,    "sprite"   },
+    {VdpLayer::undefined, "undefined"}
+};
 
 class Opengl {
   public:
@@ -1120,8 +1140,19 @@ void checkProgramCompilation(u32 program);
 
 void checkGlError();
 
+void glDebugOutput(gl::GLenum                   source,
+                   gl::GLenum                   type,
+                   unsigned int                 id,
+                   gl::GLenum                   severity,
+                   [[maybe_unused]] int         length,
+                   const char*                  message,
+                   [[maybe_unused]] const void* userParam);
+
+void error_callback(int error, const char* description);
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \fn	auto generateVertexIndicesAndDrawRanges(const PartsList& parts) -> std::tuple<std::vector<u32>, std::vector<DrawRange>>;
+/// \fn	auto generateVertexIndicesAndDrawRanges(const PartsList& parts) -> std::tuple<std::vector<u32>,
+/// std::vector<DrawRange>>;
 ///
 /// \brief	Generates vertex indices that will be used to batch draw from the parts list.
 ///
