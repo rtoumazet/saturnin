@@ -29,7 +29,7 @@
 #include <glbinding/gl33ext/gl.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
-#include <saturnin/src/video/vdp2.h>
+#include <saturnin/src/video/vdp2/vdp2.h>
 
 namespace saturnin::video {
 

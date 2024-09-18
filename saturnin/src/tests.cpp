@@ -26,7 +26,7 @@
 #include <saturnin/src/emulator_defs.h>
 #include <saturnin/src/bit_register.h>
 #include <saturnin/src/utilities.h>
-#include <saturnin/src/video/vdp2.h>
+#include <saturnin/src/video/vdp2/vdp2.h>
 
 namespace saturnin::tests {
 

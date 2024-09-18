@@ -33,10 +33,10 @@
 #include <saturnin/src/thread_pool.h>                 // ThreadPool
 #include <saturnin/src/utilities.h>                   // stringToVector, format
 #include <saturnin/src/cdrom/scsi.h>                  // ScsiDriveInfo
-#include <saturnin/src/video/opengl/opengl.h>                // Opengl
+#include <saturnin/src/video/opengl/opengl.h>         // Opengl
 #include <saturnin/src/video/texture.h>               // Texture
 #include <saturnin/src/video/vdp1.h>                  // Vdp1
-#include <saturnin/src/video/vdp2.h>                  // vram_timing_size
+#include <saturnin/src/video/vdp2/vdp2.h>             // vram_timing_size
 #include <saturnin/lib/imgui/imgui_custom_controls.h> // peripheralKeyCombo
 #include <saturnin/lib/imgui/imgui_memory_editor.h>   // MemoryEditor
 #include <saturnin/lib/imgui/imfilebrowser.h>         // imfilebrowser

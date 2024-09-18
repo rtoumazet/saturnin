@@ -33,7 +33,7 @@
 #include <saturnin/src/video/texture.h>
 #include <saturnin/src/video/vdp1.h>
 #include <saturnin/src/video/vdp1_part.h>
-#include <saturnin/src/video/vdp2.h>
+#include <saturnin/src/video/vdp2/vdp2.h>
 
 using namespace gl21;
 using namespace gl21ext;

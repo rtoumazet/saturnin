@@ -34,8 +34,8 @@
 #include <glm/mat4x4.hpp>
 #include <saturnin/src/emulator_defs.h>
 #include <saturnin/src/video/vdp_common.h>
-#include <saturnin/src/video/vdp1_part.h> // Vdp1Part
-#include <saturnin/src/video/vdp2_part.h> // Vdp2Part
+#include <saturnin/src/video/vdp1_part.h>      // Vdp1Part
+#include <saturnin/src/video/vdp2/vdp2_part.h> // Vdp2Part
 
 // Forward declarations
 namespace saturnin::core {

@@ -36,8 +36,8 @@
 #include <saturnin/src/thread_pool.h> // ThreadPool
 #include <saturnin/src/utilities.h>   // toUnderlying
 #include <saturnin/src/video/vdp_common.h>
-#include <saturnin/src/video/vdp2_part.h> // ScrollScreenPos
-#include <saturnin/src/video/vdp2_registers.h>
+#include <saturnin/src/video/vdp2/vdp2_part.h> // ScrollScreenPos
+#include <saturnin/src/video/vdp2/vdp2_registers.h>
 
 // Forward declarations
 namespace saturnin::core {
@@ -395,7 +395,7 @@ struct CellData {
         pnd(pnd),
         cell_address(cell_address),
         screen_offset(screen_offset),
-        key(key){};
+        key(key) {};
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -410,7 +410,7 @@ struct CellData {
 struct PlaneDetail {
     u32          start_address;
     ScreenOffset screen_offset;
-    PlaneDetail(const u32 sa, const ScreenOffset so) : start_address(sa), screen_offset(so){};
+    PlaneDetail(const u32 sa, const ScreenOffset so) : start_address(sa), screen_offset(so) {};
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -583,7 +583,7 @@ class Vdp2 {
     ///@{
     /// Constructors / Destructors
     Vdp2() = delete;
-    explicit Vdp2(EmulatorContext* ec) : modules_(ec){};
+    explicit Vdp2(EmulatorContext* ec) : modules_(ec) {};
     Vdp2(const Vdp2&)                      = delete;
     Vdp2(Vdp2&&)                           = delete;
     auto operator=(const Vdp2&) & -> Vdp2& = delete;
@@ -1101,8 +1101,8 @@ class Vdp2 {
     /// \returns	The required VRAM character pattern reads.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    static auto calculateRequiredVramCharacterPatternReads(ReductionSetting r, Vdp2Regs::CharacterColorNumber3Bits ccn)
-        -> VramAccessNumber;
+    static auto calculateRequiredVramCharacterPatternReads(ReductionSetting                    r,
+                                                           Vdp2Regs::CharacterColorNumber3Bits ccn) -> VramAccessNumber;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn	static auto Vdp2::calculateRequiredVramCharacterPatternReads(ReductionSetting r, Vdp2Regs::CharacterColorNumber2Bits
@@ -1119,8 +1119,8 @@ class Vdp2 {
     /// \returns	The required VRAM character pattern reads.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    static auto calculateRequiredVramCharacterPatternReads(ReductionSetting r, Vdp2Regs::CharacterColorNumber2Bits ccn)
-        -> VramAccessNumber;
+    static auto calculateRequiredVramCharacterPatternReads(ReductionSetting                    r,
+                                                           Vdp2Regs::CharacterColorNumber2Bits ccn) -> VramAccessNumber;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn	static auto Vdp2::calculateRequiredVramCharacterPatternReads(ReductionSetting r, Vdp2Regs::CharacterColorNumber1Bit
@@ -1137,8 +1137,8 @@ class Vdp2 {
     /// \returns	The required VRAM character pattern reads.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    static auto calculateRequiredVramCharacterPatternReads(ReductionSetting r, Vdp2Regs::CharacterColorNumber1Bit ccn)
-        -> VramAccessNumber;
+    static auto calculateRequiredVramCharacterPatternReads(ReductionSetting                   r,
+                                                           Vdp2Regs::CharacterColorNumber1Bit ccn) -> VramAccessNumber;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn static auto Vdp2::calculateRequiredVramPatternNameReads(ReductionSetting r) -> VramAccessNumber;
@@ -1169,8 +1169,8 @@ class Vdp2 {
     /// \returns	Pattern name command.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    static auto getPatternNameFromCharacterPattern(const Vdp2Regs::VramAccessCommand character_pattern)
-        -> Vdp2Regs::VramAccessCommand;
+    static auto
+        getPatternNameFromCharacterPattern(const Vdp2Regs::VramAccessCommand character_pattern) -> Vdp2Regs::VramAccessCommand;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn	static void Vdp2::setPatternNameAccess(const VramTiming& bank, const Vdp2Regs::VramAccessCommand pattern,

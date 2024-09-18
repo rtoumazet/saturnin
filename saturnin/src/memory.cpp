@@ -34,7 +34,7 @@
 #include <saturnin/src/cdrom/cdrom.h>
 #include <saturnin/src/sound/scsp.h>
 #include <saturnin/src/video/vdp1.h>
-#include <saturnin/src/video/vdp2.h>
+#include <saturnin/src/video/vdp2/vdp2.h>
 
 namespace lzpp      = libzippp;
 namespace fs        = std::filesystem;

@@ -18,8 +18,8 @@
 //
 
 #include <saturnin/src/pch.h>
-#include <saturnin/src/video/vdp2_part.h>
-#include <saturnin/src/video/vdp2.h> // PatternNameData
+#include <saturnin/src/video/vdp2/vdp2_part.h>
+#include <saturnin/src/video/vdp2/vdp2.h> // PatternNameData
 
 namespace saturnin::video {
 

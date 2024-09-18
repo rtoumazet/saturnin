@@ -362,6 +362,10 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='DebugFast|x64'">Use</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="src\emulator_modules.cpp" />
+    <ClCompile Include="src\video\vdp2\vdp2_cache.cpp" />
+    <ClCompile Include="src\video\vdp2\vdp2_cycle_patterns.cpp" />
+    <ClCompile Include="src\video\vdp2\vdp2_memory_access.cpp" />
+    <ClCompile Include="src\video\vdp2\vdp2_pattern_name_data.cpp" />
     <ClInclude Include="src\bit_register.h" />
     <ClInclude Include="src\exceptions.h" />
     <ClCompile Include="src\sh2\fast_interpreter\opcodes_generator.cpp" />
@@ -377,8 +381,9 @@
     <ClCompile Include="src\video\opengl\opengl_utilities.cpp" />
     <ClCompile Include="src\video\texture.cpp" />
     <ClCompile Include="src\video\vdp1_part.cpp" />
-    <ClCompile Include="src\video\vdp2_debug.cpp" />
-    <ClCompile Include="src\video\vdp2_part.cpp" />
+    <ClCompile Include="src\video\vdp2\vdp2.cpp" />
+    <ClCompile Include="src\video\vdp2\vdp2_debug.cpp" />
+    <ClCompile Include="src\video\vdp2\vdp2_part.cpp" />
     <ClInclude Include="lib\imgui\imfilebrowser.h" />
     <ClInclude Include="lib\musashi\m68k.h" />
     <ClInclude Include="lib\musashi\m68kconf.h" />
@@ -466,10 +471,9 @@
     <ClInclude Include="src\video\texture.h" />
     <ClInclude Include="src\video\vdp1_part.h" />
     <ClInclude Include="src\video\vdp1_registers.h" />
-    <ClCompile Include="src\video\vdp2.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='DebugFast|x64'">Use</PrecompiledHeader>
-    </ClCompile>
+    <ClInclude Include="src\video\vdp2\vdp2.h" />
+    <ClInclude Include="src\video\vdp2\vdp2_part.h" />
+    <ClInclude Include="src\video\vdp2\vdp2_registers.h" />
     <ClInclude Include="src\video\vdp_common.h" />
   </ItemGroup>
   <ItemGroup>
@@ -504,9 +508,6 @@
     <ClInclude Include="src\video\gui.h" />
     <ClInclude Include="src\video\imgui_wrapper.h" />
     <ClInclude Include="src\video\vdp1.h" />
-    <ClInclude Include="src\video\vdp2.h" />
-    <ClInclude Include="src\video\vdp2_part.h" />
-    <ClInclude Include="src\video\vdp2_registers.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="src\sh2\fast_interpreter\sh2_opcodes.inc" />

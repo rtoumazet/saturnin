@@ -27,7 +27,7 @@
 
 #include <vector> // vector
 #include <saturnin/src/emulator_defs.h>
-#include <saturnin/src/video/vdp2.h> // ColorCount
+#include <saturnin/src/video/vdp2/vdp2.h> // ColorCount
 
 namespace saturnin::video {
 

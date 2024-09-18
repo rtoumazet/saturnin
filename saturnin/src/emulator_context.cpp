@@ -38,7 +38,7 @@
 #include <saturnin/src/sound/scsp.h>
 #include <saturnin/src/video/opengl/opengl.h>
 #include <saturnin/src/video/vdp1.h>
-#include <saturnin/src/video/vdp2.h>
+#include <saturnin/src/video/vdp2/vdp2.h>
 
 namespace cdrom = saturnin::cdrom;
 namespace video = saturnin::video;

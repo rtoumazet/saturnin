@@ -25,7 +25,7 @@
 
 #include <saturnin/src/pch.h>
 #include <saturnin/src/utilities.h> // format
-#include <saturnin/src/video/vdp2.h>
+#include <saturnin/src/video/vdp2/vdp2.h>
 
 namespace uti = saturnin::utilities;
 
