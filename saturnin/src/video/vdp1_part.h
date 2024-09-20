@@ -216,8 +216,9 @@ class Vdp1Part {
 void normalSpriteDraw(const EmulatorModules& modules, Vdp1Part& part);
 void scaledSpriteDraw(const EmulatorModules& modules, Vdp1Part& part);
 void distortedSpriteDraw(const EmulatorModules& modules, Vdp1Part& part);
-void polygonDraw(const EmulatorModules& modules, Vdp1Part& part);
-void polylineDraw(const EmulatorModules& modules, Vdp1Part& part);
+void polyDraw(const EmulatorModules& modules, Vdp1Part& part, CmdCtrl::CommandSelect command);
+// void polygonDraw(const EmulatorModules& modules, Vdp1Part& part);
+// void polylineDraw(const EmulatorModules& modules, Vdp1Part& part);
 void lineDraw(const EmulatorModules& modules, Vdp1Part& part);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

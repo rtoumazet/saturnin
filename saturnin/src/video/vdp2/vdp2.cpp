@@ -48,10 +48,6 @@ using core::tr;
 
 using util::toUnderlying;
 
-// constexpr auto use_concurrent_read_for_cells = bool{false};
-// constexpr auto vdp2_vram_4mb_mask            = u16{0x3FFF};
-// constexpr auto vdp2_vram_8mb_mask            = u16{0x7FFF};
-
 static std::vector<long long> measures;
 
 //--------------------------------------------------------------------------------------------------------------

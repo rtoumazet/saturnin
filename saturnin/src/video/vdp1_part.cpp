@@ -158,12 +158,12 @@ void Vdp1Part::generatePartData(const EmulatorModules& modules) {
             break;
         }
         case polygon_draw: {
-            polygonDraw(modules, *this);
+            polyDraw(modules, *this, polygon_draw);
             debug_header_ = tr("Polygon draw");
             break;
         }
         case polyline_draw: {
-            polylineDraw(modules, *this);
+            polyDraw(modules, *this, polyline_draw);
             debug_header_ = tr("Polyline draw");
             break;
         }
@@ -791,66 +791,27 @@ void distortedSpriteDraw(const EmulatorModules& modules, Vdp1Part& part) {
                                                 gouraud_values[3]); // upper left
 }
 
-void polygonDraw(const EmulatorModules& modules, Vdp1Part& part) {
-    Log::debug(Logger::vdp1, tr("Command - Polygon draw"));
-
-    part.common_vdp_data_.draw_type = DrawType::non_textured_polygon;
-
-    auto color = Color(part.cmdcolr_.data());
-    if (part.cmdcolr_.is(0)) { color.a = 0; }
-    const auto gouraud_values = readGouraudData(modules, part);
-
-    part.common_vdp_data_.vertexes.reserve(4);
-    part.common_vdp_data_.vertexes.emplace_back(part.calculatedXA(),
-                                                part.calculatedYA(),
-                                                0.0f,
-                                                0.0f,
-                                                0.0f,
-                                                color.r,
-                                                color.g,
-                                                color.b,
-                                                color.a,
-                                                gouraud_values[0]); // lower left
-    part.common_vdp_data_.vertexes.emplace_back(part.calculatedXB(),
-                                                part.calculatedYB(),
-                                                1.0f,
-                                                0.0f,
-                                                0.0f,
-                                                color.r,
-                                                color.g,
-                                                color.b,
-                                                color.a,
-                                                gouraud_values[1]); // lower right
-    part.common_vdp_data_.vertexes.emplace_back(part.calculatedXC(),
-                                                part.calculatedYC(),
-                                                1.0f,
-                                                1.0f,
-                                                0.0f,
-                                                color.r,
-                                                color.g,
-                                                color.b,
-                                                color.a,
-                                                gouraud_values[2]); // upper right
-    part.common_vdp_data_.vertexes.emplace_back(part.calculatedXD(),
-                                                part.calculatedYD(),
-                                                0.0f,
-                                                1.0f,
-                                                0.0f,
-                                                color.r,
-                                                color.g,
-                                                color.b,
-                                                color.a,
-                                                gouraud_values[3]); // upper left
-}
-
-void polylineDraw(const EmulatorModules& modules, Vdp1Part& part) {
-    Log::debug(Logger::vdp1, tr("Command - Polyline draw"));
-
-    part.common_vdp_data_.draw_type = DrawType::polyline;
+void polyDraw(const EmulatorModules& modules, Vdp1Part& part, CmdCtrl::CommandSelect command) {
+    switch (command) {
+        using enum CmdCtrl::CommandSelect;
+        case polygon_draw: {
+            Log::debug(Logger::vdp1, tr("Command - Polygon draw"));
+            part.common_vdp_data_.draw_type = DrawType::non_textured_polygon;
+            break;
+        }
+        case polyline_draw: {
+            Log::debug(Logger::vdp1, tr("Command - Polyline draw"));
+            part.common_vdp_data_.draw_type = DrawType::polyline;
+            break;
+        }
+        default: {
+            Log::error(Logger::vdp1, tr("Command - Unknown poly draw"));
+            return;
+        }
+    }
 
     auto color = Color(part.cmdcolr_.data());
     if (part.cmdcolr_.is(0)) { color.a = 0; }
-
     const auto gouraud_values = readGouraudData(modules, part);
 
     part.common_vdp_data_.vertexes.reserve(4);
