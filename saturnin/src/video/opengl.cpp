@@ -24,8 +24,7 @@
 #include <fstream>    // ifstream
 #include <filesystem> // filesystem
 #include <iostream>   // cout
-// #include <ranges>
-#include <sstream> // stringstream
+#include <sstream>    // stringstream
 #include <glbinding/glbinding.h>
 #include <glbinding/Version.h>
 #include <glbinding-aux/ContextInfo.h>
@@ -50,7 +49,6 @@
 #include <saturnin/src/video/vdp1.h>
 #include <saturnin/src/resource_holder.hpp>
 
-// using namespace gl;
 using namespace gl21;
 using namespace gl21ext;
 
@@ -63,8 +61,6 @@ namespace uti = saturnin::utilities;
 using core::Log;
 using core::Logger;
 using core::tr;
-
-// constexpr auto uses_fbo = false;
 
 const std::unordered_map<ScrollScreen, VdpLayer> screen_to_layer = {
     {ScrollScreen::nbg3, VdpLayer::nbg3},
@@ -702,7 +698,6 @@ auto runOpengl(core::EmulatorContext& state) -> s32 {
         glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
         glfwWindowHint(GLFW_OPENGL_PROFILE,
                        GLFW_OPENGL_CORE_PROFILE); // 3.2+ only
-        // glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); // 3.0+ only
 
         glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, true);
     }
@@ -714,9 +709,6 @@ auto runOpengl(core::EmulatorContext& state) -> s32 {
     const auto window = createMainWindow(minimum_window_width, minimum_window_height, window_title);
     if (window == nullptr) { return EXIT_FAILURE; }
     state.openglWindow(window);
-
-    // glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
-    // const auto render_window = glfwCreateWindow(1, 1, "invisible", nullptr, ihm_window);
 
     glfwSetWindowCloseCallback(window, windowCloseCallback);
     glfwSetWindowSizeCallback(window, windowSizeCallback);
@@ -748,25 +740,17 @@ auto runOpengl(core::EmulatorContext& state) -> s32 {
 
     glbinding::initialize(glfwGetProcAddress);
 
-    // glCopyImageSubData()
-
     // Setup Dear ImGui binding
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
 
-    // auto flags = ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
-    //(void)flags;
     ImGuiIO& io = ImGui::GetIO();
     (void)io;
 
-    //  io.ConfigViewportDecorations
-    //  io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;  // Enable Keyboard Controls
-    //  io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;   // Enable Gamepad Controls
     io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable; // Enable Viewports
 
     // Setup style
     ImGui::StyleColorsDark();
-    // ImGui::StyleColorsClassic();
 
     ImGui_ImplGlfw_InitForOpenGL(window, true);
     is_legacy_opengl ? ImGui_ImplOpenGL3_Init() : ImGui_ImplOpenGL3_Init(glsl_version);
@@ -796,7 +780,6 @@ auto runOpengl(core::EmulatorContext& state) -> s32 {
     io.Fonts->AddFontFromMemoryTTF((void*)data.data(), static_cast<u32>(data.size()), font_size, &config, icons_ranges.data());
     io.Fonts->Build();
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
-    // io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable; // Enable Viewports
 
     const auto clear_color = ImVec4{0.0f, 0.0f, 0.0f, 1.00f};
 
@@ -804,14 +787,12 @@ auto runOpengl(core::EmulatorContext& state) -> s32 {
 
     state.opengl()->initialize();
 
-    Log::info(Logger::opengl, "Card : {}", (char*)glGetString(GL_RENDERER));
+    Log::info(Logger::opengl, "Card : {}", (const char*)glGetString(GL_RENDERER));
 
     if (state.memory()->selectedBinaryFile().full_path.size() > 0) {
         state.startEmulation();
         if (!state.memory()->selectedBinaryFile().is_auto_started) { state.debugStatus(core::DebugStatus::paused); }
     }
-
-    // glGetString(GL_RENDERER);
 
     // Main loop
     while (glfwWindowShouldClose(window) == GLFW_FALSE) {

@@ -1525,7 +1525,6 @@ void Vdp2::saveCell(const ScrollScreenStatus& screen,
 
     auto pos = ScreenPos{static_cast<u16>(cell_offset.x * texture_width), static_cast<u16>(cell_offset.y * texture_height)};
 
-    //: TODO: scroll offset must be handled during display, put in comments here for now
     pos.x -= screen.scroll_offset_horizontal;
     pos.y -= screen.scroll_offset_vertical;
 
