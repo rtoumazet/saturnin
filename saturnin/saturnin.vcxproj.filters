@@ -195,6 +195,9 @@
     <ClCompile Include="src\video\vdp2\vdp2_memory_access.cpp">
       <Filter>Fichiers sources\video\vdp2</Filter>
     </ClCompile>
+    <ClCompile Include="src\video\vdp2\vdp2_display.cpp">
+      <Filter>Fichiers sources\video\vdp2</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\config.h">

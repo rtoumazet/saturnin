@@ -364,6 +364,7 @@
     <ClCompile Include="src\emulator_modules.cpp" />
     <ClCompile Include="src\video\vdp2\vdp2_cache.cpp" />
     <ClCompile Include="src\video\vdp2\vdp2_cycle_patterns.cpp" />
+    <ClCompile Include="src\video\vdp2\vdp2_display.cpp" />
     <ClCompile Include="src\video\vdp2\vdp2_memory_access.cpp" />
     <ClCompile Include="src\video\vdp2\vdp2_pattern_name_data.cpp" />
     <ClInclude Include="src\bit_register.h" />
