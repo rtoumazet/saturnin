@@ -1624,22 +1624,32 @@ class Vdp2 {
         constexpr auto row_offset      = u8{4};
         auto           current_address = vram_start_address + cell_address;
         auto           row             = DataExtraction{};
+
+        auto readDot = [&]() {
+            row.as_11bits = modules_.memory()->read<u32>(current_address);
+            readPalette2048Dot<T>(texture_data, screen, row.as_11bits >> DataExtraction::As11Bits::dot0_shift);
+            readPalette2048Dot<T>(texture_data, screen, row.as_11bits >> DataExtraction::As11Bits::dot1_shift);
+        };
         for (u32 i = 0; i < 8; ++i) {
-            row.as_11bits = modules_.memory()->read<u32>(current_address);
-            readPalette2048Dot<T>(texture_data, screen, row.as_11bits >> DataExtraction::As11Bits::dot0_shift);
-            readPalette2048Dot<T>(texture_data, screen, row.as_11bits >> DataExtraction::As11Bits::dot1_shift);
+            // row.as_11bits = modules_.memory()->read<u32>(current_address);
+            // readPalette2048Dot<T>(texture_data, screen, row.as_11bits >> DataExtraction::As11Bits::dot0_shift);
+            // readPalette2048Dot<T>(texture_data, screen, row.as_11bits >> DataExtraction::As11Bits::dot1_shift);
+            readDot();
             current_address += row_offset;
-            row.as_11bits = modules_.memory()->read<u32>(current_address);
-            readPalette2048Dot<T>(texture_data, screen, row.as_11bits >> DataExtraction::As11Bits::dot0_shift);
-            readPalette2048Dot<T>(texture_data, screen, row.as_11bits >> DataExtraction::As11Bits::dot1_shift);
+            // row.as_11bits = modules_.memory()->read<u32>(current_address);
+            // readPalette2048Dot<T>(texture_data, screen, row.as_11bits >> DataExtraction::As11Bits::dot0_shift);
+            // readPalette2048Dot<T>(texture_data, screen, row.as_11bits >> DataExtraction::As11Bits::dot1_shift);
+            readDot();
             current_address += row_offset;
-            row.as_11bits = modules_.memory()->read<u32>(current_address);
-            readPalette2048Dot<T>(texture_data, screen, row.as_11bits >> DataExtraction::As11Bits::dot0_shift);
-            readPalette2048Dot<T>(texture_data, screen, row.as_11bits >> DataExtraction::As11Bits::dot1_shift);
+            // row.as_11bits = modules_.memory()->read<u32>(current_address);
+            // readPalette2048Dot<T>(texture_data, screen, row.as_11bits >> DataExtraction::As11Bits::dot0_shift);
+            // readPalette2048Dot<T>(texture_data, screen, row.as_11bits >> DataExtraction::As11Bits::dot1_shift);
+            readDot();
             current_address += row_offset;
-            row.as_11bits = modules_.memory()->read<u32>(current_address);
-            readPalette2048Dot<T>(texture_data, screen, row.as_11bits >> DataExtraction::As11Bits::dot0_shift);
-            readPalette2048Dot<T>(texture_data, screen, row.as_11bits >> DataExtraction::As11Bits::dot1_shift);
+            // row.as_11bits = modules_.memory()->read<u32>(current_address);
+            // readPalette2048Dot<T>(texture_data, screen, row.as_11bits >> DataExtraction::As11Bits::dot0_shift);
+            // readPalette2048Dot<T>(texture_data, screen, row.as_11bits >> DataExtraction::As11Bits::dot1_shift);
+            readDot();
             current_address += row_offset;
         }
     }
