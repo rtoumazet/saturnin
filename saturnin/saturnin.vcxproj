@@ -362,6 +362,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='DebugFast|x64'">Use</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="src\emulator_modules.cpp" />
+    <ClCompile Include="src\video\opengl\opengl.cpp" />
     <ClCompile Include="src\video\vdp2\vdp2_cache.cpp" />
     <ClCompile Include="src\video\vdp2\vdp2_cycle_patterns.cpp" />
     <ClCompile Include="src\video\vdp2\vdp2_display.cpp" />
@@ -448,10 +449,6 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='DebugFast|x64'">Use</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="src\video\imgui_wrapper.cpp" />
-    <ClCompile Include="src\video\opengl.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='DebugFast|x64'">Use</PrecompiledHeader>
-    </ClCompile>
     <ClCompile Include="src\video\vdp1.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='DebugFast|x64'">Use</PrecompiledHeader>

@@ -159,9 +159,6 @@
     <ClCompile Include="src\timer.cpp">
       <Filter>Fichiers sources</Filter>
     </ClCompile>
-    <ClCompile Include="src\video\opengl.cpp">
-      <Filter>Fichiers sources\video\opengl</Filter>
-    </ClCompile>
     <ClCompile Include="src\video\opengl\opengl_shaders.cpp">
       <Filter>Fichiers sources\video\opengl</Filter>
     </ClCompile>
@@ -197,6 +194,9 @@
     </ClCompile>
     <ClCompile Include="src\video\vdp2\vdp2_display.cpp">
       <Filter>Fichiers sources\video\vdp2</Filter>
+    </ClCompile>
+    <ClCompile Include="src\video\opengl\opengl.cpp">
+      <Filter>Fichiers sources\video\opengl</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -368,9 +368,6 @@
     <ClInclude Include="src\timer.h">
       <Filter>Fichiers sources</Filter>
     </ClInclude>
-    <ClInclude Include="src\video\opengl\opengl.h">
-      <Filter>Fichiers sources\video\opengl</Filter>
-    </ClInclude>
     <ClInclude Include="src\video\vdp2\vdp2_registers.h">
       <Filter>Fichiers sources\video\vdp2</Filter>
     </ClInclude>
@@ -379,6 +376,9 @@
     </ClInclude>
     <ClInclude Include="src\video\vdp2\vdp2_part.h">
       <Filter>Fichiers sources\video\vdp2</Filter>
+    </ClInclude>
+    <ClInclude Include="src\video\opengl\opengl.h">
+      <Filter>Fichiers sources\video\opengl</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
