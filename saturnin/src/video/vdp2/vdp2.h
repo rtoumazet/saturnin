@@ -1631,24 +1631,12 @@ class Vdp2 {
             readPalette2048Dot<T>(texture_data, screen, row.as_11bits >> DataExtraction::As11Bits::dot1_shift);
         };
         for (u32 i = 0; i < 8; ++i) {
-            // row.as_11bits = modules_.memory()->read<u32>(current_address);
-            // readPalette2048Dot<T>(texture_data, screen, row.as_11bits >> DataExtraction::As11Bits::dot0_shift);
-            // readPalette2048Dot<T>(texture_data, screen, row.as_11bits >> DataExtraction::As11Bits::dot1_shift);
             readDot();
             current_address += row_offset;
-            // row.as_11bits = modules_.memory()->read<u32>(current_address);
-            // readPalette2048Dot<T>(texture_data, screen, row.as_11bits >> DataExtraction::As11Bits::dot0_shift);
-            // readPalette2048Dot<T>(texture_data, screen, row.as_11bits >> DataExtraction::As11Bits::dot1_shift);
             readDot();
             current_address += row_offset;
-            // row.as_11bits = modules_.memory()->read<u32>(current_address);
-            // readPalette2048Dot<T>(texture_data, screen, row.as_11bits >> DataExtraction::As11Bits::dot0_shift);
-            // readPalette2048Dot<T>(texture_data, screen, row.as_11bits >> DataExtraction::As11Bits::dot1_shift);
             readDot();
             current_address += row_offset;
-            // row.as_11bits = modules_.memory()->read<u32>(current_address);
-            // readPalette2048Dot<T>(texture_data, screen, row.as_11bits >> DataExtraction::As11Bits::dot0_shift);
-            // readPalette2048Dot<T>(texture_data, screen, row.as_11bits >> DataExtraction::As11Bits::dot1_shift);
             readDot();
             current_address += row_offset;
         }
@@ -1658,22 +1646,20 @@ class Vdp2 {
         constexpr auto row_offset      = u8{4};
         auto           current_address = vram_start_address + cell_address;
         auto           row             = DataExtraction{};
+
+        auto readDot = [&]() {
+            row.as_16bits = modules_.memory()->read<u32>(current_address);
+            read32KDot(texture_data, screen, row.as_16bits >> DataExtraction::As16Bits::dot0_shift);
+            read32KDot(texture_data, screen, row.as_16bits >> DataExtraction::As16Bits::dot1_shift);
+        };
         for (u32 i = 0; i < 8; ++i) {
-            row.as_16bits = modules_.memory()->read<u32>(current_address);
-            read32KDot(texture_data, screen, row.as_16bits >> DataExtraction::As16Bits::dot0_shift);
-            read32KDot(texture_data, screen, row.as_16bits >> DataExtraction::As16Bits::dot1_shift);
+            readDot();
             current_address += row_offset;
-            row.as_16bits = modules_.memory()->read<u32>(current_address);
-            read32KDot(texture_data, screen, row.as_16bits >> DataExtraction::As16Bits::dot0_shift);
-            read32KDot(texture_data, screen, row.as_16bits >> DataExtraction::As16Bits::dot1_shift);
+            readDot();
             current_address += row_offset;
-            row.as_16bits = modules_.memory()->read<u32>(current_address);
-            read32KDot(texture_data, screen, row.as_16bits >> DataExtraction::As16Bits::dot0_shift);
-            read32KDot(texture_data, screen, row.as_16bits >> DataExtraction::As16Bits::dot1_shift);
+            readDot();
             current_address += row_offset;
-            row.as_16bits = modules_.memory()->read<u32>(current_address);
-            read32KDot(texture_data, screen, row.as_16bits >> DataExtraction::As16Bits::dot0_shift);
-            read32KDot(texture_data, screen, row.as_16bits >> DataExtraction::As16Bits::dot1_shift);
+            readDot();
             current_address += row_offset;
         }
     }
@@ -1681,22 +1667,10 @@ class Vdp2 {
         constexpr auto row_offset      = u8{4};
         auto           current_address = vram_start_address + cell_address;
         for (u32 i = 0; i < 8; ++i) {
-            read16MDot(texture_data, screen, modules_.memory()->read<u32>(current_address));
-            current_address += row_offset;
-            read16MDot(texture_data, screen, modules_.memory()->read<u32>(current_address));
-            current_address += row_offset;
-            read16MDot(texture_data, screen, modules_.memory()->read<u32>(current_address));
-            current_address += row_offset;
-            read16MDot(texture_data, screen, modules_.memory()->read<u32>(current_address));
-            current_address += row_offset;
-            read16MDot(texture_data, screen, modules_.memory()->read<u32>(current_address));
-            current_address += row_offset;
-            read16MDot(texture_data, screen, modules_.memory()->read<u32>(current_address));
-            current_address += row_offset;
-            read16MDot(texture_data, screen, modules_.memory()->read<u32>(current_address));
-            current_address += row_offset;
-            read16MDot(texture_data, screen, modules_.memory()->read<u32>(current_address));
-            current_address += row_offset;
+            for (u32 j = 0; j < 8; ++j) {
+                read16MDot(texture_data, screen, modules_.memory()->read<u32>(current_address));
+                current_address += row_offset;
+            }
         }
     }
 
