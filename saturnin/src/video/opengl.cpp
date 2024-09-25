@@ -941,7 +941,6 @@ auto generateVertexIndicesAndDrawRanges(const PartsList& parts) -> std::tuple<st
             ranges.push_back(current_range);
         }
     }
-
     return {indices, ranges};
 }
 }; // namespace saturnin::video
