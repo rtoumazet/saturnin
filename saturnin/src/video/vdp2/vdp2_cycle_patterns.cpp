@@ -398,47 +398,57 @@ auto Vdp2::getReductionSetting(Vdp2Regs::Zmctl::ZoomQuarter zq, Vdp2Regs::Zmctl:
 };
 
 // static
+auto Vdp2::getVramAccessNumberForPalette16(ReductionSetting r) {
+    switch (r) {
+        using enum ReductionSetting;
+        case none: return VramAccessNumber::one;
+        case up_to_one_half: return VramAccessNumber::two;
+        case up_to_one_quarter: return VramAccessNumber::four;
+        default: return VramAccessNumber::none;
+    }
+}
+
+// static
+auto Vdp2::getVramAccessNumberForPalette256(ReductionSetting r) {
+    switch (r) {
+        using enum ReductionSetting;
+        case none: return VramAccessNumber::two;
+        case up_to_one_half: return VramAccessNumber::four;
+        default: return VramAccessNumber::none;
+    }
+}
+
+// static
+auto Vdp2::getVramAccessNumberForPalette2048(ReductionSetting r) {
+    if (r == ReductionSetting::none) return VramAccessNumber::four;
+
+    return VramAccessNumber::none;
+}
+
+// static
+auto Vdp2::getVramAccessNumberForRgb32k(ReductionSetting r) {
+    if (r == ReductionSetting::none) return VramAccessNumber::four;
+
+    return VramAccessNumber::none;
+}
+
+// static
+auto Vdp2::getVramAccessNumberForRgb16m(ReductionSetting r) {
+    if (r == ReductionSetting::none) return VramAccessNumber::eight;
+
+    return VramAccessNumber::none;
+}
+
+// static
 auto Vdp2::calculateRequiredVramCharacterPatternReads(ReductionSetting                    r,
                                                       Vdp2Regs::CharacterColorNumber3Bits ccn) -> VramAccessNumber {
     switch (ccn) {
         using enum Vdp2Regs::CharacterColorNumber3Bits;
-        case palette_16:
-            switch (r) {
-                using enum ReductionSetting;
-                case none: return VramAccessNumber::one;
-                case up_to_one_half: return VramAccessNumber::two;
-                case up_to_one_quarter: return VramAccessNumber::four;
-            }
-            break;
-        case palette_256:
-            switch (r) {
-                using enum ReductionSetting;
-                case none: return VramAccessNumber::two;
-                case up_to_one_half: return VramAccessNumber::four;
-                default: return VramAccessNumber::none;
-            }
-            break;
-        case palette_2048:
-            switch (r) {
-                using enum ReductionSetting;
-                case none: return VramAccessNumber::four;
-                default: return VramAccessNumber::none;
-            }
-            break;
-        case rgb_32k:
-            switch (r) {
-                using enum ReductionSetting;
-                case none: return VramAccessNumber::four;
-                default: return VramAccessNumber::none;
-            }
-            break;
-        case rgb_16m:
-            switch (r) {
-                using enum ReductionSetting;
-                case none: return VramAccessNumber::eight;
-                default: return VramAccessNumber::none;
-            }
-            break;
+        case palette_16: return getVramAccessNumberForPalette16(r);
+        case palette_256: return getVramAccessNumberForPalette256(r);
+        case palette_2048: return getVramAccessNumberForPalette2048(r);
+        case rgb_32k: return getVramAccessNumberForRgb32k(r);
+        case rgb_16m: return getVramAccessNumberForRgb16m(r);
     }
 
     return VramAccessNumber::none;
@@ -449,36 +459,10 @@ auto Vdp2::calculateRequiredVramCharacterPatternReads(ReductionSetting          
                                                       Vdp2Regs::CharacterColorNumber2Bits ccn) -> VramAccessNumber {
     switch (ccn) {
         using enum Vdp2Regs::CharacterColorNumber2Bits;
-        case palette_16:
-            switch (r) {
-                using enum ReductionSetting;
-                case none: return VramAccessNumber::one;
-                case up_to_one_half: return VramAccessNumber::two;
-                case up_to_one_quarter: return VramAccessNumber::four;
-            }
-            break;
-        case palette_256:
-            switch (r) {
-                using enum ReductionSetting;
-                case none: return VramAccessNumber::two;
-                case up_to_one_half: return VramAccessNumber::four;
-                default: return VramAccessNumber::none;
-            }
-            break;
-        case palette_2048:
-            switch (r) {
-                using enum ReductionSetting;
-                case none: return VramAccessNumber::four;
-                default: return VramAccessNumber::none;
-            }
-            break;
-        case rgb_32k:
-            switch (r) {
-                using enum ReductionSetting;
-                case none: return VramAccessNumber::four;
-                default: return VramAccessNumber::none;
-            }
-            break;
+        case palette_16: return getVramAccessNumberForPalette16(r);
+        case palette_256: return getVramAccessNumberForPalette256(r);
+        case palette_2048: return getVramAccessNumberForPalette2048(r);
+        case rgb_32k: return getVramAccessNumberForRgb32k(r);
     }
 
     return VramAccessNumber::none;
@@ -489,22 +473,8 @@ auto Vdp2::calculateRequiredVramCharacterPatternReads(ReductionSetting          
                                                       Vdp2Regs::CharacterColorNumber1Bit ccn) -> VramAccessNumber {
     switch (ccn) {
         using enum Vdp2Regs::CharacterColorNumber1Bit;
-        case palette_16:
-            switch (r) {
-                using enum ReductionSetting;
-                case none: return VramAccessNumber::one;
-                case up_to_one_half: return VramAccessNumber::two;
-                case up_to_one_quarter: return VramAccessNumber::four;
-            }
-            break;
-        case palette_256:
-            switch (r) {
-                using enum ReductionSetting;
-                case none: return VramAccessNumber::two;
-                case up_to_one_half: return VramAccessNumber::four;
-                default: return VramAccessNumber::none;
-            }
-            break;
+        case palette_16: return getVramAccessNumberForPalette16(r);
+        case palette_256: return getVramAccessNumberForPalette256(r);
     }
 
     return VramAccessNumber::none;

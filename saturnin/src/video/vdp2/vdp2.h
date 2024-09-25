@@ -1086,6 +1086,13 @@ class Vdp2 {
 
     static auto getReductionSetting(Vdp2Regs::Zmctl::ZoomQuarter zq, Vdp2Regs::Zmctl::ZoomHalf zh) -> ReductionSetting;
 
+    // Functions to get the VRAM access number needed for each color type.
+    static auto getVramAccessNumberForPalette16(ReductionSetting r);
+    static auto getVramAccessNumberForPalette256(ReductionSetting r);
+    static auto getVramAccessNumberForPalette2048(ReductionSetting r);
+    static auto getVramAccessNumberForRgb32k(ReductionSetting r);
+    static auto getVramAccessNumberForRgb16m(ReductionSetting r);
+
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn	static auto Vdp2::calculateRequiredVramCharacterPatternReads(ReductionSetting r, Vdp2Regs::CharacterColorNumber3Bits
     /// ccn) -> VramAccessNumber;
