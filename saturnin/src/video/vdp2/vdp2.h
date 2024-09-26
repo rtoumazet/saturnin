@@ -1582,7 +1582,6 @@ class Vdp2 {
         constexpr auto row_offset      = u8{4};
         auto           current_address = vram_start_address + cell_address;
         auto           row             = DataExtraction{};
-        // const auto     data            = modules_.memory()->read(core::MemoryMapArea::vdp2_video_ram, current_address, 0x40);
         for (u32 i = 0; i < 8; ++i) {
             row.as_8bits = modules_.memory()->read<u32>(current_address);
             readPalette256Dot<T>(texture_data, screen, palette_number, row.as_8bits >> DataExtraction::As8Bits::dot0_shift);
@@ -1610,7 +1609,6 @@ class Vdp2 {
         auto           current_address = vram_start_address + cell_address;
         auto           row             = DataExtraction{};
         for (u32 i = 0; i < 8; ++i) {
-            // auto addr    = current_address & core::vdp2_vram_memory_mask;
             row.as_8bits = utilities::readAs32(vram.subspan(current_address & core::vdp2_vram_memory_mask, 4));
             readPalette256Dot<T>(texture_data, screen, palette_number, row.as_8bits >> DataExtraction::As8Bits::dot0_shift, cram);
             readPalette256Dot<T>(texture_data, screen, palette_number, row.as_8bits >> DataExtraction::As8Bits::dot1_shift, cram);

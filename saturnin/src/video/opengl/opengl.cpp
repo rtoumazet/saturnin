@@ -243,22 +243,22 @@ void Opengl::displayFramebuffer(core::EmulatorContext& state) {
 }
 
 void Opengl::clearFboTextures() {
-    // Log::debug(Logger::opengl, "clearFboTextures() call");
-    // for (u8 index = 0; auto& status : fbo_texture_pool_status_) {
-    //     if (status == FboTextureStatus::to_clear) {
-    //          :WIP:
-    //          Log::debug(Logger::opengl, "- Clearing texture at index {}", index);
-    //          attachTextureLayerToFbo(fbo_texture_array_id_, index);
-    //          attachTextureToFbo(getFboTextureId(FboTextureType::vdp2_debug_layer));
+    Log::debug(Logger::opengl, "clearFboTextures() call");
+    for (u8 index = 0; auto& status : fbo_texture_pool_status_) {
+        if (status == FboTextureStatus::to_clear) {
+            //          :WIP:
+            Log::debug(Logger::opengl, "- Clearing texture at index {}", index);
+            //          attachTextureLayerToFbo(fbo_texture_array_id_, index);
+            //          attachTextureToFbo(getFboTextureId(FboTextureType::vdp2_debug_layer));
 
-    //         gl::glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-    //         glClear(GL_COLOR_BUFFER_BIT);
+            gl::glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+            glClear(GL_COLOR_BUFFER_BIT);
 
-    //         Log::debug(Logger::opengl, "- Changing FBO texture status at index {} to 'unused'", index);
-    //         status = FboTextureStatus::unused;
-    //    }
-    //}
-    // Log::debug(Logger::opengl, "clearFbos() return");
+            Log::debug(Logger::opengl, "- Changing FBO texture status at index {} to 'unused'", index);
+            status = FboTextureStatus::unused;
+        }
+    }
+    Log::debug(Logger::opengl, "clearFbos() return");
 }
 
 void Opengl::clearFboKeys() {
