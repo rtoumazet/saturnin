@@ -198,4 +198,6 @@ void windowSizeCallback(GLFWwindow* window, const int width, const int height) {
 
 void error_callback(int error, const char* description) { fprintf(stderr, "Error %d: %s\n", error, description); }
 
+void Opengl::onWindowResize(const u16 new_width, const u16 new_height) { hostScreenResolution({new_width, new_height}); }
+
 } // namespace saturnin::video

@@ -35,7 +35,7 @@ using namespace gl21ext;
 
 using core::tr;
 
-void Opengl::initializeShaders() {
+auto initializeShaders() -> ShadersList {
     const auto readFile = [](const std::string& filename) {
         std::ifstream input_file("./shaders/" + filename, std::ios::in);
         if (!input_file) { Log::exception(Logger::opengl, tr("Could not load shader '{}' !"), filename); }
@@ -47,19 +47,20 @@ void Opengl::initializeShaders() {
         return buffer.str();
     };
 
-    shaders_list_.try_emplace("main.vert", readFile("main.vert"));
-    shaders_list_.try_emplace("main.frag", readFile("main.frag"));
+    auto shaders_list = ShadersList{};
+    shaders_list.try_emplace("main.vert", readFile("main.vert"));
+    shaders_list.try_emplace("main.frag", readFile("main.frag"));
+    return shaders_list;
 }
 
-// static
-void Opengl::deleteShaders(const std::vector<u32>& shaders) {
+void deleteShaders(const std::vector<u32>& shaders) {
     for (auto shader : shaders) {
         glDeleteShader(shader);
     }
 }
 
-auto Opengl::getShaderSource(std::string_view name) -> const char* {
-    if (auto search = shaders_list_.find(name); search != shaders_list_.end()) {
+auto getShaderSource(const ShadersList& shaders_list, std::string_view name) -> const char* {
+    if (auto search = shaders_list.find(name); search != shaders_list.end()) {
         return search->second.c_str();
 
     } else {
@@ -67,9 +68,9 @@ auto Opengl::getShaderSource(std::string_view name) -> const char* {
     }
 }
 
-auto Opengl::createVertexShader(std::string_view name) -> u32 {
+auto createVertexShader(const ShadersList& shaders_list, std::string_view shader_name) -> u32 {
     const auto vertex_shader = glCreateShader(GL_VERTEX_SHADER);
-    auto       source        = getShaderSource(name);
+    auto       source        = getShaderSource(shaders_list, shader_name);
     glShaderSource(vertex_shader, 1, &source, nullptr);
     glCompileShader(vertex_shader);
     checkShaderCompilation(vertex_shader);
@@ -77,9 +78,9 @@ auto Opengl::createVertexShader(std::string_view name) -> u32 {
     return vertex_shader;
 }
 
-auto Opengl::createFragmentShader(std::string_view name) -> u32 {
+auto createFragmentShader(const ShadersList& shaders_list, std::string_view shader_name) -> u32 {
     const auto fragment_shader = glCreateShader(GL_FRAGMENT_SHADER);
-    auto       source          = getShaderSource(name);
+    auto       source          = getShaderSource(shaders_list, shader_name);
     glShaderSource(fragment_shader, 1, &source, nullptr);
     glCompileShader(fragment_shader);
 
@@ -88,12 +89,11 @@ auto Opengl::createFragmentShader(std::string_view name) -> u32 {
     return fragment_shader;
 }
 
-// static
-auto Opengl::createProgramShader(const u32 vertex_shader, const u32 fragment_shader) -> u32 {
+auto createProgramShader(const u32 vertex_shader_id, const u32 fragment_shader_id) -> u32 {
     const auto shader_program = glCreateProgram();
 
-    glAttachShader(shader_program, vertex_shader);
-    glAttachShader(shader_program, fragment_shader);
+    glAttachShader(shader_program, vertex_shader_id);
+    glAttachShader(shader_program, fragment_shader_id);
     glLinkProgram(shader_program);
     checkProgramCompilation(shader_program);
 

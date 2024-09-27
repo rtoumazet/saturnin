@@ -95,9 +95,9 @@ void Opengl::initialize() {
         = generateTexture(texture_array_width, texture_array_height, std::vector<u8>{});
 
     initializeFbo();
-    initializeShaders();
-    const auto main_vertex   = createVertexShader("main.vert");
-    const auto main_fragment = createFragmentShader("main.frag");
+    shaders_list_            = initializeShaders();
+    const auto main_vertex   = createVertexShader(shaders_list_, "main.vert");
+    const auto main_fragment = createFragmentShader(shaders_list_, "main.frag");
     program_shaders_.try_emplace(ProgramShader::main, createProgramShader(main_vertex, main_fragment));
 
     const auto shaders_to_delete = std::vector<u32>{main_vertex, main_fragment};
@@ -190,6 +190,7 @@ void Opengl::displayFramebuffer(core::EmulatorContext& state) {
         if constexpr (render_type == RenderType::RenderType_drawElements) {
             if (global_parts_list_.empty()) {
                 std::unique_lock lk(parts_list_mutex_);
+                // std::unique_lock lk(mutexes_[uti::toUnderlying(MutexType::parts_list)]);
                 global_parts_list_ = std::move(global_parts_list);
                 data_condition_.wait(lk, [this]() { return global_parts_list_.empty(); });
             }
@@ -235,6 +236,7 @@ void Opengl::displayFramebuffer(core::EmulatorContext& state) {
         if constexpr (render_type == RenderType::RenderType_drawElements) {
             if (parts_list_.empty()) {
                 std::unique_lock lk(parts_list_mutex_);
+                // std::unique_lock lk(mutexes_[uti::toUnderlying(MutexType::parts_list)]);
                 parts_list_ = std::move(parts_list);
                 data_condition_.wait(lk, [this]() { return parts_list_.empty(); });
             }
@@ -409,10 +411,6 @@ auto Opengl::generateTextureFromTextureArrayLayer(const GuiTextureType dst_textu
 
     return gui_texture_type_to_id_[dst_texture_type];
 }
-
-void Opengl::onWindowResize(const u16 width, const u16 height) { hostScreenResolution({width, height}); }
-
-static void error_callback(int error, const char* description) { fprintf(stderr, "Error %d: %s\n", error, description); }
 
 auto Opengl::calculateDisplayViewportMatrix() const -> glm::highp_mat4 {
     const auto host_res     = hostScreenResolution();

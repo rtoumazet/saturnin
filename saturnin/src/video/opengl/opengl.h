@@ -86,6 +86,8 @@ enum class GuiTextureType : u8 { render_buffer, vdp1_debug_buffer, vdp2_debug_bu
 enum class FboType : u8 { general, for_gui, vdp2_debug };
 enum class ProgramShader : u8 { main };
 
+enum class MutexType : u8 { parts_list = 0, textures_link = 1, texture_delete = 2 };
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \enum	FboTextureStatus
 ///
@@ -209,8 +211,7 @@ const std::unordered_map<VdpLayer, std::string> layer_to_name = {
 
 class Opengl {
   public:
-    ///@{
-    /// Constructors / Destructors
+    // Constructors / Destructors
     Opengl() = default;
     explicit Opengl(core::Config* config);
     Opengl(const Opengl&)                      = default;
@@ -218,10 +219,8 @@ class Opengl {
     auto operator=(const Opengl&) & -> Opengl& = default;
     auto operator=(Opengl&&) & -> Opengl&      = default;
     ~Opengl();
-    ///@}
 
-    ///@{
-    /// Accessors / Mutators
+    // Accessors / Mutators
     [[nodiscard]] auto currentRenderedBuffer() const { return current_rendered_buffer_; };
     void               currentRenderedBuffer(const FboTextureType type) { current_rendered_buffer_ = type; };
     [[nodiscard]] auto vdp1DebugOverlayTextureId() const { return getFboTextureLayer(FboTextureType::vdp1_debug_overlay); };
@@ -237,150 +236,21 @@ class Opengl {
     void               partToHighlight(const Vdp1Part& part) { part_to_highlight_ = part; };
     auto               partToHighlight() const -> Vdp1Part { return part_to_highlight_; };
 
-    ///@}
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn void Opengl::initialize(GLFWwindow* gui_context);
-    ///
-    /// \brief  Initializes this object
-    ///
-    /// \author Runik
-    /// \date   08/04/2021
-    ///
-    /// \param [in,out] gui_context If non-null, context for the graphical user interface.
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-
+    // Initializes this object
     void initialize();
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn void Opengl::shutdown() const;
-    ///
-    /// \brief  Shuts down this object and frees any resources it is using
-    ///
-    /// \author Runik
-    /// \date   08/04/2021
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-
+    // Shuts down this object and frees any resources it is using
     void shutdown() const;
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn void Opengl::preRender();
-    ///
-    /// \brief  Processing done before rendering.
-    ///
-    /// \author Runik
-    /// \date   08/04/2021
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-
+    // Pre/post rendering functions
     void preRender();
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn	void Opengl::postRender();
-    ///
-    /// \brief	Processing done after rendering.
-    ///
-    /// \author	Runik
-    /// \date	08/04/2021
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-
     void postRender();
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn void Opengl::initializeShaders();
-    ///
-    /// \brief  Initializes the shaders.
-    ///
-    /// \author Runik
-    /// \date   08/04/2021
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    void initializeShaders();
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn void Opengl::displayFramebuffer(core::EmulatorContext& state);
-    ///
-    /// \brief  Displays the framebuffer content (VDP1 + VDP2)
-    ///
-    /// \author Runik
-    /// \date   27/01/2021
-    ///
-    /// \param [in,out] state   The state.
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-
+    // Displays the framebuffer content (VDP1 + VDP2)
     void displayFramebuffer(core::EmulatorContext& state);
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn void Opengl::onWindowResize(const u16 width, const u16 height);
-    ///
-    /// \brief  Actions executed on window resize.
-    ///
-    /// \author Runik
-    /// \date   08/02/2021
-    ///
-    /// \param  width   The new window width.
-    /// \param  height  The new window height.
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    void onWindowResize(const u16 width, const u16 height);
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn	auto Opengl::createVertexShader(std::string_view name) -> u32;
-    ///
-    /// \brief	Creates a vertex shader.
-    ///
-    /// \author	Runik
-    /// \date	26/04/2021
-    ///
-    /// \param 	name	The vertex shader name.
-    ///
-    /// \returns	The vertex shader id.
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    auto createVertexShader(std::string_view name) -> u32;
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn	auto Opengl::createFragmentShader(std::string_view name) -> u32;
-    ///
-    /// \brief	Creates a fragment shader.
-    ///
-    /// \author	Runik
-    /// \date	26/04/2021
-    ///
-    /// \param 	name	The fragment shader name.
-    ///
-    /// \returns	The fragment shader id.
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    auto createFragmentShader(std::string_view name) -> u32;
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn static auto Opengl::createProgramShader(u32 vertex_shader, u32 fragment_shader) -> u32;
-    ///
-    /// \brief  Creates a program shader.
-    ///
-    /// \author Runik
-    /// \date   26/04/2021
-    ///
-    /// \param  vertex_shader   The vertex shader.
-    /// \param  fragment_shader The fragment shader.
-    ///
-    /// \returns    The program shader id.
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    static auto createProgramShader(u32 vertex_shader, u32 fragment_shader) -> u32;
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn	static void Opengl::deleteShaders(const std::vector<u32>& shaders);
-    ///
-    /// \brief	Deletes the shaders.
-    ///
-    /// \author	Runik
-    /// \date	26/04/2021
-    ///
-    /// \param 	shaders	The shaders to delete.
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    static void deleteShaders(const std::vector<u32>& shaders);
+    // Actions executed on window resize.
+    void onWindowResize(const u16 new_width, const u16 new_height);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn static auto Opengl::generateTexture(u32 width, u32 height, const std::vector<u8>& data) -> u32;
@@ -638,21 +508,6 @@ class Opengl {
 
   private:
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn	auto Opengl::getShaderSource(std::string_view name) -> const char*;
-    ///
-    /// \brief	Gets the shader source depending on the configuration
-    ///
-    /// \author	Runik
-    /// \date	08/04/2021
-    ///
-    /// \param 	name	The shader name.
-    ///
-    /// \returns	Null if it fails, else the shader source.
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    auto getShaderSource(std::string_view name) -> const char*;
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn auto Opengl::calculateDisplayViewportMatrix() const -> glm::highp_mat4;
     ///
     /// \brief  Calculates the display viewport matrix, adding letterbox or pillarbox when the display isn't exactly like the
@@ -844,9 +699,8 @@ class Opengl {
     /// \returns	The calculated texture coordinates of the texture.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    auto calculateTextureCoordinates(const ScreenPos& pos,
-                                     const Size&      size,
-                                     const u8         texture_array_index) const -> std::vector<TextureCoordinates>;
+    auto calculateTextureCoordinates(const ScreenPos& pos, const Size& size, const u8 texture_array_index) const
+        -> std::vector<TextureCoordinates>;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn	auto readVertexes(const PartsList& parts) -> std::vector<Vertex>
@@ -999,25 +853,14 @@ class Opengl {
 
     PartsList parts_list_debug_; ///< List of parts used to generate textures for debugging
                                  // Will have to be moved to the platform agnostic renderer.
-
-    ShadersList    shaders_list_;    ///< List of shaders.
-    ProgramShaders program_shaders_; ///< List of program shaders.
+    // Various shaders storage
+    ShadersList    shaders_list_;
+    ProgramShaders program_shaders_;
 
     std::string fps_; ///< The frames per second.
 };
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \fn auto OpenGl::is_modern_opengl_capable() -> bool;
-///
-/// \brief  Query if the current video card is capable of rendering modern opengl (ie version
-///         3.3+).
-///
-/// \author Runik
-/// \date   24/12/2017
-///
-/// \return True if the video card can render modern OpenGL .
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
+// Queries if the current video card is capable of rendering modern opengl (ie version 3.3+).
 auto isModernOpenglCapable() -> bool;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1112,32 +955,6 @@ auto loadPngImage(const char* filename) -> GLFWimage;
 
 auto loadPngImage(const u8* data, const size_t size) -> GLFWimage;
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \fn void checkShaderCompilation(const u32 shader);
-///
-/// \brief  Checks shader compilation and displays errors when detected.
-///
-/// \author Runik
-/// \date   22/10/2019
-///
-/// \param  shader  The shader to check.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-void checkShaderCompilation(u32 shader);
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \fn void checkProgramCompilation(const u32 program);
-///
-/// \brief  Checks program compilation and displays errors when detected.
-///
-/// \author Runik
-/// \date   22/10/2019
-///
-/// \param  program The program to check.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-void checkProgramCompilation(u32 program);
-
 void checkGlError();
 
 void glDebugOutput(gl::GLenum                   source,
@@ -1148,6 +965,7 @@ void glDebugOutput(gl::GLenum                   source,
                    const char*                  message,
                    [[maybe_unused]] const void* userParam);
 
+// Callback for OpenGL errors
 void error_callback(int error, const char* description);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1165,5 +983,18 @@ void error_callback(int error, const char* description);
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 auto generateVertexIndicesAndDrawRanges(const PartsList& parts) -> std::tuple<std::vector<u32>, std::vector<DrawRange>>;
+
+/////////////////////
+// Shaders functions
+/////////////////////
+
+auto initializeShaders() -> ShadersList;
+void deleteShaders(const std::vector<u32>& shaders);
+auto createVertexShader(const ShadersList& shaders_list, std::string_view shader_name) -> u32;
+auto createFragmentShader(const ShadersList& shaders_list, std::string_view shader_name) -> u32;
+auto createProgramShader(u32 vertex_shader_id, u32 fragment_shader_id) -> u32;
+auto getShaderSource(const ShadersList& shaders_list, std::string_view name) -> const char*;
+void checkShaderCompilation(u32 shader);
+void checkProgramCompilation(u32 program);
 
 }; // namespace saturnin::video

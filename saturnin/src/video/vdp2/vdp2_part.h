@@ -66,13 +66,8 @@ class Vdp2Part {
     ~Vdp2Part()                                    = default;
     ///@}
 
-    auto scrollScreenPos() const -> ScreenPos { return scroll_screen_pos_; }
-    auto linkedPlaneAddress() const -> u32 { return linked_plane_address_; }
-
-    CommonVdpData common_vdp_data_; ///< Data shared between different VDP parts.
-
-  private:
-    ScreenPos scroll_screen_pos_{};    ///< Position in the scroll screen.
-    u32       linked_plane_address_{}; ///< Address of the linked plane, used to generate the plane texture while rendering.
+    CommonVdpData common_vdp_data_;        ///< Data shared between different VDP parts.
+    ScreenPos     scroll_screen_pos_{};    ///< Position in the scroll screen.
+    u32           linked_plane_address_{}; ///< Address of the linked plane, used to generate the plane texture while rendering.
 };
 } // namespace saturnin::video
