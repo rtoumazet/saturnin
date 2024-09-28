@@ -118,8 +118,14 @@ struct string_hash {
     [[nodiscard]] size_t operator()(const std::string& txt) const { return std::hash<std::string>{}(txt); }
 };
 
-using ShadersList = std::unordered_map<std::string, std::string, string_hash, std::equal_to<>>; ///< Shader name + shader content
-using ProgramShaders = std::unordered_map<ProgramShader, u32>; ///< Program shader name + its OpenGL id.
+using GraphicShaders
+    = std::unordered_map<std::string, std::string, string_hash, std::equal_to<>>; ///< Shader name + shader content
+using ProgramShaders = std::unordered_map<ProgramShader, u32>;                    ///< Program shader name + its OpenGL id.
+
+struct Shaders {
+    GraphicShaders graphics;
+    ProgramShaders programs;
+};
 
 struct OpenglTexture {
     size_t                          key;                 ///< The Saturn texture key.
@@ -817,6 +823,8 @@ class Opengl {
 
     void renderFboTexture(const u32 texture_id);
 
+    auto getMutex(const MutexType& type) -> std::mutex&;
+
     core::Config* config_; ///< Configuration object.
 
     FboTypeToId           fbo_type_to_id_;            ///< The framebuffer objects used in the app.
@@ -845,17 +853,17 @@ class Opengl {
     LayerToCacheReloadState    layer_to_cache_reload_state_{};    ///< Stores if a layer needs its cache to be reloaded .
     AddressToPlaneTexture      address_to_plane_textures_{};      ///< Link between an address and its plane.
 
-    std::mutex parts_list_mutex_;     ///< Mutex protecting parts_list_.
-    std::mutex textures_link_mutex_;  ///< Mutex protecting textures_link_.
-    std::mutex texture_delete_mutex_; ///< Mutex protecting textures_to_delete_.
+    // std::mutex                parts_list_mutex_;     ///< Mutex protecting parts_list_.
+    // std::mutex                textures_link_mutex_;  ///< Mutex protecting textures_link_.
+    // std::mutex                texture_delete_mutex_; ///< Mutex protecting textures_to_delete_.
+    std::array<std::mutex, 3> mutexes_{std::mutex(), std::mutex(), std::mutex()};
 
     std::condition_variable data_condition_; ///< Condition variable to synchronize between emulation and UI thread.
 
     PartsList parts_list_debug_; ///< List of parts used to generate textures for debugging
                                  // Will have to be moved to the platform agnostic renderer.
-    // Various shaders storage
-    ShadersList    shaders_list_;
-    ProgramShaders program_shaders_;
+
+    Shaders shaders_; // Shaders storage
 
     std::string fps_; ///< The frames per second.
 };
@@ -988,12 +996,14 @@ auto generateVertexIndicesAndDrawRanges(const PartsList& parts) -> std::tuple<st
 // Shaders functions
 /////////////////////
 
-auto initializeShaders() -> ShadersList;
+auto initializeShaders() -> GraphicShaders;
 void deleteShaders(const std::vector<u32>& shaders);
-auto createVertexShader(const ShadersList& shaders_list, std::string_view shader_name) -> u32;
-auto createFragmentShader(const ShadersList& shaders_list, std::string_view shader_name) -> u32;
+
+auto createVertexShader(const GraphicShaders& shaders_list, std::string_view shader_name) -> u32;
+auto createFragmentShader(const GraphicShaders& shaders_list, std::string_view shader_name) -> u32;
 auto createProgramShader(u32 vertex_shader_id, u32 fragment_shader_id) -> u32;
-auto getShaderSource(const ShadersList& shaders_list, std::string_view name) -> const char*;
+auto getShaderSource(const GraphicShaders& shaders_list, std::string_view name) -> const char*;
+
 void checkShaderCompilation(u32 shader);
 void checkProgramCompilation(u32 program);
 

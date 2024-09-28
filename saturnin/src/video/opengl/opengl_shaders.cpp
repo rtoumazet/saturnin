@@ -35,7 +35,7 @@ using namespace gl21ext;
 
 using core::tr;
 
-auto initializeShaders() -> ShadersList {
+auto initializeShaders() -> GraphicShaders {
     const auto readFile = [](const std::string& filename) {
         std::ifstream input_file("./shaders/" + filename, std::ios::in);
         if (!input_file) { Log::exception(Logger::opengl, tr("Could not load shader '{}' !"), filename); }
@@ -47,7 +47,7 @@ auto initializeShaders() -> ShadersList {
         return buffer.str();
     };
 
-    auto shaders_list = ShadersList{};
+    auto shaders_list = GraphicShaders{};
     shaders_list.try_emplace("main.vert", readFile("main.vert"));
     shaders_list.try_emplace("main.frag", readFile("main.frag"));
     return shaders_list;
@@ -59,7 +59,7 @@ void deleteShaders(const std::vector<u32>& shaders) {
     }
 }
 
-auto getShaderSource(const ShadersList& shaders_list, std::string_view name) -> const char* {
+auto getShaderSource(const GraphicShaders& shaders_list, std::string_view name) -> const char* {
     if (auto search = shaders_list.find(name); search != shaders_list.end()) {
         return search->second.c_str();
 
@@ -68,7 +68,7 @@ auto getShaderSource(const ShadersList& shaders_list, std::string_view name) -> 
     }
 }
 
-auto createVertexShader(const ShadersList& shaders_list, std::string_view shader_name) -> u32 {
+auto createVertexShader(const GraphicShaders& shaders_list, std::string_view shader_name) -> u32 {
     const auto vertex_shader = glCreateShader(GL_VERTEX_SHADER);
     auto       source        = getShaderSource(shaders_list, shader_name);
     glShaderSource(vertex_shader, 1, &source, nullptr);
@@ -78,7 +78,7 @@ auto createVertexShader(const ShadersList& shaders_list, std::string_view shader
     return vertex_shader;
 }
 
-auto createFragmentShader(const ShadersList& shaders_list, std::string_view shader_name) -> u32 {
+auto createFragmentShader(const GraphicShaders& shaders_list, std::string_view shader_name) -> u32 {
     const auto fragment_shader = glCreateShader(GL_FRAGMENT_SHADER);
     auto       source          = getShaderSource(shaders_list, shader_name);
     glShaderSource(fragment_shader, 1, &source, nullptr);

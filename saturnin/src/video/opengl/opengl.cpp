@@ -79,6 +79,8 @@ Opengl::Opengl(core::Config* config) : config_(config) {};
 
 Opengl::~Opengl() { shutdown(); }
 
+auto Opengl::getMutex(const MutexType& type) -> std::mutex& { return mutexes_[uti::toUnderlying(type)]; }
+
 void Opengl::initialize() {
     hostScreenResolution(ScreenResolution{video::minimum_window_width, video::minimum_window_height});
 
@@ -95,10 +97,10 @@ void Opengl::initialize() {
         = generateTexture(texture_array_width, texture_array_height, std::vector<u8>{});
 
     initializeFbo();
-    shaders_list_            = initializeShaders();
-    const auto main_vertex   = createVertexShader(shaders_list_, "main.vert");
-    const auto main_fragment = createFragmentShader(shaders_list_, "main.frag");
-    program_shaders_.try_emplace(ProgramShader::main, createProgramShader(main_vertex, main_fragment));
+    shaders_.graphics        = initializeShaders();
+    const auto main_vertex   = createVertexShader(shaders_.graphics, "main.vert");
+    const auto main_fragment = createFragmentShader(shaders_.graphics, "main.frag");
+    shaders_.programs.try_emplace(ProgramShader::main, createProgramShader(main_vertex, main_fragment));
 
     const auto shaders_to_delete = std::vector<u32>{main_vertex, main_fragment};
     deleteShaders(shaders_to_delete);
@@ -112,7 +114,7 @@ void Opengl::initialize() {
 }
 
 void Opengl::shutdown() const {
-    for (auto& [name, id] : program_shaders_) {
+    for (auto& [name, id] : shaders_.programs) {
         glDeleteProgram(id);
     }
 
@@ -189,8 +191,8 @@ void Opengl::displayFramebuffer(core::EmulatorContext& state) {
         // Step three : wait to send data to the render thread.
         if constexpr (render_type == RenderType::RenderType_drawElements) {
             if (global_parts_list_.empty()) {
-                std::unique_lock lk(parts_list_mutex_);
-                // std::unique_lock lk(mutexes_[uti::toUnderlying(MutexType::parts_list)]);
+                // std::unique_lock lk(parts_list_mutex_);
+                std::unique_lock lk(getMutex(MutexType::parts_list));
                 global_parts_list_ = std::move(global_parts_list);
                 data_condition_.wait(lk, [this]() { return global_parts_list_.empty(); });
             }
@@ -235,7 +237,7 @@ void Opengl::displayFramebuffer(core::EmulatorContext& state) {
         std::ranges::stable_sort(parts_list, [](const RenderPart& a, const RenderPart& b) { return a.priority < b.priority; });
         if constexpr (render_type == RenderType::RenderType_drawElements) {
             if (parts_list_.empty()) {
-                std::unique_lock lk(parts_list_mutex_);
+                std::unique_lock lk(getMutex(MutexType::parts_list));
                 // std::unique_lock lk(mutexes_[uti::toUnderlying(MutexType::parts_list)]);
                 parts_list_ = std::move(parts_list);
                 data_condition_.wait(lk, [this]() { return parts_list_.empty(); });

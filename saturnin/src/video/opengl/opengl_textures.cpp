@@ -43,7 +43,7 @@ void Opengl::addOrUpdateTexture(const size_t key, const VdpLayer layer) {
     // const auto& texture = Texture::getTexture(key);
 
     // if (texture) {
-    std::lock_guard lock(textures_link_mutex_);
+    std::lock_guard lock(getMutex(MutexType::textures_link));
     textures_link_[key].key                 = key;
     textures_link_[key].opengl_id           = 0;
     textures_link_[key].texture_array_index = 0;
@@ -159,9 +159,8 @@ void Opengl::packTextures(std::vector<OpenglTexture>& textures, const VdpLayer l
     glBindTexture(GL_TEXTURE_2D_ARRAY, 0);
 }
 
-auto Opengl::calculateTextureCoordinates(const ScreenPos& pos,
-                                         const Size&      size,
-                                         const u8         texture_array_index) const -> std::vector<TextureCoordinates> {
+auto Opengl::calculateTextureCoordinates(const ScreenPos& pos, const Size& size, const u8 texture_array_index) const
+    -> std::vector<TextureCoordinates> {
     // Calculating the texture coordinates in the atlas
     // (x1,y1)     (x2,y1)
     //        .---.
@@ -219,14 +218,14 @@ auto Opengl::readVertexes(const PartsList& parts) -> std::vector<Vertex> {
 }
 
 auto Opengl::getOpenglTexture(const size_t key) -> std::optional<OpenglTexture> {
-    std::lock_guard lock(textures_link_mutex_);
+    std::lock_guard lock(getMutex(MutexType::textures_link));
     const auto      it = textures_link_.find(key);
     return (it == textures_link_.end()) ? std::nullopt : std::optional<OpenglTexture>(it->second);
 }
 
 auto Opengl::getOpenglTextureDetails(const size_t key) -> std::string {
     auto            details = std::string{};
-    std::lock_guard lock(textures_link_mutex_);
+    std::lock_guard lock(getMutex(MutexType::textures_link));
     if (const auto it = textures_link_.find(key); it != textures_link_.end()) {
         details += util::format("Key: 0x{:x}\n", it->second.key);
         details += util::format("Position: {},{}\n", it->second.pos.x, it->second.pos.y);
