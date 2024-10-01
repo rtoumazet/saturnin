@@ -142,7 +142,7 @@ void Opengl::displayFramebuffer(core::EmulatorContext& state) {
     // -
 
     if constexpr (uses_fbo) {
-        GlobalPartsList global_parts_list;
+        MapOfPartsList global_parts_list;
 
         // Step one : get displayable layers
         using enum ScrollScreen;
@@ -190,11 +190,10 @@ void Opengl::displayFramebuffer(core::EmulatorContext& state) {
 
         // Step three : wait to send data to the render thread.
         if constexpr (render_type == RenderType::RenderType_drawElements) {
-            if (global_parts_list_.empty()) {
-                // std::unique_lock lk(parts_list_mutex_);
+            if (parts_list_global_.empty()) {
                 std::unique_lock lk(getMutex(MutexType::parts_list));
-                global_parts_list_ = std::move(global_parts_list);
-                data_condition_.wait(lk, [this]() { return global_parts_list_.empty(); });
+                parts_list_global_ = std::move(global_parts_list);
+                data_condition_.wait(lk, [this]() { return parts_list_global_.empty(); });
             }
         }
     } else {
@@ -238,7 +237,6 @@ void Opengl::displayFramebuffer(core::EmulatorContext& state) {
         if constexpr (render_type == RenderType::RenderType_drawElements) {
             if (parts_list_.empty()) {
                 std::unique_lock lk(getMutex(MutexType::parts_list));
-                // std::unique_lock lk(mutexes_[uti::toUnderlying(MutexType::parts_list)]);
                 parts_list_ = std::move(parts_list);
                 data_condition_.wait(lk, [this]() { return parts_list_.empty(); });
             }
@@ -366,7 +364,7 @@ auto Opengl::getNextAvailableTextureArrayIndex() const -> u8 {
 }
 
 auto Opengl::isSaturnResolutionSet() const -> bool {
-    return (saturn_screen_resolution_.width == 0 || saturn_screen_resolution_.height == 0) ? false : true;
+    return (screen_resolutions_.saturn.width == 0 || screen_resolutions_.saturn.height == 0) ? false : true;
 }
 
 auto Opengl::generateTextureFromTextureArrayLayer(const GuiTextureType dst_texture_type, const u8 layer) -> u32 {
@@ -683,7 +681,7 @@ auto runOpengl(core::EmulatorContext& state) -> s32 {
     const bool is_legacy_opengl = state.config()->readValue(core::AccessKeys::cfg_rendering_legacy_opengl);
 
     // Setup window
-    glfwSetErrorCallback(error_callback);
+    glfwSetErrorCallback(errorCallback);
     if (glfwInit() == GLFW_FALSE) { return EXIT_FAILURE; }
 
     // Decide GL+GLSL versions

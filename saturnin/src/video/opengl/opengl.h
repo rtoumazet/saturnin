@@ -122,9 +122,16 @@ using GraphicShaders
     = std::unordered_map<std::string, std::string, string_hash, std::equal_to<>>; ///< Shader name + shader content
 using ProgramShaders = std::unordered_map<ProgramShader, u32>;                    ///< Program shader name + its OpenGL id.
 
+// Holds the various shaders used in the program
 struct Shaders {
     GraphicShaders graphics;
     ProgramShaders programs;
+};
+
+// Holds screen resolutions used in the program
+struct ScreenResolutions {
+    ScreenResolution saturn;
+    ScreenResolution host;
 };
 
 struct OpenglTexture {
@@ -192,13 +199,12 @@ struct RenderPart {
         texture_key(p.common_vdp_data_.texture_key) {};
 };
 
-using PartsList       = std::vector<RenderPart>;
-using GlobalPartsList = std::map<FboKey, PartsList>; // Parts list by priority + layer
+using PartsList      = std::vector<RenderPart>;
+using MapOfPartsList = std::map<FboKey, PartsList>; // Parts list by priority + layer
 
 using LayerToTextures            = std::unordered_map<VdpLayer, std::vector<OpenglTexture>>;
 using LayerToTextureArrayIndexes = std::unordered_map<VdpLayer, std::vector<u8>>;
 using LayerToCacheReloadState    = std::unordered_map<VdpLayer, bool>;
-using AddressToPlaneTexture      = std::unordered_map<u32, PlaneTexture>;
 
 using TexturesLink = std::unordered_map<size_t, OpenglTexture>;
 
@@ -235,10 +241,10 @@ class Opengl {
     };
     [[nodiscard]] auto fps() const { return fps_; };
     void               fps(std::string_view fps) { fps_ = fps; };
-    void               saturnScreenResolution(const ScreenResolution& res) { saturn_screen_resolution_ = res; };
-    auto               saturnScreenResolution() const -> ScreenResolution { return saturn_screen_resolution_; };
-    void               hostScreenResolution(const ScreenResolution& res) { host_screen_resolution_ = res; };
-    auto               hostScreenResolution() const -> ScreenResolution { return host_screen_resolution_; };
+    void               saturnScreenResolution(const ScreenResolution& res) { screen_resolutions_.saturn = res; };
+    auto               saturnScreenResolution() const -> ScreenResolution { return screen_resolutions_.saturn; };
+    void               hostScreenResolution(const ScreenResolution& res) { screen_resolutions_.host = res; };
+    auto               hostScreenResolution() const -> ScreenResolution { return screen_resolutions_.host; };
     void               partToHighlight(const Vdp1Part& part) { part_to_highlight_ = part; };
     auto               partToHighlight() const -> Vdp1Part { return part_to_highlight_; };
 
@@ -825,7 +831,7 @@ class Opengl {
 
     auto getMutex(const MutexType& type) -> std::mutex&;
 
-    core::Config* config_; ///< Configuration object.
+    core::Config* config_; // Configuration object.
 
     FboTypeToId           fbo_type_to_id_;            ///< The framebuffer objects used in the app.
     u32                   fbo_texture_array_id_;      ///< Identifier for the FBO texture array.
@@ -838,133 +844,59 @@ class Opengl {
     FboTexturePool       fbo_texture_pool_;          ///< Pool of textures to be used by the FBO.
     FboTexturePoolStatus fbo_texture_pool_status_;   ///< State of each texture in the pool.
 
-    ScreenResolution saturn_screen_resolution_{}; ///< Saturn screen resolution.
-    ScreenResolution host_screen_resolution_{};   ///< Host screen resolution.
+    ScreenResolutions screen_resolutions_; // Host and Saturn screen resolution
 
-    PartsList              parts_list_;        // Will have to be moved to the platform agnostic renderer.
-    GlobalPartsList        global_parts_list_; // Will have to be moved to the platform agnostic renderer.
-    Vdp1Part               part_to_highlight_; ///< Part that will be highlighted during debug.
-    std::vector<DrawRange> draw_range_;
+    // Following parts data will have to be moved to the platform agnostic renderer
+    PartsList      parts_list_;        // Used when use_fbo is false, parts are
+    MapOfPartsList parts_list_global_; // Used when use_fbo is true,
+    PartsList      parts_list_debug_;  // List of parts used to generate textures for debugging.
+    Vdp1Part       part_to_highlight_; // Part that will be highlighted during debug.
 
     u32                        texture_array_id_;                 ///< Identifier for the texture array.
     TexturesLink               textures_link_;                    ///< Link between the Texture key and the OpenglTexture.
     u32                        texture_array_debug_layer_id_{};   ///< Identifier for the texture array debug layer.
     LayerToTextureArrayIndexes layer_to_texture_array_indexes_{}; ///< Link between layers and texture array indexes.
     LayerToCacheReloadState    layer_to_cache_reload_state_{};    ///< Stores if a layer needs its cache to be reloaded .
-    AddressToPlaneTexture      address_to_plane_textures_{};      ///< Link between an address and its plane.
 
-    // std::mutex                parts_list_mutex_;     ///< Mutex protecting parts_list_.
-    // std::mutex                textures_link_mutex_;  ///< Mutex protecting textures_link_.
-    // std::mutex                texture_delete_mutex_; ///< Mutex protecting textures_to_delete_.
-    std::array<std::mutex, 3> mutexes_{std::mutex(), std::mutex(), std::mutex()};
+    std::array<std::mutex, 3> mutexes_{std::mutex(), std::mutex(), std::mutex()}; // Mutexes used to protect various shared data
 
-    std::condition_variable data_condition_; ///< Condition variable to synchronize between emulation and UI thread.
-
-    PartsList parts_list_debug_; ///< List of parts used to generate textures for debugging
-                                 // Will have to be moved to the platform agnostic renderer.
+    std::condition_variable data_condition_; // Condition variable to synchronize between emulation and UI thread.
 
     Shaders shaders_; // Shaders storage
 
-    std::string fps_; ///< The frames per second.
+    std::string fps_; // Calculated frames per second.
 };
 
 // Queries if the current video card is capable of rendering modern opengl (ie version 3.3+).
 auto isModernOpenglCapable() -> bool;
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \fn void windowCloseCallback(GLFWwindow* window);
-///
-/// \brief  Callback, called when the rendering window closes.
-///
-/// \author Runik
-/// \date   13/10/2018
-///
-/// \param [in,out] window  If non-null, a pointer to the GLFW window.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
+// Called when the rendering window closes.
 void windowCloseCallback(GLFWwindow* window);
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \fn void windowSizeCallback(GLFWwindow* window, int width, int height);
-///
-/// \brief  Callback, called when the window is resized.
-///
-/// \author Runik
-/// \date   08/02/2021
-///
-/// \param [in,out] window  If non-null, a pointer to the GLFW window.
-/// \param          width   The width.
-/// \param          height  The height.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
+// Called when the window is resized, new size is passed as parameters.
 void windowSizeCallback(GLFWwindow* window, int width, int height);
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \fn auto runOpengl(EmulatorContext& state) -> s32;
-///
-/// \brief  Executes OpenGL code.
-///
-/// \author Runik
-/// \date   03/04/2018
-///
-/// \param [in,out] state   A reference to the configuration object.
-///
-/// \returns    An int32_t.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
+// OpenGL main loop.
 auto runOpengl(core::EmulatorContext& state) -> s32;
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \fn void updateMainWindowSizeAndRatio(GLFWwindow* window, u32 width, u32 height);
-///
-/// \brief  Updates the main window size and ratio aspect.
-///
-/// \author Runik
-/// \date   24/01/2021
-///
-/// \param [in,out] window  If non-null, a pointer to the GLFW window.
-/// \param          width   The new window width.
-/// \param          height  The new window height.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
+// Updates the main window size and ratio aspect.
 void updateMainWindowSizeAndRatio(GLFWwindow* window, u32 width, u32 height);
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \fn	auto createMainWindow(u32 width, u32 height, const std::string& title) -> GLFWwindow*;
-///
-/// \brief	Creates the main window.
-///
-/// \author	Runik
-/// \date	25/01/2021
-///
-/// \param 	width 	The window's width.
-/// \param 	height	The window's height.
-/// \param 	title 	The window's title.
-///
-/// \returns	Null if it fails, else the new main window.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
+// Creates the main window, returns null if it fails, or the new main window.
 auto createMainWindow(u32 width, u32 height, const std::string& title) -> GLFWwindow*;
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \fn auto loadPngImage(const char* filename) -> GLFWimage;
-///
-/// \brief  Loads PNG image
-///
-/// \author Runik
-/// \date   08/02/2021
-///
-/// \param  filename    Filename of the file.
-///
-/// \returns    The PNG image.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
+// Functions to load PNG images.
 auto loadPngImage(const char* filename) -> GLFWimage;
-
 auto loadPngImage(const u8* data, const size_t size) -> GLFWimage;
 
+//---------------
+// Error handling
+//---------------
+
+// Checks if an OpenGL error was raised
 void checkGlError();
 
+// Formats an OpenGL message and sends it to the log.
 void glDebugOutput(gl::GLenum                   source,
                    gl::GLenum                   type,
                    unsigned int                 id,
@@ -974,7 +906,7 @@ void glDebugOutput(gl::GLenum                   source,
                    [[maybe_unused]] const void* userParam);
 
 // Callback for OpenGL errors
-void error_callback(int error, const char* description);
+void errorCallback(int error, const char* description);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \fn	auto generateVertexIndicesAndDrawRanges(const PartsList& parts) -> std::tuple<std::vector<u32>,
@@ -992,9 +924,9 @@ void error_callback(int error, const char* description);
 
 auto generateVertexIndicesAndDrawRanges(const PartsList& parts) -> std::tuple<std::vector<u32>, std::vector<DrawRange>>;
 
-/////////////////////
+//------------------
 // Shaders functions
-/////////////////////
+//------------------
 
 auto initializeShaders() -> GraphicShaders;
 void deleteShaders(const std::vector<u32>& shaders);

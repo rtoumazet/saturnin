@@ -219,11 +219,11 @@ void Opengl::renderFboTexture(const u32 texture_id) {
 
 void Opengl::render() {
     if constexpr (uses_fbo) {
-        GlobalPartsList global_parts_list;
+        MapOfPartsList global_parts_list;
 
         const auto getPartsFromThread = [&]() {
             std::lock_guard lock(getMutex(MutexType::parts_list));
-            if (!global_parts_list_.empty()) { global_parts_list = std::move(global_parts_list_); }
+            if (!parts_list_global_.empty()) { global_parts_list = std::move(parts_list_global_); }
         };
         getPartsFromThread();
 
@@ -247,7 +247,7 @@ void Opengl::render() {
 
         const auto notifyMainThread = [this, &global_parts_list]() {
             std::lock_guard lk(getMutex(MutexType::parts_list));
-            GlobalPartsList().swap(global_parts_list);
+            MapOfPartsList().swap(global_parts_list);
             data_condition_.notify_one();
         };
         notifyMainThread();
@@ -441,7 +441,7 @@ void Opengl::renderSelector() {
 auto Opengl::isThereSomethingToRender() const -> bool {
     if constexpr (render_type == RenderType::RenderType_drawElements) {
         if constexpr (uses_fbo) {
-            return !global_parts_list_.empty();
+            return !parts_list_global_.empty();
         } else {
             return !parts_list_.empty();
         }

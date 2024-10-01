@@ -196,7 +196,7 @@ void windowSizeCallback(GLFWwindow* window, const int width, const int height) {
     state->opengl()->onWindowResize(static_cast<u16>(width), static_cast<u16>(height));
 }
 
-void error_callback(int error, const char* description) { fprintf(stderr, "Error %d: %s\n", error, description); }
+void errorCallback(int error, const char* description) { fprintf(stderr, "Error %d: %s\n", error, description); }
 
 void Opengl::onWindowResize(const u16 new_width, const u16 new_height) { hostScreenResolution({new_width, new_height}); }
 
