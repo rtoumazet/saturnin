@@ -151,15 +151,7 @@ struct PlaneTexture {
     std::vector<TextureCoordinates> coords;              ///< The coordinates of the texture.
 };
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \struct	DrawRange
-///
-/// \brief	Used to draw different primitives with calls to glDrawRangeElements.
-///
-/// \author	Runik
-/// \date	27/12/2023
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
+// Used to draw different primitives with calls to glDrawRangeElements.
 struct DrawRange {
     u32        vertex_array_start;  ///< Start position in vertex array.
     u32        vertex_array_end;    ///< End position in vertex array.
@@ -170,15 +162,7 @@ struct DrawRange {
     gl::GLenum primitive;           ///< The primitive used to draw the indices in the range.
 };
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \struct	RenderPart
-///
-/// \brief	A render part to be used in the various renderers.
-///
-/// \author	Runik
-/// \date	06/01/2024
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
+// Rendering part to be used in the various renderers.
 struct RenderPart {
     std::vector<Vertex> vertexes;     ///< The vertexes used for rendering.
     ColorOffset         color_offset; ///< Color offset.
