@@ -248,140 +248,40 @@ class Opengl {
     // Actions executed on window resize.
     void onWindowResize(const u16 new_width, const u16 new_height);
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn static auto Opengl::generateTexture(u32 width, u32 height, const std::vector<u8>& data) -> u32;
-    ///
-    /// \brief  Generates a texture from a vector.
-    ///
-    /// \author Runik
-    /// \date   22/04/2020
-    ///
-    /// \param  width   Width of the texture.
-    /// \param  height  Height of the texture.
-    /// \param  data    Texture data.
-    ///
-    /// \returns    The OpenGL id of the generated texture.
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-
+    // Generates a texture from a vector of raw data. Returns the OpenGL id of the generated texture.
     [[nodiscard]] static auto generateTexture(u32 width, u32 height, const std::vector<u8>& data) -> u32;
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn static void Opengl::deleteTexture(const u32 texture);
-    ///
-    /// \brief  Deletes the texture described by key on the GPU.
-    ///
-    /// \author Runik
-    /// \date   14/04/2021
-    ///
-    /// \param  texture The OpenGL texture identifier.
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    // Deletes the texture on the GPU using its OpenGL texture id.
+    static void deleteTexture(const u32 texture_id);
 
-    static void deleteTexture(const u32 texture);
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn auto Opengl::areFbosInitialized() const ->bool
-    ///
-    /// \brief  Are framebuffer objects initialized.
-    ///
-    /// \author Runik
-    /// \date   26/04/2021
-    ///
-    /// \returns    True if framebuffer objects are initialized.
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-
+    // Checks if the Framebuffer Objects (FBO) are initialized.
     auto areFbosInitialized() const -> bool { return fbo_type_to_id_.at(FboType::general) != 0; }
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn void Opengl::render();
-    ///
-    /// \brief  Renders data if available
-    ///
-    /// \author Runik
-    /// \date   21/05/2021
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-
+    // Renders data if available.
     void render();
+
+    // Renders test data if available.
     void renderTest();
+
+    // Selects the renderer to use, depending on conditions
     void renderSelector();
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn auto saturnin::video::Opengl::isThereSomethingToRender() const -> bool;
-    ///
-    /// \brief  Is there something to render
-    ///
-    /// \author Runik
-    /// \date   06/10/2021
-    ///
-    /// \returns   True if there is something to render.
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-
+    // Checks if there's something to render.
     auto isThereSomethingToRender() const -> bool;
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn auto Opengl::getRenderedBufferTextureId(const GuiTextureType type) const -> u32;
-    ///
-    /// \brief  Gets the texture ID of the buffer currently rendered to.
-    ///
-    /// \author Runik
-    /// \date   06/10/2021
-    ///
-    /// \param  type The texture type to get.
-    ///
-    /// \returns    The rendered buffer texture identifier.
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-
+    // Gets the texture ID of the buffer currently being rendered to.
     auto getRenderedBufferTextureId(const GuiTextureType type) -> u32;
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn void Opengl::renderVdp1DebugOverlay();
-    ///
-    /// \brief  Renders the vertexes of the vdp1 part currently saved for debugging.
-    ///
-    /// \author Runik
-    /// \date   16/06/2021
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-
+    // Renders the vertexes of the vdp1 part currently saved to a specific overlay layer. Useful for debugging.
     void renderVdp1DebugOverlay();
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn void Opengl::renderVdp2DebugLayer(core::EmulatorContext& state);
-    ///
-    /// \brief  Renders the vertexes of the vdp2 layer currently selected for display in the debug
-    ///         window.
-    ///
-    /// \author Runik
-    /// \date   16/06/2021
-    ///
-    /// \param [in,out] state   The emulator state.
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-
+    // Renders the vertexes of the vdp2 layer currently selected for display in the debug window.
     void renderVdp2DebugLayer(core::EmulatorContext& state);
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn void saturnin::video::Opengl::addOrUpdateTexture(const size_t key, const VdpLayer layer);
-    ///
-    /// \brief  Adds a texture to be created or updated on OpenGL.
-    ///
-    /// \author Runik
-    /// \date   05/11/2021
-    ///
-    /// \param  key The texture key.
-    /// \param  layer The VDP layer.
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-
+    // Texture key is added so the linked texture is created or marked for recreation. Layer is used for cache management.
     void addOrUpdateTexture(const size_t key, const VdpLayer layer);
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn void saturnin::video::Opengl::removeTextureLink(const size_t key);
-    ///
-    /// \brief  Removes the link between the texture and the OpenGL id.
-    ///
-    /// \author Runik
-    /// \date   03/06/2022
-    ///
-    /// \param  key The texture key.
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-
+    // Removes the link between the Saturn texture and the OpenGL texture id.
     void removeTextureLink(const size_t key);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////

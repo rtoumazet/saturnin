@@ -285,7 +285,7 @@ void Opengl::generateSubTexture(const size_t key) {
 }
 
 // static
-void Opengl::deleteTexture(const u32 texture) { glDeleteTextures(1, &texture); }
+void Opengl::deleteTexture(const u32 texture_id) { glDeleteTextures(1, &texture_id); }
 
 auto Opengl::getTextureId(const TextureArrayType type) -> u32 {
     // There are 2 texture arrays used in the program :
