@@ -111,6 +111,8 @@ using FboKeyToFbo    = std::map<FboKey, u8>; // Link between a priority to displ
 using FboTexturePool = std::array<u32, max_fbo_texture>; // Pool of textures ids to be used for rendering by priority.
 using FboTexturePoolStatus = std::array<FboTextureStatus, max_fbo_texture>; // State of the textures in the pool.
 
+constexpr auto mixed_parts_key = FboKey{-1, VdpLayer::undefined};
+
 struct string_hash {
     using is_transparent = void;
     [[nodiscard]] size_t operator()(const char* txt) const { return std::hash<std::string_view>{}(txt); }
@@ -731,7 +733,6 @@ class Opengl {
     ScreenResolutions screen_resolutions_; // Host and Saturn screen resolution
 
     // Following parts data will have to be moved to the platform agnostic renderer
-    PartsList      parts_list_;        // Used when use_fbo is false, parts are
     MapOfPartsList parts_list_global_; // Used when use_fbo is true,
     PartsList      parts_list_debug_;  // List of parts used to generate textures for debugging.
     Vdp1Part       part_to_highlight_; // Part that will be highlighted during debug.

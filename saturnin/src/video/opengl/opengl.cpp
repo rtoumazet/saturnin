@@ -235,10 +235,10 @@ void Opengl::displayFramebuffer(core::EmulatorContext& state) {
         addVdp1PartsToList();
         std::ranges::stable_sort(parts_list, [](const RenderPart& a, const RenderPart& b) { return a.priority < b.priority; });
         if constexpr (render_type == RenderType::RenderType_drawElements) {
-            if (parts_list_.empty()) {
+            if (parts_list_global_[mixed_parts_key].empty()) {
                 std::unique_lock lk(getMutex(MutexType::parts_list));
-                parts_list_ = std::move(parts_list);
-                data_condition_.wait(lk, [this]() { return parts_list_.empty(); });
+                parts_list_global_[mixed_parts_key] = std::move(parts_list);
+                data_condition_.wait(lk, [this]() { return parts_list_global_[mixed_parts_key].empty(); });
             }
         }
     }

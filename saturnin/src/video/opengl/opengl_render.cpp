@@ -259,7 +259,7 @@ void Opengl::render() {
 
         const auto getParts = [this, &parts_list]() {
             std::lock_guard lock(getMutex(MutexType::parts_list));
-            if (!parts_list_.empty()) { parts_list = std::move(parts_list_); }
+            if (!parts_list_global_[mixed_parts_key].empty()) { parts_list = std::move(parts_list_global_[mixed_parts_key]); }
         };
         getParts();
 
@@ -443,7 +443,8 @@ auto Opengl::isThereSomethingToRender() const -> bool {
         if constexpr (uses_fbo) {
             return !parts_list_global_.empty();
         } else {
-            return !parts_list_.empty();
+            if (parts_list_global_.contains(mixed_parts_key)) { return !parts_list_global_.at(mixed_parts_key).empty(); }
+            return false;
         }
     }
     if constexpr (render_type == RenderType::RenderType_drawTest) { return true; }
