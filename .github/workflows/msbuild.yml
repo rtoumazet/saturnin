@@ -27,8 +27,9 @@ jobs:
     runs-on: windows-latest
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
+        ref: vdp2-cache
         fetch-depth: 0 # Shallow clones should be disabled for a better relevancy of analysis    
 
     - name: Add MSBuild to PATH
