@@ -223,7 +223,7 @@ void Opengl::render() {
 
         const auto getPartsFromThread = [&]() {
             std::lock_guard lock(getMutex(MutexType::parts_list));
-            if (!parts_list_global_.empty()) { global_parts_list = std::move(parts_list_global_); }
+            if (!parts_lists_.empty()) { global_parts_list = std::move(parts_lists_); }
         };
         getPartsFromThread();
 
@@ -259,7 +259,7 @@ void Opengl::render() {
 
         const auto getParts = [this, &parts_list]() {
             std::lock_guard lock(getMutex(MutexType::parts_list));
-            if (!parts_list_global_[mixed_parts_key].empty()) { parts_list = std::move(parts_list_global_[mixed_parts_key]); }
+            if (!parts_lists_[mixed_parts_key].empty()) { parts_list = std::move(parts_lists_[mixed_parts_key]); }
         };
         getParts();
 
@@ -441,9 +441,9 @@ void Opengl::renderSelector() {
 auto Opengl::isThereSomethingToRender() const -> bool {
     if constexpr (render_type == RenderType::RenderType_drawElements) {
         if constexpr (uses_fbo) {
-            return !parts_list_global_.empty();
+            return !parts_lists_.empty();
         } else {
-            if (parts_list_global_.contains(mixed_parts_key)) { return !parts_list_global_.at(mixed_parts_key).empty(); }
+            if (parts_lists_.contains(mixed_parts_key)) { return !parts_lists_.at(mixed_parts_key).empty(); }
             return false;
         }
     }

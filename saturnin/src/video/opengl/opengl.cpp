@@ -190,10 +190,10 @@ void Opengl::displayFramebuffer(core::EmulatorContext& state) {
 
         // Step three : wait to send data to the render thread.
         if constexpr (render_type == RenderType::RenderType_drawElements) {
-            if (parts_list_global_.empty()) {
+            if (parts_lists_.empty()) {
                 std::unique_lock lk(getMutex(MutexType::parts_list));
-                parts_list_global_ = std::move(global_parts_list);
-                data_condition_.wait(lk, [this]() { return parts_list_global_.empty(); });
+                parts_lists_ = std::move(global_parts_list);
+                data_condition_.wait(lk, [this]() { return parts_lists_.empty(); });
             }
         }
     } else {
@@ -235,10 +235,10 @@ void Opengl::displayFramebuffer(core::EmulatorContext& state) {
         addVdp1PartsToList();
         std::ranges::stable_sort(parts_list, [](const RenderPart& a, const RenderPart& b) { return a.priority < b.priority; });
         if constexpr (render_type == RenderType::RenderType_drawElements) {
-            if (parts_list_global_[mixed_parts_key].empty()) {
+            if (parts_lists_[mixed_parts_key].empty()) {
                 std::unique_lock lk(getMutex(MutexType::parts_list));
-                parts_list_global_[mixed_parts_key] = std::move(parts_list);
-                data_condition_.wait(lk, [this]() { return parts_list_global_[mixed_parts_key].empty(); });
+                parts_lists_[mixed_parts_key] = std::move(parts_list);
+                data_condition_.wait(lk, [this]() { return parts_lists_[mixed_parts_key].empty(); });
             }
         }
     }
