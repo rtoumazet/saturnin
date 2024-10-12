@@ -119,9 +119,10 @@ void Opengl::shutdown() const {
     }
 
     gl33core::glBindFramebuffer(GL_FRAMEBUFFER_EXT, 0);
-    glDeleteFramebuffers(1, &fbo_type_to_id_.at(FboType::general));
-    glDeleteFramebuffers(1, &fbo_type_to_id_.at(FboType::for_gui));
-    glDeleteFramebuffers(1, &fbo_type_to_id_.at(FboType::vdp2_debug));
+    using enum FboType;
+    glDeleteFramebuffers(1, &fbo_type_to_id_.at(general));
+    glDeleteFramebuffers(1, &fbo_type_to_id_.at(for_gui));
+    glDeleteFramebuffers(1, &fbo_type_to_id_.at(vdp2_debug));
 
     for (size_t i = 0; i < max_fbo_texture; ++i) {
         deleteTexture(fbo_texture_pool_[i]);
@@ -133,113 +134,119 @@ void Opengl::shutdown() const {
 }
 
 void Opengl::displayFramebuffer(core::EmulatorContext& state) {
-    // :TODO:
+    if constexpr (uses_fbo) {
+        displayFramebufferByScreenPriority(state);
+    } else {
+        displayFramebufferByParts(state);
+    }
+}
+
+void Opengl::displayFramebufferByScreenPriority(core::EmulatorContext& state) {
     // - Render each layer + priority to one specific FBO
     // - Put render() content in its own function, and name it renderToAvailableFbo()
     // - Render() itself must take care of rendering the different FBOs in order
     // - Find which FBO to use in the FBO priority list
     // - displayFramebuffer() must generate one PartList by layer + priority to display to the FBO
-    // -
 
-    if constexpr (uses_fbo) {
-        MapOfPartsList global_parts_list;
+    MapOfPartsList global_parts_list;
 
-        // Step one : get displayable layers
-        using enum ScrollScreen;
-        std::vector<ScrollScreen> screens_to_display;
-        if (!state.vdp2()->isLayerDisabled(nbg3)) screens_to_display.push_back(nbg3);
-        if (!state.vdp2()->isLayerDisabled(nbg2)) screens_to_display.push_back(nbg2);
-        if (!state.vdp2()->isLayerDisabled(nbg1)) screens_to_display.push_back(nbg1);
-        if (!state.vdp2()->isLayerDisabled(nbg0)) screens_to_display.push_back(nbg0);
-        if (!state.vdp2()->isLayerDisabled(rbg1)) screens_to_display.push_back(rbg1);
-        if (!state.vdp2()->isLayerDisabled(rbg0)) screens_to_display.push_back(rbg0);
+    // Step one : get displayable layers
+    using enum ScrollScreen;
+    std::vector<ScrollScreen> screens_to_display;
+    if (!state.vdp2()->isLayerDisabled(nbg3)) screens_to_display.push_back(nbg3);
+    if (!state.vdp2()->isLayerDisabled(nbg2)) screens_to_display.push_back(nbg2);
+    if (!state.vdp2()->isLayerDisabled(nbg1)) screens_to_display.push_back(nbg1);
+    if (!state.vdp2()->isLayerDisabled(nbg0)) screens_to_display.push_back(nbg0);
+    if (!state.vdp2()->isLayerDisabled(rbg1)) screens_to_display.push_back(rbg1);
+    if (!state.vdp2()->isLayerDisabled(rbg0)) screens_to_display.push_back(rbg0);
 
-        // Step two : populate parts list for each priority + layer couple
-        const auto addVdp1PartsToList = [&](const u8 priority) {
-            auto        local_parts = PartsList();
-            const auto& vdp1_parts  = state.vdp1()->vdp1Parts(priority);
-            if (!vdp1_parts.empty()) {
-                local_parts.reserve(vdp1_parts.size());
-                for (const auto& p : vdp1_parts) {
-                    local_parts.emplace_back(p);
-                }
-                global_parts_list[{priority, VdpLayer::sprite}] = std::move(local_parts);
-                // Sprite layer is recalculated every time, there's no cache for now.
-                setFboTextureStatus(priority, VdpLayer::sprite, FboTextureStatus::to_clear);
+    // Step two : populate parts list for each priority + layer couple
+    const auto addVdp1PartsToList = [&](const u8 priority) {
+        auto        local_parts = PartsList();
+        const auto& vdp1_parts  = state.vdp1()->vdp1Parts(priority);
+        if (!vdp1_parts.empty()) {
+            local_parts.reserve(vdp1_parts.size());
+            for (const auto& p : vdp1_parts) {
+                local_parts.emplace_back(p);
             }
-        };
+            global_parts_list[{priority, VdpLayer::sprite}] = std::move(local_parts);
+            // Sprite layer is recalculated every time, there's no cache for now.
+            setFboTextureStatus(priority, VdpLayer::sprite, FboTextureStatus::to_clear);
+        }
+    };
 
-        const auto addVdp2PartsToList = [&](const ScrollScreen screen, const u32 priority) {
-            auto        local_parts = PartsList();
-            const auto& vdp2_parts  = state.vdp2()->vdp2Parts(screen, priority);
-            if (!vdp2_parts.empty()) {
-                local_parts.reserve(vdp2_parts.size());
-                for (const auto& p : vdp2_parts) {
-                    local_parts.emplace_back(p);
-                }
-                global_parts_list[{priority, screen_to_layer.at(screen)}] = std::move(local_parts);
+    const auto addVdp2PartsToList = [&](const ScrollScreen screen, const u32 priority) {
+        auto        local_parts = PartsList();
+        const auto& vdp2_parts  = state.vdp2()->vdp2Parts(screen, priority);
+        if (!vdp2_parts.empty()) {
+            local_parts.reserve(vdp2_parts.size());
+            for (const auto& p : vdp2_parts) {
+                local_parts.emplace_back(p);
             }
-        };
+            global_parts_list[{priority, screen_to_layer.at(screen)}] = std::move(local_parts);
+        }
+    };
 
-        for (u8 priority = 7; priority > 0; --priority) {
-            for (const auto& screen : screens_to_display) {
-                addVdp2PartsToList(screen, priority);
+    for (u8 priority = 7; priority > 0; --priority) {
+        for (const auto& screen : screens_to_display) {
+            addVdp2PartsToList(screen, priority);
+        }
+        addVdp1PartsToList(priority);
+    }
+
+    // Step three : wait to send data to the render thread.
+    if constexpr (render_type == RenderType::RenderType_drawElements) {
+        if (parts_lists_.empty()) {
+            std::unique_lock lk(getMutex(MutexType::parts_list));
+            parts_lists_ = std::move(global_parts_list);
+            data_condition_.wait(lk, [this]() { return parts_lists_.empty(); });
+        }
+    }
+}
+
+void Opengl::displayFramebufferByParts(core::EmulatorContext& state) {
+    auto parts_list = PartsList{};
+
+    const auto addVdp2PartsToList = [&](const ScrollScreen s) {
+        if (const auto& vdp2_planes = state.vdp2()->vdp2Parts(s, VdpType::vdp2_cell); !vdp2_planes.empty()) {
+            parts_list.reserve(parts_list.size() + vdp2_planes.size());
+            for (const auto& p : vdp2_planes) {
+                parts_list.emplace_back(p);
             }
-            addVdp1PartsToList(priority);
         }
 
-        // Step three : wait to send data to the render thread.
-        if constexpr (render_type == RenderType::RenderType_drawElements) {
-            if (parts_lists_.empty()) {
-                std::unique_lock lk(getMutex(MutexType::parts_list));
-                parts_lists_ = std::move(global_parts_list);
-                data_condition_.wait(lk, [this]() { return parts_lists_.empty(); });
+        const auto& vdp2_bitmaps = state.vdp2()->vdp2Parts(s, VdpType::vdp2_bitmap);
+        if (!vdp2_bitmaps.empty()) {
+            parts_list.reserve(parts_list.size() + vdp2_bitmaps.size());
+            for (const auto& p : vdp2_bitmaps) {
+                parts_list.emplace_back(p);
             }
         }
-    } else {
-        auto parts_list = PartsList{};
+    };
 
-        const auto addVdp2PartsToList = [&](const ScrollScreen s) {
-            if (const auto& vdp2_planes = state.vdp2()->vdp2Parts(s, VdpType::vdp2_cell); !vdp2_planes.empty()) {
-                parts_list.reserve(parts_list.size() + vdp2_planes.size());
-                for (const auto& p : vdp2_planes) {
-                    parts_list.emplace_back(p);
-                }
+    const auto addVdp1PartsToList = [&]() {
+        const auto& vdp1_parts = state.vdp1()->vdp1Parts();
+        if (!vdp1_parts.empty()) {
+            parts_list.reserve(parts_list.size() + vdp1_parts.size());
+            for (const auto& p : vdp1_parts) {
+                parts_list.emplace_back(p);
             }
+        }
+    };
 
-            const auto& vdp2_bitmaps = state.vdp2()->vdp2Parts(s, VdpType::vdp2_bitmap);
-            if (!vdp2_bitmaps.empty()) {
-                parts_list.reserve(parts_list.size() + vdp2_bitmaps.size());
-                for (const auto& p : vdp2_bitmaps) {
-                    parts_list.emplace_back(p);
-                }
-            }
-        };
-
-        const auto addVdp1PartsToList = [&]() {
-            const auto& vdp1_parts = state.vdp1()->vdp1Parts();
-            if (!vdp1_parts.empty()) {
-                parts_list.reserve(parts_list.size() + vdp1_parts.size());
-                for (const auto& p : vdp1_parts) {
-                    parts_list.emplace_back(p);
-                }
-            }
-        };
-
-        if (!state.vdp2()->isLayerDisabled(ScrollScreen::nbg3)) { addVdp2PartsToList(ScrollScreen::nbg3); }
-        if (!state.vdp2()->isLayerDisabled(ScrollScreen::nbg2)) { addVdp2PartsToList(ScrollScreen::nbg2); }
-        if (!state.vdp2()->isLayerDisabled(ScrollScreen::nbg1)) { addVdp2PartsToList(ScrollScreen::nbg1); }
-        if (!state.vdp2()->isLayerDisabled(ScrollScreen::nbg0)) { addVdp2PartsToList(ScrollScreen::nbg0); }
-        if (!state.vdp2()->isLayerDisabled(ScrollScreen::rbg1)) { addVdp2PartsToList(ScrollScreen::rbg1); }
-        if (!state.vdp2()->isLayerDisabled(ScrollScreen::rbg0)) { addVdp2PartsToList(ScrollScreen::rbg0); }
-        addVdp1PartsToList();
-        std::ranges::stable_sort(parts_list, [](const RenderPart& a, const RenderPart& b) { return a.priority < b.priority; });
-        if constexpr (render_type == RenderType::RenderType_drawElements) {
-            if (parts_lists_[mixed_parts_key].empty()) {
-                std::unique_lock lk(getMutex(MutexType::parts_list));
-                parts_lists_[mixed_parts_key] = std::move(parts_list);
-                data_condition_.wait(lk, [this]() { return parts_lists_[mixed_parts_key].empty(); });
-            }
+    if (!state.vdp2()->isLayerDisabled(ScrollScreen::nbg3)) { addVdp2PartsToList(ScrollScreen::nbg3); }
+    if (!state.vdp2()->isLayerDisabled(ScrollScreen::nbg2)) { addVdp2PartsToList(ScrollScreen::nbg2); }
+    if (!state.vdp2()->isLayerDisabled(ScrollScreen::nbg1)) { addVdp2PartsToList(ScrollScreen::nbg1); }
+    if (!state.vdp2()->isLayerDisabled(ScrollScreen::nbg0)) { addVdp2PartsToList(ScrollScreen::nbg0); }
+    if (!state.vdp2()->isLayerDisabled(ScrollScreen::rbg1)) { addVdp2PartsToList(ScrollScreen::rbg1); }
+    if (!state.vdp2()->isLayerDisabled(ScrollScreen::rbg0)) { addVdp2PartsToList(ScrollScreen::rbg0); }
+    addVdp1PartsToList();
+    std::ranges::stable_sort(parts_list, [](const RenderPart& a, const RenderPart& b) { return a.priority < b.priority; });
+    if constexpr (render_type == RenderType::RenderType_drawElements) {
+        if (parts_lists_[mixed_parts_key].empty()) {
+            std::unique_lock lk(getMutex(MutexType::parts_list));
+            parts_lists_[mixed_parts_key] = std::move(parts_list);
+            data_condition_.wait(lk, [this]() { return parts_lists_[mixed_parts_key].empty(); });
         }
     }
 }

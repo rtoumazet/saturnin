@@ -85,15 +85,9 @@ enum class FboTextureType : u8 { front_buffer, back_buffer, vdp1_debug_overlay, 
 enum class GuiTextureType : u8 { render_buffer, vdp1_debug_buffer, vdp2_debug_buffer, layer_buffer };
 enum class FboType : u8 { general, for_gui, vdp2_debug };
 enum class ProgramShader : u8 { main };
-
 enum class MutexType : u8 { parts_list = 0, textures_link = 1, texture_delete = 2 };
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum	FboTextureStatus
-///
-/// \brief	Values that represent status of FBO textures in the pool
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
+// Status of FBO textures in the pool.
 enum class FboTextureStatus : u8 {
     reuse,   ///< FBO will be reused as is.
     unused,  ///< FBO isn't in use.
@@ -242,10 +236,12 @@ class Opengl {
 
     // Pre/post rendering functions
     void preRender();
-    void postRender();
+    void postRender() const;
 
     // Displays the framebuffer content (VDP1 + VDP2)
     void displayFramebuffer(core::EmulatorContext& state);
+    void displayFramebufferByScreenPriority(core::EmulatorContext& state);
+    void displayFramebufferByParts(core::EmulatorContext& state);
 
     // Actions executed on window resize.
     void onWindowResize(const u16 new_width, const u16 new_height);
@@ -261,6 +257,8 @@ class Opengl {
 
     // Renders data if available.
     void render();
+    void renderByScreenPriority();
+    void renderByParts();
 
     // Renders test data if available.
     void renderTest();
@@ -286,43 +284,13 @@ class Opengl {
     // Removes the link between the Saturn texture and the OpenGL texture id.
     void removeTextureLink(const size_t key);
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn void Opengl::generateTextures();
-    ///
-    /// \brief  Generates the textures that will be used during rendering.
-    ///
-    /// \author Runik
-    /// \date   05/11/2021
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-
+    // Generates the textures that will be used during rendering.
     void generateTextures();
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn	auto Opengl::getOpenglTexture(const size_t key) -> std::optional<OpenglTexture>;
-    ///
-    /// \brief	Gets texture identifier corresponding to the key.
-    ///
-    /// \author	Runik
-    /// \date	05/11/2021
-    ///
-    /// \param 	key	The key.
-    ///
-    /// \returns	The OpenglTexture if found.
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-
+    // Gets texture identifier corresponding to the key if found.
     auto getOpenglTexture(const size_t key) -> std::optional<OpenglTexture>;
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn auto Opengl::isSaturnResolutionSet() const;
-    ///
-    /// \brief  Checks if the Saturn resolution is set.
-    ///
-    /// \author Runik
-    /// \date   05/11/2021
-    ///
-    /// \returns    Returns true if the saturn screen resolution is set.
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-
+    // Checks if the Saturn resolution is set.
     auto isSaturnResolutionSet() const -> bool;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -390,72 +358,21 @@ class Opengl {
     void setFboTextureStatus(const u8 priority, const VdpLayer layer, const FboTextureStatus state);
     void setFboTextureStatus(const u8 priority, const ScrollScreen screen, const FboTextureStatus state);
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn	void Opengl::setFboTextureStatus(const ScrollScreen screen, const FboTextureStatus state);
-    ///
-    /// \brief	Sets FBO texture status for every priority of the screen.
-    ///
-    /// \author	Runik
-    /// \date	06/03/2024
-    ///
-    /// \param 	screen	The screen.
-    /// \param 	state 	The new state.
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-
+    // Sets FBO texture status for every priority of a specific screen.
     void setFboTextureStatus(const ScrollScreen screen, const FboTextureStatus state);
 
   private:
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn auto Opengl::calculateDisplayViewportMatrix() const -> glm::highp_mat4;
-    ///
-    /// \brief  Calculates the display viewport matrix, adding letterbox or pillarbox when the display isn't exactly like the
-    /// Saturn resolution.
-    ///
-    /// \author Runik
-    /// \date   10/04/2021
-    ///
-    /// \returns    The calculated display viewport matrix.
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-
+    // Calculates the display viewport matrix, adding letterbox or pillarbox when the display isn't exactly like the Saturn
+    // resolution.
     auto calculateDisplayViewportMatrix() const -> glm::highp_mat4;
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn	static auto Opengl::initializeVao() -> std::tuple<u32, u32>;
-    ///
-    /// \brief	Initializes a vao.
-    ///
-    /// \author	Runik
-    /// \date	16/04/2021
-    ///
-    /// \returns	The generated VAO id and the vertex buffer id.
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-
+    // Initialize a VAO and returns the generated VAO id and the vertex buffer id.
     static auto initializeVao() -> std::tuple<u32, u32>;
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn	void Opengl::initializeFbo();
-    ///
-    /// \brief	Initializes the framebuffer object and related elements.
-    ///
-    /// \author	Runik
-    /// \date	20/03/2024
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-
+    // Initializes the framebuffer object and related elements.
     void initializeFbo();
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn	auto Opengl::generateFbo(const FboType fbo_type) -> u32;
-    ///
-    /// \brief	Generates a framebuffer object.
-    ///
-    /// \author	Runik
-    /// \date	16/02/2024
-    ///
-    /// \param 	fbo_type 	Type of the FBO to generate
-    ///
-    /// \returns	The generated fbo id.
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-
+    // Generates a framebuffer object.
     auto generateFbo(const FboType fbo_type) -> u32;
 
     // Initializes a texture array.
@@ -482,45 +399,13 @@ class Opengl {
     // Pack textures in a texture array of texture atlases for the selected layer.
     void packTextures(std::vector<OpenglTexture>& textures, const VdpLayer layer);
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn	void Opengl::generateSubTexture(const size_t key);
-    ///
-    /// \brief	Generates a subtexture in the texture array of texture atlas.
-    ///
-    /// \author	Runik
-    /// \date	24/09/2022
-    ///
-    /// \param 	key	Key to the texture details.
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-
+    // Generates a subtexture in the texture array of texture atlas.
     void generateSubTexture(const size_t key);
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn	auto Opengl::getCurrentTextureArrayIndex(const VdpLayer layer) -> u8;
-    ///
-    /// \brief	Returns the current texture array index used by one layer.
-    ///
-    /// \author	Runik
-    /// \date	15/09/2023
-    ///
-    /// \param 	layer	VDP layer.
-    ///
-    /// \returns	The current texture array index used by the layer.
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-
+    // Returns the current texture array index used by a specific layer.
     auto getCurrentTextureArrayIndex(const VdpLayer layer) -> u8;
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn	void Opengl::getNextAvailableTextureArrayIndex() const;
-    ///
-    /// \brief	Returns the next available texture array index regardless of the layer.
-    ///
-    /// \author	Runik
-    /// \date	15/09/2023
-    ///
-    /// \returns    Texture array index.
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-
+    // Returns the next available texture array index regardless of the layer.
     auto getNextAvailableTextureArrayIndex() const -> u8;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -542,55 +427,16 @@ class Opengl {
     auto calculateTextureCoordinates(const ScreenPos& pos, const Size& size, const u8 texture_array_index) const
         -> std::vector<TextureCoordinates>;
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn	auto readVertexes(const PartsList& parts) -> std::vector<Vertex>
-    ///
-    /// \brief	Returns all the vertexes from a parts list.
-    ///
-    /// \author	Runik
-    /// \date	22/12/2023
-    ///
-    /// \param 	parts	The parts.
-    ///
-    /// \returns	The vertexes.
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-
+    // Returns all the vertexes from a parts list.
     auto readVertexes(const PartsList& parts) -> std::vector<Vertex>;
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn	void Opengl::renderToAvailableTexture(const FboKey& key, const PartsList& parts_list)
-    ///
-    /// \brief	Clears FBOs in the pool with the 'to_clear' status.
-    ///
-    /// \author	Runik
-    /// \date	04/03/2024
-    ///
-    /// \param 	key	    The FBO key (priority + layer).
-    /// \param 	parts	The parts to render.
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-
+    // Renders a list of parts to a specific FBO.
     void renderToAvailableTexture(const FboKey& key, const PartsList& parts_list);
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn	void Opengl::clearFboTextures()
-    ///
-    /// \brief	Clears FBO textures in the pool with the 'to_clear' status.
-    ///
-    /// \author	Runik
-    /// \date	04/03/2024
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-
+    // Clears FBO textures in the pool with the 'to_clear' status.
     void clearFboTextures();
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn	void Opengl::clearFboKeys()
-    ///
-    /// \brief	Removes keys from the map for FBOs which status is not 'reuse'.
-    ///
-    /// \author	Runik
-    /// \date	08/03/2024
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-
+    // Removes keys from the map for FBOs which status is not 'reuse'.
     void clearFboKeys();
 
     // Binds a FBO. Passing index 0 unbinds it.
@@ -599,44 +445,13 @@ class Opengl {
     // Unbinds current bound FBO.
     void unbindFbo();
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn	auto Opengl::getAvailableFboTextureIndex() -> std::optional<u8>;
-    ///
-    /// \brief	Returns the next available FBO texture index (with status 'unused').
-    ///
-    /// \author	Runik
-    /// \date	08/03/2024
-    ///
-    /// \returns	The FBO texture pool index if found.
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-
+    // Returns the next available FBO texture index (with status 'unused').
     auto getAvailableFboTextureIndex() -> std::optional<u8>;
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn	void Opengl::renderParts(const PartsList& parts_list, const u32 texture_id);
-    ///
-    /// \brief	Renders the parts described by parts_list to the texture.
-    ///
-    /// \author	Runik
-    /// \date	09/03/2024
-    ///
-    /// \param 	parts_list	List of parts.
-    /// \param 	texture_id	Id of the texture to render to.
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-
+    // Renders the list of parts to a specific texture.
     void renderParts(const PartsList& parts_list, const u32 texture_id);
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn	void Opengl::renderFboTexture(const u32 texture_id);
-    ///
-    /// \brief	Renders the fbo texture described by texture_id
-    ///
-    /// \author	Runik
-    /// \date	16/03/2024
-    ///
-    /// \param 	texture_id	Identifier for the texture.
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-
+    // Renders a specific FBO texture.
     void renderFboTexture(const u32 texture_id);
 
     auto getMutex(const MutexType& type) -> std::mutex&;
@@ -718,20 +533,7 @@ void glDebugOutput(gl::GLenum                   source,
 // Callback for OpenGL errors
 void errorCallback(int error, const char* description);
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \fn	auto generateVertexIndicesAndDrawRanges(const PartsList& parts) -> std::tuple<std::vector<u32>,
-/// std::vector<DrawRange>>;
-///
-/// \brief	Generates vertex indices that will be used to batch draw from the parts list.
-///
-/// \author	Runik
-/// \date	10/01/2024
-///
-/// \param 	parts	The source parts.
-///
-/// \returns	The vertex indices and the draw ranges.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
+// Generates vertex indices and draw ranges that will be used to batch draw from the list of parts.
 auto generateVertexIndicesAndDrawRanges(const PartsList& parts) -> std::tuple<std::vector<u32>, std::vector<DrawRange>>;
 
 //------------------

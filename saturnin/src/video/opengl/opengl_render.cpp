@@ -63,7 +63,7 @@ void Opengl::preRender() {
     glScissor(scissor_x, scissor_y, scissor_width, scissor_height);
 };
 
-void Opengl::postRender() {
+void Opengl::postRender() const {
     // Framebuffer is released
     checkGlError();
 
@@ -219,61 +219,68 @@ void Opengl::renderFboTexture(const u32 texture_id) {
 
 void Opengl::render() {
     if constexpr (uses_fbo) {
-        MapOfPartsList global_parts_list;
-
-        const auto getPartsFromThread = [&]() {
-            std::lock_guard lock(getMutex(MutexType::parts_list));
-            if (!parts_lists_.empty()) { global_parts_list = std::move(parts_lists_); }
-        };
-        getPartsFromThread();
-
-        clearFboTextures();
-        clearFboKeys();
-
-        // Rendering is done to FBOs depending on the priority and layer combo.
-        for (const auto& [key, parts] : global_parts_list) {
-            renderToAvailableTexture(key, parts);
-        }
-
-        preRender();
-
-        // :TODO: Render the FBOs to the current framebuffer
-        std::ranges::reverse_view rv{fbo_key_to_fbo_pool_index_};
-        for (const auto& [key, index] : rv) {
-            renderFboTexture(fbo_texture_pool_[index]);
-        }
-
-        postRender();
-
-        const auto notifyMainThread = [this, &global_parts_list]() {
-            std::lock_guard lk(getMutex(MutexType::parts_list));
-            MapOfPartsList().swap(global_parts_list);
-            data_condition_.notify_one();
-        };
-        notifyMainThread();
-
+        renderByScreenPriority();
     } else {
-        PartsList parts_list;
-
-        preRender();
-
-        const auto getParts = [this, &parts_list]() {
-            std::lock_guard lock(getMutex(MutexType::parts_list));
-            if (!parts_lists_[mixed_parts_key].empty()) { parts_list = std::move(parts_lists_[mixed_parts_key]); }
-        };
-        getParts();
-
-        renderParts(parts_list, texture_array_id_);
-
-        const auto notifyMainThread = [this, &parts_list]() {
-            std::lock_guard lk(getMutex(MutexType::parts_list));
-            PartsList().swap(parts_list);
-            data_condition_.notify_one();
-        };
-        notifyMainThread();
-
-        postRender();
+        renderByParts();
     }
+}
+
+void Opengl::renderByScreenPriority() {
+    MapOfPartsList global_parts_list;
+
+    const auto getPartsFromThread = [&]() {
+        std::lock_guard lock(getMutex(MutexType::parts_list));
+        if (!parts_lists_.empty()) { global_parts_list = std::move(parts_lists_); }
+    };
+    getPartsFromThread();
+
+    clearFboTextures();
+    clearFboKeys();
+
+    // Rendering is done to FBOs depending on the priority and layer combo.
+    for (const auto& [key, parts] : global_parts_list) {
+        renderToAvailableTexture(key, parts);
+    }
+
+    preRender();
+
+    // :TODO: Render the FBOs to the current framebuffer
+    std::ranges::reverse_view rv{fbo_key_to_fbo_pool_index_};
+    for (const auto& [key, index] : rv) {
+        renderFboTexture(fbo_texture_pool_[index]);
+    }
+
+    postRender();
+
+    const auto notifyMainThread = [this, &global_parts_list]() {
+        std::lock_guard lk(getMutex(MutexType::parts_list));
+        MapOfPartsList().swap(global_parts_list);
+        data_condition_.notify_one();
+    };
+    notifyMainThread();
+}
+
+void Opengl::renderByParts() {
+    PartsList parts_list;
+
+    preRender();
+
+    const auto getParts = [this, &parts_list]() {
+        std::lock_guard lock(getMutex(MutexType::parts_list));
+        if (!parts_lists_[mixed_parts_key].empty()) { parts_list = std::move(parts_lists_[mixed_parts_key]); }
+    };
+    getParts();
+
+    renderParts(parts_list, texture_array_id_);
+
+    const auto notifyMainThread = [this, &parts_list]() {
+        std::lock_guard lk(getMutex(MutexType::parts_list));
+        PartsList().swap(parts_list);
+        data_condition_.notify_one();
+    };
+    notifyMainThread();
+
+    postRender();
 }
 
 void Opengl::renderTest() {
