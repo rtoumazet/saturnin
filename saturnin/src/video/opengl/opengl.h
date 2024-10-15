@@ -234,10 +234,6 @@ class Opengl {
     // Shuts down this object and frees any resources it is using
     void shutdown() const;
 
-    // Pre/post rendering functions
-    void preRender();
-    void postRender() const;
-
     // Displays the framebuffer content (VDP1 + VDP2)
     void displayFramebuffer(core::EmulatorContext& state);
     void displayFramebufferByScreenPriority(core::EmulatorContext& state);
@@ -491,6 +487,26 @@ class Opengl {
 
     std::string fps_; // Calculated frames per second.
 };
+
+// class OpenglRender {
+//   public:
+//     OpenglRender()  = default;
+//     ~OpenglRender() = default;
+//
+//     OpenglRender(const OpenglRender&) = delete;
+//
+//     OpenglRender(OpenglRender&&) = delete;
+//
+//     OpenglRender& operator=(const OpenglRender&) = delete;
+//
+//     OpenglRender& operator=(OpenglRender&&) = delete;
+//
+//     // Pre/post rendering functions
+//     void preRender();
+//     void postRender() const;
+//
+//   private:
+// };
 
 // Queries if the current video card is capable of rendering modern opengl (ie version 3.3+).
 auto isModernOpenglCapable() -> bool;
