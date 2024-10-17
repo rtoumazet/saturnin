@@ -28,6 +28,7 @@
 #include <Windows.h> // removes C4005 warning
 #include <imgui.h>
 #include <map>    // map
+#include <memory> // unique_ptr
 #include <mutex>  // mutex
 #include <string> // string
 #include <tuple>  // tuple
@@ -454,6 +455,8 @@ class Opengl {
 
     core::Config* config_; // Configuration object.
 
+    std::unique_ptr<OpenglRender> opengl_render_; // OpenGL render object.
+
     FboTypeToId           fbo_type_to_id_;            // The framebuffer objects used in the app.
     u32                   fbo_texture_array_id_;      // Identifier for the FBO texture array.
     FboTextureTypeToLayer fbo_texture_type_to_layer_; // Links the used FBO texture layer to a texture type. Index of the array
@@ -488,25 +491,27 @@ class Opengl {
     std::string fps_; // Calculated frames per second.
 };
 
-// class OpenglRender {
-//   public:
-//     OpenglRender()  = default;
-//     ~OpenglRender() = default;
-//
-//     OpenglRender(const OpenglRender&) = delete;
-//
-//     OpenglRender(OpenglRender&&) = delete;
-//
-//     OpenglRender& operator=(const OpenglRender&) = delete;
-//
-//     OpenglRender& operator=(OpenglRender&&) = delete;
-//
-//     // Pre/post rendering functions
-//     void preRender();
-//     void postRender() const;
-//
-//   private:
-// };
+class OpenglRender {
+  public:
+    OpenglRender() = default;
+    explicit OpenglRender(Opengl& opengl) : opengl_(opengl) {};
+    ~OpenglRender() = default;
+
+    OpenglRender(const OpenglRender&) = delete;
+
+    OpenglRender(OpenglRender&&) = delete;
+
+    OpenglRender& operator=(const OpenglRender&) = delete;
+
+    OpenglRender& operator=(OpenglRender&&) = delete;
+
+    // Pre/post rendering functions
+    void preRender();
+    void postRender() const;
+
+  private:
+    Opengl& opengl_;
+};
 
 // Queries if the current video card is capable of rendering modern opengl (ie version 3.3+).
 auto isModernOpenglCapable() -> bool;

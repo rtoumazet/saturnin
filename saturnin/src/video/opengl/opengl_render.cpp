@@ -38,7 +38,7 @@ using namespace gl21ext;
 
 using core::tr;
 
-void Opengl::preRender() {
+void OpenglRender::preRender() {
     switchRenderedBuffer();
 
     glBindFramebuffer(GLenum::GL_FRAMEBUFFER, fbo_type_to_id_[FboType::general]);
@@ -63,7 +63,7 @@ void Opengl::preRender() {
     glScissor(scissor_x, scissor_y, scissor_width, scissor_height);
 };
 
-void Opengl::postRender() const {
+void OpenglRender::postRender() const {
     // Framebuffer is released
     checkGlError();
 
