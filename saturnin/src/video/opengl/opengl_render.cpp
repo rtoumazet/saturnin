@@ -39,14 +39,14 @@ using namespace gl21ext;
 using core::tr;
 
 void OpenglRender::preRender() {
-    switchRenderedBuffer();
+    opengl_->switchRenderedBuffer();
 
-    glBindFramebuffer(GLenum::GL_FRAMEBUFFER, fbo_type_to_id_[FboType::general]);
+    glBindFramebuffer(GLenum::GL_FRAMEBUFFER, opengl_->fbo_type_to_id_[FboType::general]);
 
-    attachTextureLayerToFbo(fbo_texture_array_id_,
-                            getFboTextureLayer(currentRenderedBuffer()),
-                            GLenum::GL_FRAMEBUFFER,
-                            GLenum::GL_COLOR_ATTACHMENT0);
+    opengl_->attachTextureLayerToFbo(opengl_->fbo_texture_array_id_,
+                                     opengl_->getFboTextureLayer(opengl_->currentRenderedBuffer()),
+                                     GLenum::GL_FRAMEBUFFER,
+                                     GLenum::GL_COLOR_ATTACHMENT0);
 
     // Viewport is the entire Saturn framebuffer
     glViewport(0, 0, saturn_framebuffer_width, saturn_framebuffer_height);
@@ -59,7 +59,7 @@ void OpenglRender::preRender() {
 
     // Scissor test calculation, to remove from display everything outside the current display area.
     glEnable(GL_SCISSOR_TEST);
-    auto [scissor_x, scissor_y, scissor_width, scissor_height] = calculateViewportPosAndSize();
+    auto [scissor_x, scissor_y, scissor_width, scissor_height] = opengl_->calculateViewportPosAndSize();
     glScissor(scissor_x, scissor_y, scissor_width, scissor_height);
 };
 
@@ -72,10 +72,10 @@ void OpenglRender::postRender() const {
     glBindFramebuffer(GLenum::GL_FRAMEBUFFER, 0);
 };
 
-void Opengl::renderToAvailableTexture(const FboKey& key, const PartsList& parts_list) {
+void OpenglRender::renderToAvailableTexture(const FboKey& key, const PartsList& parts_list) {
     using enum Logger;
     Log::debug(opengl, "renderToAvailableFbo() call");
-    const auto index = getAvailableFboTextureIndex();
+    const auto index = opengl_->getAvailableFboTextureIndex();
     if (!index) {
         Log::debug(opengl, "- No FBO available for rendering");
         Log::debug(opengl, "renderToAvailableFbo() return");
@@ -85,12 +85,12 @@ void Opengl::renderToAvailableTexture(const FboKey& key, const PartsList& parts_
     const auto& [priority, layer] = key;
     Log::debug(opengl, "- Rendering key [priority={}, layer={}] to FBO with index {}", priority, layer_to_name.at(layer), *index);
 
-    renderParts(parts_list, fbo_texture_pool_[*index]);
+    opengl_->renderParts(parts_list, opengl_->fbo_texture_pool_[*index]);
 
     Log::debug(opengl, "- Changing FBO status at index {} to 'reuse'", *index);
 
-    fbo_texture_pool_status_[*index] = FboTextureStatus::reuse;
-    fbo_key_to_fbo_pool_index_[key]  = *index;
+    opengl_->fbo_texture_pool_status_[*index] = FboTextureStatus::reuse;
+    opengl_->fbo_key_to_fbo_pool_index_[key]  = *index;
 
     Log::debug(opengl, "renderToAvailableFbo() return");
 }
@@ -239,10 +239,10 @@ void Opengl::renderByScreenPriority() {
 
     // Rendering is done to FBOs depending on the priority and layer combo.
     for (const auto& [key, parts] : global_parts_list) {
-        renderToAvailableTexture(key, parts);
+        opengl_render_->renderToAvailableTexture(key, parts);
     }
 
-    preRender();
+    opengl_render_->preRender();
 
     // :TODO: Render the FBOs to the current framebuffer
     std::ranges::reverse_view rv{fbo_key_to_fbo_pool_index_};
@@ -250,7 +250,7 @@ void Opengl::renderByScreenPriority() {
         renderFboTexture(fbo_texture_pool_[index]);
     }
 
-    postRender();
+    opengl_render_->postRender();
 
     const auto notifyMainThread = [this, &global_parts_list]() {
         std::lock_guard lk(getMutex(MutexType::parts_list));
@@ -263,7 +263,7 @@ void Opengl::renderByScreenPriority() {
 void Opengl::renderByParts() {
     PartsList parts_list;
 
-    preRender();
+    opengl_render_->preRender();
 
     const auto getParts = [this, &parts_list]() {
         std::lock_guard lock(getMutex(MutexType::parts_list));
@@ -280,11 +280,11 @@ void Opengl::renderByParts() {
     };
     notifyMainThread();
 
-    postRender();
+    opengl_render_->postRender();
 }
 
 void Opengl::renderTest() {
-    preRender();
+    opengl_render_->preRender();
 
     const auto [vao, vertex_buffer] = initializeVao();
 
@@ -437,7 +437,7 @@ void Opengl::renderTest() {
     glBindTexture(GL_TEXTURE_2D_ARRAY, 0);
     gl::glDeleteBuffers(1, &elements_buffer);
 
-    postRender();
+    opengl_render_->postRender();
 }
 
 void Opengl::renderSelector() {

@@ -75,7 +75,7 @@ const std::unordered_map<ScrollScreen, VdpLayer> screen_to_layer = {
     {ScrollScreen::rbg0, VdpLayer::rbg0}
 };
 
-Opengl::Opengl(core::Config* config) : config_(config) {};
+Opengl::Opengl(core::Config* config) : config_(config), opengl_render_(std::make_unique<OpenglRender>(this)) {};
 
 Opengl::~Opengl() { shutdown(); }
 

@@ -359,6 +359,8 @@ class Opengl {
     void setFboTextureStatus(const ScrollScreen screen, const FboTextureStatus state);
 
   private:
+    friend class OpenglRender;
+
     // Calculates the display viewport matrix, adding letterbox or pillarbox when the display isn't exactly like the Saturn
     // resolution.
     auto calculateDisplayViewportMatrix() const -> glm::highp_mat4;
@@ -427,9 +429,6 @@ class Opengl {
     // Returns all the vertexes from a parts list.
     auto readVertexes(const PartsList& parts) -> std::vector<Vertex>;
 
-    // Renders a list of parts to a specific FBO.
-    void renderToAvailableTexture(const FboKey& key, const PartsList& parts_list);
-
     // Clears FBO textures in the pool with the 'to_clear' status.
     void clearFboTextures();
 
@@ -494,23 +493,22 @@ class Opengl {
 class OpenglRender {
   public:
     OpenglRender() = default;
-    explicit OpenglRender(Opengl& opengl) : opengl_(opengl) {};
-    ~OpenglRender() = default;
-
-    OpenglRender(const OpenglRender&) = delete;
-
-    OpenglRender(OpenglRender&&) = delete;
-
+    explicit OpenglRender(Opengl* opengl) : opengl_(opengl) {};
+    ~OpenglRender()                              = default;
+    OpenglRender(const OpenglRender&)            = delete;
+    OpenglRender(OpenglRender&&)                 = delete;
     OpenglRender& operator=(const OpenglRender&) = delete;
-
-    OpenglRender& operator=(OpenglRender&&) = delete;
+    OpenglRender& operator=(OpenglRender&&)      = delete;
 
     // Pre/post rendering functions
     void preRender();
     void postRender() const;
 
+    // Renders a list of parts to a specific FBO.
+    void renderToAvailableTexture(const FboKey& key, const PartsList& parts_list);
+
   private:
-    Opengl& opengl_;
+    Opengl* opengl_;
 };
 
 // Queries if the current video card is capable of rendering modern opengl (ie version 3.3+).
