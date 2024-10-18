@@ -951,9 +951,9 @@ void showRenderingWindow(core::EmulatorContext& state) {
     ImGui::Begin("Video rendering", nullptr, flags);
 
     if (state.opengl()->areFbosInitialized()) {
-        if (state.opengl()->isThereSomethingToRender()) {
+        if (state.opengl()->render()->isThereSomethingToRender()) {
             state.opengl()->generateTextures();
-            state.opengl()->renderSelector();
+            state.opengl()->render()->renderSelector();
         }
         const auto alpha = 0xff;
         gui::addTextureToDrawList(state.opengl()->getRenderedBufferTextureId(video::GuiTextureType::render_buffer),
@@ -961,7 +961,7 @@ void showRenderingWindow(core::EmulatorContext& state) {
                                   height,
                                   alpha);
         if ((state.debugStatus() != core::DebugStatus::disabled) && state.opengl()->isSaturnResolutionSet()) {
-            state.opengl()->renderVdp1DebugOverlay();
+            state.opengl()->render()->renderVdp1DebugOverlay();
             const auto overlay_alpha = 0x80;
             // gui::addTextureToDrawList(state.opengl()->vdp1DebugOverlayTextureId(), width, height, overlay_alpha);
             gui::addTextureToDrawList(state.opengl()->getRenderedBufferTextureId(video::GuiTextureType::vdp1_debug_buffer),
@@ -1737,7 +1737,7 @@ void showDebugVdp2Window(core::EmulatorContext& state, bool* opened) {
 
                     if (state.debugStatus() != core::DebugStatus::disabled) {
                         if (state.vdp2()->screenInDebug() != video::ScrollScreen::none) {
-                            state.opengl()->renderVdp2DebugLayer(state);
+                            state.opengl()->render()->renderVdp2DebugLayer(state);
                         }
                         const auto tex_id       = state.opengl()->vdp2DebugLayerTextureId();
                         const auto preview_size = ImVec2(500, 500);

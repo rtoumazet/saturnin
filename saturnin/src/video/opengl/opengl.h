@@ -202,6 +202,8 @@ const std::unordered_map<VdpLayer, std::string> layer_to_name = {
     {VdpLayer::undefined, "undefined"}
 };
 
+class OpenglRender;
+
 class Opengl {
   public:
     // Constructors / Destructors
@@ -252,28 +254,8 @@ class Opengl {
     // Checks if the Framebuffer Objects (FBO) are initialized.
     auto areFbosInitialized() const -> bool { return fbo_type_to_id_.at(FboType::general) != 0; }
 
-    // Renders data if available.
-    void render();
-    void renderByScreenPriority();
-    void renderByParts();
-
-    // Renders test data if available.
-    void renderTest();
-
-    // Selects the renderer to use, depending on conditions
-    void renderSelector();
-
-    // Checks if there's something to render.
-    auto isThereSomethingToRender() const -> bool;
-
     // Gets the texture ID of the buffer currently being rendered to.
     auto getRenderedBufferTextureId(const GuiTextureType type) -> u32;
-
-    // Renders the vertexes of the vdp1 part currently saved to a specific overlay layer. Useful for debugging.
-    void renderVdp1DebugOverlay();
-
-    // Renders the vertexes of the vdp2 layer currently selected for display in the debug window.
-    void renderVdp2DebugLayer(core::EmulatorContext& state);
 
     // Texture key is added so the linked texture is created or marked for recreation. Layer is used for cache management.
     void addOrUpdateTexture(const size_t key, const VdpLayer layer);
@@ -357,6 +339,9 @@ class Opengl {
 
     // Sets FBO texture status for every priority of a specific screen.
     void setFboTextureStatus(const ScrollScreen screen, const FboTextureStatus state);
+
+    // Interface to the OpenglRender object.
+    auto render() -> OpenglRender* { return opengl_render_.get(); };
 
   private:
     friend class OpenglRender;
@@ -506,6 +491,26 @@ class OpenglRender {
 
     // Renders a specific FBO texture.
     void renderFboTexture(const u32 texture_id);
+
+    // Renders data if available.
+    void render();
+    void renderByScreenPriority();
+    void renderByParts();
+
+    // Renders test data if available.
+    void renderTest();
+
+    // Renders the vertexes of the vdp1 part currently saved to a specific overlay layer. Useful for debugging.
+    void renderVdp1DebugOverlay();
+
+    // Renders the vertexes of the vdp2 layer currently selected for display in the debug window.
+    void renderVdp2DebugLayer(core::EmulatorContext& state);
+
+    // Selects the renderer to use, depending on conditions
+    void renderSelector();
+
+    // Checks if there's something to render.
+    auto isThereSomethingToRender() const -> bool;
 
   private:
     Opengl* opengl_;

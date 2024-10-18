@@ -217,7 +217,7 @@ void OpenglRender::renderFboTexture(const u32 texture_id) {
     // gl::glDeleteBuffers(1, &elements_buffer);
 }
 
-void Opengl::render() {
+void OpenglRender::render() {
     if constexpr (uses_fbo) {
         renderByScreenPriority();
     } else {
@@ -225,87 +225,87 @@ void Opengl::render() {
     }
 }
 
-void Opengl::renderByScreenPriority() {
+void OpenglRender::renderByScreenPriority() {
     MapOfPartsList global_parts_list;
 
     const auto getPartsFromThread = [&]() {
-        std::lock_guard lock(getMutex(MutexType::parts_list));
-        if (!parts_lists_.empty()) { global_parts_list = std::move(parts_lists_); }
+        std::lock_guard lock(opengl_->getMutex(MutexType::parts_list));
+        if (!opengl_->parts_lists_.empty()) { global_parts_list = std::move(opengl_->parts_lists_); }
     };
     getPartsFromThread();
 
-    clearFboTextures();
-    clearFboKeys();
+    opengl_->clearFboTextures();
+    opengl_->clearFboKeys();
 
     // Rendering is done to FBOs depending on the priority and layer combo.
     for (const auto& [key, parts] : global_parts_list) {
-        opengl_render_->renderToAvailableTexture(key, parts);
+        opengl_->opengl_render_->renderToAvailableTexture(key, parts);
     }
 
-    opengl_render_->preRender();
+    preRender();
 
     // :TODO: Render the FBOs to the current framebuffer
-    std::ranges::reverse_view rv{fbo_key_to_fbo_pool_index_};
+    std::ranges::reverse_view rv{opengl_->fbo_key_to_fbo_pool_index_};
     for (const auto& [key, index] : rv) {
-        opengl_render_->renderFboTexture(fbo_texture_pool_[index]);
+        renderFboTexture(opengl_->fbo_texture_pool_[index]);
     }
 
-    opengl_render_->postRender();
+    postRender();
 
     const auto notifyMainThread = [this, &global_parts_list]() {
-        std::lock_guard lk(getMutex(MutexType::parts_list));
+        std::lock_guard lk(opengl_->getMutex(MutexType::parts_list));
         MapOfPartsList().swap(global_parts_list);
-        data_condition_.notify_one();
+        opengl_->data_condition_.notify_one();
     };
     notifyMainThread();
 }
 
-void Opengl::renderByParts() {
+void OpenglRender::renderByParts() {
     PartsList parts_list;
 
-    opengl_render_->preRender();
+    preRender();
 
     const auto getParts = [this, &parts_list]() {
-        std::lock_guard lock(getMutex(MutexType::parts_list));
-        if (!parts_lists_[mixed_parts_key].empty()) { parts_list = std::move(parts_lists_[mixed_parts_key]); }
+        std::lock_guard lock(opengl_->getMutex(MutexType::parts_list));
+        if (!opengl_->parts_lists_[mixed_parts_key].empty()) { parts_list = std::move(opengl_->parts_lists_[mixed_parts_key]); }
     };
     getParts();
 
-    opengl_render_->renderParts(parts_list, texture_array_id_);
+    renderParts(parts_list, opengl_->texture_array_id_);
 
     const auto notifyMainThread = [this, &parts_list]() {
-        std::lock_guard lk(getMutex(MutexType::parts_list));
+        std::lock_guard lk(opengl_->getMutex(MutexType::parts_list));
         PartsList().swap(parts_list);
-        data_condition_.notify_one();
+        opengl_->data_condition_.notify_one();
     };
     notifyMainThread();
 
-    opengl_render_->postRender();
+    postRender();
 }
 
-void Opengl::renderTest() {
-    opengl_render_->preRender();
+void OpenglRender::renderTest() {
+    preRender();
 
-    const auto [vao, vertex_buffer] = initializeVao();
+    const auto [vao, vertex_buffer] = opengl_->initializeVao();
 
-    glUseProgram(shaders_.programs[ProgramShader::main]);
+    glUseProgram(opengl_->shaders_.programs[ProgramShader::main]);
     glBindVertexArray(vao);                       // binding VAO
     glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer); // binding vertex buffer
 
     // Calculating the ortho projection matrix
-    const auto proj_matrix = calculateDisplayViewportMatrix();
+    const auto proj_matrix = opengl_->calculateDisplayViewportMatrix();
 
     // Sending the ortho projection matrix to the shader
-    const auto uni_proj_matrix = glGetUniformLocation(shaders_.programs[ProgramShader::main], "proj_matrix");
+    const auto uni_proj_matrix = glGetUniformLocation(opengl_->shaders_.programs[ProgramShader::main], "proj_matrix");
     glUniformMatrix4fv(uni_proj_matrix, 1, GL_FALSE, glm::value_ptr(proj_matrix));
 
     glActiveTexture(GLenum::GL_TEXTURE0);
-    const auto sampler_loc = glGetUniformLocation(shaders_.programs[ProgramShader::main], "sampler");
+    const auto sampler_loc = glGetUniformLocation(opengl_->shaders_.programs[ProgramShader::main], "sampler");
     // glUniform1i(sampler_loc, GLenum::GL_TEXTURE0);
     glUniform1i(sampler_loc, 0);
-    glBindTexture(GL_TEXTURE_2D_ARRAY, texture_array_id_);
+    glBindTexture(GL_TEXTURE_2D_ARRAY, opengl_->texture_array_id_);
 
-    const auto texture_used_loc = glGetUniformLocation(shaders_.programs[ProgramShader::main], "is_texture_used");
+    const auto texture_used_loc = glGetUniformLocation(opengl_->shaders_.programs[ProgramShader::main], "is_texture_used");
     // Sending the variable to configure the shader to use texture data.
     const auto is_texture_used = GLboolean(false);
     glUniform1i(texture_used_loc, is_texture_used);
@@ -415,7 +415,7 @@ void Opengl::renderTest() {
         const auto&& [indices, draw_ranges] = generateVertexIndicesAndDrawRanges(parts);
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint) * indices.size(), indices.data(), GL_STATIC_DRAW);
 
-        const auto vertexes = readVertexes(parts);
+        const auto vertexes = opengl_->readVertexes(parts);
         glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * vertexes.size(), vertexes.data(), GL_STATIC_DRAW);
 
         for (const auto& range : draw_ranges) {
@@ -437,34 +437,17 @@ void Opengl::renderTest() {
     glBindTexture(GL_TEXTURE_2D_ARRAY, 0);
     gl::glDeleteBuffers(1, &elements_buffer);
 
-    opengl_render_->postRender();
+    postRender();
 }
 
-void Opengl::renderSelector() {
-    if constexpr (render_type == RenderType::RenderType_drawElements) { render(); }
-    if constexpr (render_type == RenderType::RenderType_drawTest) { renderTest(); }
-}
-
-auto Opengl::isThereSomethingToRender() const -> bool {
-    if constexpr (render_type == RenderType::RenderType_drawElements) {
-        if constexpr (uses_fbo) {
-            return !parts_lists_.empty();
-        } else {
-            if (parts_lists_.contains(mixed_parts_key)) { return !parts_lists_.at(mixed_parts_key).empty(); }
-            return false;
-        }
-    }
-    if constexpr (render_type == RenderType::RenderType_drawTest) { return true; }
-}
-
-void Opengl::renderVdp1DebugOverlay() {
+void OpenglRender::renderVdp1DebugOverlay() {
     //----------- Pre render -----------//
-    glBindFramebuffer(GLenum::GL_FRAMEBUFFER, fbo_type_to_id_[FboType::general]);
+    glBindFramebuffer(GLenum::GL_FRAMEBUFFER, opengl_->fbo_type_to_id_[FboType::general]);
 
-    attachTextureLayerToFbo(fbo_texture_array_id_,
-                            getFboTextureLayer(FboTextureType::vdp1_debug_overlay),
-                            GLenum::GL_FRAMEBUFFER,
-                            GLenum::GL_COLOR_ATTACHMENT0);
+    opengl_->attachTextureLayerToFbo(opengl_->fbo_texture_array_id_,
+                                     opengl_->getFboTextureLayer(FboTextureType::vdp1_debug_overlay),
+                                     GLenum::GL_FRAMEBUFFER,
+                                     GLenum::GL_COLOR_ATTACHMENT0);
 
     // Viewport is the entire Saturn framebuffer
     glViewport(0, 0, saturn_framebuffer_width, saturn_framebuffer_height);
@@ -474,15 +457,15 @@ void Opengl::renderVdp1DebugOverlay() {
 
     // Scissor test calculation, to remove from display everything outside the current Saturn resolution.
     glEnable(GL_SCISSOR_TEST);
-    auto [scissor_x, scissor_y, scissor_width, scissor_height] = calculateViewportPosAndSize();
+    auto [scissor_x, scissor_y, scissor_width, scissor_height] = opengl_->calculateViewportPosAndSize();
     glScissor(scissor_x, scissor_y, scissor_width, scissor_height);
 
     //----------- Render -----------------//
     // Calculating the ortho projection matrix
-    const auto [vao_simple, vertex_buffer_simple] = initializeVao();
-    const auto proj_matrix                        = calculateDisplayViewportMatrix();
+    const auto [vao_simple, vertex_buffer_simple] = opengl_->initializeVao();
+    const auto proj_matrix                        = opengl_->calculateDisplayViewportMatrix();
 
-    auto part = partToHighlight();
+    auto part = opengl_->partToHighlight();
 
     auto vertexes = std::vector<Vertex>{};
 
@@ -501,7 +484,7 @@ void Opengl::renderVdp1DebugOverlay() {
         vertexes.emplace_back(part.common_vdp_data_.vertexes[2]);
         vertexes.emplace_back(part.common_vdp_data_.vertexes[3]);
 
-        glUseProgram(shaders_.programs[ProgramShader::main]);
+        glUseProgram(opengl_->shaders_.programs[ProgramShader::main]);
         glBindVertexArray(vao_simple);                       // binding VAO
         glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer_simple); // binding vertex buffer
 
@@ -509,11 +492,11 @@ void Opengl::renderVdp1DebugOverlay() {
         glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * vertexes.size(), vertexes.data(), GL_STATIC_DRAW);
 
         // Sending the ortho projection matrix to the shader
-        const auto uni_proj_matrix = glGetUniformLocation(shaders_.programs[ProgramShader::main], "proj_matrix");
+        const auto uni_proj_matrix = glGetUniformLocation(opengl_->shaders_.programs[ProgramShader::main], "proj_matrix");
         glUniformMatrix4fv(uni_proj_matrix, 1, GL_FALSE, glm::value_ptr(proj_matrix));
 
         // Sending the variable to configure the shader to use color.
-        const auto uni_use_texture = glGetUniformLocation(shaders_.programs[ProgramShader::main], "is_texture_used");
+        const auto uni_use_texture = glGetUniformLocation(opengl_->shaders_.programs[ProgramShader::main], "is_texture_used");
         const auto is_texture_used = GLboolean(false);
         glUniform1i(uni_use_texture, is_texture_used);
 
@@ -527,9 +510,9 @@ void Opengl::renderVdp1DebugOverlay() {
     glBindFramebuffer(GLenum::GL_FRAMEBUFFER, 0);
 };
 
-void Opengl::renderVdp2DebugLayer(core::EmulatorContext& state) {
+void OpenglRender::renderVdp2DebugLayer(core::EmulatorContext& state) {
     //----------- Pre render -----------//
-    glBindFramebuffer(GLenum::GL_FRAMEBUFFER, fbo_type_to_id_[FboType::vdp2_debug]);
+    glBindFramebuffer(GLenum::GL_FRAMEBUFFER, opengl_->fbo_type_to_id_[FboType::vdp2_debug]);
 
     // Viewport is the entire Saturn framebuffer
     glViewport(0, 0, saturn_framebuffer_width, saturn_framebuffer_height);
@@ -549,11 +532,28 @@ void Opengl::renderVdp2DebugLayer(core::EmulatorContext& state) {
         }
     }
 
-    if (!parts_list.empty()) { opengl_render_->renderParts(parts_list, texture_array_id_); }
+    if (!parts_list.empty()) { renderParts(parts_list, opengl_->texture_array_id_); }
 
     //------ Post render --------//
     // Framebuffer is released
     gl::glBindFramebuffer(GL_FRAMEBUFFER, 0);
 };
+
+void OpenglRender::renderSelector() {
+    if constexpr (render_type == RenderType::RenderType_drawElements) { render(); }
+    if constexpr (render_type == RenderType::RenderType_drawTest) { renderTest(); }
+};
+
+auto OpenglRender::isThereSomethingToRender() const -> bool {
+    if constexpr (render_type == RenderType::RenderType_drawElements) {
+        if constexpr (uses_fbo) {
+            return !opengl_->parts_lists_.empty();
+        } else {
+            if (opengl_->parts_lists_.contains(mixed_parts_key)) { return !opengl_->parts_lists_.at(mixed_parts_key).empty(); }
+            return false;
+        }
+    }
+    if constexpr (render_type == RenderType::RenderType_drawTest) { return true; }
+}
 
 } // namespace saturnin::video
