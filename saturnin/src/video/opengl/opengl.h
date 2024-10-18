@@ -228,8 +228,6 @@ class Opengl {
     auto               saturnScreenResolution() const -> ScreenResolution { return screen_resolutions_.saturn; };
     void               hostScreenResolution(const ScreenResolution& res) { screen_resolutions_.host = res; };
     auto               hostScreenResolution() const -> ScreenResolution { return screen_resolutions_.host; };
-    void               partToHighlight(const Vdp1Part& part) { part_to_highlight_ = part; };
-    auto               partToHighlight() const -> Vdp1Part { return part_to_highlight_; };
 
     // Initializes this object
     void initialize();
@@ -350,9 +348,6 @@ class Opengl {
     // resolution.
     auto calculateDisplayViewportMatrix() const -> glm::highp_mat4;
 
-    // Initialize a VAO and returns the generated VAO id and the vertex buffer id.
-    static auto initializeVao() -> std::tuple<u32, u32>;
-
     // Initializes the framebuffer object and related elements.
     void initializeFbo();
 
@@ -449,10 +444,9 @@ class Opengl {
     ScreenResolutions screen_resolutions_; // Host and Saturn screen resolution
 
     // Following parts data will have to be moved to the platform agnostic renderer
-    MapOfPartsList parts_lists_;  // Map of parts_list, one entry by FboKey. When used with use_fbo = false, all parts are using
-                                  // the same map entry.
-    PartsList parts_list_debug_;  // List of parts used to generate textures for debugging.
-    Vdp1Part  part_to_highlight_; // Part that will be highlighted during debug.
+    MapOfPartsList parts_lists_; // Map of parts_list, one entry by FboKey. When used with use_fbo = false, all parts are using
+                                 // the same map entry.
+    PartsList parts_list_debug_; // List of parts used to generate textures for debugging.
 
     u32                        texture_array_id_;                 // Identifier for the texture array.
     TexturesLink               textures_link_;                    // Link between the Texture key and the OpenglTexture.
@@ -512,8 +506,14 @@ class OpenglRender {
     // Checks if there's something to render.
     auto isThereSomethingToRender() const -> bool;
 
+    // Accessors to the Vdp1Part to highlight on the debug layer.
+    void partToHighlight(const Vdp1Part& part) { part_to_highlight_ = part; };
+    auto partToHighlight() const -> Vdp1Part { return part_to_highlight_; };
+
   private:
     Opengl* opengl_;
+
+    Vdp1Part part_to_highlight_; // Part that will be highlighted during debug.
 };
 
 // Queries if the current video card is capable of rendering modern opengl (ie version 3.3+).
@@ -559,6 +559,9 @@ void errorCallback(int error, const char* description);
 
 // Generates vertex indices and draw ranges that will be used to batch draw from the list of parts.
 auto generateVertexIndicesAndDrawRanges(const PartsList& parts) -> std::tuple<std::vector<u32>, std::vector<DrawRange>>;
+
+// Initialize a VAO and returns the generated VAO id and the vertex buffer id.
+auto initializeVao() -> std::tuple<u32, u32>;
 
 //------------------
 // Shaders functions

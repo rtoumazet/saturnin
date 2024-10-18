@@ -1448,7 +1448,7 @@ void showDebugVdp1Window(core::EmulatorContext& state, bool* opened) {
                 ImGui::SetNextWindowContentSize(content_size);
                 ImGui::BeginChild("ChildPartDetail", child_size, true);
                 ImGui::TextWithColors(draw_list[current_part_idx].getDebugDetail().c_str());
-                state.opengl()->partToHighlight(draw_list[current_part_idx]);
+                state.opengl()->render()->partToHighlight(draw_list[current_part_idx]);
                 ImGui::EndChild();
             }
         }

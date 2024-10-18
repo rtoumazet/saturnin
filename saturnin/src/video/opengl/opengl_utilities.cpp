@@ -200,4 +200,52 @@ void errorCallback(int error, const char* description) { fprintf(stderr, "Error 
 
 void Opengl::onWindowResize(const u16 new_width, const u16 new_height) { hostScreenResolution({new_width, new_height}); }
 
+// static
+auto initializeVao() -> std::tuple<u32, u32> {
+    auto vao = u32{};
+    glGenVertexArrays(1, &vao);
+
+    // Creating the vertex buffer
+    auto vertex_buffer = u32{};
+    glGenBuffers(1, &vertex_buffer);
+
+    // Binding the VAO
+    glBindVertexArray(vao);
+
+    //// Declaring vertex buffer data
+    glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
+
+    // position pointer
+    glVertexAttribPointer(0, 2, GLenum::GL_SHORT, GL_FALSE, sizeof(Vertex), nullptr); // NOLINT: this is an index
+    glEnableVertexAttribArray(0);                                                     // NOLINT: this is an index
+
+    // texture coords pointer
+    auto offset = GLintptr(sizeof(VertexPosition));
+    glVertexAttribPointer(1, 3, GLenum::GL_FLOAT, GL_FALSE, sizeof(Vertex), std::bit_cast<GLvoid*>(offset));
+    glEnableVertexAttribArray(1);
+
+    // color pointer
+    offset += GLintptr(sizeof(TextureCoordinates));
+    glVertexAttribPointer(2, 4, GLenum::GL_UNSIGNED_BYTE, GL_TRUE, sizeof(Vertex), std::bit_cast<GLvoid*>(offset));
+    glEnableVertexAttribArray(2);
+
+    // gouraud color pointer
+    offset += GLintptr(sizeof(VertexColor));
+    glVertexAttribPointer(3, 3, GLenum::GL_BYTE, GL_TRUE, sizeof(Vertex), std::bit_cast<GLvoid*>(offset));
+    glEnableVertexAttribArray(3);
+
+    // color offset pointer R sign
+    offset += GLintptr(sizeof(Gouraud));
+    glVertexAttribPointer(4, 3, GLenum::GL_UNSIGNED_BYTE, GL_FALSE, sizeof(Vertex), std::bit_cast<GLvoid*>(offset));
+    glEnableVertexAttribArray(4);
+
+    // color offset pointer R value
+    offset += GLintptr(sizeof(std::array<u8, 3>));
+    glVertexAttribPointer(5, 3, GLenum::GL_UNSIGNED_BYTE, GL_TRUE, sizeof(Vertex), std::bit_cast<GLvoid*>(offset));
+    glEnableVertexAttribArray(5);
+
+    glBindVertexArray(0);
+    return std::make_tuple(vao, vertex_buffer);
+}
+
 } // namespace saturnin::video

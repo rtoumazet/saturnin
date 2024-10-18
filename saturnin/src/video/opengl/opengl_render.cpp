@@ -97,7 +97,7 @@ void OpenglRender::renderToAvailableTexture(const FboKey& key, const PartsList& 
 
 void OpenglRender::renderParts(const PartsList& parts_list, const u32 texture_id) {
     if (!parts_list.empty()) {
-        const auto [vao, vertex_buffer] = opengl_->initializeVao();
+        const auto [vao, vertex_buffer] = initializeVao();
 
         glUseProgram(opengl_->shaders_.programs[ProgramShader::main]);
         glBindVertexArray(vao);                       // binding VAO
@@ -150,7 +150,7 @@ void OpenglRender::renderParts(const PartsList& parts_list, const u32 texture_id
 }
 
 void OpenglRender::renderFboTexture(const u32 texture_id) {
-    const auto [vao, vertex_buffer] = opengl_->initializeVao();
+    const auto [vao, vertex_buffer] = initializeVao();
 
     glUseProgram(opengl_->shaders_.programs[ProgramShader::main]);
     glBindVertexArray(vao);                       // binding VAO
@@ -239,7 +239,7 @@ void OpenglRender::renderByScreenPriority() {
 
     // Rendering is done to FBOs depending on the priority and layer combo.
     for (const auto& [key, parts] : global_parts_list) {
-        opengl_->opengl_render_->renderToAvailableTexture(key, parts);
+        renderToAvailableTexture(key, parts);
     }
 
     preRender();
@@ -286,7 +286,7 @@ void OpenglRender::renderByParts() {
 void OpenglRender::renderTest() {
     preRender();
 
-    const auto [vao, vertex_buffer] = opengl_->initializeVao();
+    const auto [vao, vertex_buffer] = initializeVao();
 
     glUseProgram(opengl_->shaders_.programs[ProgramShader::main]);
     glBindVertexArray(vao);                       // binding VAO
@@ -462,10 +462,10 @@ void OpenglRender::renderVdp1DebugOverlay() {
 
     //----------- Render -----------------//
     // Calculating the ortho projection matrix
-    const auto [vao_simple, vertex_buffer_simple] = opengl_->initializeVao();
+    const auto [vao_simple, vertex_buffer_simple] = initializeVao();
     const auto proj_matrix                        = opengl_->calculateDisplayViewportMatrix();
 
-    auto part = opengl_->partToHighlight();
+    auto part = partToHighlight();
 
     auto vertexes = std::vector<Vertex>{};
 
