@@ -303,7 +303,7 @@ auto Opengl::getRenderedBufferTextureId(const GuiTextureType type) -> u32 {
     switch (type) {
         using enum GuiTextureType;
         case render_buffer: {
-            layer = getFboTextureLayer(currentRenderedBuffer());
+            layer = getFboTextureLayer(render()->currentRenderedBuffer());
             break;
         }
         case vdp1_debug_buffer: {
@@ -474,7 +474,7 @@ void Opengl::initializeFbo() {
         fbo_texture_type_to_layer_[i] = priority;
     }
 
-    currentRenderedBuffer(front_buffer);
+    render()->currentRenderedBuffer(front_buffer);
 
     // Generating FBOs used by the renderer.
     using enum FboType;
@@ -501,7 +501,7 @@ auto Opengl::generateFbo(const FboType fbo_type) -> u32 {
 
             // Attaching the color texture currently used as framebuffer to the FBO.
             attachTextureLayerToFbo(fbo_texture_array_id_,
-                                    getFboTextureLayer(currentRenderedBuffer()),
+                                    getFboTextureLayer(render()->currentRenderedBuffer()),
                                     GLenum::GL_FRAMEBUFFER,
                                     GLenum::GL_COLOR_ATTACHMENT0);
             break;
@@ -510,7 +510,7 @@ auto Opengl::generateFbo(const FboType fbo_type) -> u32 {
             glBindFramebuffer(GLenum::GL_FRAMEBUFFER, fbo);
 
             attachTextureLayerToFbo(fbo_texture_array_id_,
-                                    getFboTextureLayer(currentRenderedBuffer()),
+                                    getFboTextureLayer(render()->currentRenderedBuffer()),
                                     GLenum::GL_FRAMEBUFFER,
                                     GLenum::GL_COLOR_ATTACHMENT0);
 
@@ -583,11 +583,6 @@ auto Opengl::initializeTextureArray(const u32 width, const u32 height, const u32
 inline auto Opengl::getFboTextureLayer(const FboTextureType type) const -> u8 {
     return static_cast<u8>(
         std::distance(fbo_texture_type_to_layer_.begin(), std::ranges::find(fbo_texture_type_to_layer_, type)));
-}
-
-void Opengl::switchRenderedBuffer() {
-    current_rendered_buffer_
-        = (current_rendered_buffer_ == FboTextureType::back_buffer) ? FboTextureType::front_buffer : FboTextureType::back_buffer;
 }
 
 void Opengl::attachTextureLayerToFbo(const u32        texture_id,

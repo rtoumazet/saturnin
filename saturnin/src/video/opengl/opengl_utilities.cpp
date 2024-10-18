@@ -200,7 +200,6 @@ void errorCallback(int error, const char* description) { fprintf(stderr, "Error 
 
 void Opengl::onWindowResize(const u16 new_width, const u16 new_height) { hostScreenResolution({new_width, new_height}); }
 
-// static
 auto initializeVao() -> std::tuple<u32, u32> {
     auto vao = u32{};
     glGenVertexArrays(1, &vao);

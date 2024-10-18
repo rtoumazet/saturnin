@@ -39,12 +39,12 @@ using namespace gl21ext;
 using core::tr;
 
 void OpenglRender::preRender() {
-    opengl_->switchRenderedBuffer();
+    switchRenderedBuffer();
 
     glBindFramebuffer(GLenum::GL_FRAMEBUFFER, opengl_->fbo_type_to_id_[FboType::general]);
 
     opengl_->attachTextureLayerToFbo(opengl_->fbo_texture_array_id_,
-                                     opengl_->getFboTextureLayer(opengl_->currentRenderedBuffer()),
+                                     opengl_->getFboTextureLayer(currentRenderedBuffer()),
                                      GLenum::GL_FRAMEBUFFER,
                                      GLenum::GL_COLOR_ATTACHMENT0);
 
@@ -554,6 +554,11 @@ auto OpenglRender::isThereSomethingToRender() const -> bool {
         }
     }
     if constexpr (render_type == RenderType::RenderType_drawTest) { return true; }
+}
+
+void OpenglRender::switchRenderedBuffer() {
+    current_rendered_buffer_
+        = (current_rendered_buffer_ == FboTextureType::back_buffer) ? FboTextureType::front_buffer : FboTextureType::back_buffer;
 }
 
 } // namespace saturnin::video

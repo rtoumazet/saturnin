@@ -216,8 +216,6 @@ class Opengl {
     ~Opengl();
 
     // Accessors / Mutators
-    [[nodiscard]] auto currentRenderedBuffer() const { return current_rendered_buffer_; };
-    void               currentRenderedBuffer(const FboTextureType type) { current_rendered_buffer_ = type; };
     [[nodiscard]] auto vdp1DebugOverlayTextureId() const { return getFboTextureLayer(FboTextureType::vdp1_debug_overlay); };
     [[nodiscard]] auto vdp2DebugLayerTextureId() const -> u32 {
         return gui_texture_type_to_id_.at(GuiTextureType::vdp2_debug_buffer);
@@ -360,9 +358,6 @@ class Opengl {
     // Gets the FBO texture layer currently used by the FboTextureType.
     auto getFboTextureLayer(const FboTextureType type) const -> u8;
 
-    // Switch between back and front rendering buffers.
-    void switchRenderedBuffer();
-
     // Attachs a texture array layer to the curently bound FBO.
     void attachTextureLayerToFbo(const u32        texture_id,
                                  const u8         layer,
@@ -434,7 +429,6 @@ class Opengl {
     u32                   fbo_texture_array_id_;      // Identifier for the FBO texture array.
     FboTextureTypeToLayer fbo_texture_type_to_layer_; // Links the used FBO texture layer to a texture type. Index of the array
                                                       // is the layer, content is the type.
-    FboTextureType     current_rendered_buffer_;      // The current rendered buffer (front or back)
     GuiTextureTypeToId gui_texture_type_to_id_;       // Links the texture to be used in the GUI to a type.
 
     FboKeyToFbo          fbo_key_to_fbo_pool_index_; // Link between a FBO key and its relative FBO index in the pool.
@@ -506,14 +500,21 @@ class OpenglRender {
     // Checks if there's something to render.
     auto isThereSomethingToRender() const -> bool;
 
-    // Accessors to the Vdp1Part to highlight on the debug layer.
-    void partToHighlight(const Vdp1Part& part) { part_to_highlight_ = part; };
-    auto partToHighlight() const -> Vdp1Part { return part_to_highlight_; };
+    // Switch between back and front rendering buffers.
+    void switchRenderedBuffer();
+
+    // Accessors / mutators
+    void               partToHighlight(const Vdp1Part& part) { part_to_highlight_ = part; };
+    auto               partToHighlight() const -> Vdp1Part { return part_to_highlight_; };
+    [[nodiscard]] auto currentRenderedBuffer() const { return current_rendered_buffer_; };
+    void               currentRenderedBuffer(const FboTextureType type) { current_rendered_buffer_ = type; };
 
   private:
     Opengl* opengl_;
 
     Vdp1Part part_to_highlight_; // Part that will be highlighted during debug.
+
+    FboTextureType current_rendered_buffer_; // The current rendered buffer (front or back)
 };
 
 // Queries if the current video card is capable of rendering modern opengl (ie version 3.3+).
