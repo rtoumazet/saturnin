@@ -444,12 +444,6 @@ class Opengl {
     // Returns the next available FBO texture index (with status 'unused').
     auto getAvailableFboTextureIndex() -> std::optional<u8>;
 
-    // Renders the list of parts to a specific texture.
-    void renderParts(const PartsList& parts_list, const u32 texture_id);
-
-    // Renders a specific FBO texture.
-    void renderFboTexture(const u32 texture_id);
-
     auto getMutex(const MutexType& type) -> std::mutex&;
 
     core::Config* config_; // Configuration object.
@@ -506,6 +500,12 @@ class OpenglRender {
 
     // Renders a list of parts to a specific FBO.
     void renderToAvailableTexture(const FboKey& key, const PartsList& parts_list);
+
+    // Renders the list of parts to a specific texture.
+    void renderParts(const PartsList& parts_list, const u32 texture_id);
+
+    // Renders a specific FBO texture.
+    void renderFboTexture(const u32 texture_id);
 
   private:
     Opengl* opengl_;

@@ -85,7 +85,7 @@ void OpenglRender::renderToAvailableTexture(const FboKey& key, const PartsList& 
     const auto& [priority, layer] = key;
     Log::debug(opengl, "- Rendering key [priority={}, layer={}] to FBO with index {}", priority, layer_to_name.at(layer), *index);
 
-    opengl_->renderParts(parts_list, opengl_->fbo_texture_pool_[*index]);
+    renderParts(parts_list, opengl_->fbo_texture_pool_[*index]);
 
     Log::debug(opengl, "- Changing FBO status at index {} to 'reuse'", *index);
 
@@ -95,35 +95,35 @@ void OpenglRender::renderToAvailableTexture(const FboKey& key, const PartsList& 
     Log::debug(opengl, "renderToAvailableFbo() return");
 }
 
-void Opengl::renderParts(const PartsList& parts_list, const u32 texture_id) {
+void OpenglRender::renderParts(const PartsList& parts_list, const u32 texture_id) {
     if (!parts_list.empty()) {
-        const auto [vao, vertex_buffer] = initializeVao();
+        const auto [vao, vertex_buffer] = opengl_->initializeVao();
 
-        glUseProgram(shaders_.programs[ProgramShader::main]);
+        glUseProgram(opengl_->shaders_.programs[ProgramShader::main]);
         glBindVertexArray(vao);                       // binding VAO
         glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer); // binding vertex buffer
 
         // Calculating the ortho projection matrix
-        const auto proj_matrix = calculateDisplayViewportMatrix();
+        const auto proj_matrix = opengl_->calculateDisplayViewportMatrix();
 
         // Sending the ortho projection matrix to the shader
-        const auto uni_proj_matrix = glGetUniformLocation(shaders_.programs[ProgramShader::main], "proj_matrix");
+        const auto uni_proj_matrix = glGetUniformLocation(opengl_->shaders_.programs[ProgramShader::main], "proj_matrix");
         glUniformMatrix4fv(uni_proj_matrix, 1, GL_FALSE, glm::value_ptr(proj_matrix));
 
         glActiveTexture(GLenum::GL_TEXTURE0);
-        const auto sampler_loc = glGetUniformLocation(shaders_.programs[ProgramShader::main], "sampler");
+        const auto sampler_loc = glGetUniformLocation(opengl_->shaders_.programs[ProgramShader::main], "sampler");
 
         glUniform1i(sampler_loc, 0);
         glBindTexture(GL_TEXTURE_2D_ARRAY, texture_id);
 
-        const auto texture_used_loc = glGetUniformLocation(shaders_.programs[ProgramShader::main], "is_texture_used");
+        const auto texture_used_loc = glGetUniformLocation(opengl_->shaders_.programs[ProgramShader::main], "is_texture_used");
 
         auto elements_buffer = u32{};
         glGenBuffers(1, &elements_buffer); // This buffer will be used to send indices data to the GPU
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elements_buffer);
 
         const auto&& [indices, draw_ranges] = generateVertexIndicesAndDrawRanges(parts_list);
-        const auto vertexes                 = readVertexes(parts_list);
+        const auto vertexes                 = opengl_->readVertexes(parts_list);
 
         // Sending data to the GPU
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(u32) * indices.size(), indices.data(), GL_STATIC_DRAW);
@@ -149,27 +149,27 @@ void Opengl::renderParts(const PartsList& parts_list, const u32 texture_id) {
     }
 }
 
-void Opengl::renderFboTexture(const u32 texture_id) {
-    const auto [vao, vertex_buffer] = initializeVao();
+void OpenglRender::renderFboTexture(const u32 texture_id) {
+    const auto [vao, vertex_buffer] = opengl_->initializeVao();
 
-    glUseProgram(shaders_.programs[ProgramShader::main]);
+    glUseProgram(opengl_->shaders_.programs[ProgramShader::main]);
     glBindVertexArray(vao);                       // binding VAO
     glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer); // binding vertex buffer
 
     // Calculating the ortho projection matrix
-    const auto proj_matrix = calculateDisplayViewportMatrix();
+    const auto proj_matrix = opengl_->calculateDisplayViewportMatrix();
 
     // Sending the ortho projection matrix to the shader
-    const auto uni_proj_matrix = glGetUniformLocation(shaders_.programs[ProgramShader::main], "proj_matrix");
+    const auto uni_proj_matrix = glGetUniformLocation(opengl_->shaders_.programs[ProgramShader::main], "proj_matrix");
     glUniformMatrix4fv(uni_proj_matrix, 1, GL_FALSE, glm::value_ptr(proj_matrix));
 
     glActiveTexture(GLenum::GL_TEXTURE0);
-    const auto sampler_loc = glGetUniformLocation(shaders_.programs[ProgramShader::main], "sampler");
+    const auto sampler_loc = glGetUniformLocation(opengl_->shaders_.programs[ProgramShader::main], "sampler");
 
     glUniform1i(sampler_loc, 0);
     glBindTexture(GL_TEXTURE_2D, texture_id);
 
-    const auto texture_used_loc = glGetUniformLocation(shaders_.programs[ProgramShader::main], "is_texture_used");
+    const auto texture_used_loc = glGetUniformLocation(opengl_->shaders_.programs[ProgramShader::main], "is_texture_used");
     glUniform1i(texture_used_loc, GLboolean(true));
 
     auto vertexes = std::vector<Vertex>{
@@ -247,7 +247,7 @@ void Opengl::renderByScreenPriority() {
     // :TODO: Render the FBOs to the current framebuffer
     std::ranges::reverse_view rv{fbo_key_to_fbo_pool_index_};
     for (const auto& [key, index] : rv) {
-        renderFboTexture(fbo_texture_pool_[index]);
+        opengl_render_->renderFboTexture(fbo_texture_pool_[index]);
     }
 
     opengl_render_->postRender();
@@ -271,7 +271,7 @@ void Opengl::renderByParts() {
     };
     getParts();
 
-    renderParts(parts_list, texture_array_id_);
+    opengl_render_->renderParts(parts_list, texture_array_id_);
 
     const auto notifyMainThread = [this, &parts_list]() {
         std::lock_guard lk(getMutex(MutexType::parts_list));
@@ -549,7 +549,7 @@ void Opengl::renderVdp2DebugLayer(core::EmulatorContext& state) {
         }
     }
 
-    if (!parts_list.empty()) { renderParts(parts_list, texture_array_id_); }
+    if (!parts_list.empty()) { opengl_render_->renderParts(parts_list, texture_array_id_); }
 
     //------ Post render --------//
     // Framebuffer is released
