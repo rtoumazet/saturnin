@@ -49,7 +49,6 @@
 #include <saturnin/src/video/gui.h>
 #include <saturnin/src/video/texture.h>
 #include <saturnin/src/video/vdp_common.h>
-#include <saturnin/src/video/vdp1.h>
 #include <saturnin/src/resource_holder.hpp>
 
 // using namespace gl;
@@ -65,15 +64,6 @@ namespace uti = saturnin::utilities;
 using core::Log;
 using core::Logger;
 using core::tr;
-
-const std::unordered_map<ScrollScreen, VdpLayer> screen_to_layer = {
-    {ScrollScreen::nbg3, VdpLayer::nbg3},
-    {ScrollScreen::nbg2, VdpLayer::nbg2},
-    {ScrollScreen::nbg1, VdpLayer::nbg1},
-    {ScrollScreen::nbg0, VdpLayer::nbg0},
-    {ScrollScreen::rbg1, VdpLayer::rbg1},
-    {ScrollScreen::rbg0, VdpLayer::rbg0}
-};
 
 Opengl::Opengl(core::Config* config) : config_(config), opengl_render_(std::make_unique<OpenglRender>(this)) {};
 
@@ -97,13 +87,14 @@ void Opengl::initialize() {
         = generateTexture(texture_array_width, texture_array_height, std::vector<u8>{});
 
     initializeFbo();
-    shaders_.graphics        = initializeShaders();
-    const auto main_vertex   = createVertexShader(shaders_.graphics, "main.vert");
-    const auto main_fragment = createFragmentShader(shaders_.graphics, "main.frag");
-    shaders_.programs.try_emplace(ProgramShader::main, createProgramShader(main_vertex, main_fragment));
+    render()->initialize();
+    // shaders_.graphics        = initializeShaders();
+    // const auto main_vertex   = createVertexShader(shaders_.graphics, "main.vert");
+    // const auto main_fragment = createFragmentShader(shaders_.graphics, "main.frag");
+    // shaders_.programs.try_emplace(ProgramShader::main, createProgramShader(main_vertex, main_fragment));
 
-    const auto shaders_to_delete = std::vector<u32>{main_vertex, main_fragment};
-    deleteShaders(shaders_to_delete);
+    // const auto shaders_to_delete = std::vector<u32>{main_vertex, main_fragment};
+    // deleteShaders(shaders_to_delete);
 
     texture_array_id_ = initializeTextureArray(texture_array_width, texture_array_height, texture_array_depth);
 
@@ -113,10 +104,8 @@ void Opengl::initialize() {
     }
 }
 
-void Opengl::shutdown() const {
-    for (auto& [name, id] : shaders_.programs) {
-        glDeleteProgram(id);
-    }
+void Opengl::shutdown() {
+    render()->shutdown();
 
     gl33core::glBindFramebuffer(GL_FRAMEBUFFER_EXT, 0);
     using enum FboType;
@@ -130,124 +119,6 @@ void Opengl::shutdown() const {
 
     for (const auto& [type, texture_id] : gui_texture_type_to_id_) {
         deleteTexture(texture_id);
-    }
-}
-
-void Opengl::displayFramebuffer(core::EmulatorContext& state) {
-    if constexpr (uses_fbo) {
-        displayFramebufferByScreenPriority(state);
-    } else {
-        displayFramebufferByParts(state);
-    }
-}
-
-void Opengl::displayFramebufferByScreenPriority(core::EmulatorContext& state) {
-    // - Render each layer + priority to one specific FBO
-    // - Put render() content in its own function, and name it renderToAvailableFbo()
-    // - Render() itself must take care of rendering the different FBOs in order
-    // - Find which FBO to use in the FBO priority list
-    // - displayFramebuffer() must generate one PartList by layer + priority to display to the FBO
-
-    MapOfPartsList global_parts_list;
-
-    // Step one : get displayable layers
-    using enum ScrollScreen;
-    std::vector<ScrollScreen> screens_to_display;
-    if (!state.vdp2()->isLayerDisabled(nbg3)) screens_to_display.push_back(nbg3);
-    if (!state.vdp2()->isLayerDisabled(nbg2)) screens_to_display.push_back(nbg2);
-    if (!state.vdp2()->isLayerDisabled(nbg1)) screens_to_display.push_back(nbg1);
-    if (!state.vdp2()->isLayerDisabled(nbg0)) screens_to_display.push_back(nbg0);
-    if (!state.vdp2()->isLayerDisabled(rbg1)) screens_to_display.push_back(rbg1);
-    if (!state.vdp2()->isLayerDisabled(rbg0)) screens_to_display.push_back(rbg0);
-
-    // Step two : populate parts list for each priority + layer couple
-    const auto addVdp1PartsToList = [&](const u8 priority) {
-        auto        local_parts = PartsList();
-        const auto& vdp1_parts  = state.vdp1()->vdp1Parts(priority);
-        if (!vdp1_parts.empty()) {
-            local_parts.reserve(vdp1_parts.size());
-            for (const auto& p : vdp1_parts) {
-                local_parts.emplace_back(p);
-            }
-            global_parts_list[{priority, VdpLayer::sprite}] = std::move(local_parts);
-            // Sprite layer is recalculated every time, there's no cache for now.
-            setFboTextureStatus(priority, VdpLayer::sprite, FboTextureStatus::to_clear);
-        }
-    };
-
-    const auto addVdp2PartsToList = [&](const ScrollScreen screen, const u32 priority) {
-        auto        local_parts = PartsList();
-        const auto& vdp2_parts  = state.vdp2()->vdp2Parts(screen, priority);
-        if (!vdp2_parts.empty()) {
-            local_parts.reserve(vdp2_parts.size());
-            for (const auto& p : vdp2_parts) {
-                local_parts.emplace_back(p);
-            }
-            global_parts_list[{priority, screen_to_layer.at(screen)}] = std::move(local_parts);
-        }
-    };
-
-    for (u8 priority = 7; priority > 0; --priority) {
-        for (const auto& screen : screens_to_display) {
-            addVdp2PartsToList(screen, priority);
-        }
-        addVdp1PartsToList(priority);
-    }
-
-    // Step three : wait to send data to the render thread.
-    if constexpr (render_type == RenderType::RenderType_drawElements) {
-        if (parts_lists_.empty()) {
-            std::unique_lock lk(getMutex(MutexType::parts_list));
-            parts_lists_ = std::move(global_parts_list);
-            data_condition_.wait(lk, [this]() { return parts_lists_.empty(); });
-        }
-    }
-}
-
-void Opengl::displayFramebufferByParts(core::EmulatorContext& state) {
-    auto parts_list = PartsList{};
-
-    const auto addVdp2PartsToList = [&](const ScrollScreen s) {
-        if (const auto& vdp2_planes = state.vdp2()->vdp2Parts(s, VdpType::vdp2_cell); !vdp2_planes.empty()) {
-            parts_list.reserve(parts_list.size() + vdp2_planes.size());
-            for (const auto& p : vdp2_planes) {
-                parts_list.emplace_back(p);
-            }
-        }
-
-        const auto& vdp2_bitmaps = state.vdp2()->vdp2Parts(s, VdpType::vdp2_bitmap);
-        if (!vdp2_bitmaps.empty()) {
-            parts_list.reserve(parts_list.size() + vdp2_bitmaps.size());
-            for (const auto& p : vdp2_bitmaps) {
-                parts_list.emplace_back(p);
-            }
-        }
-    };
-
-    const auto addVdp1PartsToList = [&]() {
-        const auto& vdp1_parts = state.vdp1()->vdp1Parts();
-        if (!vdp1_parts.empty()) {
-            parts_list.reserve(parts_list.size() + vdp1_parts.size());
-            for (const auto& p : vdp1_parts) {
-                parts_list.emplace_back(p);
-            }
-        }
-    };
-
-    if (!state.vdp2()->isLayerDisabled(ScrollScreen::nbg3)) { addVdp2PartsToList(ScrollScreen::nbg3); }
-    if (!state.vdp2()->isLayerDisabled(ScrollScreen::nbg2)) { addVdp2PartsToList(ScrollScreen::nbg2); }
-    if (!state.vdp2()->isLayerDisabled(ScrollScreen::nbg1)) { addVdp2PartsToList(ScrollScreen::nbg1); }
-    if (!state.vdp2()->isLayerDisabled(ScrollScreen::nbg0)) { addVdp2PartsToList(ScrollScreen::nbg0); }
-    if (!state.vdp2()->isLayerDisabled(ScrollScreen::rbg1)) { addVdp2PartsToList(ScrollScreen::rbg1); }
-    if (!state.vdp2()->isLayerDisabled(ScrollScreen::rbg0)) { addVdp2PartsToList(ScrollScreen::rbg0); }
-    addVdp1PartsToList();
-    std::ranges::stable_sort(parts_list, [](const RenderPart& a, const RenderPart& b) { return a.priority < b.priority; });
-    if constexpr (render_type == RenderType::RenderType_drawElements) {
-        if (parts_lists_[mixed_parts_key].empty()) {
-            std::unique_lock lk(getMutex(MutexType::parts_list));
-            parts_lists_[mixed_parts_key] = std::move(parts_list);
-            data_condition_.wait(lk, [this]() { return parts_lists_[mixed_parts_key].empty(); });
-        }
     }
 }
 
@@ -419,42 +290,6 @@ auto Opengl::generateTextureFromTextureArrayLayer(const GuiTextureType dst_textu
     return gui_texture_type_to_id_[dst_texture_type];
 }
 
-auto Opengl::calculateDisplayViewportMatrix() const -> glm::highp_mat4 {
-    const auto host_res     = hostScreenResolution();
-    const auto host_ratio   = static_cast<float>(host_res.width) / static_cast<float>(host_res.height);
-    const auto saturn_res   = saturnScreenResolution();
-    const auto saturn_ratio = static_cast<float>(saturn_res.width) / static_cast<float>(saturn_res.height);
-
-    // If the Saturn resolution isn't set yet, calculation is aborted
-    if ((saturn_res.height == 0) || (saturn_res.width == 0)) { return glm::mat4{}; }
-
-    auto projection = glm::mat4{};
-    auto view       = glm::mat4{1.0f};
-
-    if (host_ratio >= saturn_ratio) {
-        // Pillarbox display (wide viewport), use full height
-        projection = glm::mat4{
-            glm::ortho(0.0f, host_ratio / saturn_ratio * saturn_res.width, 0.0f, static_cast<float>(saturn_res.height))};
-
-        // Centering the viewport
-        const auto empty_zone = host_res.width - saturn_res.width * host_res.height / saturn_res.height;
-        const auto amount     = static_cast<float>(empty_zone) / host_res.width;
-        view                  = glm::translate(view, glm::vec3(amount, 0.0f, 0.0f));
-
-    } else {
-        // Letterbox display (tall viewport) use full width
-        projection = glm::mat4{
-            glm::ortho(0.f, static_cast<float>(saturn_res.width), 0.f, saturn_ratio / host_ratio * saturn_res.height)};
-
-        // Centering the viewport
-        const auto empty_zone = host_res.height - saturn_res.height * host_res.width / saturn_res.width;
-        const auto amount     = static_cast<float>(empty_zone) / host_res.height;
-        view                  = glm::translate(view, glm::vec3(0.0f, amount, 0.0f));
-    }
-
-    return view * projection;
-}
-
 void Opengl::initializeFbo() {
     fbo_texture_array_id_ = initializeTextureArray(fbo_texture_array_width, fbo_texture_array_height, fbo_texture_array_depth);
 
@@ -594,41 +429,6 @@ void Opengl::attachTextureLayerToFbo(const u32        texture_id,
 
 void Opengl::attachTextureToFbo(const u32 texture_id, const gl::GLenum framebuffer_target, const gl::GLenum color_attachment) {
     glFramebufferTexture2D(framebuffer_target, color_attachment, GLenum::GL_TEXTURE_2D, texture_id, 0);
-}
-
-auto Opengl::calculateViewportPosAndSize() const -> std::tuple<u32, u32, u32, u32> {
-    const auto host_res     = hostScreenResolution();
-    const auto host_ratio   = static_cast<float>(host_res.width) / static_cast<float>(host_res.height);
-    const auto saturn_res   = saturnScreenResolution();
-    const auto saturn_ratio = static_cast<float>(saturn_res.width) / static_cast<float>(saturn_res.height);
-
-    // Viewport position and size
-    auto x      = u32{};
-    auto y      = u32{};
-    auto width  = u32{};
-    auto height = u32{};
-
-    if (host_ratio >= saturn_ratio) {
-        // Pillarbox display (wide viewport), use full height
-        if ((saturn_res.height != 0) && (host_res.width != 0)) {
-            const auto empty_zone = host_res.width - saturn_res.width * host_res.height / saturn_res.height;
-            x                     = empty_zone * saturn_framebuffer_width / host_res.width / 2;
-            y                     = 0;
-            width                 = (host_res.width - empty_zone) * saturn_framebuffer_width / host_res.width;
-            height                = saturn_framebuffer_height;
-        }
-    } else {
-        // Letterbox display (tall viewport) use full width
-        if ((saturn_res.width != 0) && (host_res.height != 0)) {
-            const auto empty_zone = host_res.height - saturn_res.height * host_res.width / saturn_res.width;
-            x                     = 0;
-            y                     = empty_zone * saturn_framebuffer_height / host_res.height / 2;
-            width                 = saturn_framebuffer_width;
-            height                = (host_res.height - empty_zone) * saturn_framebuffer_height / host_res.height;
-        }
-    }
-
-    return std::make_tuple(x, y, width, height);
 }
 
 auto runOpengl(core::EmulatorContext& state) -> s32 {

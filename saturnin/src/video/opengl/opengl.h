@@ -202,6 +202,15 @@ const std::unordered_map<VdpLayer, std::string> layer_to_name = {
     {VdpLayer::undefined, "undefined"}
 };
 
+const std::unordered_map<ScrollScreen, VdpLayer> screen_to_layer = {
+    {ScrollScreen::nbg3, VdpLayer::nbg3},
+    {ScrollScreen::nbg2, VdpLayer::nbg2},
+    {ScrollScreen::nbg1, VdpLayer::nbg1},
+    {ScrollScreen::nbg0, VdpLayer::nbg0},
+    {ScrollScreen::rbg1, VdpLayer::rbg1},
+    {ScrollScreen::rbg0, VdpLayer::rbg0}
+};
+
 class OpenglRender;
 
 class Opengl {
@@ -231,12 +240,7 @@ class Opengl {
     void initialize();
 
     // Shuts down this object and frees any resources it is using
-    void shutdown() const;
-
-    // Displays the framebuffer content (VDP1 + VDP2)
-    void displayFramebuffer(core::EmulatorContext& state);
-    void displayFramebufferByScreenPriority(core::EmulatorContext& state);
-    void displayFramebufferByParts(core::EmulatorContext& state);
+    void shutdown();
 
     // Actions executed on window resize.
     void onWindowResize(const u16 new_width, const u16 new_height);
@@ -342,10 +346,6 @@ class Opengl {
   private:
     friend class OpenglRender;
 
-    // Calculates the display viewport matrix, adding letterbox or pillarbox when the display isn't exactly like the Saturn
-    // resolution.
-    auto calculateDisplayViewportMatrix() const -> glm::highp_mat4;
-
     // Initializes the framebuffer object and related elements.
     void initializeFbo();
 
@@ -366,9 +366,6 @@ class Opengl {
 
     // Attachs a texture to the curently bound FBO.
     void attachTextureToFbo(const u32 texture_id, const gl::GLenum framebuffer_target, const gl::GLenum color_attachment);
-
-    // Calculates and returns viewport position and size.
-    auto calculateViewportPosAndSize() const -> std::tuple<u32, u32, u32, u32>;
 
     // Pack textures in a texture array of texture atlases for the selected layer.
     void packTextures(std::vector<OpenglTexture>& textures, const VdpLayer layer);
@@ -437,11 +434,6 @@ class Opengl {
 
     ScreenResolutions screen_resolutions_; // Host and Saturn screen resolution
 
-    // Following parts data will have to be moved to the platform agnostic renderer
-    MapOfPartsList parts_lists_; // Map of parts_list, one entry by FboKey. When used with use_fbo = false, all parts are using
-                                 // the same map entry.
-    PartsList parts_list_debug_; // List of parts used to generate textures for debugging.
-
     u32                        texture_array_id_;                 // Identifier for the texture array.
     TexturesLink               textures_link_;                    // Link between the Texture key and the OpenglTexture.
     u32                        texture_array_debug_layer_id_{};   // Identifier for the texture array debug layer.
@@ -449,10 +441,6 @@ class Opengl {
     LayerToCacheReloadState    layer_to_cache_reload_state_{};    // Stores if a layer needs its cache to be reloaded .
 
     std::array<std::mutex, 3> mutexes_{std::mutex(), std::mutex(), std::mutex()}; // Mutexes used to protect various shared data
-
-    std::condition_variable data_condition_; // Condition variable to synchronize between emulation and UI thread.
-
-    Shaders shaders_; // Shaders storage
 
     std::string fps_; // Calculated frames per second.
 };
@@ -466,6 +454,9 @@ class OpenglRender {
     OpenglRender(OpenglRender&&)                 = delete;
     OpenglRender& operator=(const OpenglRender&) = delete;
     OpenglRender& operator=(OpenglRender&&)      = delete;
+
+    void initialize();
+    void shutdown() const;
 
     // Pre/post rendering functions
     void preRender();
@@ -503,6 +494,18 @@ class OpenglRender {
     // Switch between back and front rendering buffers.
     void switchRenderedBuffer();
 
+    // Calculates the display viewport matrix, adding letterbox or pillarbox when the display isn't exactly like the Saturn
+    // resolution.
+    auto calculateDisplayViewportMatrix() const -> glm::highp_mat4;
+
+    // Calculates and returns viewport position and size.
+    auto calculateViewportPosAndSize() const -> std::tuple<u32, u32, u32, u32>;
+
+    // Displays the framebuffer content (VDP1 + VDP2)
+    void displayFramebuffer(core::EmulatorContext& state);
+    void displayFramebufferByScreenPriority(core::EmulatorContext& state);
+    void displayFramebufferByParts(core::EmulatorContext& state);
+
     // Accessors / mutators
     void               partToHighlight(const Vdp1Part& part) { part_to_highlight_ = part; };
     auto               partToHighlight() const -> Vdp1Part { return part_to_highlight_; };
@@ -515,6 +518,15 @@ class OpenglRender {
     Vdp1Part part_to_highlight_; // Part that will be highlighted during debug.
 
     FboTextureType current_rendered_buffer_; // The current rendered buffer (front or back)
+
+    // Following parts data will have to be moved to the platform agnostic renderer
+    MapOfPartsList parts_lists_; // Map of parts_list, one entry by FboKey. When used with use_fbo = false, all parts are using
+                                 // the same map entry.
+    PartsList parts_list_debug_; // List of parts used to generate textures for debugging.
+
+    std::condition_variable data_condition_; // Condition variable to synchronize between emulation and UI thread.
+
+    Shaders shaders_; // Shaders storage
 };
 
 // Queries if the current video card is capable of rendering modern opengl (ie version 3.3+).

@@ -108,14 +108,6 @@ enum class TvStandard : s8 {
     ntsc    = 1   ///< NTSC.
 };
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   ScrollScreen
-///
-/// \brief  Scroll screens.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-enum class ScrollScreen { nbg0 = 0, nbg1 = 1, nbg2 = 2, nbg3 = 3, rbg0 = 4, rbg1 = 5, none = -1 };
-
 using DisabledScrollScreen = std::unordered_map<ScrollScreen, bool>;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1108,8 +1100,8 @@ class Vdp2 {
     /// \returns	The required VRAM character pattern reads.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    static auto calculateRequiredVramCharacterPatternReads(ReductionSetting                    r,
-                                                           Vdp2Regs::CharacterColorNumber3Bits ccn) -> VramAccessNumber;
+    static auto calculateRequiredVramCharacterPatternReads(ReductionSetting r, Vdp2Regs::CharacterColorNumber3Bits ccn)
+        -> VramAccessNumber;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn	static auto Vdp2::calculateRequiredVramCharacterPatternReads(ReductionSetting r, Vdp2Regs::CharacterColorNumber2Bits
@@ -1126,8 +1118,8 @@ class Vdp2 {
     /// \returns	The required VRAM character pattern reads.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    static auto calculateRequiredVramCharacterPatternReads(ReductionSetting                    r,
-                                                           Vdp2Regs::CharacterColorNumber2Bits ccn) -> VramAccessNumber;
+    static auto calculateRequiredVramCharacterPatternReads(ReductionSetting r, Vdp2Regs::CharacterColorNumber2Bits ccn)
+        -> VramAccessNumber;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn	static auto Vdp2::calculateRequiredVramCharacterPatternReads(ReductionSetting r, Vdp2Regs::CharacterColorNumber1Bit
@@ -1144,8 +1136,8 @@ class Vdp2 {
     /// \returns	The required VRAM character pattern reads.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    static auto calculateRequiredVramCharacterPatternReads(ReductionSetting                   r,
-                                                           Vdp2Regs::CharacterColorNumber1Bit ccn) -> VramAccessNumber;
+    static auto calculateRequiredVramCharacterPatternReads(ReductionSetting r, Vdp2Regs::CharacterColorNumber1Bit ccn)
+        -> VramAccessNumber;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn static auto Vdp2::calculateRequiredVramPatternNameReads(ReductionSetting r) -> VramAccessNumber;
@@ -1176,8 +1168,8 @@ class Vdp2 {
     /// \returns	Pattern name command.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    static auto
-        getPatternNameFromCharacterPattern(const Vdp2Regs::VramAccessCommand character_pattern) -> Vdp2Regs::VramAccessCommand;
+    static auto getPatternNameFromCharacterPattern(const Vdp2Regs::VramAccessCommand character_pattern)
+        -> Vdp2Regs::VramAccessCommand;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn	static void Vdp2::setPatternNameAccess(const VramTiming& bank, const Vdp2Regs::VramAccessCommand pattern,
