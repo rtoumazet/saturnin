@@ -39,6 +39,19 @@ using namespace gl21ext;
 
 using core::tr;
 
+const std::unordered_map<VdpLayer, std::string> layer_to_name = {
+    {VdpLayer::nbg0,      "nbg0"     },
+    {VdpLayer::rbg1,      "rbg1"     },
+    {VdpLayer::nbg1,      "nbg1"     },
+    {VdpLayer::exbg,      "exbg"     },
+    {VdpLayer::nbg2,      "nbg2"     },
+    {VdpLayer::nbg3,      "nbg3"     },
+    {VdpLayer::rbg0,      "rbg0"     },
+    {VdpLayer::back,      "back"     },
+    {VdpLayer::sprite,    "sprite"   },
+    {VdpLayer::undefined, "undefined"}
+};
+
 void OpenglRender::initialize() {
     shaders_.graphics        = initializeShaders();
     const auto main_vertex   = createVertexShader(shaders_.graphics, "main.vert");

@@ -24,18 +24,17 @@
 
 namespace saturnin::video {
 
-enum class ProgramShader : u8 { main };
-
 struct string_hash {
     using is_transparent = void;
     [[nodiscard]] size_t operator()(const char* txt) const { return std::hash<std::string_view>{}(txt); }
     [[nodiscard]] size_t operator()(std::string_view txt) const { return std::hash<std::string_view>{}(txt); }
     [[nodiscard]] size_t operator()(const std::string& txt) const { return std::hash<std::string>{}(txt); }
 };
-
 using GraphicShaders
     = std::unordered_map<std::string, std::string, string_hash, std::equal_to<>>; ///< Shader name + shader content
-using ProgramShaders = std::unordered_map<ProgramShader, u32>;                    ///< Program shader name + its OpenGL id.
+
+enum class ProgramShader : u8 { main };
+using ProgramShaders = std::unordered_map<ProgramShader, u32>; ///< Program shader name + its OpenGL id.
 
 // Holds the various shaders used in the program
 struct Shaders {
@@ -70,4 +69,13 @@ using FboKey = std::pair<u8, VdpLayer>; // First is priority number (1 to 7, las
 using FboKeyToFbo = std::map<FboKey, u8>; // Link between a priority to display and its relative FBO index in the FBO pool.
 
 constexpr auto mixed_parts_key = FboKey{-1, VdpLayer::undefined};
+
+const std::unordered_map<ScrollScreen, VdpLayer> screen_to_layer = {
+    {ScrollScreen::nbg3, VdpLayer::nbg3},
+    {ScrollScreen::nbg2, VdpLayer::nbg2},
+    {ScrollScreen::nbg1, VdpLayer::nbg1},
+    {ScrollScreen::nbg0, VdpLayer::nbg0},
+    {ScrollScreen::rbg1, VdpLayer::rbg1},
+    {ScrollScreen::rbg0, VdpLayer::rbg0}
+};
 } // namespace saturnin::video

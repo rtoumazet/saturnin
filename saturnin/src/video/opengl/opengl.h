@@ -146,28 +146,6 @@ using LayerToCacheReloadState    = std::unordered_map<VdpLayer, bool>;
 
 using TexturesLink = std::unordered_map<size_t, OpenglTexture>;
 
-const std::unordered_map<VdpLayer, std::string> layer_to_name = {
-    {VdpLayer::nbg0,      "nbg0"     },
-    {VdpLayer::rbg1,      "rbg1"     },
-    {VdpLayer::nbg1,      "nbg1"     },
-    {VdpLayer::exbg,      "exbg"     },
-    {VdpLayer::nbg2,      "nbg2"     },
-    {VdpLayer::nbg3,      "nbg3"     },
-    {VdpLayer::rbg0,      "rbg0"     },
-    {VdpLayer::back,      "back"     },
-    {VdpLayer::sprite,    "sprite"   },
-    {VdpLayer::undefined, "undefined"}
-};
-
-const std::unordered_map<ScrollScreen, VdpLayer> screen_to_layer = {
-    {ScrollScreen::nbg3, VdpLayer::nbg3},
-    {ScrollScreen::nbg2, VdpLayer::nbg2},
-    {ScrollScreen::nbg1, VdpLayer::nbg1},
-    {ScrollScreen::nbg0, VdpLayer::nbg0},
-    {ScrollScreen::rbg1, VdpLayer::rbg1},
-    {ScrollScreen::rbg0, VdpLayer::rbg0}
-};
-
 class Opengl {
   public:
     // Constructors / Destructors
