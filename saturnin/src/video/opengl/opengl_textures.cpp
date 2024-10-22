@@ -72,6 +72,7 @@ void Opengl::generateTextures() {
     auto local_textures_link = TexturesLink();
     local_textures_link      = textures_link_;
 
+    using LayerToTextures  = std::unordered_map<VdpLayer, std::vector<OpenglTexture>>;
     auto layer_to_textures = LayerToTextures{};
 
     for (const auto& [key, ogl_tex] : local_textures_link) {

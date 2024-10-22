@@ -25,6 +25,9 @@
 
 namespace saturnin::video {
 
+enum class RenderType { RenderType_drawElements, RenderType_drawTest };
+constexpr auto render_type = RenderType::RenderType_drawElements;
+
 using MapOfPartsList = std::map<FboKey, PartsList>; // Parts list by priority + layer
 
 class OpenglRender {

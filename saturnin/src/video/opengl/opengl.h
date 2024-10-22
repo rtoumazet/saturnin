@@ -81,9 +81,6 @@ constexpr auto vertexes_per_line             = u32{2};
 constexpr auto fbo_texture_array_depth = u16{14};
 constexpr auto max_fbo_texture         = u8{20};
 
-enum class RenderType { RenderType_drawElements, RenderType_drawTest };
-constexpr auto render_type = RenderType::RenderType_drawElements;
-
 enum class TextureArrayType : u8 { saturn_part, framebuffer };
 enum class FboTextureType : u8 { front_buffer, back_buffer, vdp1_debug_overlay, vdp2_debug_layer, priority };
 enum class GuiTextureType : u8 { render_buffer, vdp1_debug_buffer, vdp2_debug_buffer, layer_buffer };
@@ -140,7 +137,6 @@ struct DrawRange {
     gl::GLenum primitive;           ///< The primitive used to draw the indices in the range.
 };
 
-using LayerToTextures            = std::unordered_map<VdpLayer, std::vector<OpenglTexture>>;
 using LayerToTextureArrayIndexes = std::unordered_map<VdpLayer, std::vector<u8>>;
 using LayerToCacheReloadState    = std::unordered_map<VdpLayer, bool>;
 
