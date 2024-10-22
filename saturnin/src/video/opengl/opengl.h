@@ -37,6 +37,7 @@
 #include <saturnin/src/video/vdp_common.h>
 #include <saturnin/src/video/vdp1_part.h>      // Vdp1Part
 #include <saturnin/src/video/vdp2/vdp2_part.h> // Vdp2Part
+#include <saturnin/src/video/opengl/opengl_common.h>
 
 // Forward declarations
 namespace saturnin::core {
@@ -87,7 +88,6 @@ enum class TextureArrayType : u8 { saturn_part, framebuffer };
 enum class FboTextureType : u8 { front_buffer, back_buffer, vdp1_debug_overlay, vdp2_debug_layer, priority };
 enum class GuiTextureType : u8 { render_buffer, vdp1_debug_buffer, vdp2_debug_buffer, layer_buffer };
 enum class FboType : u8 { general, for_gui, vdp2_debug };
-enum class ProgramShader : u8 { main };
 enum class MutexType : u8 { parts_list = 0, textures_link = 1, texture_delete = 2 };
 
 // Status of FBO textures in the pool.
@@ -109,23 +109,6 @@ using FboTexturePool = std::array<u32, max_fbo_texture>; // Pool of textures ids
 using FboTexturePoolStatus = std::array<FboTextureStatus, max_fbo_texture>; // State of the textures in the pool.
 
 constexpr auto mixed_parts_key = FboKey{-1, VdpLayer::undefined};
-
-struct string_hash {
-    using is_transparent = void;
-    [[nodiscard]] size_t operator()(const char* txt) const { return std::hash<std::string_view>{}(txt); }
-    [[nodiscard]] size_t operator()(std::string_view txt) const { return std::hash<std::string_view>{}(txt); }
-    [[nodiscard]] size_t operator()(const std::string& txt) const { return std::hash<std::string>{}(txt); }
-};
-
-using GraphicShaders
-    = std::unordered_map<std::string, std::string, string_hash, std::equal_to<>>; ///< Shader name + shader content
-using ProgramShaders = std::unordered_map<ProgramShader, u32>;                    ///< Program shader name + its OpenGL id.
-
-// Holds the various shaders used in the program
-struct Shaders {
-    GraphicShaders graphics;
-    ProgramShaders programs;
-};
 
 // Holds screen resolutions used in the program
 struct ScreenResolutions {
