@@ -81,7 +81,7 @@ constexpr auto vertexes_per_line             = u32{2};
 constexpr auto fbo_texture_array_depth = u16{14};
 constexpr auto max_fbo_texture         = u8{20};
 
-constexpr enum class RenderType { RenderType_drawElements, RenderType_drawTest };
+enum class RenderType { RenderType_drawElements, RenderType_drawTest };
 constexpr auto render_type = RenderType::RenderType_drawElements;
 
 enum class TextureArrayType : u8 { saturn_part, framebuffer };
@@ -103,12 +103,8 @@ using FboTextureTypeToLayer = std::array<FboTextureType, fbo_texture_array_depth
 using GuiTextureTypeToId = std::unordered_map<GuiTextureType, u32>; // Defines the type of each texture used to render to GUI.
 using FboTypeToId        = std::unordered_map<FboType, u32>;        // Link between a FboType and its id.
 
-using FboKey = std::pair<u8, VdpLayer>; // First is priority number (1 to 7, last one being the highest), second is linked layer.
-using FboKeyToFbo    = std::map<FboKey, u8>; // Link between a priority to display and its relative FBO index in the FBO pool.
-using FboTexturePool = std::array<u32, max_fbo_texture>; // Pool of textures ids to be used for rendering by priority.
+using FboTexturePool       = std::array<u32, max_fbo_texture>; // Pool of textures ids to be used for rendering by priority.
 using FboTexturePoolStatus = std::array<FboTextureStatus, max_fbo_texture>; // State of the textures in the pool.
-
-constexpr auto mixed_parts_key = FboKey{-1, VdpLayer::undefined};
 
 // Holds screen resolutions used in the program
 struct ScreenResolutions {
@@ -143,30 +139,6 @@ struct DrawRange {
     DrawType   draw_type;           ///< Type of the draw.
     gl::GLenum primitive;           ///< The primitive used to draw the indices in the range.
 };
-
-// Rendering part to be used in the various renderers.
-struct RenderPart {
-    std::vector<Vertex> vertexes;     ///< The vertexes used for rendering.
-    ColorOffset         color_offset; ///< Color offset.
-    DrawType            draw_type;    ///< Type of the draw.
-    u8                  priority{0};  ///< Priority (used for sorting).
-    size_t              texture_key;  ///< Link to the texture.
-    explicit RenderPart(const Vdp1Part& p) :
-        vertexes(p.common_vdp_data_.vertexes),
-        color_offset(p.common_vdp_data_.color_offset),
-        draw_type(p.common_vdp_data_.draw_type),
-        priority(p.common_vdp_data_.priority),
-        texture_key(p.common_vdp_data_.texture_key) {};
-    explicit RenderPart(const Vdp2Part& p) :
-        vertexes(p.common_vdp_data_.vertexes),
-        color_offset(p.common_vdp_data_.color_offset),
-        draw_type(p.common_vdp_data_.draw_type),
-        priority(p.common_vdp_data_.priority),
-        texture_key(p.common_vdp_data_.texture_key) {};
-};
-
-using PartsList      = std::vector<RenderPart>;
-using MapOfPartsList = std::map<FboKey, PartsList>; // Parts list by priority + layer
 
 using LayerToTextures            = std::unordered_map<VdpLayer, std::vector<OpenglTexture>>;
 using LayerToTextureArrayIndexes = std::unordered_map<VdpLayer, std::vector<u8>>;

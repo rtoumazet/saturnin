@@ -43,4 +43,31 @@ struct Shaders {
     ProgramShaders programs;
 };
 
+// Rendering part to be used in the various renderers.
+struct RenderPart {
+    std::vector<Vertex> vertexes;     ///< The vertexes used for rendering.
+    ColorOffset         color_offset; ///< Color offset.
+    DrawType            draw_type;    ///< Type of the draw.
+    u8                  priority{0};  ///< Priority (used for sorting).
+    size_t              texture_key;  ///< Link to the texture.
+    explicit RenderPart(const Vdp1Part& p) :
+        vertexes(p.common_vdp_data_.vertexes),
+        color_offset(p.common_vdp_data_.color_offset),
+        draw_type(p.common_vdp_data_.draw_type),
+        priority(p.common_vdp_data_.priority),
+        texture_key(p.common_vdp_data_.texture_key) {};
+    explicit RenderPart(const Vdp2Part& p) :
+        vertexes(p.common_vdp_data_.vertexes),
+        color_offset(p.common_vdp_data_.color_offset),
+        draw_type(p.common_vdp_data_.draw_type),
+        priority(p.common_vdp_data_.priority),
+        texture_key(p.common_vdp_data_.texture_key) {};
+};
+
+using PartsList = std::vector<RenderPart>;
+
+using FboKey = std::pair<u8, VdpLayer>; // First is priority number (1 to 7, last one being the highest), second is linked layer.
+using FboKeyToFbo = std::map<FboKey, u8>; // Link between a priority to display and its relative FBO index in the FBO pool.
+
+constexpr auto mixed_parts_key = FboKey{-1, VdpLayer::undefined};
 } // namespace saturnin::video

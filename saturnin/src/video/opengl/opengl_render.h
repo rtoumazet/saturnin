@@ -25,6 +25,8 @@
 
 namespace saturnin::video {
 
+using MapOfPartsList = std::map<FboKey, PartsList>; // Parts list by priority + layer
+
 class OpenglRender {
   public:
     OpenglRender() = default;
