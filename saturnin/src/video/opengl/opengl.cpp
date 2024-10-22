@@ -48,6 +48,7 @@
 #include <saturnin/src/timer.h>     // Timer
 #include <saturnin/src/video/gui.h>
 #include <saturnin/src/video/opengl/opengl_render.h>
+#include <saturnin/src/video/opengl/opengl_utilities.h>
 #include <saturnin/src/video/texture.h>
 #include <saturnin/src/video/vdp_common.h>
 #include <saturnin/src/resource_holder.hpp>

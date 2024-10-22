@@ -28,6 +28,7 @@
 #include <glbinding/gl33core/gl.h>
 #include <glbinding/gl33ext/gl.h>
 #include <saturnin/src/video/texture.h>
+#include <saturnin/src/video/opengl/opengl_utilities.h>
 
 namespace saturnin::video {
 
