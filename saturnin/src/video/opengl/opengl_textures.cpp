@@ -160,8 +160,9 @@ void Opengl::packTextures(std::vector<OpenglTexture>& textures, const VdpLayer l
     glBindTexture(GL_TEXTURE_2D_ARRAY, 0);
 }
 
-auto Opengl::calculateTextureCoordinates(const ScreenPos& pos, const Size& size, const u8 texture_array_index) const
-    -> std::vector<TextureCoordinates> {
+auto Opengl::calculateTextureCoordinates(const ScreenPos& texture_pos_in_pixels,
+                                         const Size&      texture_size,
+                                         const u8         texture_array_index) const -> std::vector<TextureCoordinates> {
     // Calculating the texture coordinates in the atlas
     // (x1,y1)     (x2,y1)
     //        .---.
@@ -169,10 +170,10 @@ auto Opengl::calculateTextureCoordinates(const ScreenPos& pos, const Size& size,
     //        .---.
     // (x1,y2)     (x2,y2)
 
-    auto x1 = static_cast<float>(pos.x) / static_cast<float>(texture_array_width);
-    auto x2 = static_cast<float>(pos.x + size.w) / static_cast<float>(texture_array_width);
-    auto y1 = static_cast<float>(pos.y) / static_cast<float>(texture_array_height);
-    auto y2 = static_cast<float>(pos.y + size.h) / static_cast<float>(texture_array_height);
+    auto x1 = static_cast<float>(texture_pos_in_pixels.x) / static_cast<float>(texture_array_width);
+    auto x2 = static_cast<float>(texture_pos_in_pixels.x + texture_size.w) / static_cast<float>(texture_array_width);
+    auto y1 = static_cast<float>(texture_pos_in_pixels.y) / static_cast<float>(texture_array_height);
+    auto y2 = static_cast<float>(texture_pos_in_pixels.y + texture_size.h) / static_cast<float>(texture_array_height);
 
     return std::vector{
         TextureCoordinates{x1, y1, static_cast<float>(texture_array_index)},

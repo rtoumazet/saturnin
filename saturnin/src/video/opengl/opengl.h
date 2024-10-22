@@ -308,24 +308,10 @@ class Opengl {
     // Returns the next available texture array index regardless of the layer.
     auto getNextAvailableTextureArrayIndex() const -> u8;
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn	auto Opengl::calculateTextureCoordinates(const ScreenPos& pos, const Size& size, const u8 texture_array_index) const
-    /// -> std::vector<TextureCoordinates>;
-    ///
-    /// \brief	Calculates the texture coordinates
-    ///
-    /// \author	Runik
-    /// \date	23/10/2023
-    ///
-    /// \param 	pos				   	The position in pixels of the texture in the texture array.
-    /// \param 	size			   	The size of the texture.
-    /// \param 	texture_array_index	Zero-based index of the texture array.
-    ///
-    /// \returns	The calculated texture coordinates of the texture.
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    auto calculateTextureCoordinates(const ScreenPos& pos, const Size& size, const u8 texture_array_index) const
-        -> std::vector<TextureCoordinates>;
+    // Calculates the texture coordinates in the texture array from the texture position and size.
+    auto calculateTextureCoordinates(const ScreenPos& texture_pos_in_pixels,
+                                     const Size&      texture_size,
+                                     const u8         texture_array_index) const -> std::vector<TextureCoordinates>;
 
     // Returns all the vertexes from a parts list.
     auto readVertexes(const PartsList& parts) -> std::vector<Vertex>;
@@ -420,20 +406,5 @@ auto generateVertexIndicesAndDrawRanges(const PartsList& parts) -> std::tuple<st
 
 // Initialize a VAO and returns the generated VAO id and the vertex buffer id.
 auto initializeVao() -> std::tuple<u32, u32>;
-
-//------------------
-// Shaders functions
-//------------------
-
-auto initializeShaders() -> GraphicShaders;
-void deleteShaders(const std::vector<u32>& shaders);
-
-auto createVertexShader(const GraphicShaders& shaders_list, std::string_view shader_name) -> u32;
-auto createFragmentShader(const GraphicShaders& shaders_list, std::string_view shader_name) -> u32;
-auto createProgramShader(u32 vertex_shader_id, u32 fragment_shader_id) -> u32;
-auto getShaderSource(const GraphicShaders& shaders_list, std::string_view name) -> const char*;
-
-void checkShaderCompilation(u32 shader);
-void checkProgramCompilation(u32 program);
 
 }; // namespace saturnin::video
