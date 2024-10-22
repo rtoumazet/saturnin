@@ -18,7 +18,7 @@
 //
 
 #include <saturnin/src/pch.h>
-#include <saturnin/src/video/opengl/opengl.h>
+#include <saturnin/src/video/opengl/opengl_render.h>
 #include <ranges>
 #include <glbinding/glbinding.h>
 #include <glbinding/Version.h>
@@ -574,8 +574,8 @@ auto OpenglRender::isThereSomethingToRender() const -> bool {
 }
 
 void OpenglRender::switchRenderedBuffer() {
-    current_rendered_buffer_
-        = (current_rendered_buffer_ == FboTextureType::back_buffer) ? FboTextureType::front_buffer : FboTextureType::back_buffer;
+    using enum FboTextureType;
+    current_rendered_buffer_ = (current_rendered_buffer_ == back_buffer) ? front_buffer : back_buffer;
 }
 
 auto OpenglRender::calculateDisplayViewportMatrix() const -> glm::highp_mat4 {

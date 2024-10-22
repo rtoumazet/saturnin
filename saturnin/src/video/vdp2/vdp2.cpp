@@ -31,6 +31,7 @@
 #include <saturnin/src/timer.h>
 #include <saturnin/src/utilities.h> // toUnderlying
 #include <saturnin/src/video/opengl/opengl.h>
+#include <saturnin/src/video/opengl/opengl_render.h>
 #include <saturnin/src/video/texture.h>
 #include <saturnin/src/video/vdp1.h>
 #include <saturnin/src/video/vdp2/vdp2_registers.h>

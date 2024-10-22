@@ -34,6 +34,7 @@
 #include <saturnin/src/utilities.h>                   // stringToVector, format
 #include <saturnin/src/cdrom/scsi.h>                  // ScsiDriveInfo
 #include <saturnin/src/video/opengl/opengl.h>         // Opengl
+#include <saturnin/src/video/opengl/opengl_render.h>  // OpenglRender
 #include <saturnin/src/video/texture.h>               // Texture
 #include <saturnin/src/video/vdp1.h>                  // Vdp1
 #include <saturnin/src/video/vdp2/vdp2.h>             // vram_timing_size

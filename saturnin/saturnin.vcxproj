@@ -466,6 +466,7 @@
     <ClInclude Include="src\thread_pool.h" />
     <ClInclude Include="src\timer.h" />
     <ClInclude Include="src\video\opengl\opengl.h" />
+    <ClInclude Include="src\video\opengl\opengl_render.h" />
     <ClInclude Include="src\video\texture.h" />
     <ClInclude Include="src\video\vdp1_part.h" />
     <ClInclude Include="src\video\vdp1_registers.h" />
