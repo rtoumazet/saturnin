@@ -953,7 +953,7 @@ void showRenderingWindow(core::EmulatorContext& state) {
 
     if (state.opengl()->areFbosInitialized()) {
         if (state.opengl()->render()->isThereSomethingToRender()) {
-            state.opengl()->generateTextures();
+            state.opengl()->texturing()->generateTextures();
             state.opengl()->render()->renderSelector();
         }
         const auto alpha = 0xff;
@@ -1477,9 +1477,10 @@ void showDebugVdp1Window(core::EmulatorContext& state, bool* opened) {
 
                     static auto opengl_id = 0;
                     if (texture) {
-                        if (opengl_id != 0) { state.opengl()->deleteTexture(opengl_id); }
-                        opengl_id
-                            = state.opengl()->generateTexture((*texture)->width(), (*texture)->height(), (*texture)->rawData());
+                        if (opengl_id != 0) { state.opengl()->texturing()->deleteTexture(opengl_id); }
+                        opengl_id = state.opengl()->texturing()->generateTexture((*texture)->width(),
+                                                                                 (*texture)->height(),
+                                                                                 (*texture)->rawData());
                         ImGui::Image(reinterpret_cast<ImTextureID>(static_cast<uptr>(opengl_id)), preview_size);
                     }
                 }
@@ -1740,7 +1741,7 @@ void showDebugVdp2Window(core::EmulatorContext& state, bool* opened) {
                         if (state.vdp2()->screenInDebug() != video::ScrollScreen::none) {
                             state.opengl()->render()->renderVdp2DebugLayer(state);
                         }
-                        const auto tex_id       = state.opengl()->vdp2DebugLayerTextureId();
+                        const auto tex_id       = state.opengl()->texturing()->vdp2DebugLayerTextureId();
                         const auto preview_size = ImVec2(500, 500);
                         ImGui::Image(reinterpret_cast<ImTextureID>(static_cast<uptr>(tex_id)), preview_size);
                     } else {
@@ -1841,7 +1842,7 @@ void showDebugTexturesWindow(core::EmulatorContext& state, bool* opened) {
 
                     if (!keys_list.empty()) {
                         const auto& texture_key = keys_list[current_texture_idx].second;
-                        ImGui::TextUnformatted(state.opengl()->getOpenglTextureDetails(texture_key).c_str());
+                        ImGui::TextUnformatted(state.opengl()->texturing()->getOpenglTextureDetails(texture_key).c_str());
                     }
                     ImGui::EndChild();
 
@@ -1859,10 +1860,10 @@ void showDebugTexturesWindow(core::EmulatorContext& state, bool* opened) {
                             // Reloading texture data from the new selected entry.
                             const auto texture = video::Texture::getTexture(texture_key);
                             if (texture) {
-                                if (opengl_id != 0) { state.opengl()->deleteTexture(opengl_id); }
-                                opengl_id = state.opengl()->generateTexture((*texture)->width(),
-                                                                            (*texture)->height(),
-                                                                            (*texture)->rawData());
+                                if (opengl_id != 0) { state.opengl()->texturing()->deleteTexture(opengl_id); }
+                                opengl_id = state.opengl()->texturing()->generateTexture((*texture)->width(),
+                                                                                         (*texture)->height(),
+                                                                                         (*texture)->rawData());
                             }
                             previous_texture_idx = current_texture_idx;
                         }
@@ -1874,10 +1875,11 @@ void showDebugTexturesWindow(core::EmulatorContext& state, bool* opened) {
                 {
                     // Full layer display
                     const auto& key        = keys_list[current_texture_idx].second;
-                    const auto  opengl_tex = state.opengl()->getOpenglTexture(key);
+                    const auto  opengl_tex = state.opengl()->texturing()->getOpenglTexture(key);
 
-                    auto tex_id = state.opengl()->generateTextureFromTextureArrayLayer(video::GuiTextureType::layer_buffer,
-                                                                                       static_cast<u8>(key));
+                    auto tex_id
+                        = state.opengl()->texturing()->generateTextureFromTextureArrayLayer(video::GuiTextureType::layer_buffer,
+                                                                                            static_cast<u8>(key));
                     ImGui::SetCursorPos(layer_window_pos);
                     const auto child_size = ImVec2(area_3_width, ImGui::GetContentRegionAvail().y);
                     ImGui::BeginChild("ChildTextureLayer", child_size, false, window_flags);
@@ -1900,7 +1902,8 @@ void showDebugTexturesWindow(core::EmulatorContext& state, bool* opened) {
                 static auto current_layer = int{};
                 if (ImGui::Combo("Layer", &current_layer, layers)) {}
                 auto tex_id
-                    = state.opengl()->generateTextureFromTextureArrayLayer(video::GuiTextureType::layer_buffer, current_layer);
+                    = state.opengl()->texturing()->generateTextureFromTextureArrayLayer(video::GuiTextureType::layer_buffer,
+                                                                                        current_layer);
 
                 ImGui::BeginChild("child_part_texture", child_size, true, window_flags);
                 const auto preview_size = ImVec2(500, 500);

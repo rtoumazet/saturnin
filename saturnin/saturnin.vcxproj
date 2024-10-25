@@ -469,6 +469,7 @@
     <ClInclude Include="src\video\opengl\opengl_common.h" />
     <ClInclude Include="src\video\opengl\opengl_render.h" />
     <ClInclude Include="src\video\opengl\opengl_shaders.h" />
+    <ClInclude Include="src\video\opengl\opengl_textures.h" />
     <ClInclude Include="src\video\opengl\opengl_utilities.h" />
     <ClInclude Include="src\video\texture.h" />
     <ClInclude Include="src\video\vdp1_part.h" />

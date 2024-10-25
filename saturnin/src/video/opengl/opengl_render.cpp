@@ -73,12 +73,12 @@ void OpenglRender::shutdown() const {
 void OpenglRender::preRender() {
     switchRenderedBuffer();
 
-    glBindFramebuffer(GLenum::GL_FRAMEBUFFER, opengl_->fbo_type_to_id_[FboType::general]);
+    glBindFramebuffer(GLenum::GL_FRAMEBUFFER, opengl_->texturing()->getFboId(FboType::general));
 
-    opengl_->attachTextureLayerToFbo(opengl_->fbo_texture_array_id_,
-                                     opengl_->getFboTextureLayer(currentRenderedBuffer()),
-                                     GLenum::GL_FRAMEBUFFER,
-                                     GLenum::GL_COLOR_ATTACHMENT0);
+    opengl_->texturing()->attachTextureLayerToFbo(opengl_->texturing()->getFboTextureArrayId(),
+                                                  opengl_->texturing()->getFboTextureLayer(currentRenderedBuffer()),
+                                                  GLenum::GL_FRAMEBUFFER,
+                                                  GLenum::GL_COLOR_ATTACHMENT0);
 
     // Viewport is the entire Saturn framebuffer
     glViewport(0, 0, saturn_framebuffer_width, saturn_framebuffer_height);
@@ -155,7 +155,7 @@ void OpenglRender::renderParts(const PartsList& parts_list, const u32 texture_id
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elements_buffer);
 
         const auto&& [indices, draw_ranges] = generateVertexIndicesAndDrawRanges(parts_list);
-        const auto vertexes                 = opengl_->readVertexes(parts_list);
+        const auto vertexes                 = opengl_->texturing()->readVertexes(parts_list);
 
         // Sending data to the GPU
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(u32) * indices.size(), indices.data(), GL_STATIC_DRAW);
@@ -303,7 +303,7 @@ void OpenglRender::renderByParts() {
     };
     getParts();
 
-    renderParts(parts_list, opengl_->texture_array_id_);
+    renderParts(parts_list, opengl_->texturing()->getTextureArrayId());
 
     const auto notifyMainThread = [this, &parts_list]() {
         std::lock_guard lk(opengl_->getMutex(MutexType::parts_list));
@@ -335,7 +335,7 @@ void OpenglRender::renderTest() {
     const auto sampler_loc = glGetUniformLocation(shaders_.programs[ProgramShader::main], "sampler");
     // glUniform1i(sampler_loc, GLenum::GL_TEXTURE0);
     glUniform1i(sampler_loc, 0);
-    glBindTexture(GL_TEXTURE_2D_ARRAY, opengl_->texture_array_id_);
+    glBindTexture(GL_TEXTURE_2D_ARRAY, opengl_->texturing()->getTextureArrayId());
 
     const auto texture_used_loc = glGetUniformLocation(shaders_.programs[ProgramShader::main], "is_texture_used");
     // Sending the variable to configure the shader to use texture data.
@@ -447,7 +447,7 @@ void OpenglRender::renderTest() {
         const auto&& [indices, draw_ranges] = generateVertexIndicesAndDrawRanges(parts);
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint) * indices.size(), indices.data(), GL_STATIC_DRAW);
 
-        const auto vertexes = opengl_->readVertexes(parts);
+        const auto vertexes = opengl_->texturing()->readVertexes(parts);
         glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * vertexes.size(), vertexes.data(), GL_STATIC_DRAW);
 
         for (const auto& range : draw_ranges) {
@@ -474,12 +474,12 @@ void OpenglRender::renderTest() {
 
 void OpenglRender::renderVdp1DebugOverlay() {
     //----------- Pre render -----------//
-    glBindFramebuffer(GLenum::GL_FRAMEBUFFER, opengl_->fbo_type_to_id_[FboType::general]);
+    glBindFramebuffer(GLenum::GL_FRAMEBUFFER, opengl_->texturing()->getFboId(FboType::general));
 
-    opengl_->attachTextureLayerToFbo(opengl_->fbo_texture_array_id_,
-                                     opengl_->getFboTextureLayer(FboTextureType::vdp1_debug_overlay),
-                                     GLenum::GL_FRAMEBUFFER,
-                                     GLenum::GL_COLOR_ATTACHMENT0);
+    opengl_->texturing()->attachTextureLayerToFbo(opengl_->texturing()->getFboTextureArrayId(),
+                                                  opengl_->texturing()->getFboTextureLayer(FboTextureType::vdp1_debug_overlay),
+                                                  GLenum::GL_FRAMEBUFFER,
+                                                  GLenum::GL_COLOR_ATTACHMENT0);
 
     // Viewport is the entire Saturn framebuffer
     glViewport(0, 0, saturn_framebuffer_width, saturn_framebuffer_height);
@@ -544,7 +544,7 @@ void OpenglRender::renderVdp1DebugOverlay() {
 
 void OpenglRender::renderVdp2DebugLayer(core::EmulatorContext& state) {
     //----------- Pre render -----------//
-    glBindFramebuffer(GLenum::GL_FRAMEBUFFER, opengl_->fbo_type_to_id_[FboType::vdp2_debug]);
+    glBindFramebuffer(GLenum::GL_FRAMEBUFFER, opengl_->texturing()->getFboId(FboType::vdp2_debug));
 
     // Viewport is the entire Saturn framebuffer
     glViewport(0, 0, saturn_framebuffer_width, saturn_framebuffer_height);
@@ -564,7 +564,7 @@ void OpenglRender::renderVdp2DebugLayer(core::EmulatorContext& state) {
         }
     }
 
-    if (!parts_list.empty()) { renderParts(parts_list, opengl_->texture_array_id_); }
+    if (!parts_list.empty()) { renderParts(parts_list, opengl_->texturing()->getTextureArrayId()); }
 
     //------ Post render --------//
     // Framebuffer is released

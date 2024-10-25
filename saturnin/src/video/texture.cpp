@@ -155,7 +155,7 @@ void Texture::cleanCache(Opengl* ogl, const VdpType t) {
 
             if (value.isDiscarded()) {
                 // WIP
-                ogl->addOrUpdateTexture(value.key(), value.layer());
+                ogl->texturing()->addOrUpdateTexture(value.key(), value.layer());
                 keys_to_erase.emplace_back(key);
             }
         }
@@ -163,7 +163,7 @@ void Texture::cleanCache(Opengl* ogl, const VdpType t) {
 
     for (const auto& key : keys_to_erase) {
         texture_storage_.erase(key);
-        ogl->removeTextureLink(key);
+        ogl->texturing()->removeTextureLink(key);
     }
 }
 

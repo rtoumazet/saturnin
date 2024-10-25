@@ -29,6 +29,7 @@
 #include <glbinding/gl33ext/gl.h>
 #include <saturnin/src/video/texture.h>
 #include <saturnin/src/video/opengl/opengl_utilities.h>
+#include <saturnin/src/video/opengl/opengl_render.h>
 
 namespace saturnin::video {
 
@@ -37,14 +38,79 @@ using namespace gl21ext;
 
 using core::tr;
 
-void Opengl::addOrUpdateTexture(const size_t key, const VdpLayer layer) {
+void OpenglTexturing::initialize() {
+    texture_array_id_     = initializeTextureArray(texture_array_width, texture_array_height, texture_array_depth);
+    fbo_texture_array_id_ = initializeTextureArray(fbo_texture_array_width, fbo_texture_array_height, fbo_texture_array_depth);
+
+    // Clear texture array indexes data
+    for (auto& [layer, indexes] : layer_to_texture_array_indexes_) {
+        std::vector<u8>().swap(indexes);
+    }
+
+    // Initialize textures to be used on the GUI side
+    gui_texture_type_to_id_[GuiTextureType::render_buffer]
+        = OpenglTexturing::generateTexture(fbo_texture_array_width, fbo_texture_array_height, std::vector<u8>{});
+    gui_texture_type_to_id_[GuiTextureType::vdp1_debug_buffer]
+        = OpenglTexturing::generateTexture(fbo_texture_array_width, fbo_texture_array_height, std::vector<u8>{});
+    gui_texture_type_to_id_[GuiTextureType::vdp2_debug_buffer]
+        = OpenglTexturing::generateTexture(fbo_texture_array_width, fbo_texture_array_height, std::vector<u8>{});
+    gui_texture_type_to_id_[GuiTextureType::layer_buffer]
+        = OpenglTexturing::generateTexture(texture_array_width, texture_array_height, std::vector<u8>{});
+
+    initializeFbo();
+}
+
+void OpenglTexturing::shutdown() {
+    gl33core::glBindFramebuffer(GL_FRAMEBUFFER_EXT, 0);
+    using enum FboType;
+    glDeleteFramebuffers(1, &fbo_type_to_id_.at(general));
+    glDeleteFramebuffers(1, &fbo_type_to_id_.at(for_gui));
+    glDeleteFramebuffers(1, &fbo_type_to_id_.at(vdp2_debug));
+
+    for (const auto& [type, texture_id] : gui_texture_type_to_id_) {
+        OpenglTexturing::deleteTexture(texture_id);
+    }
+}
+
+auto OpenglTexturing::initializeTextureArray(const u32 width, const u32 height, const u32 depth) const -> u32 {
+    auto texture = u32{};
+    glGenTextures(1, &texture);
+    glActiveTexture(GLenum::GL_TEXTURE0);
+    glBindTexture(GLenum::GL_TEXTURE_2D_ARRAY, texture);
+    // The `my_gl_format` represents your cpu-side channel layout.
+    // Both GL_RGBA and GL_BGRA are common. See the "format" section
+    // of this page: https://www.opengl.org/wiki/GLAPI/glTexImage3D
+    glTexImage3D(GL_TEXTURE_2D_ARRAY,
+                 0,                        // mipmap level
+                 GL_RGBA,                  // gpu texel format
+                 width,                    // width
+                 height,                   // height
+                 depth,                    // depth
+                 0,                        // border
+                 GLenum::GL_RGBA,          // cpu pixel format
+                 GLenum::GL_UNSIGNED_BYTE, // cpu pixel coord type
+                 nullptr);                 // no data for now
+
+    // set the texture wrapping parameters
+    glTexParameteri(GLenum::GL_TEXTURE_2D_ARRAY, GLenum::GL_TEXTURE_WRAP_S, GLenum::GL_REPEAT);
+    glTexParameteri(GLenum::GL_TEXTURE_2D_ARRAY, GLenum::GL_TEXTURE_WRAP_T, GLenum::GL_REPEAT);
+
+    // disabling mipmaps
+    glTexParameteri(GLenum::GL_TEXTURE_2D_ARRAY, GLenum::GL_TEXTURE_MIN_FILTER, GLenum::GL_NEAREST);
+    glTexParameteri(GLenum::GL_TEXTURE_2D_ARRAY, GLenum::GL_TEXTURE_MAG_FILTER, GLenum::GL_NEAREST);
+
+    glBindTexture(GLenum::GL_TEXTURE_2D_ARRAY, 0);
+    return texture;
+}
+
+void OpenglTexturing::addOrUpdateTexture(const size_t key, const VdpLayer layer) {
     // If the key doesn't exist it will be automatically added.
     // If it does, opengl link will be reset in order to regenerate the texture.
     // const auto opengl_tex = getOpenglTexture(key);
     // const auto& texture = Texture::getTexture(key);
 
     // if (texture) {
-    std::lock_guard lock(getMutex(MutexType::textures_link));
+    std::lock_guard lock(opengl_->getMutex(MutexType::textures_link));
     textures_link_[key].key                 = key;
     textures_link_[key].opengl_id           = 0;
     textures_link_[key].texture_array_index = 0;
@@ -55,9 +121,9 @@ void Opengl::addOrUpdateTexture(const size_t key, const VdpLayer layer) {
     // }
 }
 
-void Opengl::removeTextureLink(const size_t key) { textures_link_.erase(key); }
+void OpenglTexturing::removeTextureLink(const size_t key) { textures_link_.erase(key); }
 
-void Opengl::generateTextures() {
+void OpenglTexturing::generateTextures() {
     // Textures are generated in a 128 layers texture array, each layer being a texture atlas of
     // 1024*1024 pixels.
     // In theory, the maximum number of different VDP2 cells that could be stored by the Saturn at a given time is 0x80000
@@ -97,7 +163,7 @@ void Opengl::generateTextures() {
 // Using the simplest (and fastest) method to pack textures in the atlas. Better algorithms could be used to
 // improve packing, but there's a non trivial performance tradeoff, with a big increase in complexity.
 // So for now, keeping things simple.
-void Opengl::packTextures(std::vector<OpenglTexture>& textures, const VdpLayer layer) {
+void OpenglTexturing::packTextures(std::vector<OpenglTexture>& textures, const VdpLayer layer) {
     glBindTexture(GL_TEXTURE_2D_ARRAY, texture_array_id_);
     // First, indexes used by the layer are cleared and removed from the used list.
     auto empty_data = std::vector<u8>(texture_array_width * texture_array_height * 4);
@@ -161,9 +227,9 @@ void Opengl::packTextures(std::vector<OpenglTexture>& textures, const VdpLayer l
     glBindTexture(GL_TEXTURE_2D_ARRAY, 0);
 }
 
-auto Opengl::calculateTextureCoordinates(const ScreenPos& texture_pos_in_pixels,
-                                         const Size&      texture_size,
-                                         const u8         texture_array_index) const -> std::vector<TextureCoordinates> {
+auto OpenglTexturing::calculateTextureCoordinates(const ScreenPos& texture_pos_in_pixels,
+                                                  const Size&      texture_size,
+                                                  const u8         texture_array_index) const -> std::vector<TextureCoordinates> {
     // Calculating the texture coordinates in the atlas
     // (x1,y1)     (x2,y1)
     //        .---.
@@ -184,7 +250,7 @@ auto Opengl::calculateTextureCoordinates(const ScreenPos& texture_pos_in_pixels,
     };
 }
 
-auto Opengl::readVertexes(const PartsList& parts) -> std::vector<Vertex> {
+auto OpenglTexturing::readVertexes(const PartsList& parts) -> std::vector<Vertex> {
     auto vertexes = std::vector<Vertex>{};
     for (auto p : parts) {
         const auto opengl_tex = getOpenglTexture(p.texture_key);
@@ -220,15 +286,15 @@ auto Opengl::readVertexes(const PartsList& parts) -> std::vector<Vertex> {
     return vertexes;
 }
 
-auto Opengl::getOpenglTexture(const size_t key) -> std::optional<OpenglTexture> {
-    std::lock_guard lock(getMutex(MutexType::textures_link));
+auto OpenglTexturing::getOpenglTexture(const size_t key) -> std::optional<OpenglTexture> {
+    std::lock_guard lock(opengl_->getMutex(MutexType::textures_link));
     const auto      it = textures_link_.find(key);
     return (it == textures_link_.end()) ? std::nullopt : std::optional<OpenglTexture>(it->second);
 }
 
-auto Opengl::getOpenglTextureDetails(const size_t key) -> std::string {
+auto OpenglTexturing::getOpenglTextureDetails(const size_t key) -> std::string {
     auto            details = std::string{};
-    std::lock_guard lock(getMutex(MutexType::textures_link));
+    std::lock_guard lock(opengl_->getMutex(MutexType::textures_link));
     if (const auto it = textures_link_.find(key); it != textures_link_.end()) {
         details += util::format("Key: 0x{:x}\n", it->second.key);
         details += util::format("Position: {},{}\n", it->second.pos.x, it->second.pos.y);
@@ -243,7 +309,7 @@ auto Opengl::getOpenglTextureDetails(const size_t key) -> std::string {
 }
 
 // static
-auto Opengl::generateTexture(const u32 width, const u32 height, const std::vector<u8>& data) -> u32 {
+auto OpenglTexturing::generateTexture(const u32 width, const u32 height, const std::vector<u8>& data) -> u32 {
     using enum GLenum;
     auto texture = u32{};
     glGenTextures(1, &texture);
@@ -265,7 +331,7 @@ auto Opengl::generateTexture(const u32 width, const u32 height, const std::vecto
     return texture;
 }
 
-void Opengl::generateSubTexture(const size_t key) {
+void OpenglTexturing::generateSubTexture(const size_t key) {
     const auto ogl_tex = getOpenglTexture(key);
 
     if (ogl_tex) {
@@ -288,9 +354,9 @@ void Opengl::generateSubTexture(const size_t key) {
 }
 
 // static
-void Opengl::deleteTexture(const u32 texture_id) { glDeleteTextures(1, &texture_id); }
+void OpenglTexturing::deleteTexture(const u32 texture_id) { glDeleteTextures(1, &texture_id); }
 
-auto Opengl::getTextureId(const TextureArrayType type) -> u32 {
+auto OpenglTexturing::getTextureId(const TextureArrayType type) -> u32 {
     // There are 2 texture arrays used in the program :
     // - one is used as a texture atlas for VDP parts rendering (texture_array_id_)
     // - the other as framebuffers linked to the main FBO, handling debug layers, priority rendering, front and back
@@ -315,5 +381,186 @@ auto Opengl::getTextureId(const TextureArrayType type) -> u32 {
 
     return u32();
 };
+
+auto OpenglTexturing::getCurrentTextureArrayIndex(const VdpLayer layer) -> u8 {
+    if (layer_to_texture_array_indexes_.at(layer).empty()) {
+        auto index = getNextAvailableTextureArrayIndex();
+        layer_to_texture_array_indexes_.at(layer).push_back(index);
+        return index;
+    } else {
+        return *std::ranges::max_element(layer_to_texture_array_indexes_.at(layer));
+    }
+}
+
+auto OpenglTexturing::getNextAvailableTextureArrayIndex() const -> u8 {
+    auto appended_indexes = std::vector<u8>();
+    for (const auto& [layer, indexes] : layer_to_texture_array_indexes_) {
+        appended_indexes.insert(appended_indexes.end(), indexes.begin(), indexes.end());
+    }
+
+    std::ranges::sort(appended_indexes, [](const u8 a, const u8& b) { return a < b; });
+
+    auto ref_index = u8{};
+    for (const auto index : appended_indexes) {
+        if (index > ref_index) { return ref_index; }
+        ++ref_index;
+    }
+    return ref_index;
+}
+
+auto OpenglTexturing::generateTextureFromTextureArrayLayer(const GuiTextureType dst_texture_type, const u8 layer) -> u32 {
+    auto texture_width  = u32{};
+    auto texture_height = u32{};
+    auto src_texture_id = u32{};
+
+    switch (dst_texture_type) {
+        using enum GuiTextureType;
+        case render_buffer:
+        case vdp1_debug_buffer:
+        case vdp2_debug_buffer: {
+            texture_width  = fbo_texture_array_width;
+            texture_height = fbo_texture_array_height;
+            src_texture_id = fbo_texture_array_id_;
+            break;
+        }
+        case layer_buffer: {
+            texture_width  = texture_array_width;
+            texture_height = texture_array_height;
+            src_texture_id = texture_array_id_;
+            break;
+        }
+    }
+
+    glBindFramebuffer(GLenum::GL_FRAMEBUFFER, fbo_type_to_id_[FboType::for_gui]);
+
+    attachTextureLayerToFbo(src_texture_id, layer, GLenum::GL_FRAMEBUFFER, GLenum::GL_COLOR_ATTACHMENT0);
+
+    attachTextureToFbo(gui_texture_type_to_id_[dst_texture_type], GLenum::GL_DRAW_FRAMEBUFFER, GLenum::GL_COLOR_ATTACHMENT1);
+
+    glBlitFramebuffer(0,
+                      0,
+                      texture_width,
+                      texture_height,
+                      0,
+                      0,
+                      texture_width,
+                      texture_height,
+                      gl::GL_COLOR_BUFFER_BIT,
+                      GLenum::GL_LINEAR);
+
+    glBindFramebuffer(GLenum::GL_FRAMEBUFFER, 0);
+
+    return gui_texture_type_to_id_[dst_texture_type];
+}
+
+void OpenglTexturing::attachTextureToFbo(const u32        texture_id,
+                                         const gl::GLenum framebuffer_target,
+                                         const gl::GLenum color_attachment) {
+    glFramebufferTexture2D(framebuffer_target, color_attachment, GLenum::GL_TEXTURE_2D, texture_id, 0);
+}
+
+void OpenglTexturing::attachTextureLayerToFbo(const u32        texture_id,
+                                              const u8         layer,
+                                              const gl::GLenum framebuffer_target,
+                                              const gl::GLenum color_attachment) {
+    glFramebufferTextureLayer(framebuffer_target, color_attachment, texture_id, 0, layer);
+}
+
+void OpenglTexturing::initializeFbo() {
+    // Generating a pool of textures to be used with the FBO.
+    // for (size_t i = 0; i < max_fbo_texture; ++i) {
+    //    fbo_texture_pool_[i]        = generateTexture(saturn_framebuffer_width, saturn_framebuffer_height,
+    //    std::vector<u8>()); fbo_texture_pool_status_[i] = FboTextureStatus::unused;
+    //}
+
+    // Some textures are setup as a specific types in the FBO texture pool.
+    // Front and back buffers are switched every frame : one will be used as the last complete rendering by the GUI while
+    // the other will be rendered to.
+    // Textures not yet linked to a type will be used as a 'priority' type on demand when rendering.
+    using enum FboTextureType;
+    fbo_texture_type_to_layer_ = {front_buffer, back_buffer, vdp1_debug_overlay, vdp2_debug_layer};
+    for (u8 i = 4; i < fbo_texture_array_depth; ++i) {
+        fbo_texture_type_to_layer_[i] = priority;
+    }
+
+    opengl_->render()->currentRenderedBuffer(front_buffer);
+
+    // Generating FBOs used by the renderer.
+    using enum FboType;
+    fbo_type_to_id_[general]    = generateFbo(general);
+    fbo_type_to_id_[for_gui]    = generateFbo(for_gui);
+    fbo_type_to_id_[vdp2_debug] = generateFbo(vdp2_debug);
+
+    glBindFramebuffer(GL_FRAMEBUFFER, fbo_type_to_id_[general]);
+}
+
+auto OpenglTexturing::generateFbo(const FboType fbo_type) -> u32 {
+    auto fbo = u32{};
+    gl33core::glGenFramebuffers(1, &fbo);
+
+    switch (fbo_type) {
+        using enum FboType;
+        case general: {
+            glBindFramebuffer(GLenum::GL_FRAMEBUFFER, fbo);
+
+            glBindTexture(GLenum::GL_TEXTURE_2D_ARRAY, getFboTextureArrayId());
+
+            glEnable(GLenum::GL_BLEND);
+            glBlendFunc(GLenum::GL_SRC_ALPHA, GLenum::GL_ONE_MINUS_SRC_ALPHA);
+
+            // Attaching the color texture currently used as framebuffer to the FBO.
+            attachTextureLayerToFbo(getFboTextureArrayId(),
+                                    getFboTextureLayer(opengl_->render()->currentRenderedBuffer()),
+                                    GLenum::GL_FRAMEBUFFER,
+                                    GLenum::GL_COLOR_ATTACHMENT0);
+            break;
+        }
+        case for_gui: {
+            glBindFramebuffer(GLenum::GL_FRAMEBUFFER, fbo);
+
+            attachTextureLayerToFbo(getFboTextureArrayId(),
+                                    getFboTextureLayer(opengl_->render()->currentRenderedBuffer()),
+                                    GLenum::GL_FRAMEBUFFER,
+                                    GLenum::GL_COLOR_ATTACHMENT0);
+
+            attachTextureToFbo(getGuiTextureId(GuiTextureType::render_buffer),
+                               GLenum::GL_DRAW_FRAMEBUFFER,
+                               GLenum::GL_COLOR_ATTACHMENT1);
+
+            glDrawBuffer(GL_COLOR_ATTACHMENT1);
+
+            break;
+        }
+        case vdp2_debug: {
+            glBindFramebuffer(GLenum::GL_FRAMEBUFFER, fbo);
+
+            glActiveTexture(GLenum::GL_TEXTURE0);
+
+            glEnable(GLenum::GL_BLEND);
+            glBlendFunc(GLenum::GL_SRC_ALPHA, GLenum::GL_ONE_MINUS_SRC_ALPHA);
+
+            attachTextureToFbo(getGuiTextureId(GuiTextureType::vdp2_debug_buffer),
+                               GLenum::GL_DRAW_FRAMEBUFFER,
+                               GLenum::GL_COLOR_ATTACHMENT0);
+
+            glDrawBuffer(GL_COLOR_ATTACHMENT0);
+            break;
+        }
+    }
+
+    if (const auto status = gl33core::glCheckFramebufferStatus(GLenum::GL_FRAMEBUFFER);
+        status != gl::GLenum::GL_FRAMEBUFFER_COMPLETE) {
+        Log::exception(Logger::opengl, tr("Could not initialize framebuffer object !"));
+    }
+
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+    return fbo;
+}
+
+inline auto OpenglTexturing::getFboTextureLayer(const FboTextureType type) const -> u8 {
+    return static_cast<u8>(
+        std::distance(fbo_texture_type_to_layer_.begin(), std::ranges::find(fbo_texture_type_to_layer_, type)));
+}
 
 } // namespace saturnin::video

@@ -1138,7 +1138,7 @@ void Vdp2::readBitmapData(const ScrollScreenStatus& screen) {
                                       texture_data,
                                       texture_width,
                                       texture_height));
-        modules_.opengl()->addOrUpdateTexture(key, scrollScreenToLayer(screen.scroll_screen));
+        modules_.opengl()->texturing()->addOrUpdateTexture(key, scrollScreenToLayer(screen.scroll_screen));
     }
     saveBitmap(screen, texture_width, texture_height, key);
 }
@@ -1444,7 +1444,7 @@ void Vdp2::readCell(const ScrollScreenStatus& screen, const PatternNameData& pnd
                                   texture_data,
                                   texture_width,
                                   texture_height));
-    modules_.opengl()->addOrUpdateTexture(key, scrollScreenToLayer(screen.scroll_screen));
+    modules_.opengl()->texturing()->addOrUpdateTexture(key, scrollScreenToLayer(screen.scroll_screen));
 }
 
 void Vdp2::readCellMT(const ScrollScreenStatus& screen,
@@ -1511,7 +1511,7 @@ void Vdp2::readCellMT(const ScrollScreenStatus& screen,
                                   texture_data,
                                   texture_width,
                                   texture_height));
-    modules_.opengl()->addOrUpdateTexture(key, scrollScreenToLayer(screen.scroll_screen));
+    modules_.opengl()->texturing()->addOrUpdateTexture(key, scrollScreenToLayer(screen.scroll_screen));
 }
 
 // NOLINTNEXTLINE(readability-convert-member-functions-to-static)
