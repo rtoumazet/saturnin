@@ -18,7 +18,7 @@
 //
 
 #include <saturnin/src/pch.h>
-#include <saturnin/src/video/opengl/opengl.h>
+#include <saturnin/src/video/opengl/opengl_textures.h>
 
 #include <glbinding/glbinding.h>
 #include <glbinding/Version.h>

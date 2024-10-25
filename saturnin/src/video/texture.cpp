@@ -20,6 +20,7 @@
 #include <saturnin/src/pch.h>
 #include <saturnin/src/video/texture.h>
 #include <saturnin/src/video/opengl/opengl.h>
+#include <saturnin/src/video/opengl/opengl_textures.h>
 #include <saturnin/src/utilities.h> // hashCombine, format
 
 namespace uti = saturnin::utilities;

@@ -21,6 +21,7 @@
 #include <saturnin/src/memory.h>
 #include <saturnin/src/video/vdp1_part.h>
 #include <saturnin/src/video/opengl/opengl.h>
+#include <saturnin/src/video/opengl/opengl_textures.h>
 #include <saturnin/src/video/texture.h>
 #include <saturnin/src/video/vdp1.h>
 #include <saturnin/src/emulator_modules.h>
