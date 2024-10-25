@@ -20,7 +20,7 @@
 #include <saturnin/src/pch.h>
 #include <saturnin/src/video/vdp2/vdp2.h>
 #include <saturnin/src/video/opengl/opengl.h>
-#include <saturnin/src/video/opengl/opengl_textures.h>
+#include <saturnin/src/video/opengl/opengl_texturing.h>
 #include <saturnin/src/video/texture.h>
 #include <saturnin/src/utilities.h> // toUnderlying
 

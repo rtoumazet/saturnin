@@ -30,18 +30,18 @@
 #include <saturnin/src/sh2/basic_interpreter/sh2_instructions.h>
 #include <saturnin/src/smpc.h> // SaturnDigitalPad, PeripheralKey
 #include <saturnin/src/tests.h>
-#include <saturnin/src/thread_pool.h>                  // ThreadPool
-#include <saturnin/src/utilities.h>                    // stringToVector, format
-#include <saturnin/src/cdrom/scsi.h>                   // ScsiDriveInfo
-#include <saturnin/src/video/opengl/opengl.h>          // Opengl
-#include <saturnin/src/video/opengl/opengl_render.h>   // OpenglRender
-#include <saturnin/src/video/opengl/opengl_textures.h> // OpenglTexturing
-#include <saturnin/src/video/texture.h>                // Texture
-#include <saturnin/src/video/vdp1.h>                   // Vdp1
-#include <saturnin/src/video/vdp2/vdp2.h>              // vram_timing_size
-#include <saturnin/lib/imgui/imgui_custom_controls.h>  // peripheralKeyCombo
-#include <saturnin/lib/imgui/imgui_memory_editor.h>    // MemoryEditor
-#include <saturnin/lib/imgui/imfilebrowser.h>          // imfilebrowser
+#include <saturnin/src/thread_pool.h>                   // ThreadPool
+#include <saturnin/src/utilities.h>                     // stringToVector, format
+#include <saturnin/src/cdrom/scsi.h>                    // ScsiDriveInfo
+#include <saturnin/src/video/opengl/opengl.h>           // Opengl
+#include <saturnin/src/video/opengl/opengl_render.h>    // OpenglRender
+#include <saturnin/src/video/opengl/opengl_texturing.h> // OpenglTexturing
+#include <saturnin/src/video/texture.h>                 // Texture
+#include <saturnin/src/video/vdp1.h>                    // Vdp1
+#include <saturnin/src/video/vdp2/vdp2.h>               // vram_timing_size
+#include <saturnin/lib/imgui/imgui_custom_controls.h>   // peripheralKeyCombo
+#include <saturnin/lib/imgui/imgui_memory_editor.h>     // MemoryEditor
+#include <saturnin/lib/imgui/imfilebrowser.h>           // imfilebrowser
 
 #if defined(__clang__)
 #pragma clang diagnostic ignored "-Wformat-security" // warning: format string is not a string literal
