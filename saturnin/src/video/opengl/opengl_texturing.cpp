@@ -39,6 +39,7 @@ using namespace gl21ext;
 using core::tr;
 
 void OpenglTexturing::initialize() {
+    using enum GuiTextureType;
     texture_array_id_     = initializeTextureArray(texture_array_width, texture_array_height, texture_array_depth);
     fbo_texture_array_id_ = initializeTextureArray(fbo_texture_array_width, fbo_texture_array_height, fbo_texture_array_depth);
 
@@ -48,13 +49,13 @@ void OpenglTexturing::initialize() {
     }
 
     // Initialize textures to be used on the GUI side
-    gui_texture_type_to_id_[GuiTextureType::render_buffer]
+    gui_texture_type_to_id_[render_buffer]
         = OpenglTexturing::generateTexture(fbo_texture_array_width, fbo_texture_array_height, std::vector<u8>{});
-    gui_texture_type_to_id_[GuiTextureType::vdp1_debug_buffer]
+    gui_texture_type_to_id_[vdp1_debug_buffer]
         = OpenglTexturing::generateTexture(fbo_texture_array_width, fbo_texture_array_height, std::vector<u8>{});
-    gui_texture_type_to_id_[GuiTextureType::vdp2_debug_buffer]
+    gui_texture_type_to_id_[vdp2_debug_buffer]
         = OpenglTexturing::generateTexture(fbo_texture_array_width, fbo_texture_array_height, std::vector<u8>{});
-    gui_texture_type_to_id_[GuiTextureType::layer_buffer]
+    gui_texture_type_to_id_[layer_buffer]
         = OpenglTexturing::generateTexture(texture_array_width, texture_array_height, std::vector<u8>{});
 
     initializeFbo();
@@ -251,30 +252,27 @@ auto OpenglTexturing::calculateTextureCoordinates(const ScreenPos& texture_pos_i
 }
 
 auto OpenglTexturing::readVertexes(const PartsList& parts) -> std::vector<Vertex> {
+    auto updateCoords = [](RenderPart& p, const OpenglTexture& opengl_tex) {
+        for (auto& v : p.vertexes) {
+            v.color_offset = p.color_offset;
+
+            if ((v.tex_coords.s == 0.0) && (v.tex_coords.t == 0.0)) {
+                v.tex_coords = opengl_tex.coords[0];
+            } else if ((v.tex_coords.s == 1.0) && (v.tex_coords.t == 0.0)) {
+                v.tex_coords = opengl_tex.coords[1];
+            } else if ((v.tex_coords.s == 1.0) && (v.tex_coords.t == 1.0)) {
+                v.tex_coords = opengl_tex.coords[2];
+            } else if ((v.tex_coords.s == 0.0) && (v.tex_coords.t == 1.0)) {
+                v.tex_coords = opengl_tex.coords[3];
+            }
+        }
+    };
+
     auto vertexes = std::vector<Vertex>{};
     for (auto p : parts) {
-        const auto opengl_tex = getOpenglTexture(p.texture_key);
-        if (opengl_tex.has_value()) {
+        if (const auto opengl_tex = getOpenglTexture(p.texture_key); opengl_tex.has_value()) {
             // Replacing texture coordinates of the vertex by those of the OpenGL texture.
-            for (auto& v : p.vertexes) {
-                v.color_offset = p.color_offset;
-                if ((v.tex_coords.s == 0.0) && (v.tex_coords.t == 0.0)) {
-                    v.tex_coords = opengl_tex->coords[0];
-                    continue;
-                }
-                if ((v.tex_coords.s == 1.0) && (v.tex_coords.t == 0.0)) {
-                    v.tex_coords = opengl_tex->coords[1];
-                    continue;
-                }
-                if ((v.tex_coords.s == 1.0) && (v.tex_coords.t == 1.0)) {
-                    v.tex_coords = opengl_tex->coords[2];
-                    continue;
-                }
-                if ((v.tex_coords.s == 0.0) && (v.tex_coords.t == 1.0)) {
-                    v.tex_coords = opengl_tex->coords[3];
-                    continue;
-                }
-            }
+            updateCoords(p, *opengl_tex);
         } else {
             for (auto& v : p.vertexes) {
                 v.color_offset = p.color_offset;
@@ -455,14 +453,14 @@ auto OpenglTexturing::generateTextureFromTextureArrayLayer(const GuiTextureType 
 
 void OpenglTexturing::attachTextureToFbo(const u32        texture_id,
                                          const gl::GLenum framebuffer_target,
-                                         const gl::GLenum color_attachment) {
+                                         const gl::GLenum color_attachment) const {
     glFramebufferTexture2D(framebuffer_target, color_attachment, GLenum::GL_TEXTURE_2D, texture_id, 0);
 }
 
 void OpenglTexturing::attachTextureLayerToFbo(const u32        texture_id,
                                               const u8         layer,
                                               const gl::GLenum framebuffer_target,
-                                              const gl::GLenum color_attachment) {
+                                              const gl::GLenum color_attachment) const {
     glFramebufferTextureLayer(framebuffer_target, color_attachment, texture_id, 0, layer);
 }
 

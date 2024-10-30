@@ -232,10 +232,10 @@ class Opengl {
     void clearFboKeys();
 
     // Binds a FBO. Passing index 0 unbinds it.
-    void bindFbo(const u32 fbo_id);
+    void bindFbo(const u32 fbo_id) const;
 
     // Unbinds current bound FBO.
-    void unbindFbo();
+    void unbindFbo() const;
 
     // Returns the next available FBO texture index (with status 'unused').
     auto getAvailableFboTextureIndex() -> std::optional<u8>;

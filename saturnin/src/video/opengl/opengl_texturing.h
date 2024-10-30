@@ -89,13 +89,13 @@ class OpenglTexturing {
     auto generateTextureFromTextureArrayLayer(const GuiTextureType dst_texture_type, const u8 layer) -> u32;
 
     // Attachs a texture to the curently bound FBO.
-    void attachTextureToFbo(const u32 texture_id, const gl::GLenum framebuffer_target, const gl::GLenum color_attachment);
+    void attachTextureToFbo(const u32 texture_id, const gl::GLenum framebuffer_target, const gl::GLenum color_attachment) const;
 
     // Attachs a texture array layer to the curently bound FBO.
     void attachTextureLayerToFbo(const u32        texture_id,
                                  const u8         layer,
                                  const gl::GLenum framebuffer_target,
-                                 const gl::GLenum color_attachment);
+                                 const gl::GLenum color_attachment) const;
 
     // Initializes the framebuffer object and related elements.
     void initializeFbo();

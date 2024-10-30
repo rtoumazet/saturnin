@@ -98,22 +98,23 @@ void Opengl::shutdown() {
 auto Opengl::areFbosInitialized() const -> bool { return opengl_texturing_->getFboId(FboType::general) != 0; };
 
 void Opengl::clearFboTextures() {
-    Log::debug(Logger::opengl, "clearFboTextures() call");
+    using enum Logger;
+    Log::debug(opengl, "clearFboTextures() call");
     for (u8 index = 0; auto& status : fbo_texture_pool_status_) {
         if (status == FboTextureStatus::to_clear) {
             //          :WIP:
-            Log::debug(Logger::opengl, "- Clearing texture at index {}", index);
+            Log::debug(opengl, "- Clearing texture at index {}", index);
             //          attachTextureLayerToFbo(fbo_texture_array_id_, index);
             //          attachTextureToFbo(getFboTextureId(FboTextureType::vdp2_debug_layer));
 
             gl::glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
             glClear(GL_COLOR_BUFFER_BIT);
 
-            Log::debug(Logger::opengl, "- Changing FBO texture status at index {} to 'unused'", index);
+            Log::debug(opengl, "- Changing FBO texture status at index {} to 'unused'", index);
             status = FboTextureStatus::unused;
         }
     }
-    Log::debug(Logger::opengl, "clearFbos() return");
+    Log::debug(opengl, "clearFbos() return");
 }
 
 void Opengl::clearFboKeys() {
@@ -126,9 +127,9 @@ void Opengl::clearFboKeys() {
     // Log::debug(Logger::opengl, "clearFboKeys() return");
 }
 
-void Opengl::bindFbo(const u32 fbo_id) { gl33core::glBindFramebuffer(GL_FRAMEBUFFER, fbo_id); }
+void Opengl::bindFbo(const u32 fbo_id) const { gl33core::glBindFramebuffer(GL_FRAMEBUFFER, fbo_id); }
 
-void Opengl::unbindFbo() { bindFbo(0); }
+void Opengl::unbindFbo() const { bindFbo(0); }
 
 auto Opengl::getAvailableFboTextureIndex() -> std::optional<u8> {
     std::array<FboTextureStatus, 1> status = {FboTextureStatus::unused};
@@ -158,6 +159,10 @@ auto Opengl::getRenderedBufferTextureId(const GuiTextureType type) -> u32 {
         }
         case vdp2_debug_buffer: {
             layer = texturing()->getFboTextureLayer(FboTextureType::vdp2_debug_layer);
+            break;
+        }
+        case layer_buffer: {
+            Log::warning(Logger::opengl, "getRenderedBufferTextureId() called with a layer_buffer type !");
             break;
         }
     }
@@ -219,7 +224,7 @@ auto runOpengl(core::EmulatorContext& state) -> s32 {
         glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
         glfwWindowHint(GLFW_OPENGL_PROFILE,
                        GLFW_OPENGL_CORE_PROFILE); // 3.2+ only
-        // glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); // 3.0+ only
+        // Change call to glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); for 3.0+ only
 
         glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, true);
     }
@@ -231,9 +236,6 @@ auto runOpengl(core::EmulatorContext& state) -> s32 {
     const auto window = createMainWindow(minimum_window_width, minimum_window_height, window_title);
     if (window == nullptr) { return EXIT_FAILURE; }
     state.openglWindow(window);
-
-    // glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
-    // const auto render_window = glfwCreateWindow(1, 1, "invisible", nullptr, ihm_window);
 
     glfwSetWindowCloseCallback(window, windowCloseCallback);
     glfwSetWindowSizeCallback(window, windowSizeCallback);
@@ -271,19 +273,12 @@ auto runOpengl(core::EmulatorContext& state) -> s32 {
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
 
-    // auto flags = ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
-    //(void)flags;
     ImGuiIO& io = ImGui::GetIO();
     (void)io;
-
-    //  io.ConfigViewportDecorations
-    //  io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;  // Enable Keyboard Controls
-    //  io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;   // Enable Gamepad Controls
     io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable; // Enable Viewports
 
     // Setup style
     ImGui::StyleColorsDark();
-    // ImGui::StyleColorsClassic();
 
     ImGui_ImplGlfw_InitForOpenGL(window, true);
     is_legacy_opengl ? ImGui_ImplOpenGL3_Init() : ImGui_ImplOpenGL3_Init(glsl_version);
@@ -299,7 +294,6 @@ auto runOpengl(core::EmulatorContext& state) -> s32 {
     // io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\ArialUni.ttf", 18.0f, NULL, io.Fonts->GetGlyphRangesJapanese());
 
     // Adding glyphs that will be used as images in text
-    // ImGuiIO& io = ImGui::GetIO();
     io.Fonts->AddFontDefault();
     static const std::array<ImWchar, 3> icons_ranges = {0xe900, 0xe908, 0}; // Will not be copied by AddFont* so keep in scope.
     ImFontConfig                        config;
@@ -313,7 +307,6 @@ auto runOpengl(core::EmulatorContext& state) -> s32 {
     io.Fonts->AddFontFromMemoryTTF((void*)data.data(), static_cast<u32>(data.size()), font_size, &config, icons_ranges.data());
     io.Fonts->Build();
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
-    // io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable; // Enable Viewports
 
     const auto clear_color = ImVec4{0.0f, 0.0f, 0.0f, 1.00f};
 
@@ -321,14 +314,12 @@ auto runOpengl(core::EmulatorContext& state) -> s32 {
 
     state.opengl()->initialize();
 
-    Log::info(Logger::opengl, "Card : {}", (char*)glGetString(GL_RENDERER));
+    Log::info(Logger::opengl, "Card : {}", reinterpret_cast<const char*>(glGetString(GL_RENDERER)));
 
     if (state.memory()->selectedBinaryFile().full_path.size() > 0) {
         state.startEmulation();
         if (!state.memory()->selectedBinaryFile().is_auto_started) { state.debugStatus(core::DebugStatus::paused); }
     }
-
-    // glGetString(GL_RENDERER);
 
     // Main loop
     while (glfwWindowShouldClose(window) == GLFW_FALSE) {

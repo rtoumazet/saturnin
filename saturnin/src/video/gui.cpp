@@ -1412,7 +1412,6 @@ void showDebugVdp1Window(core::EmulatorContext& state, bool* opened) {
             // Draw list
             ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2());
             const auto child_size = ImVec2(310, 280);
-            // ImGui::BeginChild("ChildDrawList", child_size, true, window_flags | ImGuiWindowFlags_MenuBar);
             ImGui::BeginChild("ChildDrawList", child_size, true);
 
             if (ImGui::BeginMenuBar()) {
@@ -1477,10 +1476,10 @@ void showDebugVdp1Window(core::EmulatorContext& state, bool* opened) {
 
                     static auto opengl_id = 0;
                     if (texture) {
-                        if (opengl_id != 0) { state.opengl()->texturing()->deleteTexture(opengl_id); }
-                        opengl_id = state.opengl()->texturing()->generateTexture((*texture)->width(),
-                                                                                 (*texture)->height(),
-                                                                                 (*texture)->rawData());
+                        if (opengl_id != 0) { video::OpenglTexturing::deleteTexture(opengl_id); }
+                        opengl_id = video::OpenglTexturing::generateTexture((*texture)->width(),
+                                                                            (*texture)->height(),
+                                                                            (*texture)->rawData());
                         ImGui::Image(reinterpret_cast<ImTextureID>(static_cast<uptr>(opengl_id)), preview_size);
                     }
                 }
@@ -1860,10 +1859,10 @@ void showDebugTexturesWindow(core::EmulatorContext& state, bool* opened) {
                             // Reloading texture data from the new selected entry.
                             const auto texture = video::Texture::getTexture(texture_key);
                             if (texture) {
-                                if (opengl_id != 0) { state.opengl()->texturing()->deleteTexture(opengl_id); }
-                                opengl_id = state.opengl()->texturing()->generateTexture((*texture)->width(),
-                                                                                         (*texture)->height(),
-                                                                                         (*texture)->rawData());
+                                if (opengl_id != 0) { video::OpenglTexturing::deleteTexture(opengl_id); }
+                                opengl_id = video::OpenglTexturing::generateTexture((*texture)->width(),
+                                                                                    (*texture)->height(),
+                                                                                    (*texture)->rawData());
                             }
                             previous_texture_idx = current_texture_idx;
                         }
@@ -1903,7 +1902,7 @@ void showDebugTexturesWindow(core::EmulatorContext& state, bool* opened) {
                 if (ImGui::Combo("Layer", &current_layer, layers)) {}
                 auto tex_id
                     = state.opengl()->texturing()->generateTextureFromTextureArrayLayer(video::GuiTextureType::layer_buffer,
-                                                                                        current_layer);
+                                                                                        static_cast<u8>(current_layer));
 
                 ImGui::BeginChild("child_part_texture", child_size, true, window_flags);
                 const auto preview_size = ImVec2(500, 500);
