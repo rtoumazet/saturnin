@@ -165,7 +165,7 @@
     <ClCompile Include="src\video\opengl\opengl_utilities.cpp">
       <Filter>Fichiers sources\video\opengl</Filter>
     </ClCompile>
-    <ClCompile Include="src\video\opengl\opengl_textures.cpp">
+    <ClCompile Include="src\video\opengl\opengl_texturing.cpp">
       <Filter>Fichiers sources\video\opengl</Filter>
     </ClCompile>
     <ClCompile Include="src\video\opengl\opengl_render.cpp">
@@ -379,6 +379,21 @@
     </ClInclude>
     <ClInclude Include="src\video\opengl\opengl.h">
       <Filter>Fichiers sources\video\opengl</Filter>
+    </ClInclude>
+    <ClInclude Include="src\video\opengl\opengl_common.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="src\video\opengl\opengl_render.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="src\video\opengl\opengl_shaders.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="src\video\opengl\opengl_texturing.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="src\video\opengl\opengl_utilities.h">
+      <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

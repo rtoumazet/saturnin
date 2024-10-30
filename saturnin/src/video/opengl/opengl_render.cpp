@@ -31,6 +31,7 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <saturnin/src/video/opengl/opengl_shaders.h>
 #include <saturnin/src/video/opengl/opengl_utilities.h>
+#include <saturnin/src/video/opengl/opengl_texturing.h>
 #include <saturnin/src/video/vdp1.h>
 #include <saturnin/src/video/vdp2/vdp2.h>
 

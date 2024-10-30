@@ -379,7 +379,7 @@
     <ClCompile Include="src\timer.cpp" />
     <ClCompile Include="src\video\opengl\opengl_render.cpp" />
     <ClCompile Include="src\video\opengl\opengl_shaders.cpp" />
-    <ClCompile Include="src\video\opengl\opengl_textures.cpp" />
+    <ClCompile Include="src\video\opengl\opengl_texturing.cpp" />
     <ClCompile Include="src\video\opengl\opengl_utilities.cpp" />
     <ClCompile Include="src\video\texture.cpp" />
     <ClCompile Include="src\video\vdp1_part.cpp" />
@@ -469,7 +469,7 @@
     <ClInclude Include="src\video\opengl\opengl_common.h" />
     <ClInclude Include="src\video\opengl\opengl_render.h" />
     <ClInclude Include="src\video\opengl\opengl_shaders.h" />
-    <ClInclude Include="src\video\opengl\opengl_textures.h" />
+    <ClInclude Include="src\video\opengl\opengl_texturing.h" />
     <ClInclude Include="src\video\opengl\opengl_utilities.h" />
     <ClInclude Include="src\video\texture.h" />
     <ClInclude Include="src\video\vdp1_part.h" />
