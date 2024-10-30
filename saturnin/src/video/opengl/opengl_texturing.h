@@ -103,19 +103,21 @@ class OpenglTexturing {
     // Generates a framebuffer object.
     auto generateFbo(const FboType fbo_type) -> u32;
 
-    auto getTextureArrayId() const { return texture_array_id_; };
-    auto getFboTextureArrayId() const { return fbo_texture_array_id_; };
-    auto getGuiTextureId(const GuiTextureType type) const { return gui_texture_type_to_id_.at(type); };
     auto getFboId(const FboType type) const { return fbo_type_to_id_.at(type); };
 
     // Gets the FBO texture layer currently used by the FboTextureType.
     auto getFboTextureLayer(const FboTextureType type) const -> u8;
 
-    [[nodiscard]] auto vdp1DebugOverlayTextureId() const { return getFboTextureLayer(FboTextureType::vdp1_debug_overlay); };
+    auto getGuiTextureId(const GuiTextureType type) const { return gui_texture_type_to_id_.at(type); };
+
+    auto getTextureArrayId() const { return texture_array_id_; };
+    auto getFboTextureArrayId() const { return fbo_texture_array_id_; };
 
     [[nodiscard]] auto vdp2DebugLayerTextureId() const -> u32 {
         return gui_texture_type_to_id_.at(GuiTextureType::vdp2_debug_buffer);
     };
+
+    // auto textureId
 
   private:
     Opengl* opengl_;
