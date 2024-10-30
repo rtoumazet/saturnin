@@ -24,6 +24,15 @@
 #include <saturnin/src/video/vdp_common.h>
 
 namespace saturnin::video {
+
+enum class TextureArrayType : u8 { saturn_part, framebuffer };
+enum class FboTextureType : u8 { front_buffer, back_buffer, vdp1_debug_overlay, vdp2_debug_layer, priority };
+enum class GuiTextureType : u8 { render_buffer, vdp1_debug_buffer, vdp2_debug_buffer, layer_buffer };
+
+using FboTextureTypeToLayer = std::array<FboTextureType, fbo_texture_array_depth>; // Defines the type of each FBO texture layer,
+                                                                                   // the index of the array being the layer.
+using GuiTextureTypeToId = std::unordered_map<GuiTextureType, u32>; // Defines the type of each texture used to render to GUI.
+
 class OpenglTexturing {
   public:
     OpenglTexturing() = default;
