@@ -19,7 +19,6 @@
 
 #include <saturnin/src/pch.h>
 #include <saturnin/src/video/vdp2/vdp2.h>
-#include <saturnin/src/video/opengl/opengl.h>
 #include <saturnin/src/video/opengl/opengl_texturing.h>
 #include <saturnin/src/video/texture.h>
 #include <saturnin/src/utilities.h> // toUnderlying
@@ -42,55 +41,41 @@ constexpr auto bits_in_a_byte                = u8{8};
 void Vdp2::clearRenderData(const ScrollScreen s) { std::vector<video::Vdp2Part>().swap(vdp2_parts_[toUnderlying(s)]); }
 
 void Vdp2::populateRenderData() {
-    clearRenderData(ScrollScreen::rbg1);
-    if (isScreenDisplayed(ScrollScreen::rbg1)) {
-        updateScrollScreenStatus(ScrollScreen::rbg1);
-        if (getScreen(ScrollScreen::rbg1).priority_number != 0) { readScrollScreenData(ScrollScreen::rbg1); }
-    } else {
-        // discardCache(ScrollScreen::rbg1);
-    }
+    using enum ScrollScreen;
 
-    clearRenderData(ScrollScreen::rbg0);
-    if (isScreenDisplayed(ScrollScreen::rbg0)) {
-        updateScrollScreenStatus(ScrollScreen::rbg0);
-        if (getScreen(ScrollScreen::rbg0).priority_number != 0) { readScrollScreenData(ScrollScreen::rbg0); }
-    } else {
-        // discardCache(ScrollScreen::rbg0);
-    }
-    auto is_nbg_displayed
-        = !(getScreen(ScrollScreen::rbg0).is_display_enabled && getScreen(ScrollScreen::rbg1).is_display_enabled);
+    auto populateRbgScreen = [this](const ScrollScreen rbg) {
+        clearRenderData(rbg);
+        if (isScreenDisplayed(rbg)) {
+            updateScrollScreenStatus(rbg);
+            if (getScreen(rbg).priority_number != 0) { readScrollScreenData(rbg); }
+        } else {
+            // discardCache(rbg);
+        }
+    };
+
+    populateRbgScreen(rbg1);
+    populateRbgScreen(rbg0);
+
+    auto populateNbgScreen = [this](const ScrollScreen nbg) {
+        clearRenderData(nbg);
+        if (isScrollScreenDisplayable(nbg) && isScreenDisplayed(nbg) && (getScreen(nbg).priority_number != 0)) {
+            readScrollScreenData(nbg);
+        }
+    };
+
+    auto is_nbg_displayed = !(getScreen(rbg0).is_display_enabled && getScreen(rbg1).is_display_enabled);
 
     if (is_nbg_displayed) {
-        clearRenderData(ScrollScreen::nbg0);
-        if (isScreenDisplayed(ScrollScreen::nbg0)) {
-            updateScrollScreenStatus(ScrollScreen::nbg0);
-            if (getScreen(ScrollScreen::nbg0).priority_number != 0) { readScrollScreenData(ScrollScreen::nbg0); }
-        }
-
-        clearRenderData(ScrollScreen::nbg1);
-        if (canScrollScreenBeDisplayed(ScrollScreen::nbg1)) {
-            if (isScreenDisplayed(ScrollScreen::nbg1)) {
-                updateScrollScreenStatus(ScrollScreen::nbg1);
-                if (getScreen(ScrollScreen::nbg1).priority_number != 0) { readScrollScreenData(ScrollScreen::nbg1); }
-            }
-        }
-
-        clearRenderData(ScrollScreen::nbg2);
-        if (canScrollScreenBeDisplayed(ScrollScreen::nbg2)) {
-            if (isScreenDisplayed(ScrollScreen::nbg2)) {
-                updateScrollScreenStatus(ScrollScreen::nbg2);
-                if (getScreen(ScrollScreen::nbg2).priority_number != 0) { readScrollScreenData(ScrollScreen::nbg2); }
-            }
-        } else {
-            // bg_[util::toUnderlying(ScrollScreen::nbg2)] = {};
-        }
+        populateNbgScreen(nbg0);
+        populateNbgScreen(nbg1);
+        populateNbgScreen(nbg2);
 
         if (uses_fbo) {
             // WIP
-            if (canScrollScreenBeDisplayed(ScrollScreen::nbg3) && isScreenDisplayed(ScrollScreen::nbg3)) {
-                updateScrollScreenStatus(ScrollScreen::nbg3);
-                const auto isDirty             = isCacheDirty(ScrollScreen::nbg3);
-                const auto priorityIsAboveZero = getScreen(ScrollScreen::nbg3).priority_number != 0;
+            if (isScrollScreenDisplayable(nbg3) && isScreenDisplayed(nbg3)) {
+                updateScrollScreenStatus(nbg3);
+                const auto isDirty             = isCacheDirty(nbg3);
+                const auto priorityIsAboveZero = getScreen(nbg3).priority_number != 0;
                 if (isDirty && priorityIsAboveZero) {
                     //        discardCache(ScrollScreen::nbg3);
                     //        clearRenderData(ScrollScreen::nbg3);
@@ -117,18 +102,12 @@ void Vdp2::populateRenderData() {
                 // modules_.opengl()->setFboStatus(ScrollScreen::nbg3, FboStatus::to_clear);
             }
         } else {
-            clearRenderData(ScrollScreen::nbg3);
-            if (canScrollScreenBeDisplayed(ScrollScreen::nbg3)) {
-                if (isScreenDisplayed(ScrollScreen::nbg3)) {
-                    updateScrollScreenStatus(ScrollScreen::nbg3);
-                    if (getScreen(ScrollScreen::nbg3).priority_number != 0) { readScrollScreenData(ScrollScreen::nbg3); }
-                }
-            }
+            populateNbgScreen(nbg3);
         }
     }
 }
 
-auto Vdp2::canScrollScreenBeDisplayed(const ScrollScreen s) const -> bool {
+auto Vdp2::isScrollScreenDisplayable(const ScrollScreen s) const -> bool {
     const auto nbg0_color_nb = getScreen(ScrollScreen::nbg0).character_color_number;
     const auto nbg1_color_nb = getScreen(ScrollScreen::nbg1).character_color_number;
     switch (s) {

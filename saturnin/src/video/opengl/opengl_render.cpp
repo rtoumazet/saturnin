@@ -32,6 +32,7 @@
 #include <saturnin/src/video/opengl/opengl_shaders.h>
 #include <saturnin/src/video/opengl/opengl_texturing.h>
 #include <saturnin/src/video/opengl/opengl_utilities.h>
+#include <saturnin/src/video/opengl/opengl_texturing.h>
 #include <saturnin/src/video/vdp1.h>
 #include <saturnin/src/video/vdp2/vdp2.h>
 
@@ -334,7 +335,6 @@ void OpenglRender::renderTest() {
 
     glActiveTexture(GLenum::GL_TEXTURE0);
     const auto sampler_loc = glGetUniformLocation(shaders_.programs[ProgramShader::main], "sampler");
-    // glUniform1i(sampler_loc, GLenum::GL_TEXTURE0);
     glUniform1i(sampler_loc, 0);
     glBindTexture(GL_TEXTURE_2D_ARRAY, opengl_->texturing()->getTextureArrayId());
 
@@ -348,10 +348,7 @@ void OpenglRender::renderTest() {
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elements_buffer);
 
     if constexpr (false) {
-        // std::array<GLuint, 20> indices = {0, 1, 2, 0, 2, 3, 4, 5, 6, 4, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15};
         std::vector<GLuint> indices = {0, 1, 2, 0, 2, 3, 4, 5, 6, 4, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15};
-        // std::span<GLuint>   indices(vindices);
-        //      std::array<GLuint, 5> indices = {0, 1, 2, 3, 0};
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint) * indices.size(), &indices.front(), GL_STATIC_DRAW);
 
         auto vertexes = std::vector<Vertex>{
@@ -422,7 +419,6 @@ void OpenglRender::renderTest() {
         };
         render_part.common_vdp_data_.draw_type = DrawType::line;
         render_part.common_vdp_data_.vdp_type  = VdpType::vdp1;
-        // render_part.common_vdp_data_.color_offset = {0x50, 0x50, 0x50};
         parts.emplace_back(render_part);
 
         render_part.common_vdp_data_.vertexes = {
@@ -431,7 +427,6 @@ void OpenglRender::renderTest() {
         };
         render_part.common_vdp_data_.draw_type = DrawType::line;
         render_part.common_vdp_data_.vdp_type  = VdpType::vdp1;
-        // render_part.common_vdp_data_.color_offset = {0x50, 0x50, 0x50};
         parts.emplace_back(render_part);
 
         render_part.common_vdp_data_.vertexes = {
@@ -442,7 +437,6 @@ void OpenglRender::renderTest() {
         };
         render_part.common_vdp_data_.draw_type = DrawType::polyline;
         render_part.common_vdp_data_.vdp_type  = VdpType::vdp1;
-        // render_part.common_vdp_data_.color_offset = {0x50, 0x50, 0x50};
         parts.emplace_back(render_part);
 
         const auto&& [indices, draw_ranges] = generateVertexIndicesAndDrawRanges(parts);
@@ -452,9 +446,6 @@ void OpenglRender::renderTest() {
         glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * vertexes.size(), vertexes.data(), GL_STATIC_DRAW);
 
         for (const auto& range : draw_ranges) {
-            const auto is_texture_used = GLboolean(range.is_textured);
-            glUniform1i(texture_used_loc, is_texture_used);
-
             glDrawRangeElements(range.primitive,
                                 range.vertex_array_start,
                                 range.vertex_array_end,

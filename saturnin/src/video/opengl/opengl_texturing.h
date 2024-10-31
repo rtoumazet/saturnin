@@ -25,6 +25,14 @@
 
 namespace saturnin::video {
 
+enum class TextureArrayType : u8 { saturn_part, framebuffer };
+enum class FboTextureType : u8 { front_buffer, back_buffer, vdp1_debug_overlay, vdp2_debug_layer, priority };
+enum class GuiTextureType : u8 { render_buffer, vdp1_debug_buffer, vdp2_debug_buffer, layer_buffer };
+
+using FboTextureTypeToLayer = std::array<FboTextureType, fbo_texture_array_depth>; // Defines the type of each FBO texture layer,
+                                                                                   // the index of the array being the layer.
+using GuiTextureTypeToId = std::unordered_map<GuiTextureType, u32>; // Defines the type of each texture used to render to GUI.
+
 class OpenglTexturing {
   public:
     OpenglTexturing() = default;
@@ -90,13 +98,13 @@ class OpenglTexturing {
     auto generateTextureFromTextureArrayLayer(const GuiTextureType dst_texture_type, const u8 layer) -> u32;
 
     // Attachs a texture to the curently bound FBO.
-    void attachTextureToFbo(const u32 texture_id, const gl::GLenum framebuffer_target, const gl::GLenum color_attachment);
+    void attachTextureToFbo(const u32 texture_id, const gl::GLenum framebuffer_target, const gl::GLenum color_attachment) const;
 
     // Attachs a texture array layer to the curently bound FBO.
     void attachTextureLayerToFbo(const u32        texture_id,
                                  const u8         layer,
                                  const gl::GLenum framebuffer_target,
-                                 const gl::GLenum color_attachment);
+                                 const gl::GLenum color_attachment) const;
 
     // Initializes the framebuffer object and related elements.
     void initializeFbo();
@@ -104,19 +112,21 @@ class OpenglTexturing {
     // Generates a framebuffer object.
     auto generateFbo(const FboType fbo_type) -> u32;
 
-    auto getTextureArrayId() const { return texture_array_id_; };
-    auto getFboTextureArrayId() const { return fbo_texture_array_id_; };
-    auto getGuiTextureId(const GuiTextureType type) const { return gui_texture_type_to_id_.at(type); };
     auto getFboId(const FboType type) const { return fbo_type_to_id_.at(type); };
 
     // Gets the FBO texture layer currently used by the FboTextureType.
     auto getFboTextureLayer(const FboTextureType type) const -> u8;
 
-    [[nodiscard]] auto vdp1DebugOverlayTextureId() const { return getFboTextureLayer(FboTextureType::vdp1_debug_overlay); };
+    auto getGuiTextureId(const GuiTextureType type) const { return gui_texture_type_to_id_.at(type); };
+
+    auto getTextureArrayId() const { return texture_array_id_; };
+    auto getFboTextureArrayId() const { return fbo_texture_array_id_; };
 
     [[nodiscard]] auto vdp2DebugLayerTextureId() const -> u32 {
         return gui_texture_type_to_id_.at(GuiTextureType::vdp2_debug_buffer);
     };
+
+    // auto textureId
 
   private:
     Opengl* opengl_;

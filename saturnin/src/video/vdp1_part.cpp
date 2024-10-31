@@ -20,7 +20,6 @@
 #include <saturnin/src/pch.h>
 #include <saturnin/src/memory.h>
 #include <saturnin/src/video/vdp1_part.h>
-#include <saturnin/src/video/opengl/opengl.h>
 #include <saturnin/src/video/opengl/opengl_texturing.h>
 #include <saturnin/src/video/texture.h>
 #include <saturnin/src/video/vdp1.h>
@@ -795,18 +794,19 @@ void distortedSpriteDraw(const EmulatorModules& modules, Vdp1Part& part) {
 void polyDraw(const EmulatorModules& modules, Vdp1Part& part, CmdCtrl::CommandSelect command) {
     switch (command) {
         using enum CmdCtrl::CommandSelect;
+        using enum Logger;
         case polygon_draw: {
-            Log::debug(Logger::vdp1, tr("Command - Polygon draw"));
+            Log::debug(vdp1, tr("Command - Polygon draw"));
             part.common_vdp_data_.draw_type = DrawType::non_textured_polygon;
             break;
         }
         case polyline_draw: {
-            Log::debug(Logger::vdp1, tr("Command - Polyline draw"));
+            Log::debug(vdp1, tr("Command - Polyline draw"));
             part.common_vdp_data_.draw_type = DrawType::polyline;
             break;
         }
         default: {
-            Log::error(Logger::vdp1, tr("Command - Unknown poly draw"));
+            Log::error(vdp1, tr("Command - Unknown poly draw"));
             return;
         }
     }

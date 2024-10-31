@@ -192,49 +192,22 @@ auto Vdp2::getDebugVramAccessBanks() const -> std::vector<VramTiming> {
     const auto banks_used = getDebugVramAccessBanksUsed();
     auto       banks      = std::vector<VramTiming>{};
 
-    const VramTiming bank_a0 = {regs_.cyca0l >> Cycxxl::t0_enum,
-                                regs_.cyca0l >> Cycxxl::t1_enum,
-                                regs_.cyca0l >> Cycxxl::t2_enum,
-                                regs_.cyca0l >> Cycxxl::t3_enum,
-                                is_normal_mode ? regs_.cyca0u >> Cycxxu::t4_enum : no_access,
-                                is_normal_mode ? regs_.cyca0u >> Cycxxu::t5_enum : no_access,
-                                is_normal_mode ? regs_.cyca0u >> Cycxxu::t6_enum : no_access,
-                                is_normal_mode ? regs_.cyca0u >> Cycxxu::t7_enum : no_access};
-    banks.emplace_back(bank_a0);
+    auto readBank = [&is_normal_mode](const Vdp2Regs::CycxxlType& cycl, const Vdp2Regs::CycxxuType& cycu) -> VramTiming {
+        return {cycl >> Cycxxl::t0_enum,
+                cycl >> Cycxxl::t1_enum,
+                cycl >> Cycxxl::t2_enum,
+                cycl >> Cycxxl::t3_enum,
+                is_normal_mode ? cycu >> Cycxxu::t4_enum : no_access,
+                is_normal_mode ? cycu >> Cycxxu::t5_enum : no_access,
+                is_normal_mode ? cycu >> Cycxxu::t6_enum : no_access,
+                is_normal_mode ? cycu >> Cycxxu::t7_enum : no_access};
+    };
 
-    if (banks_used[vram_bank_a1_index]) {
-        const VramTiming bank_a1 = {regs_.cyca0l >> Cycxxl::t0_enum,
-                                    regs_.cyca1l >> Cycxxl::t1_enum,
-                                    regs_.cyca1l >> Cycxxl::t2_enum,
-                                    regs_.cyca1l >> Cycxxl::t3_enum,
-                                    is_normal_mode ? regs_.cyca1u >> Cycxxu::t4_enum : no_access,
-                                    is_normal_mode ? regs_.cyca1u >> Cycxxu::t5_enum : no_access,
-                                    is_normal_mode ? regs_.cyca1u >> Cycxxu::t6_enum : no_access,
-                                    is_normal_mode ? regs_.cyca1u >> Cycxxu::t7_enum : no_access};
-        banks.emplace_back(bank_a1);
-    }
+    banks.emplace_back(readBank(regs_.cyca0l, regs_.cyca0u));
+    if (banks_used[vram_bank_a1_index]) { banks.emplace_back(readBank(regs_.cyca1l, regs_.cyca1u)); }
+    banks.emplace_back(readBank(regs_.cycb0l, regs_.cycb0u));
+    if (banks_used[vram_bank_b1_index]) { banks.emplace_back(readBank(regs_.cycb1l, regs_.cycb1u)); }
 
-    const VramTiming bank_b0 = {regs_.cycb0l >> Cycxxl::t0_enum,
-                                regs_.cycb0l >> Cycxxl::t1_enum,
-                                regs_.cycb0l >> Cycxxl::t2_enum,
-                                regs_.cycb0l >> Cycxxl::t3_enum,
-                                is_normal_mode ? regs_.cycb0u >> Cycxxu::t4_enum : no_access,
-                                is_normal_mode ? regs_.cycb0u >> Cycxxu::t5_enum : no_access,
-                                is_normal_mode ? regs_.cycb0u >> Cycxxu::t6_enum : no_access,
-                                is_normal_mode ? regs_.cycb0u >> Cycxxu::t7_enum : no_access};
-    banks.emplace_back(bank_b0);
-
-    if (banks_used[vram_bank_a1_index]) {
-        const VramTiming bank_b1 = {regs_.cycb1l >> Cycxxl::t0_enum,
-                                    regs_.cycb1l >> Cycxxl::t1_enum,
-                                    regs_.cycb1l >> Cycxxl::t2_enum,
-                                    regs_.cycb1l >> Cycxxl::t3_enum,
-                                    is_normal_mode ? regs_.cycb1u >> Cycxxu::t4_enum : no_access,
-                                    is_normal_mode ? regs_.cycb1u >> Cycxxu::t5_enum : no_access,
-                                    is_normal_mode ? regs_.cycb1u >> Cycxxu::t6_enum : no_access,
-                                    is_normal_mode ? regs_.cycb1u >> Cycxxu::t7_enum : no_access};
-        banks.emplace_back(bank_b1);
-    }
     return banks;
 }
 

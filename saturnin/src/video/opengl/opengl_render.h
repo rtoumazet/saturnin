@@ -21,6 +21,7 @@
 
 #include <saturnin/src/emulator_defs.h>
 #include <saturnin/src/video/opengl/opengl.h>
+#include <saturnin/src/video/opengl/opengl_texturing.h>
 #include <saturnin/src/video/vdp_common.h>
 
 namespace saturnin::video {

@@ -106,13 +106,11 @@ void runTests() {
         }
 
         std::vector<u8> texture_data;
-        // core::Log::info(Logger::test, "{}", arr[0x3f]);
-        auto os = std::ostringstream{};
-        auto b  = ankerl::nanobench::Bench();
+        auto            os = std::ostringstream{};
+        auto            b  = ankerl::nanobench::Bench();
         b.output(&os).relative(true);
 
-        // ankerl::nanobench::Bench().output(&os).run("Direct copy", [&] {
-        b.run("Direct copy", [&] {
+        b.run("Direct copy", [&texture_data, &current_address, &row, &ec] {
             texture_data.clear();
             current_address = u32{0x25e00000};
             for (u32 i = 0; i < 8; ++i) {
@@ -129,26 +127,6 @@ void runTests() {
                 texture_data.emplace_back(row.as_8bits >> DataExtraction::As8Bits::dot3_shift);
                 current_address += 4;
             }
-
-            // ankerl::nanobench::doNotOptimizeAway(d);
-        });
-
-        b.run("Block copy", [&] {
-            texture_data.clear();
-            current_address = u32{0x25e00000};
-            // for (u32 i = 0; i < 8; ++i) {
-            //     const auto data = ec.memory()->read(core::MemoryMapArea::vdp2_video_ram, current_address, 0x40);
-
-            //                  for (const auto& elem : data) {
-            //                      row.as_8bits = elem;
-            //                      texture_data.emplace_back(row.as_8bits >> DataExtraction::As8Bits::dot0_shift);
-            //                      texture_data.emplace_back(row.as_8bits >> DataExtraction::As8Bits::dot1_shift);
-            //                      texture_data.emplace_back(row.as_8bits >> DataExtraction::As8Bits::dot2_shift);
-            //                      texture_data.emplace_back(row.as_8bits >> DataExtraction::As8Bits::dot3_shift);
-            //                  }
-            //}
-
-            // ankerl::nanobench::doNotOptimizeAway(d);
         });
 
         core::Log::info(Logger::test, "{}", os.str());

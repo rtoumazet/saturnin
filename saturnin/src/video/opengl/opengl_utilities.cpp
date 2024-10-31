@@ -70,7 +70,7 @@ auto createMainWindow(const u32 width, const u32 height, const std::string& titl
 }
 
 void windowCloseCallback(GLFWwindow* window) {
-    auto state = reinterpret_cast<core::EmulatorContext*>(glfwGetWindowUserPointer(window));
+    auto state = static_cast<core::EmulatorContext*>(glfwGetWindowUserPointer(window));
     state->stopEmulation();
     state->renderingStatus(core::RenderingStatus::stopped);
 
@@ -165,7 +165,6 @@ void glDebugOutput(gl::GLenum                   source,
             type_str = "Type: Other";
             break;
         }
-            [[fallthrough]];
         default: {
             type_str = "Type: Unknown";
             break;
@@ -182,7 +181,6 @@ void glDebugOutput(gl::GLenum                   source,
             severity_str = "notification";
             break;
         }
-            [[fallthrough]];
         default: {
             severity_str = "unknown";
             break;

@@ -59,6 +59,7 @@ class OpenglTexturing;
 
 enum class DrawType : u8;
 enum class ScrollScreen;
+enum class GuiTextureType : u8;
 
 using saturnin::core::Config;
 using utilities::toUnderlying;
@@ -82,9 +83,6 @@ constexpr auto vertexes_per_line             = u32{2};
 constexpr auto fbo_texture_array_depth = u16{14};
 constexpr auto max_fbo_texture         = u8{20};
 
-enum class TextureArrayType : u8 { saturn_part, framebuffer };
-enum class FboTextureType : u8 { front_buffer, back_buffer, vdp1_debug_overlay, vdp2_debug_layer, priority };
-enum class GuiTextureType : u8 { render_buffer, vdp1_debug_buffer, vdp2_debug_buffer, layer_buffer };
 enum class FboType : u8 { general, for_gui, vdp2_debug };
 enum class MutexType : u8 { parts_list = 0, textures_link = 1, texture_delete = 2 };
 
@@ -95,11 +93,9 @@ enum class FboTextureStatus : u8 {
     to_clear ///< FBO will have to be cleared.
 };
 
-using FboData               = std::pair<u32, u32>; // Describes a framebuffer object. 1st is fbo id, 2nd is texture id.
-using FboTextureTypeToLayer = std::array<FboTextureType, fbo_texture_array_depth>; // Defines the type of each FBO texture layer,
-                                                                                   // the index of the array being the layer.
-using GuiTextureTypeToId = std::unordered_map<GuiTextureType, u32>; // Defines the type of each texture used to render to GUI.
-using FboTypeToId        = std::unordered_map<FboType, u32>;        // Link between a FboType and its id.
+using FboData = std::pair<u32, u32>; // Describes a framebuffer object. 1st is fbo id, 2nd is texture id.
+
+using FboTypeToId = std::unordered_map<FboType, u32>; // Link between a FboType and its id.
 
 using FboTexturePool       = std::array<u32, max_fbo_texture>; // Pool of textures ids to be used for rendering by priority.
 using FboTexturePoolStatus = std::array<FboTextureStatus, max_fbo_texture>; // State of the textures in the pool.
@@ -232,10 +228,10 @@ class Opengl {
     void clearFboKeys();
 
     // Binds a FBO. Passing index 0 unbinds it.
-    void bindFbo(const u32 fbo_id);
+    void bindFbo(const u32 fbo_id) const;
 
     // Unbinds current bound FBO.
-    void unbindFbo();
+    void unbindFbo() const;
 
     // Returns the next available FBO texture index (with status 'unused').
     auto getAvailableFboTextureIndex() -> std::optional<u8>;
