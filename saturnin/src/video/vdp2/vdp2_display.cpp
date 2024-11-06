@@ -58,40 +58,40 @@ void Vdp2::populateRbgScreens() {
 
 void Vdp2::populateNbgScreens() {
     using enum ScrollScreen;
-    auto is_nbg_displayed
-        = !(getScreen(ScrollScreen::rbg0).is_display_enabled && getScreen(ScrollScreen::rbg1).is_display_enabled);
+
+    const auto is_nbg_displayed = !(getScreen(rbg0).is_display_enabled && getScreen(rbg1).is_display_enabled);
 
     if (is_nbg_displayed) {
-        clearRenderData(ScrollScreen::nbg0);
-        if (isScreenDisplayed(ScrollScreen::nbg0)) {
-            updateScrollScreenStatus(ScrollScreen::nbg0);
-            if (getScreen(ScrollScreen::nbg0).priority_number != 0) { readScrollScreenData(ScrollScreen::nbg0); }
-        }
-
-        clearRenderData(ScrollScreen::nbg1);
-        if (isScrollScreenDisplayable(ScrollScreen::nbg1)) {
-            if (isScreenDisplayed(ScrollScreen::nbg1)) {
-                updateScrollScreenStatus(ScrollScreen::nbg1);
-                if (getScreen(ScrollScreen::nbg1).priority_number != 0) { readScrollScreenData(ScrollScreen::nbg1); }
+        clearRenderData(nbg0);
+        if (isScrollScreenDisplayable(nbg0)) {
+            if (isScreenDisplayed(nbg0)) {
+                updateScrollScreenStatus(nbg0);
+                if (getScreen(nbg0).priority_number != 0) { readScrollScreenData(nbg0); }
             }
         }
 
-        clearRenderData(ScrollScreen::nbg2);
-        if (isScrollScreenDisplayable(ScrollScreen::nbg2)) {
-            if (isScreenDisplayed(ScrollScreen::nbg2)) {
-                updateScrollScreenStatus(ScrollScreen::nbg2);
-                if (getScreen(ScrollScreen::nbg2).priority_number != 0) { readScrollScreenData(ScrollScreen::nbg2); }
+        clearRenderData(nbg1);
+        if (isScrollScreenDisplayable(nbg1)) {
+            if (isScreenDisplayed(nbg1)) {
+                updateScrollScreenStatus(nbg1);
+                if (getScreen(nbg1).priority_number != 0) { readScrollScreenData(nbg1); }
             }
-        } else {
-            // bg_[util::toUnderlying(ScrollScreen::nbg2)] = {};
+        }
+
+        clearRenderData(nbg2);
+        if (isScrollScreenDisplayable(nbg2)) {
+            if (isScreenDisplayed(nbg2)) {
+                updateScrollScreenStatus(nbg2);
+                if (getScreen(nbg2).priority_number != 0) { readScrollScreenData(nbg2); }
+            }
         }
 
         if (uses_fbo) {
             // WIP
-            if (isScrollScreenDisplayable(ScrollScreen::nbg3) && isScreenDisplayed(ScrollScreen::nbg3)) {
-                updateScrollScreenStatus(ScrollScreen::nbg3);
-                const auto isDirty             = isCacheDirty(ScrollScreen::nbg3);
-                const auto priorityIsAboveZero = getScreen(ScrollScreen::nbg3).priority_number != 0;
+            if (isScrollScreenDisplayable(nbg3) && isScreenDisplayed(nbg3)) {
+                updateScrollScreenStatus(nbg3);
+                const auto isDirty             = isCacheDirty(nbg3);
+                const auto priorityIsAboveZero = getScreen(nbg3).priority_number != 0;
                 if (isDirty && priorityIsAboveZero) {
                     //        discardCache(ScrollScreen::nbg3);
                     //        clearRenderData(ScrollScreen::nbg3);
@@ -118,11 +118,11 @@ void Vdp2::populateNbgScreens() {
                 // modules_.opengl()->setFboStatus(ScrollScreen::nbg3, FboStatus::to_clear);
             }
         } else {
-            clearRenderData(ScrollScreen::nbg3);
-            if (isScrollScreenDisplayable(ScrollScreen::nbg3)) {
-                if (isScreenDisplayed(ScrollScreen::nbg3)) {
-                    updateScrollScreenStatus(ScrollScreen::nbg3);
-                    if (getScreen(ScrollScreen::nbg3).priority_number != 0) { readScrollScreenData(ScrollScreen::nbg3); }
+            clearRenderData(nbg3);
+            if (isScrollScreenDisplayable(nbg3)) {
+                if (isScreenDisplayed(nbg3)) {
+                    updateScrollScreenStatus(nbg3);
+                    if (getScreen(nbg3).priority_number != 0) { readScrollScreenData(nbg3); }
                 }
             }
         }
