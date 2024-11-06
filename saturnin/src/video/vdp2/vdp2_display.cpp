@@ -41,41 +41,57 @@ constexpr auto bits_in_a_byte                = u8{8};
 void Vdp2::clearRenderData(const ScrollScreen s) { std::vector<video::Vdp2Part>().swap(vdp2_parts_[toUnderlying(s)]); }
 
 void Vdp2::populateRenderData() {
-    using enum ScrollScreen;
+    populateRbgScreens();
+    populateNbgScreens();
+}
 
-    auto populateRbgScreen = [this](const ScrollScreen rbg) {
+void Vdp2::populateRbgScreens() {
+    using enum ScrollScreen;
+    for (const auto rbg : {rbg1, rbg0}) {
         clearRenderData(rbg);
         if (isScreenDisplayed(rbg)) {
             updateScrollScreenStatus(rbg);
             if (getScreen(rbg).priority_number != 0) { readScrollScreenData(rbg); }
-        } else {
-            // discardCache(rbg);
         }
-    };
+    }
+}
 
-    populateRbgScreen(rbg1);
-    populateRbgScreen(rbg0);
-
-    auto populateNbgScreen = [this](const ScrollScreen nbg) {
-        clearRenderData(nbg);
-        if (isScrollScreenDisplayable(nbg) && isScreenDisplayed(nbg) && (getScreen(nbg).priority_number != 0)) {
-            readScrollScreenData(nbg);
-        }
-    };
-
-    auto is_nbg_displayed = !(getScreen(rbg0).is_display_enabled && getScreen(rbg1).is_display_enabled);
+void Vdp2::populateNbgScreens() {
+    using enum ScrollScreen;
+    auto is_nbg_displayed
+        = !(getScreen(ScrollScreen::rbg0).is_display_enabled && getScreen(ScrollScreen::rbg1).is_display_enabled);
 
     if (is_nbg_displayed) {
-        populateNbgScreen(nbg0);
-        populateNbgScreen(nbg1);
-        populateNbgScreen(nbg2);
+        clearRenderData(ScrollScreen::nbg0);
+        if (isScreenDisplayed(ScrollScreen::nbg0)) {
+            updateScrollScreenStatus(ScrollScreen::nbg0);
+            if (getScreen(ScrollScreen::nbg0).priority_number != 0) { readScrollScreenData(ScrollScreen::nbg0); }
+        }
+
+        clearRenderData(ScrollScreen::nbg1);
+        if (isScrollScreenDisplayable(ScrollScreen::nbg1)) {
+            if (isScreenDisplayed(ScrollScreen::nbg1)) {
+                updateScrollScreenStatus(ScrollScreen::nbg1);
+                if (getScreen(ScrollScreen::nbg1).priority_number != 0) { readScrollScreenData(ScrollScreen::nbg1); }
+            }
+        }
+
+        clearRenderData(ScrollScreen::nbg2);
+        if (isScrollScreenDisplayable(ScrollScreen::nbg2)) {
+            if (isScreenDisplayed(ScrollScreen::nbg2)) {
+                updateScrollScreenStatus(ScrollScreen::nbg2);
+                if (getScreen(ScrollScreen::nbg2).priority_number != 0) { readScrollScreenData(ScrollScreen::nbg2); }
+            }
+        } else {
+            // bg_[util::toUnderlying(ScrollScreen::nbg2)] = {};
+        }
 
         if (uses_fbo) {
             // WIP
-            if (isScrollScreenDisplayable(nbg3) && isScreenDisplayed(nbg3)) {
-                updateScrollScreenStatus(nbg3);
-                const auto isDirty             = isCacheDirty(nbg3);
-                const auto priorityIsAboveZero = getScreen(nbg3).priority_number != 0;
+            if (isScrollScreenDisplayable(ScrollScreen::nbg3) && isScreenDisplayed(ScrollScreen::nbg3)) {
+                updateScrollScreenStatus(ScrollScreen::nbg3);
+                const auto isDirty             = isCacheDirty(ScrollScreen::nbg3);
+                const auto priorityIsAboveZero = getScreen(ScrollScreen::nbg3).priority_number != 0;
                 if (isDirty && priorityIsAboveZero) {
                     //        discardCache(ScrollScreen::nbg3);
                     //        clearRenderData(ScrollScreen::nbg3);
@@ -102,7 +118,13 @@ void Vdp2::populateRenderData() {
                 // modules_.opengl()->setFboStatus(ScrollScreen::nbg3, FboStatus::to_clear);
             }
         } else {
-            populateNbgScreen(nbg3);
+            clearRenderData(ScrollScreen::nbg3);
+            if (isScrollScreenDisplayable(ScrollScreen::nbg3)) {
+                if (isScreenDisplayed(ScrollScreen::nbg3)) {
+                    updateScrollScreenStatus(ScrollScreen::nbg3);
+                    if (getScreen(ScrollScreen::nbg3).priority_number != 0) { readScrollScreenData(ScrollScreen::nbg3); }
+                }
+            }
         }
     }
 }

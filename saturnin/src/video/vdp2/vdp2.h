@@ -1245,16 +1245,14 @@ class Vdp2 {
     // DISPLAY methods
     //--------------------------------------------------------------------------------------------------------------
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn void Vdp2::populateRenderData();
-    ///
-    /// \brief  Populates data from the VDP2 memory before backend rendering.
-    ///
-    /// \author Runik
-    /// \date   29/01/2021
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-
+    // Populates data from the VDP2 memory before backend rendering.
     void populateRenderData();
+
+    // Populates data from rotating background screens (RBG)
+    void populateRbgScreens();
+
+    // Populates data from normal background screens (NBG)
+    void populateNbgScreens();
 
     // Determines if scroll screen is displayable, based on others scroll screens configuration
     auto isScrollScreenDisplayable(const ScrollScreen s) const -> bool;
