@@ -62,67 +62,39 @@ void Vdp2::populateNbgScreens() {
     const auto is_nbg_displayed = !(getScreen(rbg0).is_display_enabled && getScreen(rbg1).is_display_enabled);
 
     if (is_nbg_displayed) {
-        clearRenderData(nbg0);
-        if (isScrollScreenDisplayable(nbg0)) {
-            if (isScreenDisplayed(nbg0)) {
-                updateScrollScreenStatus(nbg0);
-                if (getScreen(nbg0).priority_number != 0) { readScrollScreenData(nbg0); }
-            }
-        }
+        for (auto nbg : {nbg0, nbg1, nbg2, nbg3}) {
+            if (uses_fbo) {
+                // WIP
+                if (isScrollScreenDisplayable(nbg) && isScreenDisplayed(nbg)) {
+                    updateScrollScreenStatus(nbg);
+                    const auto isDirty             = isCacheDirty(nbg);
+                    const auto priorityIsAboveZero = getScreen(nbg).priority_number != 0;
+                    if (isDirty && priorityIsAboveZero) {
+                        discardCache(nbg);
+                        clearRenderData(nbg);
+                        readScrollScreenData(nbg);
+                        //     // Data must be reloaded. Passing the status as 'to_clear' suffice on this side.
+                        //     modules_.opengl()->setFboStatus(getScreen(nbg).priority_number, nbg, FboStatus::to_clear);
+                    }
 
-        clearRenderData(nbg1);
-        if (isScrollScreenDisplayable(nbg1)) {
-            if (isScreenDisplayed(nbg1)) {
-                updateScrollScreenStatus(nbg1);
-                if (getScreen(nbg1).priority_number != 0) { readScrollScreenData(nbg1); }
-            }
-        }
+                    // if (!priorityIsAboveZero) {
+                    //     // Clear previously used data.
+                    //     modules_.opengl()->setFboStatus(nbg, FboStatus::to_clear);
+                    // }
 
-        clearRenderData(nbg2);
-        if (isScrollScreenDisplayable(nbg2)) {
-            if (isScreenDisplayed(nbg2)) {
-                updateScrollScreenStatus(nbg2);
-                if (getScreen(nbg2).priority_number != 0) { readScrollScreenData(nbg2); }
-            }
-        }
-
-        if (uses_fbo) {
-            // WIP
-            if (isScrollScreenDisplayable(nbg3) && isScreenDisplayed(nbg3)) {
-                updateScrollScreenStatus(nbg3);
-                const auto isDirty             = isCacheDirty(nbg3);
-                const auto priorityIsAboveZero = getScreen(nbg3).priority_number != 0;
-                if (isDirty && priorityIsAboveZero) {
-                    //        discardCache(ScrollScreen::nbg3);
-                    //        clearRenderData(ScrollScreen::nbg3);
-                    //        readScrollScreenData(ScrollScreen::nbg3);
-                    //        // Data must be reloaded. Passing the status as 'to_clear' suffice on this side.
-                    //        modules_.opengl()->setFboStatus(getScreen(ScrollScreen::nbg3).priority_number,
-                    //                                        ScrollScreen::nbg3,
-                    //                                        FboStatus::to_clear);
-                    //    }
-
-                    //    if (!priorityIsAboveZero) {
-                    //        // Clear previously used data.
-                    //        modules_.opengl()->setFboStatus(ScrollScreen::nbg3, FboStatus::to_clear);
-                    //    }
-
-                    //    if (!isDirty && priorityIsAboveZero) {
-                    //        // Reuse previous data.
-                    //        modules_.opengl()->setFboStatus(getScreen(ScrollScreen::nbg3).priority_number,
-                    //                                        ScrollScreen::nbg3,
-                    //                                        FboStatus::reuse);
+                    // if (!isDirty && priorityIsAboveZero) {
+                    //     // Reuse previous data.
+                    //     modules_.opengl()->setFboStatus(getScreen(nbg).priority_number, nbg, FboStatus::reuse);
+                    // }
+                } else {
+                    // Clear previously used data.
+                    // modules_.opengl()->setFboStatus(ScrollScreen::nbg3, FboStatus::to_clear);
                 }
             } else {
-                // Clear previously used data.
-                // modules_.opengl()->setFboStatus(ScrollScreen::nbg3, FboStatus::to_clear);
-            }
-        } else {
-            clearRenderData(nbg3);
-            if (isScrollScreenDisplayable(nbg3)) {
-                if (isScreenDisplayed(nbg3)) {
-                    updateScrollScreenStatus(nbg3);
-                    if (getScreen(nbg3).priority_number != 0) { readScrollScreenData(nbg3); }
+                clearRenderData(nbg);
+                if (isScrollScreenDisplayable(nbg) && isScreenDisplayed(nbg)) {
+                    updateScrollScreenStatus(nbg);
+                    if (getScreen(nbg).priority_number != 0) { readScrollScreenData(nbg); }
                 }
             }
         }

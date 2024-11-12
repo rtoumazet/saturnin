@@ -295,6 +295,9 @@ void OpenglRender::renderByScreenPriority() {
 }
 
 void OpenglRender::renderByParts() {
+    // All the parts to be displayed are read, regardless of their screen of attachment.
+    // Parts are sorted by priority.
+    
     PartsList parts_list;
 
     preRender();
