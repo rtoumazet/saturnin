@@ -88,9 +88,10 @@ enum class MutexType : u8 { parts_list = 0, textures_link = 1, texture_delete = 
 
 // Status of FBO textures in the pool.
 enum class FboTextureStatus : u8 {
-    reuse,   ///< FBO will be reused as is.
-    unused,  ///< FBO isn't in use.
-    to_clear ///< FBO will have to be cleared.
+    unused,   // FBO isn't in use.
+    reuse,    // FBO will be reused as is.
+    to_clear, // FBO will have to be cleared.
+    fixed     // FBO status won't change
 };
 
 using FboData = std::pair<u32, u32>; // Describes a framebuffer object. 1st is fbo id, 2nd is texture id.
@@ -121,6 +122,12 @@ struct PlaneTexture {
     Size                            size;                ///< Texture size
     ScreenPos                       pos;                 ///< Position of the texture in the texture atlas.
     std::vector<TextureCoordinates> coords;              ///< The coordinates of the texture.
+};
+
+struct FboManager {
+    FboKeyToFbo          key_to_pool_index;   // Link between a FBO key and its relative FBO index in the pool.
+    FboTexturePool       texture_pool;        // Pool of textures to be used by the FBO.
+    FboTexturePoolStatus texture_pool_status; // State of each texture in the pool.
 };
 
 // Used to draw different primitives with calls to glDrawRangeElements.
@@ -236,14 +243,14 @@ class Opengl {
     // Returns the next available FBO texture index (with status 'unused').
     auto getAvailableFboTextureIndex() -> std::optional<u8>;
 
+    void initializeFboTexturePoolStatus();
+
     core::Config* config_; // Configuration object.
 
     std::unique_ptr<OpenglRender>    opengl_render_;    // OpenGL render object.
     std::unique_ptr<OpenglTexturing> opengl_texturing_; // OpenGL texturing object.
 
-    FboKeyToFbo          fbo_key_to_fbo_pool_index_; // Link between a FBO key and its relative FBO index in the pool.
-    FboTexturePool       fbo_texture_pool_;          // Pool of textures to be used by the FBO.
-    FboTexturePoolStatus fbo_texture_pool_status_;   // State of each texture in the pool.
+    FboManager fbo_manager_;
 
     ScreenResolutions screen_resolutions_; // Host and Saturn screen resolution
 

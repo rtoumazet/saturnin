@@ -119,12 +119,12 @@ void OpenglRender::renderToAvailableTexture(const FboKey& key, const PartsList& 
     const auto& [priority, layer] = key;
     Log::debug(opengl, "- Rendering key [priority={}, layer={}] to FBO with index {}", priority, layer_to_name.at(layer), *index);
 
-    renderParts(parts_list, opengl_->fbo_texture_pool_[*index]);
+    renderParts(parts_list, opengl_->fbo_manager_.texture_pool[*index]);
 
     Log::debug(opengl, "- Changing FBO status at index {} to 'reuse'", *index);
 
-    opengl_->fbo_texture_pool_status_[*index] = FboTextureStatus::reuse;
-    opengl_->fbo_key_to_fbo_pool_index_[key]  = *index;
+    opengl_->fbo_manager_.texture_pool_status[*index] = FboTextureStatus::reuse;
+    opengl_->fbo_manager_.key_to_pool_index[key]  = *index;
 
     Log::debug(opengl, "renderToAvailableFbo() return");
 }
@@ -260,6 +260,7 @@ void OpenglRender::render() {
 }
 
 void OpenglRender::renderByScreenPriority() {
+    // Each screen is rendered to a sce
     MapOfPartsList global_parts_list;
 
     const auto getPartsFromThread = [&]() {
@@ -279,9 +280,9 @@ void OpenglRender::renderByScreenPriority() {
     preRender();
 
     // :TODO: Render the FBOs to the current framebuffer
-    std::ranges::reverse_view rv{opengl_->fbo_key_to_fbo_pool_index_};
+    std::ranges::reverse_view rv{opengl_->fbo_manager_.key_to_pool_index};
     for (const auto& [key, index] : rv) {
-        renderFboTexture(opengl_->fbo_texture_pool_[index]);
+        renderFboTexture(opengl_->fbo_manager_.texture_pool[index]);
     }
 
     postRender();
@@ -297,7 +298,7 @@ void OpenglRender::renderByScreenPriority() {
 void OpenglRender::renderByParts() {
     // All the parts to be displayed are read, regardless of their screen of attachment.
     // Parts are sorted by priority.
-    
+
     PartsList parts_list;
 
     preRender();
