@@ -91,7 +91,7 @@ enum class FboTextureStatus : u8 {
     unused,   // FBO isn't in use.
     reuse,    // FBO will be reused as is.
     to_clear, // FBO will have to be cleared.
-    fixed     // FBO status won't change
+    reserved  // FBO status won't change
 };
 
 using FboData = std::pair<u32, u32>; // Describes a framebuffer object. 1st is fbo id, 2nd is texture id.
@@ -227,12 +227,6 @@ class Opengl {
 
   private:
     friend class OpenglRender;
-
-    // Clears FBO textures in the pool with the 'to_clear' status.
-    void clearFboTextures();
-
-    // Removes keys from the map for FBOs which status is not 'reuse'.
-    void clearFboKeys();
 
     // Binds a FBO. Passing index 0 unbinds it.
     void bindFbo(const u32 fbo_id) const;

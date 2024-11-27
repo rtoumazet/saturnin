@@ -61,6 +61,16 @@ struct RenderPart {
         draw_type(p.common_vdp_data_.draw_type),
         priority(p.common_vdp_data_.priority),
         texture_key(p.common_vdp_data_.texture_key) {};
+    auto toVdp1Part() -> Vdp1Part {
+        Vdp1Part p;
+        p.common_vdp_data_.vertexes     = vertexes;
+        p.common_vdp_data_.color_offset = color_offset;
+        p.common_vdp_data_.draw_type    = draw_type;
+        p.common_vdp_data_.priority     = priority;
+        p.common_vdp_data_.texture_key  = texture_key;
+        p.common_vdp_data_.vdp_type     = VdpType::vdp1;
+        return p;
+    }
 };
 
 using PartsList = std::vector<RenderPart>;

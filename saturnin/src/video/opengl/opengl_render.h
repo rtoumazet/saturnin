@@ -54,9 +54,6 @@ class OpenglRender {
     // Renders the list of parts to a specific texture.
     void renderParts(const PartsList& parts_list, const u32 texture_id);
 
-    // Renders a specific FBO texture.
-    void renderFboTexture(const u32 texture_id);
-
     // Renders data if available.
     void render();
     void renderByScreenPriority();

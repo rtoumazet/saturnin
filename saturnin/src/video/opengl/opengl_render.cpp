@@ -119,7 +119,15 @@ void OpenglRender::renderToAvailableTexture(const FboKey& key, const PartsList& 
     const auto& [priority, layer] = key;
     Log::debug(opengl, "- Rendering key [priority={}, layer={}] to FBO with index {}", priority, layer_to_name.at(layer), *index);
 
-    renderParts(parts_list, opengl_->fbo_manager_.texture_pool[*index]);
+    opengl_->texturing()->attachTextureLayerToFbo(opengl_->texturing()->getFboTextureArrayId(),
+                                                //opengl_->texturing()->getFboTextureLayer(FboTextureType::vdp1_debug_overlay),
+                                                *index,
+                                                GLenum::GL_FRAMEBUFFER,
+                                                GLenum::GL_COLOR_ATTACHMENT0);
+
+    //glClear(GL_COLOR_BUFFER_BIT);
+    //renderParts(parts_list, opengl_->fbo_manager_.texture_pool[*index]);
+    renderParts(parts_list, opengl_->texturing()->getFboTextureArrayId());
 
     Log::debug(opengl, "- Changing FBO status at index {} to 'reuse'", *index);
 
@@ -183,74 +191,6 @@ void OpenglRender::renderParts(const PartsList& parts_list, const u32 texture_id
     }
 }
 
-void OpenglRender::renderFboTexture(const u32 texture_id) {
-    const auto [vao, vertex_buffer] = initializeVao();
-
-    glUseProgram(shaders_.programs[ProgramShader::main]);
-    glBindVertexArray(vao);                       // binding VAO
-    glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer); // binding vertex buffer
-
-    // Calculating the ortho projection matrix
-    const auto proj_matrix = calculateDisplayViewportMatrix();
-
-    // Sending the ortho projection matrix to the shader
-    const auto uni_proj_matrix = glGetUniformLocation(shaders_.programs[ProgramShader::main], "proj_matrix");
-    glUniformMatrix4fv(uni_proj_matrix, 1, GL_FALSE, glm::value_ptr(proj_matrix));
-
-    glActiveTexture(GLenum::GL_TEXTURE0);
-    const auto sampler_loc = glGetUniformLocation(shaders_.programs[ProgramShader::main], "sampler");
-
-    glUniform1i(sampler_loc, 0);
-    glBindTexture(GL_TEXTURE_2D, texture_id);
-
-    const auto texture_used_loc = glGetUniformLocation(shaders_.programs[ProgramShader::main], "is_texture_used");
-    glUniform1i(texture_used_loc, GLboolean(true));
-
-    auto vertexes = std::vector<Vertex>{
-        {0,    0,    0.0f, 0.0f, 0.0f, 0, 0, 0xff, 0xff, Gouraud()},
-        {0,    2048, 1.0f, 0.0f, 0.0f, 0, 0, 0xff, 0xff, Gouraud()},
-        {2048, 2048, 1.0f, 1.0f, 0.0f, 0, 0, 0xff, 0xff, Gouraud()},
-        {0,    0,    0.0f, 0.0f, 0.0f, 0, 0, 0xff, 0xff, Gouraud()},
-        {2048, 2048, 1.0f, 1.0f, 0.0f, 0, 0, 0xff, 0xff, Gouraud()},
-        {2048, 0,    0.0f, 1.0f, 0.0f, 0, 0, 0xff, 0xff, Gouraud()}
-    };
-
-    // Sending vertex buffer data to the GPU
-    glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * vertexes.size(), vertexes.data(), GL_STATIC_DRAW);
-
-    // Drawing the list
-    glDrawArrays(GL_TRIANGLES, 0, vertexes_per_tessellated_quad);
-
-    // auto elements_buffer = u32{};
-    // glGenBuffers(1, &elements_buffer); // This buffer will be used to send indices data to the GPU
-    // glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elements_buffer);
-
-    // const auto&& [indices, draw_ranges] = generateVertexIndicesAndDrawRanges(parts_list);
-    // const auto vertexes                 = readVertexes(parts_list);
-
-    //// Sending data to the GPU
-    // glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(u32) * indices.size(), indices.data(), GL_STATIC_DRAW);
-    // glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * vertexes.size(), vertexes.data(), GL_STATIC_DRAW);
-
-    // for (const auto& range : draw_ranges) {
-    //     const auto is_texture_used = GLboolean(range.is_textured);
-    //     glUniform1i(texture_used_loc, is_texture_used);
-
-    //    glDrawRangeElements(range.primitive,
-    //                        range.vertex_array_start,
-    //                        range.vertex_array_end,
-    //                        range.indices_nb,
-    //                        GL_UNSIGNED_INT,
-    //                        static_cast<GLuint*>(nullptr) + range.indices_array_start);
-    //}
-
-    gl::glDeleteBuffers(1, &vertex_buffer);
-    gl::glDeleteVertexArrays(1, &vao);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-    glBindTexture(GL_TEXTURE_2D, 0);
-    // gl::glDeleteBuffers(1, &elements_buffer);
-}
-
 void OpenglRender::render() {
     if constexpr (uses_fbo) {
         renderByScreenPriority();
@@ -269,21 +209,19 @@ void OpenglRender::renderByScreenPriority() {
     };
     getPartsFromThread();
 
-    opengl_->clearFboTextures();
-    opengl_->clearFboKeys();
+    preRender();
 
     // Rendering is done to FBOs depending on the priority and layer combo.
     for (const auto& [key, parts] : global_parts_list) {
         renderToAvailableTexture(key, parts);
     }
 
-    preRender();
 
     // :TODO: Render the FBOs to the current framebuffer
-    std::ranges::reverse_view rv{opengl_->fbo_manager_.key_to_pool_index};
-    for (const auto& [key, index] : rv) {
-        renderFboTexture(opengl_->fbo_manager_.texture_pool[index]);
-    }
+    //std::ranges::reverse_view rv{opengl_->fbo_manager_.key_to_pool_index};
+    //for (const auto& [key, index] : rv) {
+    //    renderFboTexture(opengl_->fbo_manager_.texture_pool[index]);
+    //}
 
     postRender();
 

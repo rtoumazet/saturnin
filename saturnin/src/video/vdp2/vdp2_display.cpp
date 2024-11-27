@@ -41,8 +41,9 @@ constexpr auto bits_in_a_byte                = u8{8};
 void Vdp2::clearRenderData(const ScrollScreen s) { std::vector<video::Vdp2Part>().swap(vdp2_parts_[toUnderlying(s)]); }
 
 void Vdp2::populateRenderData() {
-    populateRbgScreens();
-    populateNbgScreens();
+    // Desactivated while testing rendering to sprites using FBOs
+    // populateRbgScreens();
+    // populateNbgScreens();
 }
 
 void Vdp2::populateRbgScreens() {

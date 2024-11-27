@@ -84,6 +84,7 @@ void Opengl::initialize() {
 
     render()->initialize();
     texturing()->initialize();
+    initializeFboTexturePoolStatus();
 }
 
 void Opengl::shutdown() {
@@ -99,37 +100,14 @@ void Opengl::shutdown() {
 auto Opengl::areFbosInitialized() const -> bool { return opengl_texturing_->getFboId(FboType::general) != 0; };
 
 void Opengl::initializeFboTexturePoolStatus() {
-    // fbo_texture_pool
-}
-
-void Opengl::clearFboTextures() {
-    using enum Logger;
-    Log::debug(opengl, "clearFboTextures() call");
-    for (u8 index = 0; auto& status : fbo_manager_.texture_pool_status) {
-        if (status == FboTextureStatus::to_clear) {
-            //          :WIP:
-            Log::debug(opengl, "- Clearing texture at index {}", index);
-            //          attachTextureLayerToFbo(fbo_texture_array_id_, index);
-            //          attachTextureToFbo(getFboTextureId(FboTextureType::vdp2_debug_layer));
-
-            gl::glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-            glClear(GL_COLOR_BUFFER_BIT);
-
-            Log::debug(opengl, "- Changing FBO texture status at index {} to 'unused'", index);
-            status = FboTextureStatus::unused;
-        }
+    for (auto i = 0; i < 4; ++i) {
+        // The 4 first FBOs are reserved for front and back buffer, and 2 debug rendering
+        fbo_manager_.texture_pool_status[i] = FboTextureStatus::reserved;
     }
-    Log::debug(opengl, "clearFbos() return");
-}
-
-void Opengl::clearFboKeys() {
-    // Log::debug(Logger::opengl, "clearFboKeys() call");
-    // const auto count = std::erase_if(fbo_key_to_fbo_pool_index_, [this](const auto& item) {
-    //     auto const& [key, index] = item;
-    //     return fbo_pool_status_[index] != FboStatus::reuse;
-    // });
-    // Log::debug(Logger::opengl, "- {} FBO key(s) erased", count);
-    // Log::debug(Logger::opengl, "clearFboKeys() return");
+    for (auto i = 4; i < fbo_texture_array_depth; ++i) {
+        // The rest are used for priority rendering
+        fbo_manager_.texture_pool_status[i] = FboTextureStatus::unused;
+    }
 }
 
 void Opengl::bindFbo(const u32 fbo_id) const { gl33core::glBindFramebuffer(GL_FRAMEBUFFER, fbo_id); }
