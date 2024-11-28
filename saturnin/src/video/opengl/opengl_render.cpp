@@ -169,7 +169,9 @@ void OpenglRender::render() {
 }
 
 void OpenglRender::renderByScreenPriority() {
-    // Each screen is rendered to a sce
+    // Parts to be displayed are moved to global_parts_list_, with one entry by priority + linked FBO (FboKey).
+    // 
+    // Goal is to reuse FBOs which are identical from previous frame to improve performances.
     MapOfPartsList global_parts_list;
 
     const auto getPartsFromThread = [&]() {
@@ -198,7 +200,7 @@ void OpenglRender::renderByScreenPriority() {
 
 void OpenglRender::renderByParts() {
     // All the parts to be displayed are read, regardless of their screen of attachment.
-    // Parts are sorted by priority.
+    // Parts are sorted by priority, nothing's cached.
 
     PartsList parts_list;
 
