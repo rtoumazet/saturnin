@@ -1480,7 +1480,7 @@ void showDebugVdp1Window(core::EmulatorContext& state, bool* opened) {
                         opengl_id = video::OpenglTexturing::generateTexture((*texture)->width(),
                                                                             (*texture)->height(),
                                                                             (*texture)->rawData());
-                        ImGui::Image(reinterpret_cast<ImTextureID>(static_cast<uptr>(opengl_id)), preview_size);
+                        ImGui::Image(static_cast<uptr>(opengl_id), preview_size);
                     }
                 }
                 ImGui::EndChild();
@@ -1742,7 +1742,7 @@ void showDebugVdp2Window(core::EmulatorContext& state, bool* opened) {
                         }
                         const auto tex_id       = state.opengl()->texturing()->vdp2DebugLayerTextureId();
                         const auto preview_size = ImVec2(500, 500);
-                        ImGui::Image(reinterpret_cast<ImTextureID>(static_cast<uptr>(tex_id)), preview_size);
+                        ImGui::Image(static_cast<uptr>(tex_id), preview_size);
                     } else {
                         ImGui::TextUnformatted(tr("Pause emulation to display debug data ...").c_str());
                     }
@@ -1866,7 +1866,7 @@ void showDebugTexturesWindow(core::EmulatorContext& state, bool* opened) {
                             }
                             previous_texture_idx = current_texture_idx;
                         }
-                        ImGui::Image(reinterpret_cast<ImTextureID>(static_cast<uptr>(opengl_id)), preview_size);
+                        ImGui::Image(static_cast<uptr>(opengl_id), preview_size);
                     }
 
                     ImGui::EndChild();
@@ -1883,8 +1883,7 @@ void showDebugTexturesWindow(core::EmulatorContext& state, bool* opened) {
                     const auto child_size = ImVec2(area_3_width, ImGui::GetContentRegionAvail().y);
                     ImGui::BeginChild("ChildTextureLayer", child_size, false, window_flags);
                     const auto preview_size = ImGui::GetContentRegionAvail();
-                    ImGui::Image(reinterpret_cast<ImTextureID>(static_cast<uptr>(tex_id)), preview_size);
-
+                    ImGui::Image(static_cast<uptr>(tex_id), preview_size);
                     ImGui::EndChild();
                 }
 
@@ -1906,7 +1905,7 @@ void showDebugTexturesWindow(core::EmulatorContext& state, bool* opened) {
 
                 ImGui::BeginChild("child_part_texture", child_size, true, window_flags);
                 const auto preview_size = ImVec2(500, 500);
-                ImGui::Image(reinterpret_cast<ImTextureID>(static_cast<uptr>(tex_id)), preview_size);
+                ImGui::Image(static_cast<uptr>(tex_id), preview_size);
 
                 ImGui::EndChild();
                 ImGui::PopStyleVar();

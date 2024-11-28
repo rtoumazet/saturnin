@@ -45,6 +45,7 @@ using s8   = std::int8_t;
 using s16  = std::int16_t;
 using s32  = std::int32_t;
 using s64  = std::int64_t;
+using sptr = std::intptr_t;
 
 using LabelValue       = std::pair<std::string, std::optional<std::string>>;
 using AddressToNameMap = std::map<u32, std::string>;
