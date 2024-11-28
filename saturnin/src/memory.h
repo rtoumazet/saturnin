@@ -264,7 +264,7 @@ class Memory {
     //@{
     // Constructors / Destructors
     Memory() = delete;
-    explicit Memory(EmulatorContext* ec) : modules_(ec){};
+    explicit Memory(EmulatorContext* ec) : modules_(ec) {};
     Memory(const Memory&)                      = delete;
     Memory(Memory&&)                           = delete;
     auto operator=(const Memory&) & -> Memory& = delete;
@@ -1238,17 +1238,7 @@ struct writeCart<u8> {
     }
 };
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \struct readCdBlock
-///
-/// \brief  CD block read handler.
-///
-/// \author Runik
-/// \date   28/12/2018
-///
-/// \tparam T   type of data to read (u8, u16 or u32).
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
+// CD block read handler. T is the type of data to read (u8, u16 or u32).
 template<typename T>
 struct readCdBlock {
     operator Memory::ReadType<T>() const {
