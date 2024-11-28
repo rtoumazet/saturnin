@@ -84,48 +84,18 @@ void Opengl::initialize() {
 
     render()->initialize();
     texturing()->initialize();
-    initializeFboTexturePoolStatus();
 }
 
 void Opengl::shutdown() {
     render()->shutdown();
-
-    for (size_t i = 0; i < max_fbo_texture; ++i) {
-        OpenglTexturing::deleteTexture(fbo_manager_.texture_pool[i]);
-    }
-
     texturing()->shutdown();
 }
 
 auto Opengl::areFbosInitialized() const -> bool { return opengl_texturing_->getFboId(FboType::general) != 0; };
 
-void Opengl::initializeFboTexturePoolStatus() {
-    for (auto i = 0; i < 4; ++i) {
-        // The 4 first FBOs are reserved for front and back buffer, and 2 debug rendering
-        fbo_manager_.texture_pool_status[i] = FboTextureStatus::reserved;
-    }
-    for (auto i = 4; i < fbo_texture_array_depth; ++i) {
-        // The rest are used for priority rendering
-        fbo_manager_.texture_pool_status[i] = FboTextureStatus::unused;
-    }
-}
-
 void Opengl::bindFbo(const u32 fbo_id) const { gl33core::glBindFramebuffer(GL_FRAMEBUFFER, fbo_id); }
 
 void Opengl::unbindFbo() const { bindFbo(0); }
-
-auto Opengl::getAvailableFboTextureIndex() -> std::optional<u8> {
-    std::array<FboTextureStatus, 1> status = {FboTextureStatus::unused};
-    const auto                      result = std::ranges::find_first_of(fbo_manager_.texture_pool_status, status);
-    if (result == fbo_manager_.texture_pool_status.end()) {
-        Log::warning(Logger::opengl, "No FBO texture available in the pool !");
-        return std::nullopt;
-    } else {
-        const auto index = static_cast<u8>(std::distance(fbo_manager_.texture_pool_status.begin(), result));
-        Log::debug(Logger::opengl, "Available FBO texture index : {}", index);
-        return std::optional(index);
-    }
-}
 
 auto Opengl::getRenderedBufferTextureId(const GuiTextureType type) -> u32 {
     auto layer = u8{};
@@ -152,30 +122,6 @@ auto Opengl::getRenderedBufferTextureId(const GuiTextureType type) -> u32 {
 
     auto texture_id = texturing()->generateTextureFromTextureArrayLayer(type, layer);
     return texture_id;
-}
-
-auto Opengl::getFboPoolIndex(const u8 priority, const VdpLayer layer) -> std::optional<u8> {
-    if (fbo_manager_.key_to_pool_index.contains({priority, layer})) {
-        return std::optional{fbo_manager_.key_to_pool_index[{priority, layer}]};
-    }
-    return std::nullopt;
-}
-
-void Opengl::setFboTextureStatus(const u8 priority, const VdpLayer layer, const FboTextureStatus state) {
-    const auto index = getFboPoolIndex(priority, layer);
-    if (!index) { return; }
-
-    fbo_manager_.texture_pool_status[*index] = state;
-}
-
-void Opengl::setFboTextureStatus(const u8 priority, const ScrollScreen screen, const FboTextureStatus state) {
-    setFboTextureStatus(priority, screen_to_layer.at(screen), state);
-}
-
-void Opengl::setFboTextureStatus(const ScrollScreen screen, const FboTextureStatus state) {
-    for (auto priority = u8{1}; priority < 8; ++priority) {
-        setFboTextureStatus(priority, screen_to_layer.at(screen), state);
-    }
 }
 
 auto Opengl::isSaturnResolutionSet() const -> bool {

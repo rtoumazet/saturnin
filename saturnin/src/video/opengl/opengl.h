@@ -124,12 +124,6 @@ struct PlaneTexture {
     std::vector<TextureCoordinates> coords;              ///< The coordinates of the texture.
 };
 
-struct FboManager {
-    FboKeyToFbo          key_to_pool_index;   // Link between a FBO key and its relative FBO index in the pool.
-    FboTexturePool       texture_pool;        // Pool of textures to be used by the FBO.
-    FboTexturePoolStatus texture_pool_status; // State of each texture in the pool.
-};
-
 // Used to draw different primitives with calls to glDrawRangeElements.
 struct DrawRange {
     u32        vertex_array_start;  ///< Start position in vertex array.
@@ -183,41 +177,6 @@ class Opengl {
     // Checks if the Saturn resolution is set.
     auto isSaturnResolutionSet() const -> bool;
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn	auto Opengl::getFboPoolIndex(const u8 priority, const Layer layer) -> std::optional<u8>;
-    ///
-    /// \brief	Gets the index of the relative priority + Layer in the FBO pool.
-    ///
-    /// \author	Runik
-    /// \date	24/02/2024
-    ///
-    /// \param 	priority	The priority.
-    /// \param 	layer   	The layer.
-    ///
-    /// \returns	The FBO pool index if found.
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    auto getFboPoolIndex(const u8 priority, const VdpLayer layer) -> std::optional<u8>;
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn	void Opengl::setFboTextureStatus(const u8 priority, const VdpLayer layer, const FboTextureStatus state);
-    ///
-    /// \brief	Sets FBO status
-    ///
-    /// \author	Runik
-    /// \date	03/03/2024
-    ///
-    /// \param 	priority	The priority.
-    /// \param 	layer   	The VDP layer.
-    /// \param 	state   	The new state.
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    void setFboTextureStatus(const u8 priority, const VdpLayer layer, const FboTextureStatus state);
-    void setFboTextureStatus(const u8 priority, const ScrollScreen screen, const FboTextureStatus state);
-
-    // Sets FBO texture status for every priority of a specific screen.
-    void setFboTextureStatus(const ScrollScreen screen, const FboTextureStatus state);
-
     auto getMutex(const MutexType& type) -> std::mutex&;
 
     // Interface to the OpenglRender object.
@@ -234,17 +193,10 @@ class Opengl {
     // Unbinds current bound FBO.
     void unbindFbo() const;
 
-    // Returns the next available FBO texture index (with status 'unused').
-    auto getAvailableFboTextureIndex() -> std::optional<u8>;
-
-    void initializeFboTexturePoolStatus();
-
     core::Config* config_; // Configuration object.
 
     std::unique_ptr<OpenglRender>    opengl_render_;    // OpenGL render object.
     std::unique_ptr<OpenglTexturing> opengl_texturing_; // OpenGL texturing object.
-
-    FboManager fbo_manager_;
 
     ScreenResolutions screen_resolutions_; // Host and Saturn screen resolution
 

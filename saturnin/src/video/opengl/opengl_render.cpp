@@ -106,37 +106,6 @@ void OpenglRender::postRender() const {
     glBindFramebuffer(GLenum::GL_FRAMEBUFFER, 0);
 };
 
-void OpenglRender::renderToAvailableTexture(const FboKey& key, const PartsList& parts_list) {
-    using enum Logger;
-    Log::debug(opengl, "renderToAvailableFbo() call");
-    const auto index = opengl_->getAvailableFboTextureIndex();
-    if (!index) {
-        Log::debug(opengl, "- No FBO available for rendering");
-        Log::debug(opengl, "renderToAvailableFbo() return");
-        return;
-    }
-
-    const auto& [priority, layer] = key;
-    Log::debug(opengl, "- Rendering key [priority={}, layer={}] to FBO with index {}", priority, layer_to_name.at(layer), *index);
-
-    opengl_->texturing()->attachTextureLayerToFbo(opengl_->texturing()->getFboTextureArrayId(),
-                                                //opengl_->texturing()->getFboTextureLayer(FboTextureType::vdp1_debug_overlay),
-                                                *index,
-                                                GLenum::GL_FRAMEBUFFER,
-                                                GLenum::GL_COLOR_ATTACHMENT0);
-
-    //glClear(GL_COLOR_BUFFER_BIT);
-    //renderParts(parts_list, opengl_->fbo_manager_.texture_pool[*index]);
-    renderParts(parts_list, opengl_->texturing()->getFboTextureArrayId());
-
-    Log::debug(opengl, "- Changing FBO status at index {} to 'reuse'", *index);
-
-    opengl_->fbo_manager_.texture_pool_status[*index] = FboTextureStatus::reuse;
-    opengl_->fbo_manager_.key_to_pool_index[key]  = *index;
-
-    Log::debug(opengl, "renderToAvailableFbo() return");
-}
-
 void OpenglRender::renderParts(const PartsList& parts_list, const u32 texture_id) {
     if (!parts_list.empty()) {
         const auto [vao, vertex_buffer] = initializeVao();
@@ -210,12 +179,6 @@ void OpenglRender::renderByScreenPriority() {
     getPartsFromThread();
 
     preRender();
-
-    // Rendering is done to FBOs depending on the priority and layer combo.
-    for (const auto& [key, parts] : global_parts_list) {
-        renderToAvailableTexture(key, parts);
-    }
-
 
     // :TODO: Render the FBOs to the current framebuffer
     //std::ranges::reverse_view rv{opengl_->fbo_manager_.key_to_pool_index};
@@ -636,7 +599,7 @@ void OpenglRender::displayFramebufferByScreenPriority(core::EmulatorContext& sta
             }
             global_parts_list[{priority, VdpLayer::sprite}] = std::move(local_parts);
             // Sprite layer is recalculated every time, there's no cache for now.
-            opengl_->setFboTextureStatus(priority, VdpLayer::sprite, FboTextureStatus::to_clear);
+            //opengl_->setFboTextureStatus(priority, VdpLayer::sprite, FboTextureStatus::to_clear);
         }
     };
 
