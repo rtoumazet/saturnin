@@ -42,8 +42,8 @@ void Vdp2::clearRenderData(const ScrollScreen s) { std::vector<video::Vdp2Part>(
 
 void Vdp2::populateRenderData() {
     // Desactivated while testing rendering to sprites using FBOs
-    // populateRbgScreens();
-    // populateNbgScreens();
+    populateRbgScreens();
+    populateNbgScreens();
 }
 
 void Vdp2::populateRbgScreens() {
