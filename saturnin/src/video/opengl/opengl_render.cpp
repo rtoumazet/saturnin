@@ -170,7 +170,6 @@ void OpenglRender::render() {
 
 void OpenglRender::renderByScreenPriority() {
     // Parts to be displayed are moved to global_parts_list_, with one entry by priority + linked FBO (FboKey).
-    // 
     // Goal is to reuse FBOs which are identical from previous frame to improve performances.
     MapOfPartsList global_parts_list;
 
