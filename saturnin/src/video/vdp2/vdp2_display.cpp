@@ -74,22 +74,9 @@ void Vdp2::populateNbgScreens() {
                         discardCache(nbg);
                         clearRenderData(nbg);
                         readScrollScreenData(nbg);
-                        //     // Data must be reloaded. Passing the status as 'to_clear' suffice on this side.
-                        //     modules_.opengl()->setFboStatus(getScreen(nbg).priority_number, nbg, FboStatus::to_clear);
                     }
-
-                    // if (!priorityIsAboveZero) {
-                    //     // Clear previously used data.
-                    //     modules_.opengl()->setFboStatus(nbg, FboStatus::to_clear);
-                    // }
-
-                    // if (!isDirty && priorityIsAboveZero) {
-                    //     // Reuse previous data.
-                    //     modules_.opengl()->setFboStatus(getScreen(nbg).priority_number, nbg, FboStatus::reuse);
-                    // }
                 } else {
                     // Clear previously used data.
-                    // modules_.opengl()->setFboStatus(ScrollScreen::nbg3, FboStatus::to_clear);
                 }
             } else {
                 clearRenderData(nbg);

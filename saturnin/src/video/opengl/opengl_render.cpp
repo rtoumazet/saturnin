@@ -181,6 +181,13 @@ void OpenglRender::renderByScreenPriority() {
 
     preRender();
 
+    for (const auto& [key, parts_list] : global_parts_list | std::views::reverse) {
+        renderParts(parts_list, opengl_->texturing()->getTextureArrayId());
+    }
+
+
+    
+
     // :TODO: Render the FBOs to the current framebuffer
     //std::ranges::reverse_view rv{opengl_->fbo_manager_.key_to_pool_index};
     //for (const auto& [key, index] : rv) {
