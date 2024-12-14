@@ -1,4 +1,4 @@
-//
+﻿//
 // tests.cpp
 // Saturnin
 //
@@ -37,7 +37,7 @@ auto Test::endTest() -> std::string {
     auto res      = (std::chrono::duration_cast<std::chrono::microseconds>(elapsed_time_)).count();
 
     using namespace std::literals;
-    return utilities::format("{} �s", res);
+    return utilities::format("{} µs", res);
 }
 
 void runTests() {
