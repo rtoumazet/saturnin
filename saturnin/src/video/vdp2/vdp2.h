@@ -815,7 +815,7 @@ class Vdp2 {
 
     template<typename T>
     auto readColor(const u32 color_address, std::span<const u8> cram) -> Color {
-        return Color(0);
+        return Color(static_cast<u32>(0));
     };
     template<>
     auto readColor<u16>(const u32 color_address, std::span<const u8> cram) -> Color {

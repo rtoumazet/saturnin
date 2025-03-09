@@ -46,7 +46,7 @@ using core::Config;
 using core::EmulatorContext;
 using core::Log;
 using core::Logger;
-using core::rawRead;
+// using core::rawRead;
 using core::Smpc;
 using core::tr;
 

@@ -290,7 +290,7 @@ auto Sh2::readRegisters32(const u32 addr) const -> u32 {
     }
 }
 
-void Sh2::writeRegisters(u32 addr, u8 data) {
+void Sh2::writeRegisters8(u32 addr, u8 data) {
     using Ipra   = Sh2Regs::Intc::Ipra;
     using Iprb   = Sh2Regs::Intc::Iprb;
     using Vcra   = Sh2Regs::Intc::Vcra;
@@ -436,7 +436,7 @@ void Sh2::writeRegisters(u32 addr, u8 data) {
     // core::rawWrite<u8>(io_registers_, addr & sh2_memory_mask, data);
 }
 
-void Sh2::writeRegisters(u32 addr, u16 data) { // NOLINT(readability-convert-member-functions-to-static)
+void Sh2::writeRegisters16(u32 addr, u16 data) { // NOLINT(readability-convert-member-functions-to-static)
     using Icr    = Sh2Regs::Intc::Icr;
     using Vcrdiv = Sh2Regs::Intc::Vcrdiv;
     using Wcr    = Sh2Regs::Bsc::Wcr;
@@ -563,7 +563,7 @@ void Sh2::writeRegisters(u32 addr, u16 data) { // NOLINT(readability-convert-mem
     }
 }
 
-void Sh2::writeRegisters(u32 addr, u32 data) {
+void Sh2::writeRegisters32(u32 addr, u32 data) {
     using Bcr   = Sh2Regs::Bsc::Bcr;
     using Wcr   = Sh2Regs::Bsc::Wcr;
     using Mcr   = Sh2Regs::Bsc::Mcr;
@@ -726,9 +726,9 @@ void Sh2::purgeCache() {
     constexpr auto cache_purge_mask = u32{0xFFFFFC0B};
     for (u8 i = 0; i < cache_lines_number; ++i) {
         // :WARNING: following code is untested
-        auto data = core::rawRead<u32>(this->cache_addresses_, i);
+        auto data = core::Memory::rawRead<u32>(this->cache_addresses_, i);
         data &= cache_purge_mask;
-        core::rawWrite<u32>(this->cache_addresses_, i, data);
+        core::Memory::rawWrite<u32>(this->cache_addresses_, i, data);
     }
 }
 

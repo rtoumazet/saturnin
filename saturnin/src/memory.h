@@ -37,7 +37,10 @@
 #include <saturnin/src/emulator_enums.h>
 #include <saturnin/src/emulator_modules.h> // EmulatorModules
 #include <saturnin/src/log.h>              // Log, Logger
+#include <saturnin/src/memory_constants.h>
 #include <saturnin/src/scu.h>
+#include <saturnin/src/sh2/sh2.h>
+#include <saturnin/src/sound/scsp.h>
 #include <saturnin/src/smpc.h>
 #include <saturnin/src/utilities.h> // toUnderlying
 
@@ -55,9 +58,9 @@ namespace saturnin::video {
 class Vdp2;
 } // namespace saturnin::video
 
-namespace saturnin::sound {
-class Scsp;
-}
+// namespace saturnin::sound {
+// class Scsp;
+// }
 
 namespace util = saturnin::utilities;
 
@@ -71,54 +74,7 @@ class Config;
 class Scu;
 class Smpc;
 
-constexpr auto workram_low_size             = u32{0x100000};
-constexpr auto workram_high_size            = u32{0x100000};
-constexpr auto rom_size                     = u32{0x80000};
-constexpr auto smpc_size                    = u8{0x80};
-constexpr auto backup_ram_size              = u32{0x10000};
-constexpr auto scu_size                     = u8{0xD0};
-constexpr auto vdp2_vram_size               = u32{0x80000};
-constexpr auto vdp2_cram_size               = u16{0x1000};
-constexpr auto vdp2_registers_size          = u16{0x200};
-constexpr auto vdp1_vram_size               = u32{0x80000};
-constexpr auto vdp1_framebuffer_size        = u32{0x40000};
-constexpr auto vdp1_registers_size          = u8{0x18};
-constexpr auto sound_ram_size               = u32{0x100000};
-constexpr auto stv_io_size                  = u16{0x100};
-constexpr auto cart_size                    = u32{0x3000000};
-constexpr auto rom_memory_mask              = u32{0x7FFFF};
-constexpr auto smpc_memory_mask             = u32{0x7F};
-constexpr auto backup_ram_memory_mask       = u32{0xFFFF};
-constexpr auto workram_low_memory_mask      = u32{0xFFFFF};
-constexpr auto stv_io_memory_mask           = u32{0xFF};
-constexpr auto cart_memory_mask             = u32{0x01FFFFFF};
-constexpr auto vdp1_ram_memory_mask         = u32{0x7FFFF};
-constexpr auto vdp1_framebuffer_memory_mask = u32{0x3FFFF};
-constexpr auto vdp1_registers_memory_mask   = u32{0x1F};
-constexpr auto vdp2_vram_memory_mask        = u32{0x7FFFF};
-constexpr auto vdp2_cram_memory_mask        = u32{0xFFF};
-constexpr auto vdp2_registers_memory_mask   = u32{0x1FF};
-constexpr auto scu_memory_mask              = u32{0xFF};
-constexpr auto workram_high_memory_mask     = u32{0xFFFFF};
-constexpr auto stv_io_port_a                = u32{0x400001};
-constexpr auto stv_io_port_b                = u32{0x400003};
-constexpr auto stv_io_port_c                = u32{0x400005};
-constexpr auto stv_io_port_d                = u32{0x400007};
-
-constexpr auto stv_protection_register_address = u32{0x04FFFFFC};
-constexpr auto stv_protection_enabled          = u32{0x04FFFFF1};
-static auto    stv_protection_offset           = u32{};
-
-constexpr auto memory_handler_size = u32{0x10000};
-
-constexpr auto cart_absolute_address = u32{0x02000000};
-
-constexpr auto full_memory_map_size = u32{0x10000000};
-
-constexpr auto vdp2_page_disp           = u8{11};
-constexpr auto vdp2_minimum_page_size   = u16{0x800};
-constexpr auto vdp2_bitmap_disp         = u8{17};
-constexpr auto vdp2_minimum_bitmap_size = u32{0x20000};
+static auto stv_protection_offset = u32{};
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \enum   StvIOPort
@@ -561,18 +517,25 @@ class Memory {
 
     void burstCopy(const u32 source_address, const u32 destination_address, const u32 amount);
 
-    /// \name Context objects accessors
-    //@{
-    //[[nodiscard]] auto masterSh2() const -> sh2::Sh2*;
-    //[[nodiscard]] auto slaveSh2() const -> sh2::Sh2*;
-    //[[nodiscard]] auto scu() const -> Scu*;
-    //[[nodiscard]] auto config() const -> Config*;
-    //[[nodiscard]] auto smpc() const -> Smpc*;
-    //[[nodiscard]] auto openglWindow() const -> GLFWwindow*;
-    //[[nodiscard]] auto cdrom() const -> cdrom::Cdrom*;
-    //[[nodiscard]] auto vdp2() const -> video::Vdp2*;
-    //[[nodiscard]] auto scsp() const -> sound::Scsp*;
-    //@}
+    template<typename T, typename U, size_t N>
+    static auto rawRead(const std::array<U, N>& arr, u32 addr) -> T {
+        T return_value{arr[addr]};
+        for (u8 i = 1; i < sizeof(T); ++i) {
+            return_value <<= 8;
+            return_value |= arr[addr + i];
+        }
+        return return_value;
+    }
+
+    template<typename T, typename U, size_t N>
+    static void rawWrite(std::array<U, N>& arr, const u32 addr, const T value) {
+        constexpr u8 bits_by_byte{std::numeric_limits<u8>::digits};
+        constexpr u8 offset{std::numeric_limits<T>::digits};
+        for (u8 i = 0; i <= sizeof(T) - 1; ++i) {
+            arr[addr + i] = (value >> (offset - (bits_by_byte * i + bits_by_byte))) & 0xFF;
+        }
+    }
+
     EmulatorModules modules_;
 
   private:
@@ -773,15 +736,15 @@ auto defaultBinaryFile() -> BinaryFileConfiguration;
 /// \return Data read.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-template<typename T, typename U, size_t N>
-auto rawRead(const std::array<U, N>& arr, u32 addr) -> T {
-    T return_value{arr[addr]};
-    for (u8 i = 1; i < sizeof(T); ++i) {
-        return_value <<= 8;
-        return_value |= arr[addr + i];
-    }
-    return return_value;
-}
+// template<typename T, typename U, size_t N>
+// auto rawRead(const std::array<U, N>& arr, u32 addr) -> T {
+//     T return_value{arr[addr]};
+//     for (u8 i = 1; i < sizeof(T); ++i) {
+//         return_value <<= 8;
+//         return_value |= arr[addr + i];
+//     }
+//     return return_value;
+// }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \fn template<typename T, typename U, size_t N> void rawWrite(std::array<U, N>& arr, const u32 addr, const T value)
@@ -801,14 +764,14 @@ auto rawRead(const std::array<U, N>& arr, u32 addr) -> T {
 /// \param          value   The value to write.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-template<typename T, typename U, size_t N>
-void rawWrite(std::array<U, N>& arr, const u32 addr, const T value) {
-    constexpr u8 bits_by_byte{std::numeric_limits<u8>::digits};
-    constexpr u8 offset{std::numeric_limits<T>::digits};
-    for (u8 i = 0; i <= sizeof(T) - 1; ++i) {
-        arr[addr + i] = (value >> (offset - (bits_by_byte * i + bits_by_byte))) & 0xFF;
-    }
-}
+// template<typename T, typename U, size_t N>
+// void rawWrite(std::array<U, N>& arr, const u32 addr, const T value) {
+//     constexpr u8 bits_by_byte{std::numeric_limits<u8>::digits};
+//     constexpr u8 offset{std::numeric_limits<T>::digits};
+//     for (u8 i = 0; i <= sizeof(T) - 1; ++i) {
+//         arr[addr + i] = (value >> (offset - (bits_by_byte * i + bits_by_byte))) & 0xFF;
+//     }
+// }
 
 // Handlers
 
@@ -870,7 +833,7 @@ struct readDummy {
 template<typename T>
 struct readRom {
     operator Memory::ReadType<T>() const {
-        return [](const Memory& m, const u32 addr) -> T { return rawRead<T>(m.rom_, addr & rom_memory_mask); };
+        return [](const Memory& m, const u32 addr) -> T { return Memory::rawRead<T>(m.rom_, addr & rom_memory_mask); };
     }
 };
 
@@ -890,7 +853,7 @@ struct readSmpc {
     operator Memory::ReadType<T>() const {
         return [](const Memory& m, const u32 addr) -> T {
             Log::warning(Logger::memory, core::tr("SMPC read ({}) access {:#0x}"), sizeof(T) * 8, addr);
-            return rawRead<T>(m.smpc_, addr & smpc_memory_mask);
+            return Memory::rawRead<T>(m.smpc_, addr & smpc_memory_mask);
         };
     }
 };
@@ -950,7 +913,8 @@ struct writeSmpc<uint8_t> {
 template<typename T>
 struct readBackupRam {
     operator Memory::ReadType<T>() const {
-        return [](const Memory& m, const u32 addr) -> T { return rawRead<T>(m.backup_ram_, addr & backup_ram_memory_mask); };
+        return
+            [](const Memory& m, const u32 addr) -> T { return Memory::rawRead<T>(m.backup_ram_, addr & backup_ram_memory_mask); };
     }
 };
 
@@ -968,7 +932,9 @@ struct readBackupRam {
 template<typename T>
 struct writeBackupRam {
     operator Memory::WriteType<T>() const {
-        return [](Memory& m, const u32 addr, const T data) { rawWrite<T>(m.backup_ram_, addr & backup_ram_memory_mask, data); };
+        return [](Memory& m, const u32 addr, const T data) {
+            Memory::rawWrite<T>(m.backup_ram_, addr & backup_ram_memory_mask, data);
+        };
     }
 };
 
@@ -986,7 +952,9 @@ struct writeBackupRam {
 template<typename T>
 struct readWorkramLow {
     operator Memory::ReadType<T>() const {
-        return [](const Memory& m, const u32 addr) -> T { return rawRead<T>(m.workram_low_, addr & workram_low_memory_mask); };
+        return [](const Memory& m, const u32 addr) -> T {
+            return Memory::rawRead<T>(m.workram_low_, addr & workram_low_memory_mask);
+        };
     }
 };
 
@@ -1004,7 +972,9 @@ struct readWorkramLow {
 template<typename T>
 struct writeWorkramLow {
     operator Memory::WriteType<T>() const {
-        return [](Memory& m, const u32 addr, const T data) { rawWrite<T>(m.workram_low_, addr & workram_low_memory_mask, data); };
+        return [](Memory& m, const u32 addr, const T data) {
+            Memory::rawWrite<T>(m.workram_low_, addr & workram_low_memory_mask, data);
+        };
     }
 };
 
@@ -1022,7 +992,7 @@ struct writeWorkramLow {
 template<typename T>
 struct readStvIo {
     operator Memory::ReadType<T>() const {
-        return [](const Memory& m, const u32 addr) -> T { return rawRead<T>(m.stv_io_, addr & stv_io_memory_mask); };
+        return [](const Memory& m, const u32 addr) -> T { return Memory::rawRead<T>(m.stv_io_, addr & stv_io_memory_mask); };
     }
 };
 
@@ -1115,11 +1085,13 @@ struct readStvIo<u8> {
                     break;
                 }
                 case stv_io_port_d: {
-                    data = rawRead<u8>(m.stv_io_, addr & stv_io_memory_mask);
+                    // data = rawRead<u8>(m.stv_io_, addr & stv_io_memory_mask);
+                    data = Memory::rawRead<u8>(m.stv_io_, addr & stv_io_memory_mask);
                     data |= util::toUnderlying(StvIOPort::port_d);
                     break;
                 }
-                default: data = rawRead<u8>(m.stv_io_, addr & stv_io_memory_mask);
+                // default: data = rawRead<u8>(m.stv_io_, addr & stv_io_memory_mask);
+                default: data = Memory::rawRead<u8>(m.stv_io_, addr & stv_io_memory_mask);
             }
             // data = ~data;
             // return data;
@@ -1142,7 +1114,7 @@ struct readStvIo<u8> {
 template<typename T>
 struct writeStvIo {
     operator Memory::WriteType<T>() const {
-        return [](Memory& m, const u32 addr, const T data) { rawWrite<T>(m.stv_io_, addr & stv_io_memory_mask, data); };
+        return [](Memory& m, const u32 addr, const T data) { Memory::rawWrite<T>(m.stv_io_, addr & stv_io_memory_mask, data); };
     }
 };
 
@@ -1180,7 +1152,7 @@ struct readCart {
     operator Memory::ReadType<T>() const {
         return [](const Memory& m, const u32 addr) -> T {
             const auto relative_addr = calculateRelativeCartAddress(addr);
-            return rawRead<T>(m.cart_, relative_addr);
+            return Memory::rawRead<T>(m.cart_, relative_addr);
         };
     }
 };
@@ -1191,7 +1163,8 @@ struct readCart<u32> {
     operator Memory::ReadType<u32>() const {
         return [](const Memory& m, const u32 addr) -> u32 {
             const auto relative_addr = calculateRelativeCartAddress(addr);
-            auto       data          = u32{rawRead<u32>(m.cart_, relative_addr)};
+            // auto       data          = u32{rawRead<u32>(m.cart_, relative_addr)};
+            auto data = u32{Memory::rawRead<u32>(m.cart_, relative_addr)};
 
             if ((addr & 0xFFFFFFF) == stv_protection_register_address) {
                 if (m.HardwareMode_ == HardwareMode::stv) { data = m.readStvProtection(addr, data); }
@@ -1217,7 +1190,7 @@ struct writeCart {
     operator Memory::WriteType<T>() const {
         return [](Memory& m, const u32 addr, const T data) {
             u32 relative_addr = calculateRelativeCartAddress(addr);
-            rawWrite<T>(m.cart_, relative_addr, data);
+            Memory::rawWrite<T>(m.cart_, relative_addr, data);
         };
     }
 };
@@ -1242,7 +1215,8 @@ struct writeCart<u8> {
 template<typename T>
 struct readCdBlock {
     operator Memory::ReadType<T>() const {
-        return [](const Memory& m, const u32 addr) -> T { return m.modules_.cdrom()->readRegisters<T>(addr); };
+        // return [](const Memory& m, const u32 addr) -> T { return m.modules_.cdrom()->readRegisters<T>(addr); };
+        return [](const Memory& m, const u32 addr) -> T { return m.modules_.cdrom()->readRegisters(addr); };
     }
 };
 
@@ -1260,7 +1234,8 @@ struct readCdBlock {
 template<typename T>
 struct writeCdBlock {
     operator Memory::WriteType<T>() const {
-        return [](Memory& m, const u32 addr, const T data) { m.modules_.cdrom()->writeRegisters<T>(addr, data); };
+        // return [](Memory& m, const u32 addr, const T data) { m.modules_.cdrom()->writeRegisters<T>(addr, data); };
+        return [](Memory& m, const u32 addr, const T data) { m.modules_.cdrom()->writeRegisters(addr, data); };
     }
 };
 
@@ -1278,7 +1253,8 @@ struct writeCdBlock {
 template<typename T>
 struct readScsp {
     operator Memory::ReadType<T>() const {
-        return [](const Memory& m, const u32 addr) -> T { return m.modules_.scsp()->read<T>(addr); };
+        // return [](const Memory& m, const u32 addr) -> T { return m.modules_.scsp()->read<T>(addr); };
+        return []<typename T>(const Memory& m, const u32 addr) -> T { return m.modules_.scsp()->read(addr); };
     }
 };
 
@@ -1296,7 +1272,8 @@ struct readScsp {
 template<typename T>
 struct writeScsp {
     operator Memory::WriteType<T>() const {
-        return [](Memory& m, const u32 addr, const T data) { m.modules_.scsp()->write<T>(addr, data); };
+        // return [](Memory& m, const u32 addr, const T data) { m.modules_.scsp()->write<T>(addr, data); };
+        return [](Memory& m, const u32 addr, const T data) { m.modules_.scsp()->write(addr, data); };
     }
 };
 
@@ -1314,7 +1291,7 @@ struct writeScsp {
 template<typename T>
 struct readVdp1Ram {
     operator Memory::ReadType<T>() const {
-        return [](const Memory& m, const u32 addr) -> T { return rawRead<T>(m.vdp1_vram_, addr & vdp1_ram_memory_mask); };
+        return [](const Memory& m, const u32 addr) -> T { return Memory::rawRead<T>(m.vdp1_vram_, addr & vdp1_ram_memory_mask); };
     }
 };
 
@@ -1333,7 +1310,7 @@ template<typename T>
 struct writeVdp1Ram {
     operator Memory::WriteType<T>() const {
         return [](Memory& m, const u32 addr, const T data) {
-            rawWrite<T>(m.vdp1_vram_, addr & vdp1_ram_memory_mask, data);
+            Memory::rawWrite<T>(m.vdp1_vram_, addr & vdp1_ram_memory_mask, data);
             // 0x25e62120
             // if ((addr & vdp1_ram_memory_mask) == (0xE62120 & vdp1_ram_memory_mask))
             //     m.modules_.context()->debugStatus(DebugStatus::paused);
@@ -1358,7 +1335,7 @@ template<typename T>
 struct readVdp1Framebuffer {
     operator Memory::ReadType<T>() const {
         return [](const Memory& m, const u32 addr) -> T {
-            return rawRead<T>(m.vdp1_framebuffer_, addr & vdp1_framebuffer_memory_mask);
+            return Memory::rawRead<T>(m.vdp1_framebuffer_, addr & vdp1_framebuffer_memory_mask);
         };
     }
 };
@@ -1378,7 +1355,7 @@ template<typename T>
 struct writeVdp1Framebuffer {
     operator Memory::WriteType<T>() const {
         return [](Memory& m, const u32 addr, const T data) {
-            rawWrite<T>(m.vdp1_framebuffer_, addr & vdp1_framebuffer_memory_mask, data);
+            Memory::rawWrite<T>(m.vdp1_framebuffer_, addr & vdp1_framebuffer_memory_mask, data);
         };
     }
 };
@@ -1397,7 +1374,8 @@ struct writeVdp1Framebuffer {
 template<typename T>
 struct readVdp1Registers {
     operator Memory::ReadType<T>() const {
-        return [](const Memory& m, const u32 addr) -> T { return m.modules_.vdp1()->readRegisters<T>(addr); };
+        // return [](const Memory& m, const u32 addr) -> T { return m.modules_.vdp1()->readRegisters<T>(addr); };
+        return []<typename T>(const Memory& m, const u32 addr) -> T { return m.modules_.vdp1()->readRegisters(addr); };
     }
 };
 
@@ -1415,7 +1393,8 @@ struct readVdp1Registers {
 template<typename T>
 struct writeVdp1Registers {
     operator Memory::WriteType<T>() const {
-        return [](Memory& m, const u32 addr, const T data) { m.modules_.vdp1()->writeRegisters<T>(addr, data); };
+        // return [](Memory& m, const u32 addr, const T data) { m.modules_.vdp1()->writeRegisters<T>(addr, data); };
+        return [](Memory& m, const u32 addr, const T data) { m.modules_.vdp1()->writeRegisters(addr, data); };
     }
 };
 
@@ -1433,7 +1412,8 @@ struct writeVdp1Registers {
 template<typename T>
 struct readVdp2Vram {
     operator Memory::ReadType<T>() const {
-        return [](const Memory& m, const u32 addr) -> T { return rawRead<T>(m.vdp2_vram_, addr & vdp2_vram_memory_mask); };
+        return
+            [](const Memory& m, const u32 addr) -> T { return Memory::rawRead<T>(m.vdp2_vram_, addr & vdp2_vram_memory_mask); };
     }
 };
 
@@ -1452,7 +1432,7 @@ template<typename T>
 struct writeVdp2Vram {
     operator Memory::WriteType<T>() const {
         return [](Memory& m, const u32 addr, const T data) {
-            rawWrite<T>(m.vdp2_vram_, addr & vdp2_vram_memory_mask, data);
+            Memory::rawWrite<T>(m.vdp2_vram_, addr & vdp2_vram_memory_mask, data);
             m.was_vdp2_page_accessed_[addr & vdp2_vram_memory_mask >> vdp2_page_disp]     = true;
             m.was_vdp2_bitmap_accessed_[addr & vdp2_vram_memory_mask >> vdp2_bitmap_disp] = true;
         };
@@ -1473,7 +1453,8 @@ struct writeVdp2Vram {
 template<typename T>
 struct readVdp2Cram {
     operator Memory::ReadType<T>() const {
-        return [](const Memory& m, const u32 addr) -> T { return rawRead<T>(m.vdp2_cram_, addr & vdp2_cram_memory_mask); };
+        return
+            [](const Memory& m, const u32 addr) -> T { return Memory::rawRead<T>(m.vdp2_cram_, addr & vdp2_cram_memory_mask); };
     }
 };
 
@@ -1492,7 +1473,7 @@ template<typename T>
 struct writeVdp2Cram {
     operator Memory::WriteType<T>() const {
         return [](Memory& m, const u32 addr, const T data) {
-            rawWrite<T>(m.vdp2_cram_, addr & vdp2_cram_memory_mask, data);
+            Memory::rawWrite<T>(m.vdp2_cram_, addr & vdp2_cram_memory_mask, data);
             m.was_vdp2_cram_accessed_ = true;
         };
     }
@@ -1512,7 +1493,8 @@ struct writeVdp2Cram {
 template<typename T>
 struct readVdp2Registers {
     operator Memory::ReadType<T>() const {
-        return [](const Memory& m, const u32 addr) -> T { return m.modules_.vdp2()->readRegisters<T>(addr); };
+        // return [](const Memory& m, const u32 addr) -> T { return m.modules_.vdp2()->readRegisters<T>(addr); };
+        return []<typename T>(const Memory& m, const u32 addr) -> T { return m.modules_.vdp2()->readRegisters(addr); };
     }
 };
 
@@ -1551,7 +1533,7 @@ struct writeVdp2Registers {
 template<typename T>
 struct readScu {
     operator Memory::ReadType<T>() const {
-        return [](const Memory& m, const u32 addr) -> T { return rawRead<T>(m.scu_, addr & scu_memory_mask); };
+        return [](const Memory& m, const u32 addr) -> T { return Memory::rawRead<T>(m.scu_, addr & scu_memory_mask); };
     }
 };
 
@@ -1577,7 +1559,7 @@ struct readScu<u32> {
 template<typename T>
 struct writeScu {
     operator Memory::WriteType<T>() const {
-        return [](Memory& m, const u32 addr, const T data) { rawWrite<T>(m.scu_, addr & scu_memory_mask, data); };
+        return [](Memory& m, const u32 addr, const T data) { Memory::rawWrite<T>(m.scu_, addr & scu_memory_mask, data); };
     }
 };
 
@@ -1603,7 +1585,9 @@ struct writeScu<u32> {
 template<typename T>
 struct readWorkramHigh {
     operator Memory::ReadType<T>() const {
-        return [](const Memory& m, const u32 addr) -> T { return rawRead<T>(m.workram_high_, addr & workram_high_memory_mask); };
+        return [](const Memory& m, const u32 addr) -> T {
+            return Memory::rawRead<T>(m.workram_high_, addr & workram_high_memory_mask);
+        };
     }
 };
 
@@ -1621,8 +1605,9 @@ struct readWorkramHigh {
 template<typename T>
 struct writeWorkramHigh {
     operator Memory::WriteType<T>() const {
-        return
-            [](Memory& m, const u32 addr, const T data) { rawWrite<T>(m.workram_high_, addr & workram_high_memory_mask, data); };
+        return [](Memory& m, const u32 addr, const T data) {
+            Memory::rawWrite<T>(m.workram_high_, addr & workram_high_memory_mask, data);
+        };
     }
 };
 
@@ -1653,9 +1638,11 @@ inline auto isMasterSh2InOperation(const Memory& m) -> bool;
 template<typename T>
 struct readSh2Registers {
     operator Memory::ReadType<T>() const {
-        return [](const Memory& m, const u32 addr) -> T {
-            if (isMasterSh2InOperation(m)) { return m.modules_.masterSh2()->readRegisters<T>(addr); }
-            return m.modules_.slaveSh2()->readRegisters<T>(addr);
+        return []<typename T>(const Memory& m, const u32 addr) -> T {
+            // if (isMasterSh2InOperation(m)) { return m.modules_.masterSh2()->readRegisters<T>(addr); }
+            // return m.modules_.slaveSh2()->readRegisters<T>(addr);
+            if (isMasterSh2InOperation(m)) { return m.modules_.masterSh2()->readRegisters(addr); }
+            return m.modules_.slaveSh2()->readRegisters(addr);
         };
     }
 };
@@ -1674,9 +1661,11 @@ struct readSh2Registers {
 template<typename T>
 struct writeSh2Registers {
     operator Memory::WriteType<T>() const {
-        return [](Memory& m, const u32 addr, const T data) {
-            if (isMasterSh2InOperation(m)) { return m.modules_.masterSh2()->writeRegisters<T>(addr, data); }
-            return m.modules_.slaveSh2()->writeRegisters<T>(addr, data);
+        return []<typename T>(Memory& m, const u32 addr, const T data) {
+            // if (isMasterSh2InOperation(m)) { return m.modules_.masterSh2()->writeRegisters<T>(addr, data); }
+            // return m.modules_.slaveSh2()->writeRegisters<T>(addr, data);
+            if (isMasterSh2InOperation(m)) { return m.modules_.masterSh2()->writeRegisters(addr, data); }
+            return m.modules_.slaveSh2()->writeRegisters(addr, data);
         };
     }
 };
@@ -1754,8 +1743,10 @@ template<typename T>
 struct writeCachePurgeArea {
     operator Memory::WriteType<T>() const {
         return [](Memory& m, const u32 addr, const T data) {
-            if (isMasterSh2InOperation(m)) { return m.modules_.masterSh2()->writeCachePurgeArea<T>(addr, data); }
-            return m.modules_.slaveSh2()->writeCachePurgeArea<T>(addr, data);
+            // if (isMasterSh2InOperation(m)) { return m.modules_.masterSh2()->writeCachePurgeArea<T>(addr, data); }
+            // return m.modules_.slaveSh2()->writeCachePurgeArea<T>(addr, data);
+            if (isMasterSh2InOperation(m)) { return m.modules_.masterSh2()->writeCachePurgeArea(addr, data); }
+            return m.modules_.slaveSh2()->writeCachePurgeArea(addr, data);
         };
     }
 };
@@ -1774,9 +1765,11 @@ struct writeCachePurgeArea {
 template<typename T>
 struct readCacheAddresses {
     operator Memory::ReadType<T>() const {
-        return [](const Memory& m, const u32 addr) -> T {
-            if (isMasterSh2InOperation(m)) { return m.modules_.masterSh2()->readCacheAddresses<T>(addr); }
-            return m.modules_.slaveSh2()->readCacheAddresses<T>(addr);
+        return []<typename T>(const Memory& m, const u32 addr) -> T {
+            // if (isMasterSh2InOperation(m)) { return m.modules_.masterSh2()->readCacheAddresses<T>(addr); }
+            // return m.modules_.slaveSh2()->readCacheAddresses<T>(addr);
+            if (isMasterSh2InOperation(m)) { return m.modules_.masterSh2()->readCacheAddresses(addr); }
+            return m.modules_.slaveSh2()->readCacheAddresses(addr);
         };
     }
 };
@@ -1796,8 +1789,10 @@ template<typename T>
 struct writeCacheAddresses {
     operator Memory::WriteType<T>() const {
         return [](Memory& m, const u32 addr, const T data) {
-            if (isMasterSh2InOperation(m)) { return m.modules_.masterSh2()->writeCacheAddresses<T>(addr, data); }
-            return m.modules_.slaveSh2()->writeCacheAddresses<T>(addr, data);
+            // if (isMasterSh2InOperation(m)) { return m.modules_.masterSh2()->writeCacheAddresses<T>(addr, data); }
+            // return m.modules_.slaveSh2()->writeCacheAddresses<T>(addr, data);
+            if (isMasterSh2InOperation(m)) { return m.modules_.masterSh2()->writeCacheAddresses(addr, data); }
+            return m.modules_.slaveSh2()->writeCacheAddresses(addr, data);
         };
     }
 };
@@ -1816,9 +1811,11 @@ struct writeCacheAddresses {
 template<typename T>
 struct readCacheData {
     operator Memory::ReadType<T>() const {
-        return [](const Memory& m, const u32 addr) -> T {
-            if (isMasterSh2InOperation(m)) { return m.modules_.masterSh2()->readCacheData<T>(addr); }
-            return m.modules_.slaveSh2()->readCacheData<T>(addr);
+        return []<typename T>(const Memory& m, const u32 addr) -> T {
+            // if (isMasterSh2InOperation(m)) { return m.modules_.masterSh2()->readCacheData<T>(addr); }
+            // return m.modules_.slaveSh2()->readCacheData<T>(addr);
+            if (isMasterSh2InOperation(m)) { return m.modules_.masterSh2()->readCacheData(addr); }
+            return m.modules_.slaveSh2()->readCacheData(addr);
         };
     }
 };
@@ -1838,8 +1835,10 @@ template<typename T>
 struct writeCacheData {
     operator Memory::WriteType<T>() const {
         return [](Memory& m, const u32 addr, const T data) {
-            if (isMasterSh2InOperation(m)) { return m.modules_.masterSh2()->writeCacheData<T>(addr, data); }
-            return m.modules_.slaveSh2()->writeCacheData<T>(addr, data);
+            // if (isMasterSh2InOperation(m)) { return m.modules_.masterSh2()->writeCacheData<T>(addr, data); }
+            // return m.modules_.slaveSh2()->writeCacheData<T>(addr, data);
+            if (isMasterSh2InOperation(m)) { return m.modules_.masterSh2()->writeCacheData(addr, data); }
+            return m.modules_.slaveSh2()->writeCacheData(addr, data);
         };
     }
 };

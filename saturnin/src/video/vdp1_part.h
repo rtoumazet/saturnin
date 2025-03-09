@@ -275,7 +275,8 @@ void readDotColorBank16(const EmulatorModules& modules,
     const auto     color_address
         = u32{cram_start_address + color_ram_offset + ((part.cmdcolr_.data() & color_bank_mask) | dot) * sizeof(T)};
 
-    auto color = modules.vdp2()->readColor<T>(color_address);
+    // auto color = modules.vdp2()->readColor<T>(color_address);
+    auto color = Color(modules.memory()->read<T>(color_address));
 
     // Checking transparency.
     if ((part.cmdpmod_ >> CmdPmod::spd_enum) == CmdPmod::TransparentPixelDisable::transparent_pixel_enabled) {
@@ -302,7 +303,8 @@ template<typename T>
 void readDotLookUpTable16(const EmulatorModules& modules, std::vector<u8>& texture_data, Vdp1Part& part, const u8 dot) {
     const auto color_address = u32{vdp1_vram_start_address + part.cmdcolr_.data() * vdp1_address_multiplier + dot * sizeof(T)};
 
-    auto color = modules.vdp2()->readColor<T>(color_address);
+    // auto color = modules.vdp2()->readColor<T>(color_address);
+    auto color = Color(modules.memory()->read<T>(color_address));
 
     // Checking transparency.
     if ((part.cmdpmod_ >> CmdPmod::spd_enum) == CmdPmod::TransparentPixelDisable::transparent_pixel_enabled) {
@@ -336,7 +338,8 @@ void readDotColorBank64(const EmulatorModules& modules,
     const auto     color_address
         = u32{cram_start_address + color_ram_offset + ((part.cmdcolr_.data() & color_bank_mask) | dot) * sizeof(T)};
 
-    auto color = modules.vdp2()->readColor<T>(color_address);
+    // auto color = modules.vdp2()->readColor<T>(color_address);
+    auto color = Color(modules.memory()->read<T>(color_address));
 
     // Checking transparency.
     if ((part.cmdpmod_ >> CmdPmod::spd_enum) == CmdPmod::TransparentPixelDisable::transparent_pixel_enabled) {
@@ -370,7 +373,8 @@ void readDotColorBank128(const EmulatorModules& modules,
     const auto     color_address
         = u32{cram_start_address + color_ram_offset + ((part.cmdcolr_.data() & color_bank_mask) | dot) * sizeof(T)};
 
-    auto color = modules.vdp2()->readColor<T>(color_address);
+    // auto color = modules.vdp2()->readColor<T>(color_address);
+    auto color = Color(modules.memory()->read<T>(color_address));
 
     // Checking transparency.
     if ((part.cmdpmod_ >> CmdPmod::spd_enum) == CmdPmod::TransparentPixelDisable::transparent_pixel_enabled) {
@@ -404,7 +408,8 @@ void readDotColorBank256(const EmulatorModules& modules,
     const auto     color_address
         = u32{cram_start_address + color_ram_offset + ((part.cmdcolr_.data() & color_bank_mask) | dot) * sizeof(T)};
 
-    auto color = modules.vdp2()->readColor<T>(color_address);
+    // auto color = modules.vdp2()->readColor<T>(color_address);
+    auto color = Color(modules.memory()->read<T>(color_address));
 
     // Checking transparency.
     if ((part.cmdpmod_ >> CmdPmod::spd_enum) == CmdPmod::TransparentPixelDisable::transparent_pixel_enabled) {

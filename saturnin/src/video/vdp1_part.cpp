@@ -33,8 +33,8 @@ namespace excpt = saturnin::exception;
 namespace saturnin::video {
 
 using core::EmulatorModules;
-using core::rawRead;
-using core::rawWrite;
+// using core::rawRead;
+// using core::rawWrite;
 using core::tr;
 using utilities::readAs16;
 using utilities::toUnderlying;

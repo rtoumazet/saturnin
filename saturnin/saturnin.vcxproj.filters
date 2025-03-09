@@ -395,6 +395,9 @@
     <ClInclude Include="src\video\opengl\opengl_utilities.h">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
+    <ClInclude Include="src\memory_constants.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="src\sh2\fast_interpreter\sh2_opcodes.inc">

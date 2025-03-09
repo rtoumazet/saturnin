@@ -31,8 +31,8 @@ extern "C" {
 
 namespace saturnin::sound {
 
-using saturnin::core::rawRead;
-using saturnin::core::rawWrite;
+// using saturnin::core::rawRead;
+// using saturnin::core::rawWrite;
 using saturnin::core::tr;
 using saturnin::utilities::swapEndianness;
 using saturnin::utilities::swapWords;
@@ -85,23 +85,28 @@ void Scsp::scspHostInterruptHandler() {
 
 void Scsp::scsp68kInterruptHandler(const u32 level) { m68k_set_irq(level); }
 
+// static
+auto Scsp::ram() -> std::array<u8, core::sound_ram_size>& { return external_access_modules_.memory()->sound_ram_; }
+
 auto Scsp::read8(const u32 addr) const -> u8 {
     auto local_addr = addr & sound_ram_mask;
-    if (local_addr < sound_ram_upper_boundary) { return rawRead<u8>(Scsp::ram(), local_addr ^ 1); }
+    if (local_addr < sound_ram_upper_boundary) { return Memory::rawRead<u8>(Scsp::ram(), local_addr ^ 1); }
     if (local_addr >= scsp_registers_start_address) { return scsp_r_b(local_addr); }
     return 0;
 }
 
 auto Scsp::read16(const u32 addr) const -> u16 {
     auto local_addr = addr & sound_ram_mask;
-    if (local_addr < sound_ram_upper_boundary) { return swapEndianness<u16>(rawRead<u16>(Scsp::ram(), local_addr)); }
+    if (local_addr < sound_ram_upper_boundary) { return swapEndianness<u16>(Memory::rawRead<u16>(Scsp::ram(), local_addr)); }
     if (local_addr >= scsp_registers_start_address) { return scsp_r_w(local_addr); }
     return 0;
 }
 
 auto Scsp::read32(const u32 addr) const -> u32 {
     auto local_addr = addr & sound_ram_mask;
-    if (local_addr < sound_ram_upper_boundary) { return swapWords(swapEndianness<u32>(rawRead<u32>(Scsp::ram(), local_addr))); }
+    if (local_addr < sound_ram_upper_boundary) {
+        return swapWords(swapEndianness<u32>(Memory::rawRead<u32>(Scsp::ram(), local_addr)));
+    }
     if (local_addr >= scsp_registers_start_address) { return scsp_r_d(local_addr); }
     return 0;
 }
@@ -109,7 +114,7 @@ auto Scsp::read32(const u32 addr) const -> u32 {
 void Scsp::write8(const u32 addr, const u8 data) const {
     auto local_addr = addr & sound_ram_mask;
     if (local_addr < sound_ram_upper_boundary) {
-        rawWrite<u8>(Scsp::ram(), local_addr ^ 1, data);
+        Memory::rawWrite<u8>(Scsp::ram(), local_addr ^ 1, data);
     } else if (local_addr >= scsp_registers_start_address) {
         scsp_w_b(local_addr, data);
     }
@@ -118,7 +123,7 @@ void Scsp::write8(const u32 addr, const u8 data) const {
 void Scsp::write16(const u32 addr, const u16 data) const {
     auto local_addr = addr & sound_ram_mask;
     if (local_addr < sound_ram_upper_boundary) {
-        rawWrite<u16>(Scsp::ram(), local_addr, swapEndianness<u16>(data));
+        Memory::rawWrite<u16>(Scsp::ram(), local_addr, swapEndianness<u16>(data));
     } else if (local_addr >= scsp_registers_start_address) {
         scsp_w_w(local_addr, data);
     }
@@ -127,7 +132,7 @@ void Scsp::write16(const u32 addr, const u16 data) const {
 void Scsp::write32(const u32 addr, const u32 data) const {
     auto local_addr = addr & sound_ram_mask;
     if (local_addr < sound_ram_upper_boundary) {
-        rawWrite<u32>(Scsp::ram(), local_addr, swapEndianness<u32>(swapWords(data)));
+        Memory::rawWrite<u32>(Scsp::ram(), local_addr, swapEndianness<u32>(swapWords(data)));
     } else if (local_addr >= scsp_registers_start_address) {
         scsp_w_d(local_addr, data);
     }
@@ -168,7 +173,7 @@ extern "C" void m68k_write_memory_8(u32 address, u32 value) {
     // if (address == 0x700) __debugbreak();
 
     if (address < sound_ram_upper_boundary) {
-        rawWrite<u8>(Scsp::ram(), address ^ 1, value);
+        Memory::rawWrite<u8>(Scsp::ram(), address ^ 1, value);
     } else if (address >= scsp_registers_start_address) {
         scsp_w_b(address, value);
     }
@@ -178,7 +183,7 @@ extern "C" void m68k_write_memory_16(u32 address, u32 value) {
     address &= sound_ram_mask;
     // if (address == 0x700) __debugbreak();
     if (address < sound_ram_upper_boundary) {
-        rawWrite<u16>(Scsp::ram(), address, swapEndianness<u16>(value));
+        Memory::rawWrite<u16>(Scsp::ram(), address, swapEndianness<u16>(value));
     } else if (address >= scsp_registers_start_address) {
         scsp_w_w(address, value);
     }
@@ -188,7 +193,7 @@ extern "C" void m68k_write_memory_32(u32 address, u32 value) {
     address &= sound_ram_mask;
     // if (address == 0x700) __debugbreak();
     if (address < sound_ram_upper_boundary) {
-        rawWrite<u32>(Scsp::ram(), address, swapEndianness<u32>(swapWords(value)));
+        Memory::rawWrite<u32>(Scsp::ram(), address, swapEndianness<u32>(swapWords(value)));
     } else if (address >= scsp_registers_start_address) {
         scsp_w_d(address, value);
     }
@@ -197,7 +202,7 @@ extern "C" void m68k_write_memory_32(u32 address, u32 value) {
 extern "C" auto m68k_read_memory_8(u32 address) -> u32 {
     address &= sound_ram_mask;
     // if (address == 0x700) __debugbreak();
-    if (address < sound_ram_upper_boundary) { return rawRead<u8>(Scsp::ram(), address ^ 1); }
+    if (address < sound_ram_upper_boundary) { return Memory::rawRead<u8>(Scsp::ram(), address ^ 1); }
     if (address >= scsp_registers_start_address) { return scsp_r_b(address); }
     return 0;
 }
@@ -205,7 +210,7 @@ extern "C" auto m68k_read_memory_8(u32 address) -> u32 {
 extern "C" auto m68k_read_memory_16(u32 address) -> u32 {
     address &= sound_ram_mask;
     // if (address == 0x700) __debugbreak();
-    if (address < sound_ram_upper_boundary) { return swapEndianness<u16>(rawRead<u16>(Scsp::ram(), address)); }
+    if (address < sound_ram_upper_boundary) { return swapEndianness<u16>(Memory::rawRead<u16>(Scsp::ram(), address)); }
     if (address >= scsp_registers_start_address) { return scsp_r_w(address); }
     return 0;
 }
@@ -213,7 +218,9 @@ extern "C" auto m68k_read_memory_16(u32 address) -> u32 {
 extern "C" auto m68k_read_memory_32(u32 address) -> u32 {
     address &= sound_ram_mask;
     // if (address == 0x700) __debugbreak();
-    if (address < sound_ram_upper_boundary) { return util::swapWords(swapEndianness<u32>(rawRead<u32>(Scsp::ram(), address))); }
+    if (address < sound_ram_upper_boundary) {
+        return util::swapWords(swapEndianness<u32>(Memory::rawRead<u32>(Scsp::ram(), address)));
+    }
     if (address >= scsp_registers_start_address) { return scsp_r_d(address); }
     return 0;
 }

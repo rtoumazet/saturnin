@@ -56,11 +56,11 @@ using saturnin::core::EmulatorModules;
 using saturnin::core::Interrupt;
 using saturnin::core::Log;
 using saturnin::core::Logger;
-using saturnin::core::Memory;
+// using saturnin::core::Memory;
 using saturnin::core::Scu;
 
-using saturnin::core::rawRead;
-using saturnin::core::rawWrite;
+// using saturnin::core::rawRead;
+// using saturnin::core::rawWrite;
 
 constexpr auto max_interrupt_number     = u8{10};
 constexpr auto max_interrupt_level      = u8{16};
@@ -242,19 +242,19 @@ class Sh2 {
     // 8 bits specialization
     template<>
     void writeRegisters<u8>(const u32 addr, const u8 data) {
-        writeRegisters(addr, data);
+        writeRegisters8(addr, data);
     }
 
     // 16 bits specialization
     template<>
     void writeRegisters<u16>(const u32 addr, const u16 data) {
-        writeRegisters(addr, data);
+        writeRegisters16(addr, data);
     }
 
     // 32 bits specialization
     template<>
     void writeRegisters<u32>(const u32 addr, const u32 data) {
-        writeRegisters(addr, data);
+        writeRegisters32(addr, data);
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -308,7 +308,8 @@ class Sh2 {
 
     template<typename T>
     [[nodiscard]] auto readCacheAddresses(const u32 addr) const -> T {
-        return rawRead<T>(cache_addresses_, addr & 0x3FF);
+        // return core::rawRead<T>(cache_addresses_, addr & 0x3FF);
+        return core::Memory::rawRead(cache_addresses_, addr & 0x3FF);
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -326,7 +327,8 @@ class Sh2 {
 
     template<typename T>
     void writeCacheAddresses(const u32 addr, const T data) {
-        rawWrite<T>(cache_addresses_, addr & 0x3FF, data);
+        // core::Memory::rawWrite<T>(cache_addresses_, addr & 0x3FF, data);
+        core::Memory::rawWrite(cache_addresses_, addr & 0x3FF, data);
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -345,7 +347,8 @@ class Sh2 {
 
     template<typename T>
     [[nodiscard]] auto readCacheData(const u32 addr) const -> T {
-        return rawRead<T>(cache_data_, addr & 0xFFF);
+        // return core::Memory::rawRead<T>(cache_data_, addr & 0xFFF);
+        return core::Memory::rawRead(cache_data_, addr & 0xFFF);
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -363,7 +366,8 @@ class Sh2 {
 
     template<typename T>
     void writeCacheData(const u32 addr, const T data) {
-        rawWrite<T>(cache_data_, addr & 0xFFF, data);
+        // core::Memory::rawWrite<T>(cache_data_, addr & 0xFFF, data);
+        core::Memory::rawWrite(cache_data_, addr & 0xFFF, data);
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -577,7 +581,7 @@ class Sh2 {
     /// \param  data    Data to write.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    void writeRegisters(u32 addr, u8 data);
+    void writeRegisters8(u32 addr, u8 data);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn void Sh2::writeRegisters(u32 addr, u16 data);
@@ -591,7 +595,7 @@ class Sh2 {
     /// \param  data    Data to write.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    void writeRegisters(u32 addr, u16 data);
+    void writeRegisters16(u32 addr, u16 data);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn void Sh2::writeRegisters(u32 addr, u32 data);
@@ -605,7 +609,7 @@ class Sh2 {
     /// \param  data    Data to write.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    void writeRegisters(u32 addr, u32 data);
+    void writeRegisters32(u32 addr, u32 data);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn void Sh2::purgeCache();
@@ -782,10 +786,10 @@ class Sh2 {
     u16  current_opcode_;                    ///< Opcode to be executed.
     bool is_current_opcode_subroutine_call_; ///< True if is current opcode is asubroutine call, false if not.
 
-    bool is_binary_file_loaded_{false};      ///< True if a binary file has been loaded.
-    u32  binary_file_start_address_{};       ///< Start address of the binary file if any.
+    bool is_binary_file_loaded_{false}; ///< True if a binary file has been loaded.
+    u32  binary_file_start_address_{};  ///< Start address of the binary file if any.
 
-    std::mutex sh2_mutex_;                   ///< Handles class data when accessed from another thread.
+    std::mutex sh2_mutex_; ///< Handles class data when accessed from another thread.
 
     /// \name Interrupt management
     //@{
@@ -823,7 +827,7 @@ class Sh2 {
     u32                                 debug_return_address_; ///< The debug return address used with step_over / step_out.
     std::array<u32, breakpoints_number> breakpoints_;          ///< Breakpoints on current CPU program counter.
 
-    bool is_nmi_registered_{false};                            ///< True if a Non Maskable Interrupt is registered
+    bool is_nmi_registered_{false}; ///< True if a Non Maskable Interrupt is registered
 
     inline static std::array<DisasmType, opcodes_lut_size>
         opcodes_disasm_lut_; ///< The opcodes disasm LUT, used for instruction fast fetching
