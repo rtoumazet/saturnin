@@ -1038,5 +1038,4 @@ void checkColorCalculation(const Vdp1Part& part) {
         }
     }
 }
-
 } // namespace saturnin::video

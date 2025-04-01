@@ -198,6 +198,9 @@
     <ClCompile Include="src\video\opengl\opengl.cpp">
       <Filter>Fichiers sources\video\opengl</Filter>
     </ClCompile>
+    <ClCompile Include="src\video\vdp1_part_impl.cpp">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\config.h">

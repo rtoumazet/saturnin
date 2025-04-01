@@ -34,10 +34,10 @@
 #include <saturnin/src/video/vdp1_part.h> // Vdp1Part
 
 // Forward declarations
-namespace saturnin::core {
-class EmulatorContext;
-class EmulatorModules;
-} // namespace saturnin::core
+// namespace saturnin::core {
+// class EmulatorContext;
+// class EmulatorModules;
+//} // namespace saturnin::core
 
 namespace saturnin::video {
 

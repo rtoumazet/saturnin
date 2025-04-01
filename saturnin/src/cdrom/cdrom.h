@@ -30,16 +30,16 @@
 #include <vector>
 #include <string>
 #include <saturnin/src/emulator_defs.h>
+#include <saturnin/src/emulator_context.h>
 #include <saturnin/src/emulator_modules.h>
 #include <saturnin/src/utilities.h>
 #include <saturnin/src/cdrom/cdrom_registers.h>
 
 // Forward declarations
-namespace saturnin::core {
-class EmulatorContext;
-class EmulatorModules;
-class Smpc;
-} // namespace saturnin::core
+// namespace saturnin::core {
+// class EmulatorContext;
+// class Smpc;
+//} // namespace saturnin::core
 namespace saturnin::cdrom {
 struct ScsiDriveInfo;
 struct ScsiToc;

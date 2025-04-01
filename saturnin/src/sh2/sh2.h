@@ -39,13 +39,13 @@
 #include <saturnin/src/sh2/sh2_disasm_link.h>
 
 // Forward declarations
-namespace saturnin::core {
-class Config;
-class EmulatorContext;
-class EmulatorModules;
-class Scu;
-struct Interrupt;
-} // namespace saturnin::core
+// namespace saturnin::core {
+// class Config;
+// class EmulatorContext;
+// class EmulatorModules;
+// class Scu;
+// struct Interrupt;
+//} // namespace saturnin::core
 
 namespace saturnin::sh2 {
 
@@ -308,8 +308,7 @@ class Sh2 {
 
     template<typename T>
     [[nodiscard]] auto readCacheAddresses(const u32 addr) const -> T {
-        // return core::rawRead<T>(cache_addresses_, addr & 0x3FF);
-        return core::Memory::rawRead(cache_addresses_, addr & 0x3FF);
+        return rawRead<T>(cache_addresses_, addr & 0x3FF);
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -327,8 +326,7 @@ class Sh2 {
 
     template<typename T>
     void writeCacheAddresses(const u32 addr, const T data) {
-        // core::Memory::rawWrite<T>(cache_addresses_, addr & 0x3FF, data);
-        core::Memory::rawWrite(cache_addresses_, addr & 0x3FF, data);
+        rawWrite<T>(cache_addresses_, addr & 0x3FF, data);
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -347,8 +345,7 @@ class Sh2 {
 
     template<typename T>
     [[nodiscard]] auto readCacheData(const u32 addr) const -> T {
-        // return core::Memory::rawRead<T>(cache_data_, addr & 0xFFF);
-        return core::Memory::rawRead(cache_data_, addr & 0xFFF);
+        return rawRead<T>(cache_data_, addr & 0xFFF);
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -366,8 +363,7 @@ class Sh2 {
 
     template<typename T>
     void writeCacheData(const u32 addr, const T data) {
-        // core::Memory::rawWrite<T>(cache_data_, addr & 0xFFF, data);
-        core::Memory::rawWrite(cache_data_, addr & 0xFFF, data);
+        rawWrite<T>(cache_data_, addr & 0xFFF, data);
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////

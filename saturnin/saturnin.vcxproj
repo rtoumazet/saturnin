@@ -72,7 +72,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugFast|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>ClangCL</PlatformToolset>
     <PreferredToolArchitecture>x64</PreferredToolArchitecture>
     <CharacterSet>Unicode</CharacterSet>
     <EnableUnitySupport>false</EnableUnitySupport>
@@ -365,6 +365,7 @@
     </ClCompile>
     <ClCompile Include="src\emulator_modules.cpp" />
     <ClCompile Include="src\video\opengl\opengl.cpp" />
+    <ClCompile Include="src\video\vdp1_part_impl.cpp" />
     <ClCompile Include="src\video\vdp2\vdp2_cache.cpp" />
     <ClCompile Include="src\video\vdp2\vdp2_cycle_patterns.cpp" />
     <ClCompile Include="src\video\vdp2\vdp2_display.cpp" />

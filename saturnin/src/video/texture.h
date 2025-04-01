@@ -31,7 +31,7 @@
 
 namespace saturnin::video {
 
-class Opengl;
+// class Opengl;
 
 using DebugKey = std::pair<std::string, size_t>; // Debug information of the texture and its key.
 

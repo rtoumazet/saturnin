@@ -22,8 +22,6 @@
 
 #include <Windows.h> // removes C4005 warning
 #include <GLFW/glfw3.h>
-#include <iostream>
-#include <future>
 #include <argagg/argagg.hpp>
 #include <saturnin/src/config.h>
 #include <saturnin/src/log.h>

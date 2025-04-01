@@ -27,8 +27,8 @@
 
 #include <array>                           // array
 #include <chrono>                          // duration
-#include <saturnin/src/emulator_context.h> // EmulatorContext
 #include <saturnin/src/emulator_defs.h>    // u8, u16, u32
+#include <saturnin/src/emulator_context.h> // EmulatorContext
 #include <saturnin/src/emulator_modules.h> // EmulatorModules
 #include <saturnin/src/locale.h>           // tr
 #include <saturnin/src/log.h>              // Log
@@ -40,14 +40,14 @@
 #include <saturnin/src/video/vdp2/vdp2_registers.h>
 
 // Forward declarations
-namespace saturnin::core {
-class Scu;
-} // namespace saturnin::core
+// namespace saturnin::core {
+// class Scu;
+//} // namespace saturnin::core
 
 namespace saturnin::video {
 
-class Vdp1;
-class Texture;
+// class Vdp1;
+// class Texture;
 
 using saturnin::core::EmulatorContext;
 using saturnin::core::EmulatorModules;

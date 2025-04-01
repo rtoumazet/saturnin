@@ -26,17 +26,11 @@
 #pragma once
 
 #include <saturnin/src/emulator_defs.h>
+#include <saturnin/src/emulator_modules.h>
 #include <saturnin/src/video/vdp_common.h>
 #include <saturnin/src/video/vdp1_registers.h>
-#include <saturnin/src/emulator_modules.h>
 #include <saturnin/src/log.h>
 #include <saturnin/src/utilities.h> // toUnderlying
-#include <saturnin/src/memory.h>
-
-// Forward declarations
-namespace saturnin::core {
-class EmulatorModules;
-} // namespace saturnin::core
 
 namespace saturnin::video {
 
@@ -235,205 +229,61 @@ void lineDraw(const EmulatorModules& modules, Vdp1Part& part);
 
 void loadTextureData(const EmulatorModules& modules, Vdp1Part& part);
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \fn	auto readGouraudData(const EmulatorModules& modules, const Vdp1Part& part) -> std::vector<Gouraud>;
-///
-/// \brief	Reads gouraud data for the part.
-///
-/// \author	Runik
-/// \date	19/11/2022
-///
-/// \param 	modules	Emulator modules.
-/// \param 	part   	The Vdp1Part being processed.
-///
-/// \returns	The gouraud data.
-////////////////////////////////////////////////////////////////////////////////////////////////////
+// Reads gouraud data for the part.
+auto readGouraudData(const EmulatorModules& modules, // emulator modules
+                     const Vdp1Part&        part     // Vdp1Part being processed
+                     ) -> std::vector<Gouraud>;      // The gouraud data.
 
-auto readGouraudData(const EmulatorModules& modules, const Vdp1Part& part) -> std::vector<Gouraud>;
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \fn template<typename T> void readDotColorBank16(const EmulatorModules& modules, std::vector<u8>& texture_data, const u16
-/// color_ram_offset, Vdp1Part& vp, const u8 dot)
-///
-/// \brief  Reads one dot in color bank 16 colors format.
-///
-/// \tparam T   Generic type parameter.
-/// \param          modules             Emulator modules.
-/// \param [in,out] texture_data        Raw texture data.
-/// \param          color_ram_offset    The color ram offset.
-/// \param [in,out] vp                  The Vdp1Part being processed.
-/// \param          dot                 The current dot.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
+// Reads one dot in 'color bank 16 colors' format and adds it to the texture.
 template<typename T>
-void readDotColorBank16(const EmulatorModules& modules,
-                        std::vector<u8>&       texture_data,
-                        const u16              color_ram_offset,
-                        Vdp1Part&              part,
-                        const u8               dot) {
-    constexpr auto color_bank_mask = u16{0x0FF0};
-    const auto     color_address
-        = u32{cram_start_address + color_ram_offset + ((part.cmdcolr_.data() & color_bank_mask) | dot) * sizeof(T)};
+void readDotColorBank16(const EmulatorModules& modules,          // emulator modules
+                        std::vector<u8>&       texture_data,     // raw texture data to add dot to
+                        const u16              color_ram_offset, // color ram offset
+                        Vdp1Part&              part,             // Vdp1Part being processed
+                        const u8               dot               // dot to process
+);
 
-    // auto color = modules.vdp2()->readColor<T>(color_address);
-    auto color = Color(modules.memory()->read<T>(color_address));
-
-    // Checking transparency.
-    if ((part.cmdpmod_ >> CmdPmod::spd_enum) == CmdPmod::TransparentPixelDisable::transparent_pixel_enabled) {
-        if (!dot) color.a = 0;
-    }
-
-    texture_data.insert(texture_data.end(), {color.r, color.g, color.b, color.a});
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \fn template<typename T> void readDotLookUpTable16(const EmulatorModules& modules, std::vector<u8>& texture_data, Vdp1Part&
-/// vp, const u8 dot)
-///
-/// \brief  Reads dot look up table 16
-///
-/// \tparam T   Generic type parameter.
-/// \param          modules             Emulator modules.
-/// \param [in,out] texture_data        Raw texture data.
-/// \param [in,out] vp                  The Vdp1Part being processed.
-/// \param          dot                 The current dot.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
+// Reads one dot in 'look up table 16 colors' format and adds it to the texture.
 template<typename T>
-void readDotLookUpTable16(const EmulatorModules& modules, std::vector<u8>& texture_data, Vdp1Part& part, const u8 dot) {
-    const auto color_address = u32{vdp1_vram_start_address + part.cmdcolr_.data() * vdp1_address_multiplier + dot * sizeof(T)};
+void readDotLookUpTable16(const EmulatorModules& modules,      // emulator modules
+                          std::vector<u8>&       texture_data, // raw texture data to add dot to
+                          Vdp1Part&              part,         // Vdp1Part being processed
+                          const u8               dot           // dot to process
+);
 
-    // auto color = modules.vdp2()->readColor<T>(color_address);
-    auto color = Color(modules.memory()->read<T>(color_address));
-
-    // Checking transparency.
-    if ((part.cmdpmod_ >> CmdPmod::spd_enum) == CmdPmod::TransparentPixelDisable::transparent_pixel_enabled) {
-        if (!dot) color.a = 0;
-    }
-
-    texture_data.insert(texture_data.end(), {color.r, color.g, color.b, color.a});
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \fn template<typename T> void readDotColorBank64(const EmulatorModules& modules, std::vector<u8>& texture_data, const u16
-/// color_ram_offset, Vdp1Part& part, const u8 dot)
-///
-/// \brief  Reads one dot in color bank 64 colors format.
-///
-/// \tparam T   Generic type parameter.
-/// \param          modules             Emulator modules.
-/// \param [in,out] texture_data        Raw texture data.
-/// \param          color_ram_offset    The color ram offset.
-/// \param [in,out] part                  The Vdp1Part being processed.
-/// \param          dot                 The current dot.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
+// Reads one dot in 'color bank 64 colors' format and adds it to the texture.
 template<typename T>
-void readDotColorBank64(const EmulatorModules& modules,
-                        std::vector<u8>&       texture_data,
-                        const u16              color_ram_offset,
-                        Vdp1Part&              part,
-                        const u8               dot) {
-    constexpr auto color_bank_mask = u16{0x0FC0};
-    const auto     color_address
-        = u32{cram_start_address + color_ram_offset + ((part.cmdcolr_.data() & color_bank_mask) | dot) * sizeof(T)};
+void readDotColorBank64(const EmulatorModules& modules,          // emulator modules
+                        std::vector<u8>&       texture_data,     // raw texture data to add dot to
+                        const u16              color_ram_offset, // color ram offset
+                        Vdp1Part&              part,             // Vdp1Part being processed
+                        const u8               dot               // dot to process
+);
 
-    // auto color = modules.vdp2()->readColor<T>(color_address);
-    auto color = Color(modules.memory()->read<T>(color_address));
-
-    // Checking transparency.
-    if ((part.cmdpmod_ >> CmdPmod::spd_enum) == CmdPmod::TransparentPixelDisable::transparent_pixel_enabled) {
-        if (!dot) color.a = 0;
-    }
-
-    texture_data.insert(texture_data.end(), {color.r, color.g, color.b, color.a});
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \fn template<typename T> void readDotColorBank128(const EmulatorModules& modules, std::vector<u8>& texture_data, const u16
-/// color_ram_offset, Vdp1Part& part, const u8 dot)
-///
-/// \brief  Reads one dot in color bank 128 colors format.
-///
-/// \tparam T   Generic type parameter.
-/// \param          modules             Emulator modules.
-/// \param [in,out] texture_data        Raw texture data.
-/// \param          color_ram_offset    The color ram offset.
-/// \param [in,out] part                The Vdp1Part being processed.
-/// \param          dot                 The current dot.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
+// Reads one dot in 'color bank 128 colors' format and adds it to the texture.
 template<typename T>
-void readDotColorBank128(const EmulatorModules& modules,
-                         std::vector<u8>&       texture_data,
-                         const u16              color_ram_offset,
-                         Vdp1Part&              part,
-                         const u8               dot) {
-    constexpr auto color_bank_mask = u16{0x0F80};
-    const auto     color_address
-        = u32{cram_start_address + color_ram_offset + ((part.cmdcolr_.data() & color_bank_mask) | dot) * sizeof(T)};
+void readDotColorBank128(const EmulatorModules& modules,          // emulator modules
+                         std::vector<u8>&       texture_data,     // raw texture data to add dot to
+                         const u16              color_ram_offset, // color ram offset
+                         Vdp1Part&              part,             // Vdp1Part being processed
+                         const u8               dot               // dot to process
+);
 
-    // auto color = modules.vdp2()->readColor<T>(color_address);
-    auto color = Color(modules.memory()->read<T>(color_address));
-
-    // Checking transparency.
-    if ((part.cmdpmod_ >> CmdPmod::spd_enum) == CmdPmod::TransparentPixelDisable::transparent_pixel_enabled) {
-        if (!dot) color.a = 0;
-    }
-
-    texture_data.insert(texture_data.end(), {color.r, color.g, color.b, color.a});
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \fn template<typename T> void readDotColorBank256(const EmulatorModules& modules, std::vector<u8>& texture_data, const u16
-/// color_ram_offset, Vdp1Part& part, const u8 dot)
-///
-/// \brief  Reads one dot in color bank 256 colors format.
-///
-/// \tparam T   Generic type parameter.
-/// \param          modules             Emulator modules.
-/// \param [in,out] texture_data        Raw texture data.
-/// \param          color_ram_offset    The color ram offset.
-/// \param [in,out] part                The Vdp1Part being processed.
-/// \param          dot                 The current dot.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
+// Reads one dot in 'color bank 256 colors' format and adds it to the texture.
 template<typename T>
-void readDotColorBank256(const EmulatorModules& modules,
-                         std::vector<u8>&       texture_data,
-                         const u16              color_ram_offset,
-                         Vdp1Part&              part,
-                         const u8               dot) {
-    constexpr auto color_bank_mask = u16{0xFF00};
-    const auto     color_address
-        = u32{cram_start_address + color_ram_offset + ((part.cmdcolr_.data() & color_bank_mask) | dot) * sizeof(T)};
+void readDotColorBank256(const EmulatorModules& modules,          // emulator modules
+                         std::vector<u8>&       texture_data,     // raw texture data to add dot to
+                         const u16              color_ram_offset, // color ram offset
+                         Vdp1Part&              part,             // Vdp1Part being processed
+                         const u8               dot               // dot to process
+);
 
-    // auto color = modules.vdp2()->readColor<T>(color_address);
-    auto color = Color(modules.memory()->read<T>(color_address));
-
-    // Checking transparency.
-    if ((part.cmdpmod_ >> CmdPmod::spd_enum) == CmdPmod::TransparentPixelDisable::transparent_pixel_enabled) {
-        if (!dot) color.a = 0;
-    }
-
-    texture_data.insert(texture_data.end(), {color.r, color.g, color.b, color.a});
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \fn template<typename T> void readDotRgb(std::vector<u8>& texture_data, const u16
-/// color_ram_offset, const Vdp1Part& part, const u8 dot)
-///
-/// \brief  Reads one dot in RGB 32K colors format.
-///
-/// \tparam T   Generic type parameter.
-/// \param [in,out] texture_data        Raw texture data.
-/// \param          color_ram_offset    The color ram offset.
-/// \param [in,out] part                The Vdp1Part being processed.
-/// \param          dot                 The current dot.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
+// Reads one dot in 'RGB 32K colors' format and adds it to the texture.
 template<typename T>
-void readDotRgb(std::vector<u8>& texture_data, const Vdp1Part& part, const u16 dot) {
+void readDotRgb(std::vector<u8>& texture_data, // raw texture data to add dot to
+                const Vdp1Part&  part,         // Vdp1Part being processed
+                const u16        dot           // dot to process
+) {
     auto color = Color(dot);
 
     // Checking transparency.
@@ -444,316 +294,60 @@ void readDotRgb(std::vector<u8>& texture_data, const Vdp1Part& part, const u16 d
     texture_data.insert(texture_data.end(), {color.r, color.g, color.b, color.a});
 };
 
+// Checks color calculation (WIP)
 void checkColorCalculation(const Vdp1Part& part);
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \fn template<typename T> void readColorBankMode16Colors(const Memory* m, std::vector<u8>& texture_data, const u32
-/// start_address, const u8 color_ram_address_offset)
-///
-/// \brief  Reads pixel data as color bank mode 16 colors (4 bits per pixel).
-///
-/// \tparam T   Generic type parameter.
-/// \param          modules                     Reference to the emulator modules.
-/// \param [in,out] texture_data                Raw texture data.
-/// \param          start_address               Texture start address.
-/// \param          color_ram_address_offset    The color ram address offset.
-/// \param          part                        The vdp1 part currently processed.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
+// Reads pixel data as color bank mode 16 colors (4 bits per pixel).
 template<typename T>
-void readColorBankMode16Colors(const EmulatorModules& modules,
-                               std::vector<u8>&       texture_data,
-                               const u32              start_address,
-                               const u16              color_ram_address_offset,
-                               Vdp1Part&              part) {
-    constexpr auto one_read_offset = u8{4}; // in bytes
-    const auto     texture_size    = texture_data.capacity() / 4;
-    if ((texture_size % 4) != 0) {
-        // As we're reading 32 bits of data at a time (8 dots of 4 bits) we must ensure the data read is on 32 bits boundary.
-        Log::warning(Logger::vdp1, "Texture size isn't a multiple of 4 !");
-        return;
-    }
-    checkColorCalculation(part);
-    auto row = DataExtraction{};
-    for (u32 i = start_address; i < (start_address + texture_size); i += one_read_offset) {
-        row.as_4bits = modules.memory()->read<u32>(i);
-        readDotColorBank16<T>(modules,
-                              texture_data,
-                              color_ram_address_offset,
-                              part,
-                              row.as_4bits >> DataExtraction::As4Bits::dot0_shift);
-        readDotColorBank16<T>(modules,
-                              texture_data,
-                              color_ram_address_offset,
-                              part,
-                              row.as_4bits >> DataExtraction::As4Bits::dot1_shift);
-        readDotColorBank16<T>(modules,
-                              texture_data,
-                              color_ram_address_offset,
-                              part,
-                              row.as_4bits >> DataExtraction::As4Bits::dot2_shift);
-        readDotColorBank16<T>(modules,
-                              texture_data,
-                              color_ram_address_offset,
-                              part,
-                              row.as_4bits >> DataExtraction::As4Bits::dot3_shift);
-        readDotColorBank16<T>(modules,
-                              texture_data,
-                              color_ram_address_offset,
-                              part,
-                              row.as_4bits >> DataExtraction::As4Bits::dot4_shift);
-        readDotColorBank16<T>(modules,
-                              texture_data,
-                              color_ram_address_offset,
-                              part,
-                              row.as_4bits >> DataExtraction::As4Bits::dot5_shift);
-        readDotColorBank16<T>(modules,
-                              texture_data,
-                              color_ram_address_offset,
-                              part,
-                              row.as_4bits >> DataExtraction::As4Bits::dot6_shift);
-        readDotColorBank16<T>(modules,
-                              texture_data,
-                              color_ram_address_offset,
-                              part,
-                              row.as_4bits >> DataExtraction::As4Bits::dot7_shift);
-    }
-}
+void readColorBankMode16Colors(const EmulatorModules& modules,                  // emulator modules
+                               std::vector<u8>&       texture_data,             // raw texture data
+                               const u32              start_address,            // texture start address
+                               const u16              color_ram_address_offset, // color ram offset
+                               Vdp1Part&              part                      // Vdp1Part being processed
+);
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \fn template<typename T> void readLookUpTable16Colors(const EmulatorModules& modules, std::vector<u8>& texture_data, const u32
-/// start_address, Vdp1Part& vp)
-///
-/// \brief  Reads look up table 16 colors
-///
-/// \tparam T   Generic type parameter.
-/// \param          modules                     Reference to the emulator modules.
-/// \param [in,out] texture_data                Raw texture data.
-/// \param          start_address               Texture start address.
-/// \param          part                        The vdp1 part currently processed.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
+// Reads pixel data as look up table 16 colors mode.
 template<typename T>
-void readLookUpTable16Colors(const EmulatorModules& modules,
-                             std::vector<u8>&       texture_data,
-                             const u32              start_address,
-                             Vdp1Part&              part) {
-    constexpr auto one_read_offset = u8{4};
-    const auto     texture_size    = texture_data.capacity() / 4;
-    if ((texture_size % 4) != 0) {
-        // As we're reading 32 bits of data at a time (8 dots of 4 bits) we must ensure the data read is on 32 bits boundary.
-        Log::warning(Logger::vdp1, "Texture size isn't a multiple of 4 !");
-        return;
-    }
-    checkColorCalculation(part);
-    auto row = DataExtraction{};
-    for (u32 i = start_address; i < (start_address + texture_size / one_read_offset * 2); i += one_read_offset) {
-        row.as_4bits = modules.memory()->read<u32>(i);
-        readDotLookUpTable16<T>(modules, texture_data, part, row.as_4bits >> DataExtraction::As4Bits::dot0_shift);
-        readDotLookUpTable16<T>(modules, texture_data, part, row.as_4bits >> DataExtraction::As4Bits::dot1_shift);
-        readDotLookUpTable16<T>(modules, texture_data, part, row.as_4bits >> DataExtraction::As4Bits::dot2_shift);
-        readDotLookUpTable16<T>(modules, texture_data, part, row.as_4bits >> DataExtraction::As4Bits::dot3_shift);
-        readDotLookUpTable16<T>(modules, texture_data, part, row.as_4bits >> DataExtraction::As4Bits::dot4_shift);
-        readDotLookUpTable16<T>(modules, texture_data, part, row.as_4bits >> DataExtraction::As4Bits::dot5_shift);
-        readDotLookUpTable16<T>(modules, texture_data, part, row.as_4bits >> DataExtraction::As4Bits::dot6_shift);
-        readDotLookUpTable16<T>(modules, texture_data, part, row.as_4bits >> DataExtraction::As4Bits::dot7_shift);
-    }
-}
+void readLookUpTable16Colors(const EmulatorModules& modules,       // emulator modules
+                             std::vector<u8>&       texture_data,  // raw texture data
+                             const u32              start_address, // texture start address
+                             Vdp1Part&              part           // Vdp1Part being processed
+);
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \fn template<typename T> void readColorBankMode64Colors(const EmulatorModules& modules, std::vector<u8>& texture_data, const
-/// u32 start_address, const u16 color_ram_address_offset, Vdp1Part& part)
-///
-/// \brief  Reads pixel data as color bank mode 64 colors (6 bits per pixel).
-///
-/// \tparam T   Generic type parameter.
-/// \param          modules                     Reference to the emulator modules.
-/// \param [in,out] texture_data                Raw texture data.
-/// \param          start_address               Texture start address.
-/// \param          color_ram_address_offset    The color ram address offset.
-/// \param          part                          The vdp1 part currently processed.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
+// Reads pixel data as color bank mode 64 colors (6 bits per pixel).
 template<typename T>
-void readColorBankMode64Colors(const EmulatorModules& modules,
-                               std::vector<u8>&       texture_data,
-                               const u32              start_address,
-                               const u16              color_ram_address_offset,
-                               Vdp1Part&              part) {
-    constexpr auto one_read_offset = u8{4}; // in bytes
-    const auto     texture_size    = texture_data.capacity() / 4;
-    if ((texture_size % 4) != 0) {
-        // As we're reading 32 bits of data at a time (4 dots of 6 bits) we must ensure the data read is on 32 bits boundary.
-        Log::warning(Logger::vdp1, "Texture size isn't a multiple of 4 !");
-        return;
-    }
-    checkColorCalculation(part);
-    auto row = DataExtraction{};
-    for (u32 i = start_address; i < (start_address + texture_size / one_read_offset); i += one_read_offset) {
-        row.as_6bits = modules.memory()->read<u32>(i);
-        readDotColorBank64<T>(modules,
-                              texture_data,
-                              color_ram_address_offset,
-                              part,
-                              row.as_6bits >> DataExtraction::As6Bits::dot0_shift);
-        readDotColorBank64<T>(modules,
-                              texture_data,
-                              color_ram_address_offset,
-                              part,
-                              row.as_6bits >> DataExtraction::As6Bits::dot1_shift);
-        readDotColorBank64<T>(modules,
-                              texture_data,
-                              color_ram_address_offset,
-                              part,
-                              row.as_6bits >> DataExtraction::As6Bits::dot2_shift);
-        readDotColorBank64<T>(modules,
-                              texture_data,
-                              color_ram_address_offset,
-                              part,
-                              row.as_6bits >> DataExtraction::As6Bits::dot3_shift);
-    }
-}
+void readColorBankMode64Colors(const EmulatorModules& modules,                  // emulator modules
+                               std::vector<u8>&       texture_data,             // raw texture data
+                               const u32              start_address,            // texture start address
+                               const u16              color_ram_address_offset, // color ram offset
+                               Vdp1Part&              part                      // Vdp1Part being processed
+);
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \fn template<typename T> void readColorBankMode128Colors(const EmulatorModules& modules, std::vector<u8>& texture_data, const
-/// u32 start_address, const u16 color_ram_address_offset, Vdp1Part& part)
-///
-/// \brief  Reads pixel data as color bank mode 128 colors (7 bits per pixel).
-///
-/// \tparam T   Generic type parameter.
-/// \param          modules                     Reference to the emulator modules.
-/// \param [in,out] texture_data                Raw texture data.
-/// \param          start_address               Texture start address.
-/// \param          color_ram_address_offset    The color ram address offset.
-/// \param          part                        The vdp1 part currently processed.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
+// Reads pixel data as color bank mode 128 colors (7 bits per pixel).
 template<typename T>
-void readColorBankMode128Colors(const EmulatorModules& modules,
-                                std::vector<u8>&       texture_data,
-                                const u32              start_address,
-                                const u16              color_ram_address_offset,
-                                Vdp1Part&              part) {
-    constexpr auto one_read_offset = u8{4}; // in bytes
-    const auto     texture_size    = texture_data.capacity() / 4;
-    if ((texture_size % 4) != 0) {
-        // As we're reading 32 bits of data at a time (4 dots of 7 bits) we must ensure the data read is on 32 bits boundary.
-        Log::warning(Logger::vdp1, "Texture size isn't a multiple of 4 !");
-        return;
-    }
-    checkColorCalculation(part);
-    auto row = DataExtraction{};
-    for (u32 i = start_address; i < (start_address + texture_size / one_read_offset); i += one_read_offset) {
-        row.as_7bits = modules.memory()->read<u32>(i);
-        readDotColorBank128<T>(modules,
-                               texture_data,
-                               color_ram_address_offset,
-                               part,
-                               row.as_7bits >> DataExtraction::As7Bits::dot0_shift);
-        readDotColorBank128<T>(modules,
-                               texture_data,
-                               color_ram_address_offset,
-                               part,
-                               row.as_7bits >> DataExtraction::As7Bits::dot1_shift);
-        readDotColorBank128<T>(modules,
-                               texture_data,
-                               color_ram_address_offset,
-                               part,
-                               row.as_7bits >> DataExtraction::As7Bits::dot2_shift);
-        readDotColorBank128<T>(modules,
-                               texture_data,
-                               color_ram_address_offset,
-                               part,
-                               row.as_7bits >> DataExtraction::As7Bits::dot3_shift);
-    }
-}
+void readColorBankMode128Colors(const EmulatorModules& modules,                  // emulator modules
+                                std::vector<u8>&       texture_data,             // raw texture data
+                                const u32              start_address,            // texture start address
+                                const u16              color_ram_address_offset, // color ram offset
+                                Vdp1Part&              part                      // Vdp1Part being processed
+);
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \fn template<typename T> void readColorBankMode256Colors(const EmulatorModules& modules, std::vector<u8>& texture_data, const
-/// u32 start_address, const u16 color_ram_address_offset, Vdp1Part& part)
-///
-/// \brief  Reads pixel data as color bank mode 256 colors (8 bits per pixel).
-///
-/// \tparam T   Generic type parameter.
-/// \param          modules                     Reference to the emulator modules.
-/// \param [in,out] texture_data                Raw texture data.
-/// \param          start_address               Texture start address.
-/// \param          color_ram_address_offset    The color ram address offset.
-/// \param          part                        The vdp1 part currently processed.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
+// Reads pixel data as color bank mode 256 colors (8 bits per pixel).
 template<typename T>
-void readColorBankMode256Colors(const EmulatorModules& modules,
-                                std::vector<u8>&       texture_data,
-                                const u32              start_address,
-                                const u16              color_ram_address_offset,
-                                Vdp1Part&              part) {
-    constexpr auto one_read_offset = u8{4}; // in bytes
-    const auto     texture_size    = texture_data.capacity() / 4;
-    if ((texture_size % 4) != 0) {
-        // As we're reading 32 bits of data at a time (4 dots of 8 bits) we must ensure the data read is on 32 bits boundary.
-        Log::warning(Logger::vdp1, "Texture size isn't a multiple of 4 !");
-        return;
-    }
-    checkColorCalculation(part);
-    auto row = DataExtraction{};
-    for (u32 i = start_address; i < (start_address + texture_size); i += one_read_offset) {
-        row.as_8bits = modules.memory()->read<u32>(i);
-        readDotColorBank256<T>(modules,
-                               texture_data,
-                               color_ram_address_offset,
-                               part,
-                               row.as_8bits >> DataExtraction::As8Bits::dot0_shift);
-        readDotColorBank256<T>(modules,
-                               texture_data,
-                               color_ram_address_offset,
-                               part,
-                               row.as_8bits >> DataExtraction::As8Bits::dot1_shift);
-        readDotColorBank256<T>(modules,
-                               texture_data,
-                               color_ram_address_offset,
-                               part,
-                               row.as_8bits >> DataExtraction::As8Bits::dot2_shift);
-        readDotColorBank256<T>(modules,
-                               texture_data,
-                               color_ram_address_offset,
-                               part,
-                               row.as_8bits >> DataExtraction::As8Bits::dot3_shift);
-    }
-}
+void readColorBankMode256Colors(const EmulatorModules& modules,                  // emulator modules
+                                std::vector<u8>&       texture_data,             // raw texture data
+                                const u32              start_address,            // texture start address
+                                const u16              color_ram_address_offset, // color ram offset
+                                Vdp1Part&              part                      // Vdp1Part being processed
+);
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \fn template<typename T> void readRgb32KColors(const EmulatorModules& modules, std::vector<u8>& texture_data, const u32
-/// start_address, Vdp1Part& part)
-///
-/// \brief  Reads pixel data as RGB 32K colors (16 bits per pixel).
-///
-/// \tparam T   Generic type parameter.
-/// \param          modules         Reference to the emulator modules.
-/// \param [in,out] texture_data    Raw texture data.
-/// \param          start_address   Texture start address.
-/// \param          part            The vdp1 part currently processed.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
+// Reads pixel data as RGB 32K colors (16 bits per pixel).
 template<typename T>
-void readRgb32KColors(const EmulatorModules& modules, std::vector<u8>& texture_data, const u32 start_address, Vdp1Part& part) {
-    constexpr auto one_read_offset_in_bytes = u8{4};
-    const auto     texture_size             = texture_data.capacity();
-    if ((texture_size % 4) != 0) {
-        // As we're reading 32 bits of data at a time (2 dots of 16 bits) we must ensure the data read is on 32 bits boundary.
-        Log::warning(Logger::vdp1, "Texture size isn't a multiple of 4 !");
-        return;
-    }
-    checkColorCalculation(part);
-
-    const auto max_size = static_cast<u32>(start_address + texture_size);
-    auto       row      = DataExtraction{};
-    for (u32 i = start_address; i < max_size; i += one_read_offset_in_bytes) {
-        row.as_16bits = modules.memory()->read<u32>(i);
-        readDotRgb<T>(texture_data, part, row.as_16bits >> DataExtraction::As16Bits::dot0_shift);
-        readDotRgb<T>(texture_data, part, row.as_16bits >> DataExtraction::As16Bits::dot1_shift);
-    }
-}
+void readRgb32KColors(const EmulatorModules& modules,       // emulator modules
+                      std::vector<u8>&       texture_data,  // raw texture data
+                      const u32              start_address, // texture start address
+                      Vdp1Part&              part           // Vdp1Part being processed
+);
 
 auto getTextureCoordinates(const CmdCtrl::CharacterReadDirection crd) -> std::vector<TextureCoordinates>;
 

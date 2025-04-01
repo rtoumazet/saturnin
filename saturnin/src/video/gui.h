@@ -33,9 +33,9 @@
 namespace video = saturnin::video;
 
 // Forward declarations
-namespace saturnin::video {
-class Opengl;
-}
+// namespace saturnin::video {
+// class Opengl;
+//}
 
 namespace saturnin::gui {
 

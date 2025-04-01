@@ -19,6 +19,16 @@
 
 #include <saturnin/src/pch.h>
 #include <saturnin/src/emulator_modules.h>
+#include <saturnin/src/config.h>
+#include <saturnin/src/memory.h>
+#include <saturnin/src/sh2/sh2.h>
+#include <saturnin/src/scu.h>
+#include <saturnin/src/smpc.h>
+#include <saturnin/src/sound/scsp.h>
+#include <saturnin/src/cdrom/cdrom.h>
+#include <saturnin/src/video/vdp1.h>
+#include <saturnin/src/video/vdp2/vdp2.h>
+#include <saturnin/src/video/opengl/opengl.h>
 
 namespace saturnin::core {
 

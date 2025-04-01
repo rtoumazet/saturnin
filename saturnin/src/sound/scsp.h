@@ -31,10 +31,10 @@
 #include <saturnin/src/memory.h>
 
 // Forward declarations
-namespace saturnin::core {
-class EmulatorContext;
-class EmulatorModules;
-} // namespace saturnin::core
+// namespace saturnin::core {
+// class EmulatorContext;
+// class EmulatorModules;
+//} // namespace saturnin::core
 
 namespace saturnin::sound {
 
