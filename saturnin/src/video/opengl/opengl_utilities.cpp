@@ -20,6 +20,8 @@
 #include <saturnin/src/pch.h>
 #include <saturnin/src/video/opengl/opengl.h>
 #include <lodepng.h>
+#define GLFW_INCLUDE_NONE
+#include <GLFW/glfw3.h>
 #include <glbinding/glbinding.h>
 #include <glbinding/Version.h>
 #include <glbinding-aux/ContextInfo.h>

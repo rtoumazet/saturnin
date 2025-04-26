@@ -30,13 +30,6 @@
 #include <saturnin/src/emulator_defs.h>    // s32, u32, Coord
 #include <saturnin/src/smpc.h>
 
-namespace video = saturnin::video;
-
-// Forward declarations
-// namespace saturnin::video {
-// class Opengl;
-//}
-
 namespace saturnin::gui {
 
 constexpr auto icon_debug      = "\xEE\xA4\x80 ";
@@ -105,7 +98,8 @@ void showCoreWindow(GuiConfiguration& conf, core::EmulatorContext& state);
 void showMainMenu(GuiConfiguration& conf, core::EmulatorContext& state);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \fn	void formatStvPlayerControls(const u8 second_column_offset, const std::vector<core::PeripheralKey>& keys, core::StvPlayerControls& controls, const u8 player_number);
+/// \fn	void formatStvPlayerControls(const u8 second_column_offset, const std::vector<core::PeripheralKey>& keys,
+/// core::StvPlayerControls& controls, const u8 player_number);
 ///
 /// \brief	Format ST-V player controls
 ///

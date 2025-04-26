@@ -364,6 +364,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='DebugFast|x64'">Use</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="src\emulator_modules.cpp" />
+    <ClCompile Include="src\memory_impl.cpp" />
     <ClCompile Include="src\video\opengl\opengl.cpp" />
     <ClCompile Include="src\video\vdp1_part_impl.cpp" />
     <ClCompile Include="src\video\vdp2\vdp2_cache.cpp" />

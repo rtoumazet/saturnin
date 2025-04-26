@@ -67,10 +67,10 @@ auto Scu::read32(const u32 addr) const -> u32 {
         case interrupt_status_register: return regs_.ist.data();
         case interrupt_mask_register: return regs_.ims.data();
         // default: return rawRead<u32>(modules_.memory()->scu_, addr & scu_memory_mask);
-        default: return Memory::rawRead<u32>(modules_.memory()->scu_, addr & scu_memory_mask);
+        default: return rawRead<u32>(modules_.memory()->scu_, addr & scu_memory_mask);
     }
     // return rawRead<u32>(modules_.memory()->scu_, addr & scu_memory_mask);
-    return Memory::rawRead<u32>(modules_.memory()->scu_, addr & scu_memory_mask);
+    return rawRead<u32>(modules_.memory()->scu_, addr & scu_memory_mask);
 };
 
 void Scu::write32(const u32 addr, const u32 data) {
@@ -102,7 +102,7 @@ void Scu::write32(const u32 addr, const u32 data) {
         case dsp_program_ram_dataport: {
             auto index = regs_.ppaf >> Ppaf::p_shft;
             // rawWrite(program_ram_, index * 4, data);
-            Memory::rawWrite(program_ram_, index * 4, data);
+            rawWrite(program_ram_, index * 4, data);
             ++index;
             regs_.ppaf.upd(ScuRegs::Ppaf::programRamAddress(index));
             regs_.ppd = data;
@@ -179,7 +179,7 @@ void Scu::write32(const u32 addr, const u32 data) {
     }
 
     // rawWrite<u32>(modules_.memory()->scu_, addr & scu_memory_mask, data);
-    Memory::rawWrite<u32>(modules_.memory()->scu_, addr & scu_memory_mask, data);
+    rawWrite<u32>(modules_.memory()->scu_, addr & scu_memory_mask, data);
 };
 
 void Scu::executeDma(DmaConfiguration& dc) {
@@ -652,18 +652,13 @@ void Scu::initializeRegisters() {
     regs_.d0md                               = mode_default_value;
     regs_.d1md                               = mode_default_value;
     regs_.d2md                               = mode_default_value;
-    // rawWrite<u32>(modules_.memory()->scu_, dma_forced_stop & scu_memory_mask, 0x00000000);
-    Memory::rawWrite<u32>(modules_.memory()->scu_, dma_forced_stop & scu_memory_mask, 0x00000000);
-    // rawWrite<u32>(modules_.memory()->scu_, dma_status_register & scu_memory_mask, 0x00000000);
-    Memory::rawWrite<u32>(modules_.memory()->scu_, dma_status_register & scu_memory_mask, 0x00000000);
+    rawWrite<u32>(modules_.memory()->scu_, dma_forced_stop & scu_memory_mask, 0x00000000);
+    rawWrite<u32>(modules_.memory()->scu_, dma_status_register & scu_memory_mask, 0x00000000);
 
     // DSP
-    // rawWrite<u32>(modules_.memory()->scu_, dsp_program_control_port & scu_memory_mask, 0x00000000);
-    Memory::rawWrite<u32>(modules_.memory()->scu_, dsp_program_control_port & scu_memory_mask, 0x00000000);
-    // rawWrite<u32>(modules_.memory()->scu_, dsp_data_ram_address_port & scu_memory_mask, 0x00000000);
-    Memory::rawWrite<u32>(modules_.memory()->scu_, dsp_data_ram_address_port & scu_memory_mask, 0x00000000);
-    // rawWrite<u32>(modules_.memory()->scu_, dsp_data_ram_data_port & scu_memory_mask, 0x00000000);
-    Memory::rawWrite<u32>(modules_.memory()->scu_, dsp_data_ram_data_port & scu_memory_mask, 0x00000000);
+    rawWrite<u32>(modules_.memory()->scu_, dsp_program_control_port & scu_memory_mask, 0x00000000);
+    rawWrite<u32>(modules_.memory()->scu_, dsp_data_ram_address_port & scu_memory_mask, 0x00000000);
+    rawWrite<u32>(modules_.memory()->scu_, dsp_data_ram_data_port & scu_memory_mask, 0x00000000);
 
     // Timer
     regs_.t1md = {};
@@ -674,14 +669,14 @@ void Scu::initializeRegisters() {
     regs_.ist                                   = {};
 
     // A-BUS control
-    Memory::rawWrite<u32>(modules_.memory()->scu_, a_bus_interrupt_acknowledge & scu_memory_mask, 0x00000000);
-    Memory::rawWrite<u32>(modules_.memory()->scu_, a_bus_set_register & scu_memory_mask, 0x00000000);
-    Memory::rawWrite<u32>(modules_.memory()->scu_, (a_bus_set_register + 4) & scu_memory_mask, 0x00000000);
-    Memory::rawWrite<u32>(modules_.memory()->scu_, a_bus_refresh_register & scu_memory_mask, 0x00000000);
+    rawWrite<u32>(modules_.memory()->scu_, a_bus_interrupt_acknowledge & scu_memory_mask, 0x00000000);
+    rawWrite<u32>(modules_.memory()->scu_, a_bus_set_register & scu_memory_mask, 0x00000000);
+    rawWrite<u32>(modules_.memory()->scu_, (a_bus_set_register + 4) & scu_memory_mask, 0x00000000);
+    rawWrite<u32>(modules_.memory()->scu_, a_bus_refresh_register & scu_memory_mask, 0x00000000);
 
     // SCU control
-    Memory::rawWrite<u32>(modules_.memory()->scu_, scu_sdram_select_register & scu_memory_mask, 0x00000000);
-    Memory::rawWrite<u32>(modules_.memory()->scu_, scu_version_register & scu_memory_mask, 0x00000000);
+    rawWrite<u32>(modules_.memory()->scu_, scu_sdram_select_register & scu_memory_mask, 0x00000000);
+    rawWrite<u32>(modules_.memory()->scu_, scu_version_register & scu_memory_mask, 0x00000000);
 }
 
 auto Scu::configureDmaTransfer(const DmaLevel level) -> DmaConfiguration {

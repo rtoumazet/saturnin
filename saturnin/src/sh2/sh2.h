@@ -59,8 +59,8 @@ using saturnin::core::Logger;
 // using saturnin::core::Memory;
 using saturnin::core::Scu;
 
-// using saturnin::core::rawRead;
-// using saturnin::core::rawWrite;
+using saturnin::core::rawRead;
+using saturnin::core::rawWrite;
 
 constexpr auto max_interrupt_number     = u8{10};
 constexpr auto max_interrupt_level      = u8{16};

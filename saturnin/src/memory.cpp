@@ -551,7 +551,7 @@ auto listAvailableStvGames() -> std::vector<StvGameConfiguration> {
 auto defaultStvGame() -> StvGameConfiguration { return StvGameConfiguration{.game_name = tr("No game selected")}; }
 auto defaultBinaryFile() -> BinaryFileConfiguration { return BinaryFileConfiguration{}; }
 
-inline auto isMasterSh2InOperation(const Memory& m) -> bool { return (m.sh2_in_operation_ == sh2::Sh2Type::master); }
+auto isMasterSh2InOperation(const Memory& m) -> bool { return (m.sh2_in_operation_ == sh2::Sh2Type::master); }
 
 inline auto getDirectAddress(AddressRange ar) -> AddressRange {
     constexpr auto direct_address_offset = u32{0x20000000};

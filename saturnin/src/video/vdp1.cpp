@@ -298,4 +298,6 @@ void Vdp1::write16(const u32 addr, const u16 data) {
     }
 }
 
+auto Vdp1::vdp2() const -> const Vdp2* { return modules_.vdp2(); }
+
 } // namespace saturnin::video

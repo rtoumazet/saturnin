@@ -38,17 +38,12 @@
 #include <saturnin/src/video/vdp1.h>
 #include <saturnin/src/video/vdp2/vdp2.h>
 
-namespace cdrom = saturnin::cdrom;
-namespace video = saturnin::video;
-namespace sh2   = saturnin::sh2;
-
 namespace saturnin::core {
 
 using cdrom::Cdrom;
 using sh2::Sh2;
 using sh2::Sh2Type;
 using sound::Scsp;
-using video::BaseRenderingPart;
 using video::Opengl;
 using video::Vdp1;
 using video::Vdp2;

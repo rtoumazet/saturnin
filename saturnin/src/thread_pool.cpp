@@ -22,7 +22,7 @@
 
 namespace saturnin::core {
 
-BS::thread_pool ThreadPool::pool_;
+BS::light_thread_pool ThreadPool::pool_;
 
 // static //
 auto ThreadPool::initialize() -> bool {

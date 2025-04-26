@@ -26,9 +26,7 @@
 
 namespace libcfg = libconfig;
 namespace fs     = std::filesystem;
-namespace cdrom  = saturnin::cdrom;
 namespace uti    = saturnin::utilities;
-namespace sh2    = saturnin::sh2;
 
 namespace saturnin::core {
 

@@ -33,13 +33,10 @@
 #include <saturnin/src/video/vdp1_registers.h>
 #include <saturnin/src/video/vdp1_part.h> // Vdp1Part
 
-// Forward declarations
-// namespace saturnin::core {
-// class EmulatorContext;
-// class EmulatorModules;
-//} // namespace saturnin::core
-
 namespace saturnin::video {
+
+// Forward declaration
+class Vdp2;
 
 using saturnin::core::EmulatorContext;
 using saturnin::core::EmulatorModules;
@@ -52,7 +49,7 @@ class Vdp1 {
     //@{
     // Constructors / Destructors
     Vdp1() = delete;
-    explicit Vdp1(EmulatorContext* ec) : modules_(ec){};
+    explicit Vdp1(EmulatorContext* ec) : modules_(ec) {};
     Vdp1(const Vdp1&)                      = delete;
     Vdp1(Vdp1&&)                           = delete;
     auto operator=(const Vdp1&) & -> Vdp1& = delete;
@@ -104,18 +101,8 @@ class Vdp1 {
         return read16(addr);
     }
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn auto Vdp1::vdp2() const -> const Vdp2*
-    ///
-    /// \brief  Pointer to the VDP2 module, will be used by VDP1 parts.
-    ///
-    /// \author Runik
-    /// \date   14/05/2021
-    ///
-    /// \returns    A const pointer to Vdp2.
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    auto vdp2() const -> const Vdp2* { return modules_.vdp2(); }
+    // Pointer to the VDP2 module, will be used by VDP1 parts.
+    auto vdp2() const -> const Vdp2*;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn auto Vdp1::getColorRamAddressOffset() -> u16

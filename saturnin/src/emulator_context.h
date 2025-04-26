@@ -35,24 +35,24 @@
 
 struct GLFWwindow;
 
-namespace sh2 {
+namespace saturnin::sh2 {
 class Sh2;
 enum class Sh2Type;
-} // namespace sh2
+} // namespace saturnin::sh2
 
-namespace sound {
+namespace saturnin::sound {
 class Scsp;
 }
 
-namespace cdrom {
+namespace saturnin::cdrom {
 class Cdrom;
 }
 
-namespace video {
+namespace saturnin::video {
 class Vdp1;
 class Vdp2;
 class Opengl;
-} // namespace video
+} // namespace saturnin::video
 
 namespace saturnin::core {
 

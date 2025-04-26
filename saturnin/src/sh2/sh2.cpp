@@ -726,9 +726,9 @@ void Sh2::purgeCache() {
     constexpr auto cache_purge_mask = u32{0xFFFFFC0B};
     for (u8 i = 0; i < cache_lines_number; ++i) {
         // :WARNING: following code is untested
-        auto data = core::Memory::rawRead<u32>(this->cache_addresses_, i);
+        auto data = core::rawRead<u32>(this->cache_addresses_, i);
         data &= cache_purge_mask;
-        core::Memory::rawWrite<u32>(this->cache_addresses_, i, data);
+        core::rawWrite<u32>(this->cache_addresses_, i, data);
     }
 }
 

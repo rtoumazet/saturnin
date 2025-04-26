@@ -40,10 +40,7 @@
 #include <saturnin/src/video/vdp2/vdp2.h> // TvStandard
 
 namespace libcfg = libconfig;
-namespace cdrom  = saturnin::cdrom;
-namespace sh2    = saturnin::sh2;
 namespace util   = saturnin::utilities;
-namespace video  = saturnin::video;
 
 namespace saturnin::core {
 

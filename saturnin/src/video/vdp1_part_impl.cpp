@@ -1,5 +1,5 @@
 //
-// vdp1_part.tpp
+// vdp1_part_impl.cpp
 // Saturnin
 //
 // Copyright (c) 2025 Renaud Toumazet
@@ -36,7 +36,7 @@ void readDotColorBank16(const EmulatorModules& modules,
                         const u8               dot) {
     constexpr auto color_bank_mask = u16{0x0FF0};
     const auto     color_address
-        = u32{cram_start_address + color_ram_offset + ((part.cmdcolr_.data() & color_bank_mask) | dot) * sizeof(T)};
+        = static_cast<u32>(cram_start_address + color_ram_offset + ((part.cmdcolr_.data() & color_bank_mask) | dot) * sizeof(T));
 
     auto color = Color(modules.memory()->read<T>(color_address));
 
@@ -49,28 +49,23 @@ void readDotColorBank16(const EmulatorModules& modules,
 };
 
 // readDotColorBank16 - explicit instanciations
-void readDotColorBank16<u8>(const EmulatorModules& modules,
-                            std::vector<u8>&       texture_data,
-                            const u16              color_ram_offset,
-                            Vdp1Part&              part,
-                            const u8               dot);
+template void readDotColorBank16<u16>(const EmulatorModules& modules,
+                                      std::vector<u8>&       texture_data,
+                                      const u16              color_ram_offset,
+                                      Vdp1Part&              part,
+                                      const u8               dot);
 
-void readDotColorBank16<u16>(const EmulatorModules& modules,
-                             std::vector<u8>&       texture_data,
-                             const u16              color_ram_offset,
-                             Vdp1Part&              part,
-                             const u8               dot);
-
-void readDotColorBank16<u32>(const EmulatorModules& modules,
-                             std::vector<u8>&       texture_data,
-                             const u16              color_ram_offset,
-                             Vdp1Part&              part,
-                             const u8               dot);
+template void readDotColorBank16<u32>(const EmulatorModules& modules,
+                                      std::vector<u8>&       texture_data,
+                                      const u16              color_ram_offset,
+                                      Vdp1Part&              part,
+                                      const u8               dot);
 
 // readDotLookUpTable16 - template definition
 template<typename T>
 void readDotLookUpTable16(const EmulatorModules& modules, std::vector<u8>& texture_data, Vdp1Part& part, const u8 dot) {
-    const auto color_address = u32{vdp1_vram_start_address + part.cmdcolr_.data() * vdp1_address_multiplier + dot * sizeof(T)};
+    const auto color_address
+        = static_cast<u32>(vdp1_vram_start_address + part.cmdcolr_.data() * vdp1_address_multiplier + dot * sizeof(T));
 
     auto color = Color(modules.memory()->read<T>(color_address));
 
@@ -82,9 +77,10 @@ void readDotLookUpTable16(const EmulatorModules& modules, std::vector<u8>& textu
     texture_data.insert(texture_data.end(), {color.r, color.g, color.b, color.a});
 };
 // readDotLookUpTable16 - explicit instanciations
-void readDotLookUpTable16<u8>(const EmulatorModules& modules, std::vector<u8>& texture_data, Vdp1Part& part, const u8 dot);
-void readDotLookUpTable16<u16>(const EmulatorModules& modules, std::vector<u8>& texture_data, Vdp1Part& part, const u8 dot);
-void readDotLookUpTable16<u32>(const EmulatorModules& modules, std::vector<u8>& texture_data, Vdp1Part& part, const u8 dot);
+template void
+    readDotLookUpTable16<u16>(const EmulatorModules& modules, std::vector<u8>& texture_data, Vdp1Part& part, const u8 dot);
+template void
+    readDotLookUpTable16<u32>(const EmulatorModules& modules, std::vector<u8>& texture_data, Vdp1Part& part, const u8 dot);
 
 // readDotColorBank64 - template definition
 template<typename T>
@@ -95,7 +91,7 @@ void readDotColorBank64(const EmulatorModules& modules,
                         const u8               dot) {
     constexpr auto color_bank_mask = u16{0x0FC0};
     const auto     color_address
-        = u32{cram_start_address + color_ram_offset + ((part.cmdcolr_.data() & color_bank_mask) | dot) * sizeof(T)};
+        = static_cast<u32>(cram_start_address + color_ram_offset + ((part.cmdcolr_.data() & color_bank_mask) | dot) * sizeof(T));
 
     auto color = Color(modules.memory()->read<T>(color_address));
 
@@ -107,21 +103,16 @@ void readDotColorBank64(const EmulatorModules& modules,
     texture_data.insert(texture_data.end(), {color.r, color.g, color.b, color.a});
 };
 // readDotColorBank64 - explicit instanciations
-void readDotColorBank64<u8>(const EmulatorModules& modules,
-                            std::vector<u8>&       texture_data,
-                            const u16              color_ram_offset,
-                            Vdp1Part&              part,
-                            const u8               dot);
-void readDotColorBank64<u16>(const EmulatorModules& modules,
-                             std::vector<u8>&       texture_data,
-                             const u16              color_ram_offset,
-                             Vdp1Part&              part,
-                             const u8               dot);
-void readDotColorBank64<u32>(const EmulatorModules& modules,
-                             std::vector<u8>&       texture_data,
-                             const u16              color_ram_offset,
-                             Vdp1Part&              part,
-                             const u8               dot);
+template void readDotColorBank64<u16>(const EmulatorModules& modules,
+                                      std::vector<u8>&       texture_data,
+                                      const u16              color_ram_offset,
+                                      Vdp1Part&              part,
+                                      const u8               dot);
+template void readDotColorBank64<u32>(const EmulatorModules& modules,
+                                      std::vector<u8>&       texture_data,
+                                      const u16              color_ram_offset,
+                                      Vdp1Part&              part,
+                                      const u8               dot);
 
 // readDotColorBank128 - template definition
 template<typename T>
@@ -132,7 +123,7 @@ void readDotColorBank128(const EmulatorModules& modules,
                          const u8               dot) {
     constexpr auto color_bank_mask = u16{0x0F80};
     const auto     color_address
-        = u32{cram_start_address + color_ram_offset + ((part.cmdcolr_.data() & color_bank_mask) | dot) * sizeof(T)};
+        = static_cast<u32>(cram_start_address + color_ram_offset + ((part.cmdcolr_.data() & color_bank_mask) | dot) * sizeof(T));
 
     auto color = Color(modules.memory()->read<T>(color_address));
 
@@ -144,21 +135,16 @@ void readDotColorBank128(const EmulatorModules& modules,
     texture_data.insert(texture_data.end(), {color.r, color.g, color.b, color.a});
 };
 // readDotColorBank128 - explicit instanciations
-void readDotColorBank128<u8>(const EmulatorModules& modules,
-                             std::vector<u8>&       texture_data,
-                             const u16              color_ram_offset,
-                             Vdp1Part&              part,
-                             const u8               dot);
-void readDotColorBank128<u16>(const EmulatorModules& modules,
-                              std::vector<u8>&       texture_data,
-                              const u16              color_ram_offset,
-                              Vdp1Part&              part,
-                              const u8               dot);
-void readDotColorBank128<u32>(const EmulatorModules& modules,
-                              std::vector<u8>&       texture_data,
-                              const u16              color_ram_offset,
-                              Vdp1Part&              part,
-                              const u8               dot);
+template void readDotColorBank128<u16>(const EmulatorModules& modules,
+                                       std::vector<u8>&       texture_data,
+                                       const u16              color_ram_offset,
+                                       Vdp1Part&              part,
+                                       const u8               dot);
+template void readDotColorBank128<u32>(const EmulatorModules& modules,
+                                       std::vector<u8>&       texture_data,
+                                       const u16              color_ram_offset,
+                                       Vdp1Part&              part,
+                                       const u8               dot);
 
 // readDotColorBank256 - template definition
 template<typename T>
@@ -169,7 +155,7 @@ void readDotColorBank256(const EmulatorModules& modules,
                          const u8               dot) {
     constexpr auto color_bank_mask = u16{0xFF00};
     const auto     color_address
-        = u32{cram_start_address + color_ram_offset + ((part.cmdcolr_.data() & color_bank_mask) | dot) * sizeof(T)};
+        = static_cast<u32>(cram_start_address + color_ram_offset + ((part.cmdcolr_.data() & color_bank_mask) | dot) * sizeof(T));
 
     auto color = Color(modules.memory()->read<T>(color_address));
 
@@ -181,21 +167,16 @@ void readDotColorBank256(const EmulatorModules& modules,
     texture_data.insert(texture_data.end(), {color.r, color.g, color.b, color.a});
 };
 // readDotColorBank256 - explicit instanciations
-void readDotColorBank256<u8>(const EmulatorModules& modules,
-                             std::vector<u8>&       texture_data,
-                             const u16              color_ram_offset,
-                             Vdp1Part&              part,
-                             const u8               dot);
-void readDotColorBank256<u16>(const EmulatorModules& modules,
-                              std::vector<u8>&       texture_data,
-                              const u16              color_ram_offset,
-                              Vdp1Part&              part,
-                              const u8               dot);
-void readDotColorBank256<u32>(const EmulatorModules& modules,
-                              std::vector<u8>&       texture_data,
-                              const u16              color_ram_offset,
-                              Vdp1Part&              part,
-                              const u8               dot);
+template void readDotColorBank256<u16>(const EmulatorModules& modules,
+                                       std::vector<u8>&       texture_data,
+                                       const u16              color_ram_offset,
+                                       Vdp1Part&              part,
+                                       const u8               dot);
+template void readDotColorBank256<u32>(const EmulatorModules& modules,
+                                       std::vector<u8>&       texture_data,
+                                       const u16              color_ram_offset,
+                                       Vdp1Part&              part,
+                                       const u8               dot);
 
 // readColorBankMode16Colors - template definition
 template<typename T>
@@ -258,21 +239,16 @@ void readColorBankMode16Colors(const EmulatorModules& modules,
     }
 }
 // readColorBankMode16Colors - explicit instanciations
-void readColorBankMode16Colors<u8>(const EmulatorModules& modules,
-                                   std::vector<u8>&       texture_data,
-                                   const u32              start_address,
-                                   const u16              color_ram_address_offset,
-                                   Vdp1Part&              part);
-void readColorBankMode16Colors<u16>(const EmulatorModules& modules,
-                                    std::vector<u8>&       texture_data,
-                                    const u32              start_address,
-                                    const u16              color_ram_address_offset,
-                                    Vdp1Part&              part);
-void readColorBankMode16Colors<u32>(const EmulatorModules& modules,
-                                    std::vector<u8>&       texture_data,
-                                    const u32              start_address,
-                                    const u16              color_ram_address_offset,
-                                    Vdp1Part&              part);
+template void readColorBankMode16Colors<u16>(const EmulatorModules& modules,
+                                             std::vector<u8>&       texture_data,
+                                             const u32              start_address,
+                                             const u16              color_ram_address_offset,
+                                             Vdp1Part&              part);
+template void readColorBankMode16Colors<u32>(const EmulatorModules& modules,
+                                             std::vector<u8>&       texture_data,
+                                             const u32              start_address,
+                                             const u16              color_ram_address_offset,
+                                             Vdp1Part&              part);
 
 // readLookUpTable16Colors - template definition
 template<typename T>
@@ -302,18 +278,14 @@ void readLookUpTable16Colors(const EmulatorModules& modules,
     }
 }
 // readLookUpTable16Colors - explicit instanciations
-void readLookUpTable16Colors<u8>(const EmulatorModules& modules,
-                                 std::vector<u8>&       texture_data,
-                                 const u32              start_address,
-                                 Vdp1Part&              part);
-void readLookUpTable16Colors<u16>(const EmulatorModules& modules,
-                                  std::vector<u8>&       texture_data,
-                                  const u32              start_address,
-                                  Vdp1Part&              part);
-void readLookUpTable16Colors<u32>(const EmulatorModules& modules,
-                                  std::vector<u8>&       texture_data,
-                                  const u32              start_address,
-                                  Vdp1Part&              part);
+template void readLookUpTable16Colors<u16>(const EmulatorModules& modules,
+                                           std::vector<u8>&       texture_data,
+                                           const u32              start_address,
+                                           Vdp1Part&              part);
+template void readLookUpTable16Colors<u32>(const EmulatorModules& modules,
+                                           std::vector<u8>&       texture_data,
+                                           const u32              start_address,
+                                           Vdp1Part&              part);
 
 // readLookUpTable16Colors - template definition
 template<typename T>
@@ -356,21 +328,16 @@ void readColorBankMode64Colors(const EmulatorModules& modules,
     }
 }
 // readColorBankMode64Colors - explicit instanciations
-void readColorBankMode64Colors<u8>(const EmulatorModules& modules,
-                                   std::vector<u8>&       texture_data,
-                                   const u32              start_address,
-                                   const u16              color_ram_address_offset,
-                                   Vdp1Part&              part);
-void readColorBankMode64Colors<u16>(const EmulatorModules& modules,
-                                    std::vector<u8>&       texture_data,
-                                    const u32              start_address,
-                                    const u16              color_ram_address_offset,
-                                    Vdp1Part&              part);
-void readColorBankMode64Colors<u32>(const EmulatorModules& modules,
-                                    std::vector<u8>&       texture_data,
-                                    const u32              start_address,
-                                    const u16              color_ram_address_offset,
-                                    Vdp1Part&              part);
+template void readColorBankMode64Colors<u16>(const EmulatorModules& modules,
+                                             std::vector<u8>&       texture_data,
+                                             const u32              start_address,
+                                             const u16              color_ram_address_offset,
+                                             Vdp1Part&              part);
+template void readColorBankMode64Colors<u32>(const EmulatorModules& modules,
+                                             std::vector<u8>&       texture_data,
+                                             const u32              start_address,
+                                             const u16              color_ram_address_offset,
+                                             Vdp1Part&              part);
 
 // readColorBankMode128Colors - template definition
 template<typename T>
@@ -413,21 +380,16 @@ void readColorBankMode128Colors(const EmulatorModules& modules,
     }
 }
 // readColorBankMode128Colors - explicit instanciations
-void readColorBankMode128Colors<u8>(const EmulatorModules& modules,
-                                    std::vector<u8>&       texture_data,
-                                    const u32              start_address,
-                                    const u16              color_ram_address_offset,
-                                    Vdp1Part&              part);
-void readColorBankMode128Colors<u16>(const EmulatorModules& modules,
-                                     std::vector<u8>&       texture_data,
-                                     const u32              start_address,
-                                     const u16              color_ram_address_offset,
-                                     Vdp1Part&              part);
-void readColorBankMode128Colors<u32>(const EmulatorModules& modules,
-                                     std::vector<u8>&       texture_data,
-                                     const u32              start_address,
-                                     const u16              color_ram_address_offset,
-                                     Vdp1Part&              part);
+template void readColorBankMode128Colors<u16>(const EmulatorModules& modules,
+                                              std::vector<u8>&       texture_data,
+                                              const u32              start_address,
+                                              const u16              color_ram_address_offset,
+                                              Vdp1Part&              part);
+template void readColorBankMode128Colors<u32>(const EmulatorModules& modules,
+                                              std::vector<u8>&       texture_data,
+                                              const u32              start_address,
+                                              const u16              color_ram_address_offset,
+                                              Vdp1Part&              part);
 
 // readColorBankMode256Colors - template definition
 template<typename T>
@@ -470,21 +432,16 @@ void readColorBankMode256Colors(const EmulatorModules& modules,
     }
 }
 // readColorBankMode256Colors - explicit instanciations
-void readColorBankMode256Colors<u8>(const EmulatorModules& modules,
-                                    std::vector<u8>&       texture_data,
-                                    const u32              start_address,
-                                    const u16              color_ram_address_offset,
-                                    Vdp1Part&              part);
-void readColorBankMode256Colors<u16>(const EmulatorModules& modules,
-                                     std::vector<u8>&       texture_data,
-                                     const u32              start_address,
-                                     const u16              color_ram_address_offset,
-                                     Vdp1Part&              part);
-void readColorBankMode256Colors<u32>(const EmulatorModules& modules,
-                                     std::vector<u8>&       texture_data,
-                                     const u32              start_address,
-                                     const u16              color_ram_address_offset,
-                                     Vdp1Part&              part);
+template void readColorBankMode256Colors<u16>(const EmulatorModules& modules,
+                                              std::vector<u8>&       texture_data,
+                                              const u32              start_address,
+                                              const u16              color_ram_address_offset,
+                                              Vdp1Part&              part);
+template void readColorBankMode256Colors<u32>(const EmulatorModules& modules,
+                                              std::vector<u8>&       texture_data,
+                                              const u32              start_address,
+                                              const u16              color_ram_address_offset,
+                                              Vdp1Part&              part);
 
 // readRgb32KColors - template definition
 template<typename T>
@@ -507,13 +464,8 @@ void readRgb32KColors(const EmulatorModules& modules, std::vector<u8>& texture_d
     }
 }
 // readRgb32KColors - explicit instanciations
-void readRgb32KColors<u8>(const EmulatorModules& modules, std::vector<u8>& texture_data, const u32 start_address, Vdp1Part& part);
-void readRgb32KColors<u16>(const EmulatorModules& modules,
-                           std::vector<u8>&       texture_data,
-                           const u32              start_address,
-                           Vdp1Part&              part);
-void readRgb32KColors<u32>(const EmulatorModules& modules,
-                           std::vector<u8>&       texture_data,
-                           const u32              start_address,
-                           Vdp1Part&              part);
+template void
+    readRgb32KColors<u16>(const EmulatorModules& modules, std::vector<u8>& texture_data, const u32 start_address, Vdp1Part& part);
+template void
+    readRgb32KColors<u32>(const EmulatorModules& modules, std::vector<u8>& texture_data, const u32 start_address, Vdp1Part& part);
 } // namespace saturnin::video
