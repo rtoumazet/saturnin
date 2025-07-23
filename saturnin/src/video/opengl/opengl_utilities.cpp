@@ -230,17 +230,17 @@ auto initializeVao() -> std::tuple<u32, u32> {
 
     // gouraud color pointer
     offset += GLintptr(sizeof(VertexColor));
-    glVertexAttribPointer(3, 3, GLenum::GL_BYTE, GL_TRUE, sizeof(Vertex), std::bit_cast<GLvoid*>(offset));
+    glVertexAttribPointer(3, 4, GLenum::GL_BYTE, GL_TRUE, sizeof(Vertex), std::bit_cast<GLvoid*>(offset));
     glEnableVertexAttribArray(3);
 
     // color offset pointer R sign
     offset += GLintptr(sizeof(Gouraud));
-    glVertexAttribPointer(4, 3, GLenum::GL_UNSIGNED_BYTE, GL_FALSE, sizeof(Vertex), std::bit_cast<GLvoid*>(offset));
+    glVertexAttribPointer(4, 4, GLenum::GL_UNSIGNED_BYTE, GL_FALSE, sizeof(Vertex), std::bit_cast<GLvoid*>(offset));
     glEnableVertexAttribArray(4);
 
     // color offset pointer R value
-    offset += GLintptr(sizeof(std::array<u8, 3>));
-    glVertexAttribPointer(5, 3, GLenum::GL_UNSIGNED_BYTE, GL_TRUE, sizeof(Vertex), std::bit_cast<GLvoid*>(offset));
+    offset += GLintptr(sizeof(std::array<u8, 4>));
+    glVertexAttribPointer(5, 4, GLenum::GL_UNSIGNED_BYTE, GL_TRUE, sizeof(Vertex), std::bit_cast<GLvoid*>(offset));
     glEnableVertexAttribArray(5);
 
     glBindVertexArray(0);

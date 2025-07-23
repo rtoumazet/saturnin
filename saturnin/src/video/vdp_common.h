@@ -101,6 +101,7 @@ struct Gouraud {
     s8 r = 0;
     s8 g = 0;
     s8 b = 0;
+    s8 p = 0;
     explicit Gouraud(const u16 raw_data) :
         r((raw_data & 0x1F) - 0x10),
         g(((raw_data & 0x3E0) >> 5) - 0x10),
@@ -118,8 +119,8 @@ struct Gouraud {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 struct ColorOffset {
-    std::array<u8, 3> signs;
-    std::array<u8, 3> values;
+    std::array<u8, 4> signs;
+    std::array<u8, 4> values;
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
