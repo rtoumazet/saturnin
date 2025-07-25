@@ -35,16 +35,16 @@
 namespace is = saturnin::core::interrupt_source;
 
 // Forward declarations
-namespace saturnin::sh2 {
-class Sh2;
-enum class Sh2Type;
-} // namespace saturnin::sh2
+// namespace saturnin::sh2 {
+// class Sh2;
+// enum class Sh2Type;
+//} // namespace saturnin::sh2
 
 namespace saturnin::core {
 
 // Forward declarations
-class Memory;
-class EmulatorContext;
+// class Memory;
+// class EmulatorContext;
 
 constexpr auto indirect_dma_end_code = u32{0x80000000};
 constexpr auto program_ram_size      = u16{256 * 32 * 4}; ///< 256 words of 32 bits.
@@ -544,7 +544,7 @@ class Scu {
     std::array<u8, program_ram_size>                           program_ram_; ///< DSP Program RAM.
     std::array<std::array<u8, data_ram_size>, data_ram_number> data_ram_;    ///< DSP Data RAM.
 
-    ScuRegs regs_;                                                           ///< Scu memory registers.
+    ScuRegs regs_; ///< Scu memory registers.
 };
 
 } // namespace saturnin::core

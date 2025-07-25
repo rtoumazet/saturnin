@@ -221,7 +221,7 @@ void call_{0:x}_{1:x}_{2:x}_{3:x}(Sh2& s){{
 }
 
 template<FunctionType Type>
-auto generateFunctions(std::string_view [[maybe_unused]] func_name,
+auto generateFunctions([[maybe_unused]] std::string_view        func_name,
                        [[maybe_unused]] GeneratedArray&         arr,
                        [[maybe_unused]] const std::vector<int>& args) -> std::string {
     return std::string{};

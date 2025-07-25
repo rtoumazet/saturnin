@@ -172,12 +172,12 @@ class Bits {
     constexpr auto operator-(const MaskedType& mskd) -> BitsType { return BitsType(bits_ & ~mskd.bits_); }
 
     auto operator-=(const BitsType other) -> BitsType {
-        bits_ = bits & ~other.bits_;
+        bits_ = bits() & ~other.bits_;
         return *this;
     }
 
     constexpr auto operator-=(const MaskedType& mskd) -> BitsType {
-        bits_ = bits & ~mskd.bits_;
+        bits_ = bits() & ~mskd.bits_;
         return *this;
     }
 
@@ -274,7 +274,7 @@ class Masked {
 
     auto operator-=(const MaskedType other) -> MaskedType {
         mask_ = mask_ & ~other.mask_;
-        bits_ = bits & ~other.bits_;
+        bits_ = bits() & ~other.bits_;
         return *this;
     }
 

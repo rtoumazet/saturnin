@@ -48,7 +48,14 @@ auto main(int argc, char* argv[]) -> int {
         Log::shutdown();
         ThreadPool::shutdown();
         std::exit(EXIT_SUCCESS);
-    } catch (const std::runtime_error& e) { Log::error(Logger::generic, e.what()); } catch (const std::exception& e) {
+    } catch (const std::runtime_error& e) {
         Log::error(Logger::generic, e.what());
-    } catch (...) { Log::error(Logger::generic, tr("Uncaught exception !")); }
+        std::exit(EXIT_FAILURE);
+    } catch (const std::exception& e) {
+        Log::error(Logger::generic, e.what());
+        std::exit(EXIT_FAILURE);
+    } catch (...) {
+        Log::error(Logger::generic, tr("Uncaught exception !"));
+        std::exit(EXIT_FAILURE);
+    }
 };

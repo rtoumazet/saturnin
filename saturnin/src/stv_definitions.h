@@ -32,76 +32,76 @@
 namespace saturnin::core {
 
 enum class Rom_stv : u8 {
-    none                     = 0,  ///< None
-    astra_superstars         = 1,  ///< Astra Superstars (IC13).
-    baku_baku_animals        = 2,  ///< Baku Baku Animal (IC13)
-    columns_97               = 3,  ///< Columns 97 (IC13)
-    cotton_2                 = 4,  ///< Cotton 2
-    cotton_boomerang         = 5,  ///< Cotton Boomerang
-    decathlete               = 6,  ///< Decathlete (IC13)
-    dynamite_deka            = 7,  ///< Dynamite Deka (IC13)
-    ejihon_tantei_jimusyo    = 8,  ///< Ejihon Tantei Jimusyo (IC13)
-    elan_doree               = 9,  ///< Fighting Dragon Legend Elan Doree
-    final_fight_revenge      = 10, ///< Final Fight Revenge
-    funky_heads_boxers       = 11, ///< Funky Head Boxers (IC13)
-    find_love                = 12, ///< Find Love (IC13) - Must be set to 1P to boot
-    final_arch               = 13, ///< Final Arch  (IC13)
-    golden_axe_the_duel      = 14, ///< Golden Axe - The Duel (IC13)
-    guardian_force           = 15, ///< Guardian Force
-    power_instinct_3         = 16, ///< Power Instinct 3 - Groove On Fight
-    intro_don_don            = 17, ///< Karaoke Quiz Intro Don Don! (IC13)
-    kiwame_s                 = 18, ///< Pro Mahjong Kiwame S (IC13) - Must be set to 1P to boot
-    maru_chan_de_goo         = 19, ///< Maru-Chan de Goo! (IC13)
-    virtual_mahjong_2        = 20, ///< Virtual Mahjong 2 - My Fair Lady - Must be set to 1P to boot
-    peeble_beach             = 21, ///< Pebble Beach - The Great Shot (IC13)
-    purikura_daisakusen      = 22, ///< Purikura Daisakusen
-    puyo_puyo_sun            = 23, ///< Puyo Puyo Sun (IC13)
-    sando_r                  = 24, ///< Sando-R (IC13)
-    taisen_tanto_r           = 25, ///< Taisen Tanto-R 'Sasshissu! (IC13)
-    shienryu                 = 26, ///< Shienryu
-    soukyugurentai           = 27, ///< Soukyugurentai / Terra Diver (IC13)
-    steep_slope_sliders      = 28, ///< Steep Slope Sliders (IC13)
-    virtua_fighter_kids      = 29, ///< Virtua Fighter Kids (IC13)
-    virtua_fighter_remix     = 30, ///< Virtua Fighter Remix (IC13)
-    virtual_mahjong          = 31, ///< Virtual Mahjong - Must be set to 1P to boot
-    winter_heat              = 32, ///< Winter Heat (IC13)
-    zen_nippon_pro_wrestling = 33, ///< Zen Nippon Pro-Wrestling Featuring Virtua (IC13)
-    hanagumi_taisen_columns  = 34, ///< Hanagumi Taisen Columns - Sakura Wars
-    radiant_silvergun        = 35, ///< Radiant Silvergun
-    danchi_de_hanafuda       = 36, ///< Danchi de Hanafuda
-    othello_shiyouyo         = 37, ///< Othello Shiyouyo
-    shanghai                 = 38, ///< Shanghai - The Great Wall
-    super_major_league       = 39, ///< Super Major League (IC13)
-    tecmo_world_cup_98       = 40, ///< Tecmo World Cup '98 (IC13)
-    suikoenbu                = 41, ///< Suikoenbu (IC13)
-    sport_fishing_2          = 42, ///< Sport Fishing 2 (IC13)
-    batman_forever           = 43, ///< Batman Forever (extra sound board)
-    die_hard_arcade          = 44, ///< Die Hard Arcade
-    critter_crusher          = 45, ///< Critter Crusher
-    danshi_de_quiz           = 46, ///< Danchi de Quiz Okusan Yontaku Desuyo!
-    daejeon_sanjeon_sujeon   = 47, ///< DaeJeon! SanJeon SuJeon
-    sea_bass_fishing         = 48, ///< Sea Bass Fishing
-    treasure_hunt            = 49, ///< Puzzle & Action: Treasure Hunt
-    bomuleul_chajara         = 50, ///< Puzzle & Action: BoMulEul Chajara
-    stress_busters           = 51, ///< Stress Busters
-    name_club_3              = 52, ///< Name Club Ver.3
-    print_club_2             = 53, ///< Print Club 2
-    print_club_2_vol_3       = 54, ///< Print Club 2 Vol. 3
-    print_club_pokemon_b     = 55, ///< Print Club Pokemon B
-    decathlete_alt           = 56, ///< Decathlete alternate version
-    magical_zunou_power      = 57, ///< Magical Zunou Power
-    technical_bowling        = 58, ///< Technical Bowling
-    microman_battle_charge   = 59, ///< Microman Battle Charge
-    sport_fishing_2_j        = 60, ///< Sport Fishing 2 (J)
-    mausuke_no_ojama         = 61  ///< Mausuke no Ojama the World
+    none                     = 0,  // None
+    astra_superstars         = 1,  // Astra Superstars (IC13).
+    baku_baku_animals        = 2,  // Baku Baku Animal (IC13)
+    columns_97               = 3,  // Columns 97 (IC13)
+    cotton_2                 = 4,  // Cotton 2
+    cotton_boomerang         = 5,  // Cotton Boomerang
+    decathlete               = 6,  // Decathlete (IC13)
+    dynamite_deka            = 7,  // Dynamite Deka (IC13)
+    ejihon_tantei_jimusyo    = 8,  // Ejihon Tantei Jimusyo (IC13)
+    elan_doree               = 9,  // Fighting Dragon Legend Elan Doree
+    final_fight_revenge      = 10, // Final Fight Revenge
+    funky_heads_boxers       = 11, // Funky Head Boxers (IC13)
+    find_love                = 12, // Find Love (IC13) - Must be set to 1P to boot
+    final_arch               = 13, // Final Arch  (IC13)
+    golden_axe_the_duel      = 14, // Golden Axe - The Duel (IC13)
+    guardian_force           = 15, // Guardian Force
+    power_instinct_3         = 16, // Power Instinct 3 - Groove On Fight
+    intro_don_don            = 17, // Karaoke Quiz Intro Don Don! (IC13)
+    kiwame_s                 = 18, // Pro Mahjong Kiwame S (IC13) - Must be set to 1P to boot
+    maru_chan_de_goo         = 19, // Maru-Chan de Goo! (IC13)
+    virtual_mahjong_2        = 20, // Virtual Mahjong 2 - My Fair Lady - Must be set to 1P to boot
+    peeble_beach             = 21, // Pebble Beach - The Great Shot (IC13)
+    purikura_daisakusen      = 22, // Purikura Daisakusen
+    puyo_puyo_sun            = 23, // Puyo Puyo Sun (IC13)
+    sando_r                  = 24, // Sando-R (IC13)
+    taisen_tanto_r           = 25, // Taisen Tanto-R 'Sasshissu! (IC13)
+    shienryu                 = 26, // Shienryu
+    soukyugurentai           = 27, // Soukyugurentai / Terra Diver (IC13)
+    steep_slope_sliders      = 28, // Steep Slope Sliders (IC13)
+    virtua_fighter_kids      = 29, // Virtua Fighter Kids (IC13)
+    virtua_fighter_remix     = 30, // Virtua Fighter Remix (IC13)
+    virtual_mahjong          = 31, // Virtual Mahjong - Must be set to 1P to boot
+    winter_heat              = 32, // Winter Heat (IC13)
+    zen_nippon_pro_wrestling = 33, // Zen Nippon Pro-Wrestling Featuring Virtua (IC13)
+    hanagumi_taisen_columns  = 34, // Hanagumi Taisen Columns - Sakura Wars
+    radiant_silvergun        = 35, // Radiant Silvergun
+    danchi_de_hanafuda       = 36, // Danchi de Hanafuda
+    othello_shiyouyo         = 37, // Othello Shiyouyo
+    shanghai                 = 38, // Shanghai - The Great Wall
+    super_major_league       = 39, // Super Major League (IC13)
+    tecmo_world_cup_98       = 40, // Tecmo World Cup '98 (IC13)
+    suikoenbu                = 41, // Suikoenbu (IC13)
+    sport_fishing_2          = 42, // Sport Fishing 2 (IC13)
+    batman_forever           = 43, // Batman Forever (extra sound board)
+    die_hard_arcade          = 44, // Die Hard Arcade
+    critter_crusher          = 45, // Critter Crusher
+    danshi_de_quiz           = 46, // Danchi de Quiz Okusan Yontaku Desuyo!
+    daejeon_sanjeon_sujeon   = 47, // DaeJeon! SanJeon SuJeon
+    sea_bass_fishing         = 48, // Sea Bass Fishing
+    treasure_hunt            = 49, // Puzzle & Action: Treasure Hunt
+    bomuleul_chajara         = 50, // Puzzle & Action: BoMulEul Chajara
+    stress_busters           = 51, // Stress Busters
+    name_club_3              = 52, // Name Club Ver.3
+    print_club_2             = 53, // Print Club 2
+    print_club_2_vol_3       = 54, // Print Club 2 Vol. 3
+    print_club_pokemon_b     = 55, // Print Club Pokemon B
+    decathlete_alt           = 56, // Decathlete alternate version
+    magical_zunou_power      = 57, // Magical Zunou Power
+    technical_bowling        = 58, // Technical Bowling
+    microman_battle_charge   = 59, // Microman Battle Charge
+    sport_fishing_2_j        = 60, // Sport Fishing 2 (J)
+    mausuke_no_ojama         = 61  // Mausuke no Ojama the World
 };
 
-using Stv_rom_data = struct { ///< ST-V ROM data structure
-    std::string name;         ///< rom name
-    Rom_stv     id;           ///< identifiant
-    std::string zip;          ///< zip name
-    std::string parent;       ///< zip parent (if any)
-    std::string version;      ///< version
+using Stv_rom_data = struct { // ST-V ROM data structure
+    std::string name;         // rom name
+    Rom_stv     id;           // identifiant
+    std::string zip;          // zip name
+    std::string parent;       // zip parent (if any)
+    std::string version;      // version
 };
 
 /// ST-V roms list array
@@ -169,8 +169,7 @@ static const auto stv_rom_list = std::array<Stv_rom_data, stv_rom_list_size>
     { "Technical Bowling",                         Rom_stv::technical_bowling,       "techbowl" ,""         ,"J         \n19971212  \nV1.000" },
     { "Microman Battle Charge",                    Rom_stv::microman_battle_charge,  "micrombc" ,""         ,"J         \n19990326  \nV1.000" },
     { "Sport Fishing 2 (J)",                       Rom_stv::sport_fishing_2_j,       "sfish2j"  ,"sfish2"   ,"J         \n19951201  \nV1.100" },
-    { "Mausuke no Ojama the World",                Rom_stv::mausuke_no_ojama,        "mausuke"  ,""         ,"J         \n19960314  \nV1.000" }
-    // clang-format on
-}};
+    { "Mausuke no Ojama the World",                Rom_stv::mausuke_no_ojama,        "mausuke"  ,""         ,"J         \n19960314  \nV1.000" } // clang-format on
+    }};
 
 } // namespace saturnin::core

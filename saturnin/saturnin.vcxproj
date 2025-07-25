@@ -230,6 +230,7 @@
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <ShowIncludes>false</ShowIncludes>
       <PrecompiledHeader>Use</PrecompiledHeader>
+      <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link />
     <Link>
@@ -251,6 +252,7 @@
       <ShowIncludes>false</ShowIncludes>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
+      <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link />
     <Link>
@@ -362,6 +364,14 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='DebugFast|x64'">Use</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="src\emulator_modules.cpp" />
+    <ClCompile Include="src\memory_impl.cpp" />
+    <ClCompile Include="src\video\opengl\opengl.cpp" />
+    <ClCompile Include="src\video\vdp1_part_impl.cpp" />
+    <ClCompile Include="src\video\vdp2\vdp2_cache.cpp" />
+    <ClCompile Include="src\video\vdp2\vdp2_cycle_patterns.cpp" />
+    <ClCompile Include="src\video\vdp2\vdp2_display.cpp" />
+    <ClCompile Include="src\video\vdp2\vdp2_memory_access.cpp" />
+    <ClCompile Include="src\video\vdp2\vdp2_pattern_name_data.cpp" />
     <ClInclude Include="src\bit_register.h" />
     <ClInclude Include="src\exceptions.h" />
     <ClCompile Include="src\sh2\fast_interpreter\opcodes_generator.cpp" />
@@ -371,10 +381,15 @@
     <ClCompile Include="src\tests.cpp" />
     <ClCompile Include="src\thread_pool.cpp" />
     <ClCompile Include="src\timer.cpp" />
+    <ClCompile Include="src\video\opengl\opengl_render.cpp" />
+    <ClCompile Include="src\video\opengl\opengl_shaders.cpp" />
+    <ClCompile Include="src\video\opengl\opengl_texturing.cpp" />
+    <ClCompile Include="src\video\opengl\opengl_utilities.cpp" />
     <ClCompile Include="src\video\texture.cpp" />
     <ClCompile Include="src\video\vdp1_part.cpp" />
-    <ClCompile Include="src\video\vdp2_debug.cpp" />
-    <ClCompile Include="src\video\vdp2_part.cpp" />
+    <ClCompile Include="src\video\vdp2\vdp2.cpp" />
+    <ClCompile Include="src\video\vdp2\vdp2_debug.cpp" />
+    <ClCompile Include="src\video\vdp2\vdp2_part.cpp" />
     <ClInclude Include="lib\imgui\imfilebrowser.h" />
     <ClInclude Include="lib\musashi\m68k.h" />
     <ClInclude Include="lib\musashi\m68kconf.h" />
@@ -433,21 +448,17 @@
     <ClCompile Include="src\sh2\basic_interpreter\sh2_instructions.cpp" />
     <ClCompile Include="src\smpc.cpp" />
     <ClCompile Include="src\utilities.cpp" />
-    <ClCompile Include="src\video\base_rendering_part.cpp" />
     <ClCompile Include="src\video\gui.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='DebugFast|x64'">Use</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="src\video\imgui_wrapper.cpp" />
-    <ClCompile Include="src\video\opengl.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='DebugFast|x64'">Use</PrecompiledHeader>
-    </ClCompile>
     <ClCompile Include="src\video\vdp1.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='DebugFast|x64'">Use</PrecompiledHeader>
     </ClCompile>
     <ClInclude Include="src\emulator_modules.h" />
+    <ClInclude Include="src\memory_constants.h" />
     <ClInclude Include="src\resource.hpp" />
     <ClInclude Include="src\resource_holder.hpp" />
     <ClInclude Include="src\scu.h" />
@@ -459,14 +470,18 @@
     <ClInclude Include="src\tests.h" />
     <ClInclude Include="src\thread_pool.h" />
     <ClInclude Include="src\timer.h" />
-    <ClInclude Include="src\video\base_rendering_part.h" />
+    <ClInclude Include="src\video\opengl\opengl.h" />
+    <ClInclude Include="src\video\opengl\opengl_common.h" />
+    <ClInclude Include="src\video\opengl\opengl_render.h" />
+    <ClInclude Include="src\video\opengl\opengl_shaders.h" />
+    <ClInclude Include="src\video\opengl\opengl_texturing.h" />
+    <ClInclude Include="src\video\opengl\opengl_utilities.h" />
     <ClInclude Include="src\video\texture.h" />
     <ClInclude Include="src\video\vdp1_part.h" />
     <ClInclude Include="src\video\vdp1_registers.h" />
-    <ClCompile Include="src\video\vdp2.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='DebugFast|x64'">Use</PrecompiledHeader>
-    </ClCompile>
+    <ClInclude Include="src\video\vdp2\vdp2.h" />
+    <ClInclude Include="src\video\vdp2\vdp2_part.h" />
+    <ClInclude Include="src\video\vdp2\vdp2_registers.h" />
     <ClInclude Include="src\video\vdp_common.h" />
   </ItemGroup>
   <ItemGroup>
@@ -500,11 +515,7 @@
     <ClInclude Include="src\utilities.h" />
     <ClInclude Include="src\video\gui.h" />
     <ClInclude Include="src\video\imgui_wrapper.h" />
-    <ClInclude Include="src\video\opengl.h" />
     <ClInclude Include="src\video\vdp1.h" />
-    <ClInclude Include="src\video\vdp2.h" />
-    <ClInclude Include="src\video\vdp2_part.h" />
-    <ClInclude Include="src\video\vdp2_registers.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="src\sh2\fast_interpreter\sh2_opcodes.inc" />

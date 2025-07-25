@@ -26,7 +26,7 @@
 #pragma once
 
 #include <saturnin/src/emulator_defs.h>
-#include <saturnin/src/video/base_rendering_part.h>
+#include <saturnin/src/video/vdp_common.h>
 
 namespace saturnin::video {
 
@@ -41,7 +41,7 @@ struct PatternNameData;
 /// \date   18/03/2021
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class Vdp2Part final : public BaseRenderingPart {
+class Vdp2Part {
   public:
     ///@{
     /// Constructors / Destructors
@@ -50,24 +50,24 @@ class Vdp2Part final : public BaseRenderingPart {
              const ScreenPos&       pos,
              const size_t           texture_key,
              const u8               priority,
-             const ColorF&          color_offset);
-    Vdp2Part(size_t        texture_key,
-             const u16     texture_width,
-             const u16     texture_height,
-             const u8      priority,
-             const ColorF& color_offset); // Constructor for bitmaps
+             const ColorOffset&     color_offset,
+             const u32              linked_plane_address);
+    Vdp2Part(size_t             texture_key,
+             const u16          texture_width,
+             const u16          texture_height,
+             const u8           priority,
+             const ColorOffset& color_offset,
+             const VdpType      vdp_type); // Constructor for bitmaps and planes
+
     Vdp2Part(const Vdp2Part&)                      = default;
     Vdp2Part(Vdp2Part&&)                           = default;
     auto operator=(const Vdp2Part&) & -> Vdp2Part& = default;
     auto operator=(Vdp2Part&&) & -> Vdp2Part&      = default;
-    ~Vdp2Part() override                           = default;
+    ~Vdp2Part()                                    = default;
     ///@}
 
-  private:
-    ScreenPos scroll_screen_pos_{};       ///< Position in the scroll screen.
-    u16       character_number_{};        ///< The character number.
-    u16       palette_number_{};          ///< The palette number.
-    bool      is_horizontally_flipped_{}; ///< True if the part is horizontally flipped.
-    bool      is_vertically_flipped_{};   ///< True if the part is vertically flipped.
+    CommonVdpData common_vdp_data_;        ///< Data shared between different VDP parts.
+    ScreenPos     scroll_screen_pos_{};    ///< Position in the scroll screen.
+    u32           linked_plane_address_{}; ///< Address of the linked plane, used to generate the plane texture while rendering.
 };
 } // namespace saturnin::video

@@ -262,8 +262,8 @@ struct Vdp2Regs {
         GENERATE_BIT_WITH_ENUM(vreso, 4, 0b11, VerticalResolution);    ///< Defines VRESOx bit.
         GENERATE_BIT_WITH_ENUM(hreso, 0, 0b111, HorizontalResolution); ///< Defines HRESOx bit.
 
-        static constexpr auto lo_byte_pos = PosType(0);                ///< Defines the range of the upper 8 bits of the register.
-        static constexpr auto hi_byte_pos = PosType(8);                ///< Defines the range of the lower 8 bits of the register.
+        static constexpr auto lo_byte_pos = PosType(0); ///< Defines the range of the upper 8 bits of the register.
+        static constexpr auto hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
 
         static constexpr auto byte_mask = 0xFF;
         GENERATE_MASKED_RANGE("Vdp2Regs::Tvmd", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
@@ -379,8 +379,8 @@ struct Vdp2Regs {
         GENERATE_BIT_WITH_ENUM(odd, 1, 0b1, ScanFieldFlag);          ///< Scan field flag.
         GENERATE_BIT_WITH_ENUM(pal, 0, 0b1, TvStandardFlag);         ///< TV standard flag.
 
-        static constexpr auto lo_byte_pos = PosType(0);              ///< Defines the range of the upper 8 bits of the register.
-        static constexpr auto hi_byte_pos = PosType(8);              ///< Defines the range of the lower 8 bits of the register.
+        static constexpr auto lo_byte_pos = PosType(0); ///< Defines the range of the upper 8 bits of the register.
+        static constexpr auto hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
 
         static constexpr auto byte_mask = 0xFF;
         GENERATE_MASKED_RANGE("Vdp2Regs::Exten", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
@@ -414,10 +414,10 @@ struct Vdp2Regs {
 
         GENERATE_BIT_WITH_ENUM(vramsz, 15, 0b1, VramSize); ///< VRAM size.
 
-        GENERATE_BIT_WITHOUT_ENUM(ver, 0, 0b1111);         ///< Version number.
+        GENERATE_BIT_WITHOUT_ENUM(ver, 0, 0b1111); ///< Version number.
 
-        static constexpr auto lo_byte_pos = PosType(0);    ///< Defines the range of the upper 8 bits of the register.
-        static constexpr auto hi_byte_pos = PosType(8);    ///< Defines the range of the lower 8 bits of the register.
+        static constexpr auto lo_byte_pos = PosType(0); ///< Defines the range of the upper 8 bits of the register.
+        static constexpr auto hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
 
         static constexpr auto byte_mask = 0xFF;
         GENERATE_MASKED_RANGE("Vdp2Regs::Vrsize", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
@@ -608,8 +608,8 @@ struct Vdp2Regs {
         GENERATE_BIT_WITH_ENUM(t2, 4, 0b1111, VramAccessCommand);  ///< VCP2xxx bits.
         GENERATE_BIT_WITH_ENUM(t3, 0, 0b1111, VramAccessCommand);  ///< VCP3xxx bits.
 
-        static constexpr auto lo_byte_pos = PosType(0);            ///< Defines the range of the upper 8 bits of the register.
-        static constexpr auto hi_byte_pos = PosType(8);            ///< Defines the range of the lower 8 bits of the register.
+        static constexpr auto lo_byte_pos = PosType(0); ///< Defines the range of the upper 8 bits of the register.
+        static constexpr auto hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
 
         static constexpr auto byte_mask = 0xFF;
         GENERATE_MASKED_RANGE("Vdp2Regs::Cycxxl", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
@@ -638,8 +638,8 @@ struct Vdp2Regs {
         GENERATE_BIT_WITH_ENUM(t6, 4, 0b1111, VramAccessCommand);  ///< VCP6xxx bits.
         GENERATE_BIT_WITH_ENUM(t7, 0, 0b1111, VramAccessCommand);  ///< VCP7xxx bits.
 
-        static constexpr auto lo_byte_pos = PosType(0);            ///< Defines the range of the upper 8 bits of the register.
-        static constexpr auto hi_byte_pos = PosType(8);            ///< Defines the range of the lower 8 bits of the register.
+        static constexpr auto lo_byte_pos = PosType(0); ///< Defines the range of the upper 8 bits of the register.
+        static constexpr auto hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
 
         static constexpr auto byte_mask = 0xFF;
         GENERATE_MASKED_RANGE("Vdp2Regs::Cycxxu", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
@@ -933,12 +933,12 @@ struct Vdp2Regs {
     struct Bmpna {
         GENERATE_USING(Bmpna, u16);
 
-        GENERATE_BIT_WITHOUT_ENUM(n1bmpr, 13, 0b1);     ///< NBG1 bitmap special priority.
-        GENERATE_BIT_WITHOUT_ENUM(n1bmcc, 12, 0b1);     ///< NBG1 bitmap special color calculation.
-        GENERATE_BIT_WITHOUT_ENUM(n1bmpx, 8, 0b111);    ///< NBG1 bitmap palette number.
-        GENERATE_BIT_WITHOUT_ENUM(n0bmpr, 5, 0b1);      ///< NBG0 bitmap special priority.
-        GENERATE_BIT_WITHOUT_ENUM(n0bmcc, 4, 0b1);      ///< NBG0 bitmap special color calculation.
-        GENERATE_BIT_WITHOUT_ENUM(n0bmpx, 0, 0b111);    ///< NBG0 bitmap palette number.
+        GENERATE_BIT_WITHOUT_ENUM(n1bmpr, 13, 0b1);  ///< NBG1 bitmap special priority.
+        GENERATE_BIT_WITHOUT_ENUM(n1bmcc, 12, 0b1);  ///< NBG1 bitmap special color calculation.
+        GENERATE_BIT_WITHOUT_ENUM(n1bmpx, 8, 0b111); ///< NBG1 bitmap palette number.
+        GENERATE_BIT_WITHOUT_ENUM(n0bmpr, 5, 0b1);   ///< NBG0 bitmap special priority.
+        GENERATE_BIT_WITHOUT_ENUM(n0bmcc, 4, 0b1);   ///< NBG0 bitmap special color calculation.
+        GENERATE_BIT_WITHOUT_ENUM(n0bmpx, 0, 0b111); ///< NBG0 bitmap palette number.
 
         static constexpr auto lo_byte_pos = PosType(0); ///< Defines the range of the upper 8 bits of the register.
         static constexpr auto hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
@@ -962,9 +962,9 @@ struct Vdp2Regs {
     struct Bmpnb {
         GENERATE_USING(Bmpnb, u16);
 
-        GENERATE_BIT_WITHOUT_ENUM(r0bmpr, 5, 0b1);      ///< RBG0 bitmap special priority.
-        GENERATE_BIT_WITHOUT_ENUM(r0bmcc, 4, 0b1);      ///< RBG0 bitmap special color calculation.
-        GENERATE_BIT_WITHOUT_ENUM(r0bmpx, 0, 0b111);    ///< RBG0 bitmap palette number.
+        GENERATE_BIT_WITHOUT_ENUM(r0bmpr, 5, 0b1);   ///< RBG0 bitmap special priority.
+        GENERATE_BIT_WITHOUT_ENUM(r0bmcc, 4, 0b1);   ///< RBG0 bitmap special color calculation.
+        GENERATE_BIT_WITHOUT_ENUM(r0bmpx, 0, 0b111); ///< RBG0 bitmap palette number.
 
         static constexpr auto lo_byte_pos = PosType(0); ///< Defines the range of the upper 8 bits of the register.
         static constexpr auto hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
@@ -1083,8 +1083,8 @@ struct Vdp2Regs {
         GENERATE_BIT_WITH_ENUM(n1plsz, 2, 0b11, PlaneSize);         ///< NBG1 plane size.
         GENERATE_BIT_WITH_ENUM(n0plsz, 0, 0b11, PlaneSize);         ///< NBG0 plane size.
 
-        static constexpr auto lo_byte_pos = PosType(0);             ///< Defines the range of the upper 8 bits of the register.
-        static constexpr auto hi_byte_pos = PosType(8);             ///< Defines the range of the lower 8 bits of the register.
+        static constexpr auto lo_byte_pos = PosType(0); ///< Defines the range of the upper 8 bits of the register.
+        static constexpr auto hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
 
         static constexpr auto byte_mask = 0xFF;
         GENERATE_MASKED_RANGE("Vdp2Regs::Plsz", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
@@ -1105,10 +1105,10 @@ struct Vdp2Regs {
     struct Mpofn {
         GENERATE_USING(Mpofn, u16);
 
-        GENERATE_BIT_WITHOUT_ENUM(n3mp, 12, 0b111);     ///< NBG3 map offset.
-        GENERATE_BIT_WITHOUT_ENUM(n2mp, 8, 0b111);      ///< NBG2 map offset.
-        GENERATE_BIT_WITHOUT_ENUM(n1mp, 4, 0b111);      ///< NBG1 map offset.
-        GENERATE_BIT_WITHOUT_ENUM(n0mp, 0, 0b111);      ///< NBG0 map offset.
+        GENERATE_BIT_WITHOUT_ENUM(n3mp, 12, 0b111); ///< NBG3 map offset.
+        GENERATE_BIT_WITHOUT_ENUM(n2mp, 8, 0b111);  ///< NBG2 map offset.
+        GENERATE_BIT_WITHOUT_ENUM(n1mp, 4, 0b111);  ///< NBG1 map offset.
+        GENERATE_BIT_WITHOUT_ENUM(n0mp, 0, 0b111);  ///< NBG0 map offset.
 
         static constexpr auto lo_byte_pos = PosType(0); ///< Defines the range of the upper 8 bits of the register.
         static constexpr auto hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
@@ -1132,8 +1132,8 @@ struct Vdp2Regs {
     struct Mpofr {
         GENERATE_USING(Mpofr, u16);
 
-        GENERATE_BIT_WITHOUT_ENUM(rbmp, 4, 0b111);      ///< RPB map offset.
-        GENERATE_BIT_WITHOUT_ENUM(ramp, 0, 0b111);      ///< RPA map offset.
+        GENERATE_BIT_WITHOUT_ENUM(rbmp, 4, 0b111); ///< RPB map offset.
+        GENERATE_BIT_WITHOUT_ENUM(ramp, 0, 0b111); ///< RPA map offset.
 
         static constexpr auto lo_byte_pos = PosType(0); ///< Defines the range of the upper 8 bits of the register.
         static constexpr auto hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
@@ -1157,8 +1157,8 @@ struct Vdp2Regs {
     struct Mpab {
         GENERATE_USING(Mpab, u16);
 
-        GENERATE_BIT_WITHOUT_ENUM(mpa, 0, 0b111111);    ///< Plane A.
-        GENERATE_BIT_WITHOUT_ENUM(mpb, 0, 0b111111);    ///< Plane B.
+        GENERATE_BIT_WITHOUT_ENUM(mpa, 0, 0b111111); ///< Plane A.
+        GENERATE_BIT_WITHOUT_ENUM(mpb, 0, 0b111111); ///< Plane B.
 
         static constexpr auto lo_byte_pos = PosType(0); ///< Defines the range of the upper 8 bits of the register.
         static constexpr auto hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
@@ -1187,8 +1187,8 @@ struct Vdp2Regs {
     struct Mpcd {
         GENERATE_USING(Mpcd, u16);
 
-        GENERATE_BIT_WITHOUT_ENUM(mpc, 0, 0b111111);    ///< Plane C.
-        GENERATE_BIT_WITHOUT_ENUM(mpd, 0, 0b111111);    ///< Plane D.
+        GENERATE_BIT_WITHOUT_ENUM(mpc, 0, 0b111111); ///< Plane C.
+        GENERATE_BIT_WITHOUT_ENUM(mpd, 0, 0b111111); ///< Plane D.
 
         static constexpr auto lo_byte_pos = PosType(0); ///< Defines the range of the upper 8 bits of the register.
         static constexpr auto hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
@@ -1217,8 +1217,8 @@ struct Vdp2Regs {
     struct Mpef {
         GENERATE_USING(Mpef, u16);
 
-        GENERATE_BIT_WITHOUT_ENUM(mpe, 0, 0b111111);    ///< Plane E.
-        GENERATE_BIT_WITHOUT_ENUM(mpf, 0, 0b111111);    ///< Plane F.
+        GENERATE_BIT_WITHOUT_ENUM(mpe, 0, 0b111111); ///< Plane E.
+        GENERATE_BIT_WITHOUT_ENUM(mpf, 0, 0b111111); ///< Plane F.
 
         static constexpr auto lo_byte_pos = PosType(0); ///< Defines the range of the upper 8 bits of the register.
         static constexpr auto hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
@@ -1243,8 +1243,8 @@ struct Vdp2Regs {
     struct Mpgh {
         GENERATE_USING(Mpgh, u16);
 
-        GENERATE_BIT_WITHOUT_ENUM(mpg, 0, 0b111111);    ///< Plane G.
-        GENERATE_BIT_WITHOUT_ENUM(mph, 0, 0b111111);    ///< Plane H.
+        GENERATE_BIT_WITHOUT_ENUM(mpg, 0, 0b111111); ///< Plane G.
+        GENERATE_BIT_WITHOUT_ENUM(mph, 0, 0b111111); ///< Plane H.
 
         static constexpr auto lo_byte_pos = PosType(0); ///< Defines the range of the upper 8 bits of the register.
         static constexpr auto hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
@@ -1269,8 +1269,8 @@ struct Vdp2Regs {
     struct Mpij {
         GENERATE_USING(Mpij, u16);
 
-        GENERATE_BIT_WITHOUT_ENUM(mpi, 0, 0b111111);    ///< Plane I.
-        GENERATE_BIT_WITHOUT_ENUM(mpj, 0, 0b111111);    ///< Plane J.
+        GENERATE_BIT_WITHOUT_ENUM(mpi, 0, 0b111111); ///< Plane I.
+        GENERATE_BIT_WITHOUT_ENUM(mpj, 0, 0b111111); ///< Plane J.
 
         static constexpr auto lo_byte_pos = PosType(0); ///< Defines the range of the upper 8 bits of the register.
         static constexpr auto hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
@@ -1295,8 +1295,8 @@ struct Vdp2Regs {
     struct Mpkl {
         GENERATE_USING(Mpkl, u16);
 
-        GENERATE_BIT_WITHOUT_ENUM(mpk, 0, 0b111111);    ///< Plane K.
-        GENERATE_BIT_WITHOUT_ENUM(mpl, 0, 0b111111);    ///< Plane L.
+        GENERATE_BIT_WITHOUT_ENUM(mpk, 0, 0b111111); ///< Plane K.
+        GENERATE_BIT_WITHOUT_ENUM(mpl, 0, 0b111111); ///< Plane L.
 
         static constexpr auto lo_byte_pos = PosType(0); ///< Defines the range of the upper 8 bits of the register.
         static constexpr auto hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
@@ -1321,8 +1321,8 @@ struct Vdp2Regs {
     struct Mpmn {
         GENERATE_USING(Mpmn, u16);
 
-        GENERATE_BIT_WITHOUT_ENUM(mpm, 0, 0b111111);    ///< Plane M.
-        GENERATE_BIT_WITHOUT_ENUM(mpn, 0, 0b111111);    ///< Plane N.
+        GENERATE_BIT_WITHOUT_ENUM(mpm, 0, 0b111111); ///< Plane M.
+        GENERATE_BIT_WITHOUT_ENUM(mpn, 0, 0b111111); ///< Plane N.
 
         static constexpr auto lo_byte_pos = PosType(0); ///< Defines the range of the upper 8 bits of the register.
         static constexpr auto hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
@@ -1347,8 +1347,8 @@ struct Vdp2Regs {
     struct Mpop {
         GENERATE_USING(Mpop, u16);
 
-        GENERATE_BIT_WITHOUT_ENUM(mpo, 0, 0b111111);    ///< Plane O.
-        GENERATE_BIT_WITHOUT_ENUM(mpp, 0, 0b111111);    ///< Plane P.
+        GENERATE_BIT_WITHOUT_ENUM(mpo, 0, 0b111111); ///< Plane O.
+        GENERATE_BIT_WITHOUT_ENUM(mpp, 0, 0b111111); ///< Plane P.
 
         static constexpr auto lo_byte_pos = PosType(0); ///< Defines the range of the upper 8 bits of the register.
         static constexpr auto hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
@@ -1373,7 +1373,7 @@ struct Vdp2Regs {
     struct Scin {
         GENERATE_USING(Scin, u16);
 
-        GENERATE_BIT_WITHOUT_ENUM(nsci, 0, 0x7FF);      ///< Screen scroll integer part  (NxSCIx).
+        GENERATE_BIT_WITHOUT_ENUM(nsci, 0, 0x7FF); ///< Screen scroll integer part  (NxSCIx).
 
         static constexpr auto lo_byte_pos = PosType(0); ///< Defines the range of the upper 8 bits of the register.
         static constexpr auto hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
@@ -1404,7 +1404,7 @@ struct Vdp2Regs {
     struct Scdn {
         GENERATE_USING(Scdn, u16);
 
-        GENERATE_BIT_WITHOUT_ENUM(nscd, 8, 0xFF);       ///< Screen scroll integer part  (NxSCIx).
+        GENERATE_BIT_WITHOUT_ENUM(nscd, 8, 0xFF); ///< Screen scroll integer part  (NxSCIx).
 
         static constexpr auto lo_byte_pos = PosType(0); ///< Defines the range of the upper 8 bits of the register.
         static constexpr auto hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
@@ -1431,7 +1431,7 @@ struct Vdp2Regs {
     struct Zmin {
         GENERATE_USING(Zmin, u16);
 
-        GENERATE_BIT_WITHOUT_ENUM(zmin, 0, 0b111);      ///< Coordinate increment (NxZMxIx).
+        GENERATE_BIT_WITHOUT_ENUM(zmin, 0, 0b111); ///< Coordinate increment (NxZMxIx).
 
         static constexpr auto lo_byte_pos = PosType(0); ///< Defines the range of the upper 8 bits of the register.
         static constexpr auto hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
@@ -1458,7 +1458,7 @@ struct Vdp2Regs {
     struct Zmdn {
         GENERATE_USING(Zmdn, u16);
 
-        GENERATE_BIT_WITHOUT_ENUM(zmdn, 8, 0xFF);       ///< Coordinate increment (NxZMxDx).
+        GENERATE_BIT_WITHOUT_ENUM(zmdn, 8, 0xFF); ///< Coordinate increment (NxZMxDx).
 
         static constexpr auto lo_byte_pos = PosType(0); ///< Defines the range of the upper 8 bits of the register.
         static constexpr auto hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
@@ -1506,8 +1506,8 @@ struct Vdp2Regs {
         GENERATE_BIT_WITH_ENUM(n0zmqt, 1, 0b1, ZoomQuarter); ///< NBG0 zoom quarter.
         GENERATE_BIT_WITH_ENUM(n0zmhf, 0, 0b1, ZoomHalf);    ///< NBG0 zoom half.
 
-        static constexpr auto lo_byte_pos = PosType(0);      ///< Defines the range of the upper 8 bits of the register.
-        static constexpr auto hi_byte_pos = PosType(8);      ///< Defines the range of the lower 8 bits of the register.
+        static constexpr auto lo_byte_pos = PosType(0); ///< Defines the range of the upper 8 bits of the register.
+        static constexpr auto hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
 
         static constexpr auto byte_mask = 0xFF;
         GENERATE_MASKED_RANGE("Vdp2Regs::Zmctl", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
@@ -1607,7 +1607,7 @@ struct Vdp2Regs {
     struct Vcstau {
         GENERATE_USING(Vcstau, u16);
 
-        GENERATE_BIT_WITHOUT_ENUM(vstau, 0, 0b111);     ///< Upper vertical cell scroll table address register(NxZMxDx).
+        GENERATE_BIT_WITHOUT_ENUM(vstau, 0, 0b111); ///< Upper vertical cell scroll table address register(NxZMxDx).
 
         static constexpr auto lo_byte_pos = PosType(0); ///< Defines the range of the upper 8 bits of the register.
         static constexpr auto hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
@@ -1631,7 +1631,7 @@ struct Vdp2Regs {
     struct Vcstal {
         GENERATE_USING(Vcstal, u16);
 
-        GENERATE_BIT_WITHOUT_ENUM(vstal, 1, 0x7FFF);    ///< Upper vertical cell scroll table address register(NxZMxDx).
+        GENERATE_BIT_WITHOUT_ENUM(vstal, 1, 0x7FFF); ///< Upper vertical cell scroll table address register(NxZMxDx).
 
         static constexpr auto lo_byte_pos = PosType(0); ///< Defines the range of the upper 8 bits of the register.
         static constexpr auto hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
@@ -1655,7 +1655,7 @@ struct Vdp2Regs {
     struct Lstau {
         GENERATE_USING(Lstau, u16);
 
-        GENERATE_BIT_WITHOUT_ENUM(lstau, 0, 0b111);     ///< Upper vertical cell scroll table address register(NxZMxDx).
+        GENERATE_BIT_WITHOUT_ENUM(lstau, 0, 0b111); ///< Upper vertical cell scroll table address register(NxZMxDx).
 
         static constexpr auto lo_byte_pos = PosType(0); ///< Defines the range of the upper 8 bits of the register.
         static constexpr auto hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
@@ -1680,7 +1680,7 @@ struct Vdp2Regs {
     struct Lstal {
         GENERATE_USING(Lstal, u16);
 
-        GENERATE_BIT_WITHOUT_ENUM(lstal, 1, 0x7FFF);    ///< Upper vertical cell scroll table address register(NxZMxDx).
+        GENERATE_BIT_WITHOUT_ENUM(lstal, 1, 0x7FFF); ///< Upper vertical cell scroll table address register(NxZMxDx).
 
         static constexpr auto lo_byte_pos = PosType(0); ///< Defines the range of the upper 8 bits of the register.
         static constexpr auto hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
@@ -1716,8 +1716,8 @@ struct Vdp2Regs {
         GENERATE_BIT_WITH_ENUM(lcclmd, 15, 0b1, LineColorScreenMode); ///< Line color screen mode (LCCLMD).
         GENERATE_BIT_WITHOUT_ENUM(lctau, 0, 0b111);                   ///< Line color screen table address (upper part).
 
-        static constexpr auto lo_byte_pos = PosType(0);               ///< Defines the range of the upper 8 bits of the register.
-        static constexpr auto hi_byte_pos = PosType(8);               ///< Defines the range of the lower 8 bits of the register.
+        static constexpr auto lo_byte_pos = PosType(0); ///< Defines the range of the upper 8 bits of the register.
+        static constexpr auto hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
 
         static constexpr auto byte_mask = 0xFF;
         GENERATE_MASKED_RANGE("Vdp2Regs::Lctau", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
@@ -1771,8 +1771,8 @@ struct Vdp2Regs {
         GENERATE_BIT_WITH_ENUM(bkclmd, 15, 0b1, BackScreenColorMode); ///< Back screen color mode (BKCLMD).
         GENERATE_BIT_WITHOUT_ENUM(bktau, 0, 0b111);                   ///< Line color screen table address (upper part).
 
-        static constexpr auto lo_byte_pos = PosType(0);               ///< Defines the range of the upper 8 bits of the register.
-        static constexpr auto hi_byte_pos = PosType(8);               ///< Defines the range of the lower 8 bits of the register.
+        static constexpr auto lo_byte_pos = PosType(0); ///< Defines the range of the upper 8 bits of the register.
+        static constexpr auto hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
 
         static constexpr auto byte_mask = 0xFF;
         GENERATE_MASKED_RANGE("Vdp2Regs::Bktau", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
@@ -1830,8 +1830,8 @@ struct Vdp2Regs {
 
         GENERATE_BIT_WITH_ENUM(rpmd, 0, 0b11, RotationParametersMode); ///< Rotation parameters mode (RPMDx).
 
-        static constexpr auto lo_byte_pos = PosType(0);                ///< Defines the range of the upper 8 bits of the register.
-        static constexpr auto hi_byte_pos = PosType(8);                ///< Defines the range of the lower 8 bits of the register.
+        static constexpr auto lo_byte_pos = PosType(0); ///< Defines the range of the upper 8 bits of the register.
+        static constexpr auto hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
 
         static constexpr auto byte_mask = 0xFF;
         GENERATE_MASKED_RANGE("Vdp2Regs::Rpmd", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
@@ -1931,8 +1931,8 @@ struct Vdp2Regs {
         ////////////////////////////////////////////////////////////////////////////////////////////////////
 
         enum class CoefficientTableEnable : bool {
-            do_not_use_coeff_table = false,                            ///< Do not use coefficient table.
-            use_coeff_table        = true                              ///< Use coefficient table.
+            do_not_use_coeff_table = false, ///< Do not use coefficient table.
+            use_coeff_table        = true   ///< Use coefficient table.
         };
         GENERATE_BIT_WITH_ENUM(rakte, 0, 0b1, CoefficientTableEnable); /**< Coefficient table enable for rotation parameter A.
                                                                           (RAKTE).*/
@@ -1971,10 +1971,10 @@ struct Vdp2Regs {
     struct Ktaof {
         GENERATE_USING(Ktaof, u16);
 
-        GENERATE_BIT_WITHOUT_ENUM(raktaos, 0, 0b111);   /**< Designates the lead address offset value of the coefficient table
-                                                             stored in the rotation parameter A table. (RAKTAOS) */
-        GENERATE_BIT_WITHOUT_ENUM(rbktaos, 8, 0b111);   /**< Designates the lead address offset value of the coefficient table
-                                                             stored in the rotation parameter B table. (RBKTAOS) */
+        GENERATE_BIT_WITHOUT_ENUM(raktaos, 0, 0b111); /**< Designates the lead address offset value of the coefficient table
+                                                           stored in the rotation parameter A table. (RAKTAOS) */
+        GENERATE_BIT_WITHOUT_ENUM(rbktaos, 8, 0b111); /**< Designates the lead address offset value of the coefficient table
+                                                           stored in the rotation parameter B table. (RBKTAOS) */
 
         static constexpr auto lo_byte_pos = PosType(0); ///< Defines the range of the upper 8 bits of the register.
         static constexpr auto hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
@@ -2021,7 +2021,7 @@ struct Vdp2Regs {
     struct Rptau {
         GENERATE_USING(Rptau, u16);
 
-        GENERATE_BIT_WITHOUT_ENUM(rptau, 0, 0b111);     ///< Upper rotation parameter table address (RPTA).
+        GENERATE_BIT_WITHOUT_ENUM(rptau, 0, 0b111); ///< Upper rotation parameter table address (RPTA).
 
         static constexpr auto lo_byte_pos = PosType(0); ///< Defines the range of the upper 8 bits of the register.
         static constexpr auto hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
@@ -2045,7 +2045,7 @@ struct Vdp2Regs {
     struct Rptal {
         GENERATE_USING(Rptal, u16);
 
-        GENERATE_BIT_WITHOUT_ENUM(rptal, 1, 0x7FFF);    ///< Lower rotation parameter table address (RPTAL).
+        GENERATE_BIT_WITHOUT_ENUM(rptal, 1, 0x7FFF); ///< Lower rotation parameter table address (RPTAL).
 
         static constexpr auto lo_byte_pos = PosType(0); ///< Defines the range of the upper 8 bits of the register.
         static constexpr auto hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
@@ -2069,7 +2069,7 @@ struct Vdp2Regs {
     struct Wpsx {
         GENERATE_USING(Wpsx, u16);
 
-        GENERATE_BIT_WITHOUT_ENUM(rptau, 0, 0x3FF);     ///< Window start/end X bits (WxxXx).
+        GENERATE_BIT_WITHOUT_ENUM(rptau, 0, 0x3FF); ///< Window start/end X bits (WxxXx).
 
         static constexpr auto lo_byte_pos = PosType(0); ///< Defines the range of the upper 8 bits of the register.
         static constexpr auto hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
@@ -2096,7 +2096,7 @@ struct Vdp2Regs {
     struct Wpsy {
         GENERATE_USING(Wpsy, u16);
 
-        GENERATE_BIT_WITHOUT_ENUM(rptau, 0, 0x1FF);     ///< Window start/end Y bits (WxxYx).
+        GENERATE_BIT_WITHOUT_ENUM(rptau, 0, 0x1FF); ///< Window start/end Y bits (WxxYx).
 
         static constexpr auto lo_byte_pos = PosType(0); ///< Defines the range of the upper 8 bits of the register.
         static constexpr auto hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
@@ -2156,13 +2156,13 @@ struct Vdp2Regs {
             enables_ouside_of_window = true   ///< Enables the outside of W0,W1 or SW window.
         };
 
-        GENERATE_BIT_WITH_ENUM(n0w0a, 0, 0b1, WindowArea);    ///< NBG0 window area (N0W0A).
-        GENERATE_BIT_WITH_ENUM(n0w0e, 1, 0b1, WindowEnable);  ///< NBG0 window W0 enable (N0W0E).
-        GENERATE_BIT_WITH_ENUM(n0w1a, 2, 0b1, WindowArea);    ///< NBG0 window area (N0W1A).
-        GENERATE_BIT_WITH_ENUM(n0w1e, 3, 0b1, WindowEnable);  ///< NBG0 window W1 enable (N0W1E).
-        GENERATE_BIT_WITH_ENUM(n0swa, 4, 0b1, WindowArea);    ///< NBG0 window area (N0SWA).
-        GENERATE_BIT_WITH_ENUM(n0swe, 5, 0b1, WindowEnable);  ///< NBG0 window SW enable (N0SWE).
-        GENERATE_BIT_WITH_ENUM(n0log, 7, 0b1, WindowLogic);   ///< NBG0 overlapping window method (N0LOG).
+        GENERATE_BIT_WITH_ENUM(n0w0a, 0, 0b1, WindowArea);   ///< NBG0 window area (N0W0A).
+        GENERATE_BIT_WITH_ENUM(n0w0e, 1, 0b1, WindowEnable); ///< NBG0 window W0 enable (N0W0E).
+        GENERATE_BIT_WITH_ENUM(n0w1a, 2, 0b1, WindowArea);   ///< NBG0 window area (N0W1A).
+        GENERATE_BIT_WITH_ENUM(n0w1e, 3, 0b1, WindowEnable); ///< NBG0 window W1 enable (N0W1E).
+        GENERATE_BIT_WITH_ENUM(n0swa, 4, 0b1, WindowArea);   ///< NBG0 window area (N0SWA).
+        GENERATE_BIT_WITH_ENUM(n0swe, 5, 0b1, WindowEnable); ///< NBG0 window SW enable (N0SWE).
+        GENERATE_BIT_WITH_ENUM(n0log, 7, 0b1, WindowLogic);  ///< NBG0 overlapping window method (N0LOG).
 
         GENERATE_BIT_WITH_ENUM(n1w0a, 8, 0b1, WindowArea);    ///< NBG1 window area (N1W0A).
         GENERATE_BIT_WITH_ENUM(n1w0e, 9, 0b1, WindowEnable);  ///< NBG1 window W0 enable (N1W0E).
@@ -2172,8 +2172,8 @@ struct Vdp2Regs {
         GENERATE_BIT_WITH_ENUM(n1swe, 13, 0b1, WindowEnable); ///< NBG1 window SW enable (N1SWE).
         GENERATE_BIT_WITH_ENUM(n1log, 15, 0b1, WindowLogic);  ///< NBG1 overlapping window method (N1LOG).
 
-        static constexpr auto lo_byte_pos = PosType(0);       ///< Defines the range of the upper 8 bits of the register.
-        static constexpr auto hi_byte_pos = PosType(8);       ///< Defines the range of the lower 8 bits of the register.
+        static constexpr auto lo_byte_pos = PosType(0); ///< Defines the range of the upper 8 bits of the register.
+        static constexpr auto hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
 
         static constexpr auto byte_mask = 0xFF;
         GENERATE_MASKED_RANGE("Vdp2Regs::Wctla", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
@@ -2227,13 +2227,13 @@ struct Vdp2Regs {
             enables_ouside_of_window = true   ///< Enables the outside of W0,W1 or SW window.
         };
 
-        GENERATE_BIT_WITH_ENUM(n2w0a, 0, 0b1, WindowArea);    ///< NBG2 window area (N2W0A).
-        GENERATE_BIT_WITH_ENUM(n2w0e, 1, 0b1, WindowEnable);  ///< NBG2 window W0 enable (N2W0E).
-        GENERATE_BIT_WITH_ENUM(n2w1a, 2, 0b1, WindowArea);    ///< NBG2 window area (N2W1A).
-        GENERATE_BIT_WITH_ENUM(n2w1e, 3, 0b1, WindowEnable);  ///< NBG2 window W1 enable (N2W1E).
-        GENERATE_BIT_WITH_ENUM(n2swa, 4, 0b1, WindowArea);    ///< NBG2 window area (N2SWA).
-        GENERATE_BIT_WITH_ENUM(n2swe, 5, 0b1, WindowEnable);  ///< NBG2 window SW enable (N2SWE).
-        GENERATE_BIT_WITH_ENUM(n2log, 7, 0b1, WindowLogic);   ///< NBG2 overlapping window method (N2LOG).
+        GENERATE_BIT_WITH_ENUM(n2w0a, 0, 0b1, WindowArea);   ///< NBG2 window area (N2W0A).
+        GENERATE_BIT_WITH_ENUM(n2w0e, 1, 0b1, WindowEnable); ///< NBG2 window W0 enable (N2W0E).
+        GENERATE_BIT_WITH_ENUM(n2w1a, 2, 0b1, WindowArea);   ///< NBG2 window area (N2W1A).
+        GENERATE_BIT_WITH_ENUM(n2w1e, 3, 0b1, WindowEnable); ///< NBG2 window W1 enable (N2W1E).
+        GENERATE_BIT_WITH_ENUM(n2swa, 4, 0b1, WindowArea);   ///< NBG2 window area (N2SWA).
+        GENERATE_BIT_WITH_ENUM(n2swe, 5, 0b1, WindowEnable); ///< NBG2 window SW enable (N2SWE).
+        GENERATE_BIT_WITH_ENUM(n2log, 7, 0b1, WindowLogic);  ///< NBG2 overlapping window method (N2LOG).
 
         GENERATE_BIT_WITH_ENUM(n3w0a, 8, 0b1, WindowArea);    ///< NBG3 window area (N3W0A).
         GENERATE_BIT_WITH_ENUM(n3w0e, 9, 0b1, WindowEnable);  ///< NBG3 window W0 enable (N3W0E).
@@ -2243,8 +2243,8 @@ struct Vdp2Regs {
         GENERATE_BIT_WITH_ENUM(n3swe, 13, 0b1, WindowEnable); ///< NBG3 window SW enable (N3SWE).
         GENERATE_BIT_WITH_ENUM(n3log, 15, 0b1, WindowLogic);  ///< NBG3 overlapping window method (N3LOG).
 
-        static constexpr auto lo_byte_pos = PosType(0);       ///< Defines the range of the upper 8 bits of the register.
-        static constexpr auto hi_byte_pos = PosType(8);       ///< Defines the range of the lower 8 bits of the register.
+        static constexpr auto lo_byte_pos = PosType(0); ///< Defines the range of the upper 8 bits of the register.
+        static constexpr auto hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
 
         static constexpr auto byte_mask = 0xFF;
         GENERATE_MASKED_RANGE("Vdp2Regs::Wctlb", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
@@ -2298,13 +2298,13 @@ struct Vdp2Regs {
             enables_ouside_of_window = true   ///< Enables the outside of W0,W1 or SW window.
         };
 
-        GENERATE_BIT_WITH_ENUM(r0w0a, 0, 0b1, WindowArea);    ///< RBG0 window area (R0W0A).
-        GENERATE_BIT_WITH_ENUM(r0w0e, 1, 0b1, WindowEnable);  ///< RBG0 window W0 enable (R0W0E).
-        GENERATE_BIT_WITH_ENUM(r0w1a, 2, 0b1, WindowArea);    ///< RBG0 window area (R0W1A).
-        GENERATE_BIT_WITH_ENUM(r0w1e, 3, 0b1, WindowEnable);  ///< RBG0 window W1 enable (R0W1E).
-        GENERATE_BIT_WITH_ENUM(r0swa, 4, 0b1, WindowArea);    ///< RBG0 window area (R0SWA).
-        GENERATE_BIT_WITH_ENUM(r0swe, 5, 0b1, WindowEnable);  ///< RBG0 window SW enable (R0SWE).
-        GENERATE_BIT_WITH_ENUM(r0log, 7, 0b1, WindowLogic);   ///< RBG0 overlapping window method (R0LOG).
+        GENERATE_BIT_WITH_ENUM(r0w0a, 0, 0b1, WindowArea);   ///< RBG0 window area (R0W0A).
+        GENERATE_BIT_WITH_ENUM(r0w0e, 1, 0b1, WindowEnable); ///< RBG0 window W0 enable (R0W0E).
+        GENERATE_BIT_WITH_ENUM(r0w1a, 2, 0b1, WindowArea);   ///< RBG0 window area (R0W1A).
+        GENERATE_BIT_WITH_ENUM(r0w1e, 3, 0b1, WindowEnable); ///< RBG0 window W1 enable (R0W1E).
+        GENERATE_BIT_WITH_ENUM(r0swa, 4, 0b1, WindowArea);   ///< RBG0 window area (R0SWA).
+        GENERATE_BIT_WITH_ENUM(r0swe, 5, 0b1, WindowEnable); ///< RBG0 window SW enable (R0SWE).
+        GENERATE_BIT_WITH_ENUM(r0log, 7, 0b1, WindowLogic);  ///< RBG0 overlapping window method (R0LOG).
 
         GENERATE_BIT_WITH_ENUM(spw0a, 8, 0b1, WindowArea);    ///< Sprite window area (SPW0A).
         GENERATE_BIT_WITH_ENUM(spw0e, 9, 0b1, WindowEnable);  ///< Sprite window W0 enable (SPW0E).
@@ -2314,8 +2314,8 @@ struct Vdp2Regs {
         GENERATE_BIT_WITH_ENUM(spswe, 13, 0b1, WindowEnable); ///< Sprite window SW enable (SPSWE).
         GENERATE_BIT_WITH_ENUM(splog, 15, 0b1, WindowLogic);  ///< Sprite overlapping window method (SPLOG).
 
-        static constexpr auto lo_byte_pos = PosType(0);       ///< Defines the range of the upper 8 bits of the register.
-        static constexpr auto hi_byte_pos = PosType(8);       ///< Defines the range of the lower 8 bits of the register.
+        static constexpr auto lo_byte_pos = PosType(0); ///< Defines the range of the upper 8 bits of the register.
+        static constexpr auto hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
 
         static constexpr auto byte_mask = 0xFF;
         GENERATE_MASKED_RANGE("Vdp2Regs::Wctlc", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
@@ -2369,11 +2369,11 @@ struct Vdp2Regs {
             enables_ouside_of_window = true   ///< Enables the outside of W0,W1 or SW window.
         };
 
-        GENERATE_BIT_WITH_ENUM(rpw0a, 0, 0b1, WindowArea);    ///< Rotation parameter window area (RPW0A).
-        GENERATE_BIT_WITH_ENUM(rpw0e, 1, 0b1, WindowEnable);  ///< Rotation parameter window W0 enable (RPW0E).
-        GENERATE_BIT_WITH_ENUM(rpw1a, 2, 0b1, WindowArea);    ///< Rotation parameter window area (RPW1A).
-        GENERATE_BIT_WITH_ENUM(rpw1e, 3, 0b1, WindowEnable);  ///< Rotation parameter window W1 enable (RPW1E).
-        GENERATE_BIT_WITH_ENUM(rplog, 7, 0b1, WindowLogic);   ///< Rotation parameter overlapping window method (RPLOG).
+        GENERATE_BIT_WITH_ENUM(rpw0a, 0, 0b1, WindowArea);   ///< Rotation parameter window area (RPW0A).
+        GENERATE_BIT_WITH_ENUM(rpw0e, 1, 0b1, WindowEnable); ///< Rotation parameter window W0 enable (RPW0E).
+        GENERATE_BIT_WITH_ENUM(rpw1a, 2, 0b1, WindowArea);   ///< Rotation parameter window area (RPW1A).
+        GENERATE_BIT_WITH_ENUM(rpw1e, 3, 0b1, WindowEnable); ///< Rotation parameter window W1 enable (RPW1E).
+        GENERATE_BIT_WITH_ENUM(rplog, 7, 0b1, WindowLogic);  ///< Rotation parameter overlapping window method (RPLOG).
 
         GENERATE_BIT_WITH_ENUM(ccw0a, 8, 0b1, WindowArea);    ///< Color calculation window area (CCW0A).
         GENERATE_BIT_WITH_ENUM(ccw0e, 9, 0b1, WindowEnable);  ///< Color calculation window W0 enable (CCW0E).
@@ -2383,8 +2383,8 @@ struct Vdp2Regs {
         GENERATE_BIT_WITH_ENUM(ccswe, 13, 0b1, WindowEnable); ///< Color calculation window SW enable (CCSWE).
         GENERATE_BIT_WITH_ENUM(cclog, 15, 0b1, WindowLogic);  ///< Color calculation overlapping window method (CCLOG).
 
-        static constexpr auto lo_byte_pos = PosType(0);       ///< Defines the range of the upper 8 bits of the register.
-        static constexpr auto hi_byte_pos = PosType(8);       ///< Defines the range of the lower 8 bits of the register.
+        static constexpr auto lo_byte_pos = PosType(0); ///< Defines the range of the upper 8 bits of the register.
+        static constexpr auto hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
 
         static constexpr auto byte_mask = 0xFF;
         GENERATE_MASKED_RANGE("Vdp2Regs::Wctld", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
@@ -2419,8 +2419,8 @@ struct Vdp2Regs {
         GENERATE_BIT_WITHOUT_ENUM(lwtau, 0, 0b111);               ///< Line window table lead address (upper).
         GENERATE_BIT_WITH_ENUM(wxlwe, 15, 0b1, LineWindowEnable); ///< Line window enable.
 
-        static constexpr auto lo_byte_pos = PosType(0);           ///< Defines the range of the upper 8 bits of the register.
-        static constexpr auto hi_byte_pos = PosType(8);           ///< Defines the range of the lower 8 bits of the register.
+        static constexpr auto lo_byte_pos = PosType(0); ///< Defines the range of the upper 8 bits of the register.
+        static constexpr auto hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
 
         static constexpr auto byte_mask = 0xFF;
         GENERATE_MASKED_RANGE("Vdp2Regs::Lwtau", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
@@ -2442,7 +2442,7 @@ struct Vdp2Regs {
     struct Lwtal {
         GENERATE_USING(Lwtal, u16);
 
-        GENERATE_BIT_WITHOUT_ENUM(lwtal, 1, 0x7FFF);    ///< Line window table lead address (lower).
+        GENERATE_BIT_WITHOUT_ENUM(lwtal, 1, 0x7FFF); ///< Line window table lead address (lower).
 
         static constexpr auto lo_byte_pos = PosType(0); ///< Defines the range of the upper 8 bits of the register.
         static constexpr auto hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
@@ -2478,8 +2478,8 @@ struct Vdp2Regs {
             = 0b00,                                     ///< (Priority number) <= (Color calculation condition number) only.
             only_when_priority_equals_condition = 0b01, ///< (Priority number) = (Color calculation condition number) only.
             only_when_priority_is_higher_or_equals_condition
-            = 0b10,                                     ///< (Priority number) >= (Color calculation condition number) only.
-            only_when_color_data_msb_is_1 = 0b11        ///< Only when Color Data MSB is 1.
+            = 0b10,                              ///< (Priority number) >= (Color calculation condition number) only.
+            only_when_color_data_msb_is_1 = 0b11 ///< Only when Color Data MSB is 1.
         };
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -2610,10 +2610,10 @@ struct Vdp2Regs {
     struct Craofa {
         GENERATE_USING(Craofa, u16);
 
-        GENERATE_BIT_WITHOUT_ENUM(n0caos, 0, 0b111);    ///< NBG0 color RAM address offset.
-        GENERATE_BIT_WITHOUT_ENUM(n1caos, 4, 0b111);    ///< NBG1 color RAM address offset.
-        GENERATE_BIT_WITHOUT_ENUM(n2caos, 8, 0b111);    ///< NBG2 color RAM address offset.
-        GENERATE_BIT_WITHOUT_ENUM(n3caos, 12, 0b111);   ///< NBG3 color RAM address offset.
+        GENERATE_BIT_WITHOUT_ENUM(n0caos, 0, 0b111);  ///< NBG0 color RAM address offset.
+        GENERATE_BIT_WITHOUT_ENUM(n1caos, 4, 0b111);  ///< NBG1 color RAM address offset.
+        GENERATE_BIT_WITHOUT_ENUM(n2caos, 8, 0b111);  ///< NBG2 color RAM address offset.
+        GENERATE_BIT_WITHOUT_ENUM(n3caos, 12, 0b111); ///< NBG3 color RAM address offset.
 
         static constexpr auto lo_byte_pos = PosType(0); ///< Defines the range of the upper 8 bits of the register.
         static constexpr auto hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
@@ -2637,8 +2637,8 @@ struct Vdp2Regs {
     struct Craofb {
         GENERATE_USING(Craofb, u16);
 
-        GENERATE_BIT_WITHOUT_ENUM(r0caos, 0, 0b111);    ///< RBG0 color RAM address offset.
-        GENERATE_BIT_WITHOUT_ENUM(spcaos, 4, 0b111);    ///< Sprite color RAM address offset.
+        GENERATE_BIT_WITHOUT_ENUM(r0caos, 0, 0b111); ///< RBG0 color RAM address offset.
+        GENERATE_BIT_WITHOUT_ENUM(spcaos, 4, 0b111); ///< Sprite color RAM address offset.
 
         static constexpr auto lo_byte_pos = PosType(0); ///< Defines the range of the upper 8 bits of the register.
         static constexpr auto hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
@@ -2680,8 +2680,8 @@ struct Vdp2Regs {
         GENERATE_BIT_WITH_ENUM(r0lcen, 4, 0b1, LineColorEnable); ///< RBG0 line color enable (R0LCEN).
         GENERATE_BIT_WITH_ENUM(splcen, 5, 0b1, LineColorEnable); ///< Sprite line color enable (SPLCEN).
 
-        static constexpr auto lo_byte_pos = PosType(0);          ///< Defines the range of the upper 8 bits of the register.
-        static constexpr auto hi_byte_pos = PosType(8);          ///< Defines the range of the lower 8 bits of the register.
+        static constexpr auto lo_byte_pos = PosType(0); ///< Defines the range of the upper 8 bits of the register.
+        static constexpr auto hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
 
         static constexpr auto byte_mask = 0xFF;
         GENERATE_MASKED_RANGE("Vdp2Regs::Lnclen", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
@@ -2721,8 +2721,8 @@ struct Vdp2Regs {
         GENERATE_BIT_WITH_ENUM(n3lcen, 3, 0b11, SpecialPriorityMode); ///< NBG3 special priority mode (N3SPRM).
         GENERATE_BIT_WITH_ENUM(r0lcen, 4, 0b11, SpecialPriorityMode); ///< RBG0 special priority mode (R0SPRM).
 
-        static constexpr auto lo_byte_pos = PosType(0);               ///< Defines the range of the upper 8 bits of the register.
-        static constexpr auto hi_byte_pos = PosType(8);               ///< Defines the range of the lower 8 bits of the register.
+        static constexpr auto lo_byte_pos = PosType(0); ///< Defines the range of the upper 8 bits of the register.
+        static constexpr auto hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
 
         static constexpr auto byte_mask = 0xFF;
         GENERATE_MASKED_RANGE("Vdp2Regs::Sfprmd", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
@@ -2875,8 +2875,8 @@ struct Vdp2Regs {
                                0b11,
                                SpecialColorCalculationMode); ///< NBG0 (or RBG1) special color calculation enable (N0SCCMx).
 
-        static constexpr auto lo_byte_pos = PosType(0);      ///< Defines the range of the upper 8 bits of the register.
-        static constexpr auto hi_byte_pos = PosType(8);      ///< Defines the range of the lower 8 bits of the register.
+        static constexpr auto lo_byte_pos = PosType(0); ///< Defines the range of the upper 8 bits of the register.
+        static constexpr auto hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
 
         static constexpr auto byte_mask = 0xFF;
         GENERATE_MASKED_RANGE("Vdp2Regs::Sfccmd", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
@@ -2897,8 +2897,8 @@ struct Vdp2Regs {
     struct Prisa {
         GENERATE_USING(Prisa, u16);
 
-        GENERATE_BIT_WITHOUT_ENUM(s0prin, 0, 0b111);    ///< Sprite register 0 (S0PRINx).
-        GENERATE_BIT_WITHOUT_ENUM(s1prin, 8, 0b111);    ///< Sprite register 1 (S1PRINx).
+        GENERATE_BIT_WITHOUT_ENUM(s0prin, 0, 0b111); ///< Sprite register 0 (S0PRINx).
+        GENERATE_BIT_WITHOUT_ENUM(s1prin, 8, 0b111); ///< Sprite register 1 (S1PRINx).
 
         static constexpr auto lo_byte_pos = PosType(0); ///< Defines the range of the upper 8 bits of the register.
         static constexpr auto hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
@@ -2922,8 +2922,8 @@ struct Vdp2Regs {
     struct Prisb {
         GENERATE_USING(Prisb, u16);
 
-        GENERATE_BIT_WITHOUT_ENUM(s2prin, 0, 0b111);    ///< Sprite register 2 (S2PRINx).
-        GENERATE_BIT_WITHOUT_ENUM(s3prin, 8, 0b111);    ///< Sprite register 3 (S3PRINx).
+        GENERATE_BIT_WITHOUT_ENUM(s2prin, 0, 0b111); ///< Sprite register 2 (S2PRINx).
+        GENERATE_BIT_WITHOUT_ENUM(s3prin, 8, 0b111); ///< Sprite register 3 (S3PRINx).
 
         static constexpr auto lo_byte_pos = PosType(0); ///< Defines the range of the upper 8 bits of the register.
         static constexpr auto hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
@@ -2947,8 +2947,8 @@ struct Vdp2Regs {
     struct Prisc {
         GENERATE_USING(Prisc, u16);
 
-        GENERATE_BIT_WITHOUT_ENUM(s4prin, 0, 0b111);    ///< Sprite register 4 (S4PRINx).
-        GENERATE_BIT_WITHOUT_ENUM(s5prin, 8, 0b111);    ///< Sprite register 5 (S5PRINx).
+        GENERATE_BIT_WITHOUT_ENUM(s4prin, 0, 0b111); ///< Sprite register 4 (S4PRINx).
+        GENERATE_BIT_WITHOUT_ENUM(s5prin, 8, 0b111); ///< Sprite register 5 (S5PRINx).
 
         static constexpr auto lo_byte_pos = PosType(0); ///< Defines the range of the upper 8 bits of the register.
         static constexpr auto hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
@@ -2972,8 +2972,8 @@ struct Vdp2Regs {
     struct Prisd {
         GENERATE_USING(Prisd, u16);
 
-        GENERATE_BIT_WITHOUT_ENUM(s6prin, 0, 0b111);    ///< Sprite register 6 (S6PRINx).
-        GENERATE_BIT_WITHOUT_ENUM(s7prin, 8, 0b111);    ///< Sprite register 7 (S7PRINx).
+        GENERATE_BIT_WITHOUT_ENUM(s6prin, 0, 0b111); ///< Sprite register 6 (S6PRINx).
+        GENERATE_BIT_WITHOUT_ENUM(s7prin, 8, 0b111); ///< Sprite register 7 (S7PRINx).
 
         static constexpr auto lo_byte_pos = PosType(0); ///< Defines the range of the upper 8 bits of the register.
         static constexpr auto hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
@@ -2997,8 +2997,8 @@ struct Vdp2Regs {
     struct Prina {
         GENERATE_USING(Prina, u16);
 
-        GENERATE_BIT_WITHOUT_ENUM(n0prin, 0, 0b111);    ///< NBG0 priority number (N0PRINx).
-        GENERATE_BIT_WITHOUT_ENUM(n1prin, 8, 0b111);    ///< NBG1 priority number (N1PRINx).
+        GENERATE_BIT_WITHOUT_ENUM(n0prin, 0, 0b111); ///< NBG0 priority number (N0PRINx).
+        GENERATE_BIT_WITHOUT_ENUM(n1prin, 8, 0b111); ///< NBG1 priority number (N1PRINx).
 
         static constexpr auto lo_byte_pos = PosType(0); ///< Defines the range of the upper 8 bits of the register.
         static constexpr auto hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
@@ -3022,8 +3022,8 @@ struct Vdp2Regs {
     struct Prinb {
         GENERATE_USING(Prinb, u16);
 
-        GENERATE_BIT_WITHOUT_ENUM(n2prin, 0, 0b111);    ///< NBG2 priority number (N2PRINx).
-        GENERATE_BIT_WITHOUT_ENUM(n3prin, 8, 0b111);    ///< NBG3 priority number (N3PRINx).
+        GENERATE_BIT_WITHOUT_ENUM(n2prin, 0, 0b111); ///< NBG2 priority number (N2PRINx).
+        GENERATE_BIT_WITHOUT_ENUM(n3prin, 8, 0b111); ///< NBG3 priority number (N3PRINx).
 
         static constexpr auto lo_byte_pos = PosType(0); ///< Defines the range of the upper 8 bits of the register.
         static constexpr auto hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
@@ -3047,7 +3047,7 @@ struct Vdp2Regs {
     struct Prir {
         GENERATE_USING(Prir, u16);
 
-        GENERATE_BIT_WITHOUT_ENUM(r0prin, 0, 0b111);    ///< RBG0 priority number (R0PRINx).
+        GENERATE_BIT_WITHOUT_ENUM(r0prin, 0, 0b111); ///< RBG0 priority number (R0PRINx).
 
         static constexpr auto lo_byte_pos = PosType(0); ///< Defines the range of the upper 8 bits of the register.
         static constexpr auto hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
@@ -3071,8 +3071,8 @@ struct Vdp2Regs {
     struct Ccrsa {
         GENERATE_USING(Ccrsa, u16);
 
-        GENERATE_BIT_WITHOUT_ENUM(s0ccrt, 0, 0b11111);  ///< Sprite register 0 color calculation ratio (S0CCRTx).
-        GENERATE_BIT_WITHOUT_ENUM(s1ccrt, 8, 0b11111);  ///< Sprite register 1 color calculation ratio (S1CCRTx).
+        GENERATE_BIT_WITHOUT_ENUM(s0ccrt, 0, 0b11111); ///< Sprite register 0 color calculation ratio (S0CCRTx).
+        GENERATE_BIT_WITHOUT_ENUM(s1ccrt, 8, 0b11111); ///< Sprite register 1 color calculation ratio (S1CCRTx).
 
         static constexpr auto lo_byte_pos = PosType(0); ///< Defines the range of the upper 8 bits of the register.
         static constexpr auto hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
@@ -3096,8 +3096,8 @@ struct Vdp2Regs {
     struct Ccrsb {
         GENERATE_USING(Ccrsb, u16);
 
-        GENERATE_BIT_WITHOUT_ENUM(s2ccrt, 0, 0b11111);  ///< Sprite register 2 color calculation ratio (S2CCRTx).
-        GENERATE_BIT_WITHOUT_ENUM(s3ccrt, 8, 0b11111);  ///< Sprite register 3 color calculation ratio (S3CCRTx).
+        GENERATE_BIT_WITHOUT_ENUM(s2ccrt, 0, 0b11111); ///< Sprite register 2 color calculation ratio (S2CCRTx).
+        GENERATE_BIT_WITHOUT_ENUM(s3ccrt, 8, 0b11111); ///< Sprite register 3 color calculation ratio (S3CCRTx).
 
         static constexpr auto lo_byte_pos = PosType(0); ///< Defines the range of the upper 8 bits of the register.
         static constexpr auto hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
@@ -3121,8 +3121,8 @@ struct Vdp2Regs {
     struct Ccrsc {
         GENERATE_USING(Ccrsc, u16);
 
-        GENERATE_BIT_WITHOUT_ENUM(s4ccrt, 0, 0b11111);  ///< Sprite register 4 color calculation ratio (S4CCRTx).
-        GENERATE_BIT_WITHOUT_ENUM(s5ccrt, 8, 0b11111);  ///< Sprite register 5 color calculation ratio (S5CCRTx).
+        GENERATE_BIT_WITHOUT_ENUM(s4ccrt, 0, 0b11111); ///< Sprite register 4 color calculation ratio (S4CCRTx).
+        GENERATE_BIT_WITHOUT_ENUM(s5ccrt, 8, 0b11111); ///< Sprite register 5 color calculation ratio (S5CCRTx).
 
         static constexpr auto lo_byte_pos = PosType(0); ///< Defines the range of the upper 8 bits of the register.
         static constexpr auto hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
@@ -3146,8 +3146,8 @@ struct Vdp2Regs {
     struct Ccrsd {
         GENERATE_USING(Ccrsd, u16);
 
-        GENERATE_BIT_WITHOUT_ENUM(s6ccrt, 0, 0b11111);  ///< Sprite register 6 color calculation ratio (S6CCRTx).
-        GENERATE_BIT_WITHOUT_ENUM(s7ccrt, 8, 0b11111);  ///< Sprite register 7 color calculation ratio (S7CCRTx).
+        GENERATE_BIT_WITHOUT_ENUM(s6ccrt, 0, 0b11111); ///< Sprite register 6 color calculation ratio (S6CCRTx).
+        GENERATE_BIT_WITHOUT_ENUM(s7ccrt, 8, 0b11111); ///< Sprite register 7 color calculation ratio (S7CCRTx).
 
         static constexpr auto lo_byte_pos = PosType(0); ///< Defines the range of the upper 8 bits of the register.
         static constexpr auto hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
@@ -3171,8 +3171,8 @@ struct Vdp2Regs {
     struct Ccrna {
         GENERATE_USING(Ccrna, u16);
 
-        GENERATE_BIT_WITHOUT_ENUM(n0ccrt, 0, 0b11111);  ///< NBG0 color calculation ratio (N0CCRTx).
-        GENERATE_BIT_WITHOUT_ENUM(n1ccrt, 8, 0b11111);  ///< NBG1 color calculation ratio (N1CCRTx).
+        GENERATE_BIT_WITHOUT_ENUM(n0ccrt, 0, 0b11111); ///< NBG0 color calculation ratio (N0CCRTx).
+        GENERATE_BIT_WITHOUT_ENUM(n1ccrt, 8, 0b11111); ///< NBG1 color calculation ratio (N1CCRTx).
 
         static constexpr auto lo_byte_pos = PosType(0); ///< Defines the range of the upper 8 bits of the register.
         static constexpr auto hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
@@ -3196,8 +3196,8 @@ struct Vdp2Regs {
     struct Ccrnb {
         GENERATE_USING(Ccrnb, u16);
 
-        GENERATE_BIT_WITHOUT_ENUM(n2ccrt, 0, 0b11111);  ///< NBG2 color calculation ratio (N2CCRTx).
-        GENERATE_BIT_WITHOUT_ENUM(n3ccrt, 8, 0b11111);  ///< NBG3 color calculation ratio (N3CCRTx).
+        GENERATE_BIT_WITHOUT_ENUM(n2ccrt, 0, 0b11111); ///< NBG2 color calculation ratio (N2CCRTx).
+        GENERATE_BIT_WITHOUT_ENUM(n3ccrt, 8, 0b11111); ///< NBG3 color calculation ratio (N3CCRTx).
 
         static constexpr auto lo_byte_pos = PosType(0); ///< Defines the range of the upper 8 bits of the register.
         static constexpr auto hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
@@ -3221,7 +3221,7 @@ struct Vdp2Regs {
     struct Ccrr {
         GENERATE_USING(Ccrr, u16);
 
-        GENERATE_BIT_WITHOUT_ENUM(r0ccrt, 0, 0b11111);  ///< RBG0 color calculation ratio (R0CCRTx).
+        GENERATE_BIT_WITHOUT_ENUM(r0ccrt, 0, 0b11111); ///< RBG0 color calculation ratio (R0CCRTx).
 
         static constexpr auto lo_byte_pos = PosType(0); ///< Defines the range of the upper 8 bits of the register.
         static constexpr auto hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
@@ -3245,8 +3245,8 @@ struct Vdp2Regs {
     struct Ccrlb {
         GENERATE_USING(Ccrlb, u16);
 
-        GENERATE_BIT_WITHOUT_ENUM(lcccrt, 0, 0b11111);  ///< LNCL color calculation ratio (LCCCRTx).
-        GENERATE_BIT_WITHOUT_ENUM(bkccrt, 8, 0b11111);  ///< Back color calculation ratio (BKCCRTx).
+        GENERATE_BIT_WITHOUT_ENUM(lcccrt, 0, 0b11111); ///< LNCL color calculation ratio (LCCCRTx).
+        GENERATE_BIT_WITHOUT_ENUM(bkccrt, 8, 0b11111); ///< Back color calculation ratio (BKCCRTx).
 
         static constexpr auto lo_byte_pos = PosType(0); ///< Defines the range of the upper 8 bits of the register.
         static constexpr auto hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
@@ -3289,8 +3289,8 @@ struct Vdp2Regs {
         GENERATE_BIT_WITH_ENUM(bkcoen, 5, 0b1, ColorOffsetEnable); ///< Back color offset enable (BKCOEN).
         GENERATE_BIT_WITH_ENUM(spcoen, 6, 0b1, ColorOffsetEnable); ///< Sprite color offset enable (SPCOEN).
 
-        static constexpr auto lo_byte_pos = PosType(0);            ///< Defines the range of the upper 8 bits of the register.
-        static constexpr auto hi_byte_pos = PosType(8);            ///< Defines the range of the lower 8 bits of the register.
+        static constexpr auto lo_byte_pos = PosType(0); ///< Defines the range of the upper 8 bits of the register.
+        static constexpr auto hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
 
         static constexpr auto byte_mask = 0xFF;
         GENERATE_MASKED_RANGE("Vdp2Regs::Clofen", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
@@ -3330,8 +3330,8 @@ struct Vdp2Regs {
         GENERATE_BIT_WITH_ENUM(bkcosl, 5, 0b1, ColorOffsetSelect); ///< Back color offset select (BKCOSL).
         GENERATE_BIT_WITH_ENUM(spcosl, 6, 0b1, ColorOffsetSelect); ///< Sprite color offset select (SPCOSL).
 
-        static constexpr auto lo_byte_pos = PosType(0);            ///< Defines the range of the upper 8 bits of the register.
-        static constexpr auto hi_byte_pos = PosType(8);            ///< Defines the range of the lower 8 bits of the register.
+        static constexpr auto lo_byte_pos = PosType(0); ///< Defines the range of the upper 8 bits of the register.
+        static constexpr auto hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
 
         static constexpr auto byte_mask = 0xFF;
         GENERATE_MASKED_RANGE("Vdp2Regs::Clofsl", LO_BYTE, loByte, byte_mask, lo_byte_pos, byte_mask);
@@ -3363,8 +3363,8 @@ struct Vdp2Regs {
     struct Coar {
         GENERATE_USING(Coar, u16);
 
-        GENERATE_BIT_WITH_ENUM(sign, 8, 0b1, Sign);     ///< Sign of the data..
-        GENERATE_BIT_WITHOUT_ENUM(coard, 0, 0xFF);      ///< Defines the color offset A red data (COARDx).
+        GENERATE_BIT_WITH_ENUM(sign, 8, 0b1, Sign); ///< Sign of the data..
+        GENERATE_BIT_WITHOUT_ENUM(coard, 0, 0xFF);  ///< Defines the color offset A red data (COARDx).
 
         static constexpr auto lo_byte_pos = PosType(0); ///< Defines the range of the upper 8 bits of the register.
         static constexpr auto hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
@@ -3388,8 +3388,8 @@ struct Vdp2Regs {
     struct Coag {
         GENERATE_USING(Coag, u16);
 
-        GENERATE_BIT_WITH_ENUM(sign, 8, 0b1, Sign);     ///< Sign of the data..
-        GENERATE_BIT_WITHOUT_ENUM(coagd, 0, 0xFF);      ///< Defines the color offset A green data (COAGDx).
+        GENERATE_BIT_WITH_ENUM(sign, 8, 0b1, Sign); ///< Sign of the data..
+        GENERATE_BIT_WITHOUT_ENUM(coagd, 0, 0xFF);  ///< Defines the color offset A green data (COAGDx).
 
         static constexpr auto lo_byte_pos = PosType(0); ///< Defines the range of the upper 8 bits of the register.
         static constexpr auto hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
@@ -3413,8 +3413,8 @@ struct Vdp2Regs {
     struct Coab {
         GENERATE_USING(Coab, u16);
 
-        GENERATE_BIT_WITH_ENUM(sign, 8, 0b1, Sign);     ///< Sign of the data..
-        GENERATE_BIT_WITHOUT_ENUM(coarb, 0, 0xFF);      ///< Defines the color offset A blue data (COABDx).
+        GENERATE_BIT_WITH_ENUM(sign, 8, 0b1, Sign); ///< Sign of the data..
+        GENERATE_BIT_WITHOUT_ENUM(coarb, 0, 0xFF);  ///< Defines the color offset A blue data (COABDx).
 
         static constexpr auto lo_byte_pos = PosType(0); ///< Defines the range of the upper 8 bits of the register.
         static constexpr auto hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
@@ -3438,8 +3438,8 @@ struct Vdp2Regs {
     struct Cobr {
         GENERATE_USING(Cobr, u16);
 
-        GENERATE_BIT_WITH_ENUM(sign, 8, 0b1, Sign);     ///< Sign of the data..
-        GENERATE_BIT_WITHOUT_ENUM(cobrd, 0, 0xFF);      ///< Defines the color offset B red data (COBRDx).
+        GENERATE_BIT_WITH_ENUM(sign, 8, 0b1, Sign); ///< Sign of the data..
+        GENERATE_BIT_WITHOUT_ENUM(cobrd, 0, 0xFF);  ///< Defines the color offset B red data (COBRDx).
 
         static constexpr auto lo_byte_pos = PosType(0); ///< Defines the range of the upper 8 bits of the register.
         static constexpr auto hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
@@ -3463,8 +3463,8 @@ struct Vdp2Regs {
     struct Cobg {
         GENERATE_USING(Cobg, u16);
 
-        GENERATE_BIT_WITH_ENUM(sign, 8, 0b1, Sign);     ///< Sign of the data..
-        GENERATE_BIT_WITHOUT_ENUM(cobgr, 0, 0xFF);      ///< Defines the color offset B green data (COBGRx).
+        GENERATE_BIT_WITH_ENUM(sign, 8, 0b1, Sign); ///< Sign of the data..
+        GENERATE_BIT_WITHOUT_ENUM(cobgr, 0, 0xFF);  ///< Defines the color offset B green data (COBGRx).
 
         static constexpr auto lo_byte_pos = PosType(0); ///< Defines the range of the upper 8 bits of the register.
         static constexpr auto hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.
@@ -3488,8 +3488,8 @@ struct Vdp2Regs {
     struct Cobb {
         GENERATE_USING(Cobb, u16);
 
-        GENERATE_BIT_WITH_ENUM(sign, 8, 0b1, Sign);     ///< Sign of the data..
-        GENERATE_BIT_WITHOUT_ENUM(cobbl, 0, 0xFF);      ///< Defines the color offset B blue data (COBBLx).
+        GENERATE_BIT_WITH_ENUM(sign, 8, 0b1, Sign); ///< Sign of the data..
+        GENERATE_BIT_WITHOUT_ENUM(cobbl, 0, 0xFF);  ///< Defines the color offset B blue data (COBBLx).
 
         static constexpr auto lo_byte_pos = PosType(0); ///< Defines the range of the upper 8 bits of the register.
         static constexpr auto hi_byte_pos = PosType(8); ///< Defines the range of the lower 8 bits of the register.

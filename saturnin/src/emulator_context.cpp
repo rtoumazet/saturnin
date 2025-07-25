@@ -22,8 +22,6 @@
 
 #include <Windows.h> // removes C4005 warning
 #include <GLFW/glfw3.h>
-#include <iostream>
-#include <future>
 #include <argagg/argagg.hpp>
 #include <saturnin/src/config.h>
 #include <saturnin/src/log.h>
@@ -36,13 +34,9 @@
 #include <saturnin/src/cdrom/cdrom.h>
 #include <saturnin/src/cdrom/scsi.h>
 #include <saturnin/src/sound/scsp.h>
-#include <saturnin/src/video/opengl.h>
+#include <saturnin/src/video/opengl/opengl_utilities.h>
 #include <saturnin/src/video/vdp1.h>
-#include <saturnin/src/video/vdp2.h>
-
-namespace cdrom = saturnin::cdrom;
-namespace video = saturnin::video;
-namespace sh2   = saturnin::sh2;
+#include <saturnin/src/video/vdp2/vdp2.h>
 
 namespace saturnin::core {
 
@@ -50,7 +44,6 @@ using cdrom::Cdrom;
 using sh2::Sh2;
 using sh2::Sh2Type;
 using sound::Scsp;
-using video::BaseRenderingPart;
 using video::Opengl;
 using video::Vdp1;
 using video::Vdp2;
@@ -192,19 +185,20 @@ void EmulatorContext::emulationSetup() {
 
 void EmulatorContext::emulationMainThread() {
     Log::info(Logger::main, tr("Emulation main thread started"));
+    try {
+        emulationSetup();
 
-    emulationSetup();
-
-    while (emulationStatus() == EmulationStatus::running) {
-        if (debugStatus() != DebugStatus::paused) {
-            const auto cycles = masterSh2()->run();
-            if (smpc()->isSlaveSh2On()) { slaveSh2()->run(); }
-            smpc()->run(cycles);
-            vdp2()->run(cycles);
-            cdrom()->run(cycles);
-            scsp()->run(cycles);
+        while (emulationStatus() == EmulationStatus::running) {
+            if (debugStatus() != DebugStatus::paused) {
+                const auto cycles = masterSh2()->run();
+                if (smpc()->isSlaveSh2On()) { slaveSh2()->run(); }
+                smpc()->run(cycles);
+                vdp2()->run(cycles);
+                cdrom()->run(cycles);
+                scsp()->run(cycles);
+            }
         }
-    }
+    } catch (...) { Log::error(Logger::main, tr("Exception raised in emulation thread !")); }
     Log::info(Logger::main, tr("Emulation main thread finished"));
     dumpTrace();
 }

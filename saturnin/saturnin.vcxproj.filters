@@ -40,6 +40,12 @@
     <Filter Include="Fichiers sources\sh2\fast_interpreter">
       <UniqueIdentifier>{dab72cf9-6b96-42c9-9a49-b64d257fa361}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Fichiers sources\video\opengl">
+      <UniqueIdentifier>{789e1ad2-891d-45fa-979a-d33b7c19045e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Fichiers sources\video\vdp2">
+      <UniqueIdentifier>{9b5ba755-5f93-4264-a3e6-afc9f86354b9}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\config.cpp">
@@ -87,26 +93,14 @@
     <ClCompile Include="lib\imgui\imgui_custom_controls.cpp">
       <Filter>Fichiers sources\imgui</Filter>
     </ClCompile>
-    <ClCompile Include="src\video\opengl.cpp">
-      <Filter>Fichiers sources\video</Filter>
-    </ClCompile>
     <ClCompile Include="src\smpc.cpp">
       <Filter>Fichiers sources</Filter>
-    </ClCompile>
-    <ClCompile Include="src\video\vdp2.cpp">
-      <Filter>Fichiers sources\video</Filter>
     </ClCompile>
     <ClCompile Include="src\video\vdp1.cpp">
       <Filter>Fichiers sources\video</Filter>
     </ClCompile>
     <ClCompile Include="src\pch.cpp">
       <Filter>Fichiers sources</Filter>
-    </ClCompile>
-    <ClCompile Include="src\video\base_rendering_part.cpp">
-      <Filter>Fichiers sources\video</Filter>
-    </ClCompile>
-    <ClCompile Include="src\video\vdp2_part.cpp">
-      <Filter>Fichiers sources\video</Filter>
     </ClCompile>
     <ClCompile Include="src\video\texture.cpp">
       <Filter>Fichiers sources\video</Filter>
@@ -138,9 +132,6 @@
     <ClCompile Include="src\video\vdp1_part.cpp">
       <Filter>Fichiers sources\video</Filter>
     </ClCompile>
-    <ClCompile Include="src\video\vdp2_debug.cpp">
-      <Filter>Fichiers sources\video</Filter>
-    </ClCompile>
     <ClCompile Include="src\thread_pool.cpp">
       <Filter>Fichiers sources</Filter>
     </ClCompile>
@@ -166,6 +157,51 @@
       <Filter>Fichiers sources\sh2</Filter>
     </ClCompile>
     <ClCompile Include="src\timer.cpp">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
+    <ClCompile Include="src\video\opengl\opengl_shaders.cpp">
+      <Filter>Fichiers sources\video\opengl</Filter>
+    </ClCompile>
+    <ClCompile Include="src\video\opengl\opengl_utilities.cpp">
+      <Filter>Fichiers sources\video\opengl</Filter>
+    </ClCompile>
+    <ClCompile Include="src\video\opengl\opengl_texturing.cpp">
+      <Filter>Fichiers sources\video\opengl</Filter>
+    </ClCompile>
+    <ClCompile Include="src\video\opengl\opengl_render.cpp">
+      <Filter>Fichiers sources\video\opengl</Filter>
+    </ClCompile>
+    <ClCompile Include="src\video\vdp2\vdp2.cpp">
+      <Filter>Fichiers sources\video\vdp2</Filter>
+    </ClCompile>
+    <ClCompile Include="src\video\vdp2\vdp2_debug.cpp">
+      <Filter>Fichiers sources\video\vdp2</Filter>
+    </ClCompile>
+    <ClCompile Include="src\video\vdp2\vdp2_part.cpp">
+      <Filter>Fichiers sources\video\vdp2</Filter>
+    </ClCompile>
+    <ClCompile Include="src\video\vdp2\vdp2_pattern_name_data.cpp">
+      <Filter>Fichiers sources\video\vdp2</Filter>
+    </ClCompile>
+    <ClCompile Include="src\video\vdp2\vdp2_cycle_patterns.cpp">
+      <Filter>Fichiers sources\video\vdp2</Filter>
+    </ClCompile>
+    <ClCompile Include="src\video\vdp2\vdp2_cache.cpp">
+      <Filter>Fichiers sources\video\vdp2</Filter>
+    </ClCompile>
+    <ClCompile Include="src\video\vdp2\vdp2_memory_access.cpp">
+      <Filter>Fichiers sources\video\vdp2</Filter>
+    </ClCompile>
+    <ClCompile Include="src\video\vdp2\vdp2_display.cpp">
+      <Filter>Fichiers sources\video\vdp2</Filter>
+    </ClCompile>
+    <ClCompile Include="src\video\opengl\opengl.cpp">
+      <Filter>Fichiers sources\video\opengl</Filter>
+    </ClCompile>
+    <ClCompile Include="src\video\vdp1_part_impl.cpp">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
+    <ClCompile Include="src\memory_impl.cpp">
       <Filter>Fichiers sources</Filter>
     </ClCompile>
   </ItemGroup>
@@ -233,17 +269,11 @@
     <ClInclude Include="lib\imgui\imgui_custom_controls.h">
       <Filter>Fichiers sources\imgui</Filter>
     </ClInclude>
-    <ClInclude Include="src\video\opengl.h">
-      <Filter>Fichiers sources\video</Filter>
-    </ClInclude>
     <ClInclude Include="src\smpc.h">
       <Filter>Fichiers sources</Filter>
     </ClInclude>
     <ClInclude Include="src\smpc_registers.h">
       <Filter>Fichiers sources</Filter>
-    </ClInclude>
-    <ClInclude Include="src\video\vdp2.h">
-      <Filter>Fichiers sources\video</Filter>
     </ClInclude>
     <ClInclude Include="src\sound\scsp.h">
       <Filter>Fichiers sources\sound</Filter>
@@ -251,20 +281,11 @@
     <ClInclude Include="lib\imgui\imgui_memory_editor.h">
       <Filter>Fichiers sources\imgui</Filter>
     </ClInclude>
-    <ClInclude Include="src\video\vdp2_registers.h">
-      <Filter>Fichiers sources\video</Filter>
-    </ClInclude>
     <ClInclude Include="src\video\vdp1.h">
       <Filter>Fichiers sources\video</Filter>
     </ClInclude>
     <ClInclude Include="src\pch.h">
       <Filter>Fichiers sources</Filter>
-    </ClInclude>
-    <ClInclude Include="src\video\base_rendering_part.h">
-      <Filter>Fichiers sources\video</Filter>
-    </ClInclude>
-    <ClInclude Include="src\video\vdp2_part.h">
-      <Filter>Fichiers sources\video</Filter>
     </ClInclude>
     <ClInclude Include="src\video\texture.h">
       <Filter>Fichiers sources\video</Filter>
@@ -352,6 +373,36 @@
     </ClInclude>
     <ClInclude Include="src\timer.h">
       <Filter>Fichiers sources</Filter>
+    </ClInclude>
+    <ClInclude Include="src\video\vdp2\vdp2_registers.h">
+      <Filter>Fichiers sources\video\vdp2</Filter>
+    </ClInclude>
+    <ClInclude Include="src\video\vdp2\vdp2.h">
+      <Filter>Fichiers sources\video\vdp2</Filter>
+    </ClInclude>
+    <ClInclude Include="src\video\vdp2\vdp2_part.h">
+      <Filter>Fichiers sources\video\vdp2</Filter>
+    </ClInclude>
+    <ClInclude Include="src\video\opengl\opengl.h">
+      <Filter>Fichiers sources\video\opengl</Filter>
+    </ClInclude>
+    <ClInclude Include="src\video\opengl\opengl_common.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="src\video\opengl\opengl_render.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="src\video\opengl\opengl_shaders.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="src\video\opengl\opengl_texturing.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="src\video\opengl\opengl_utilities.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="src\memory_constants.h">
+      <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

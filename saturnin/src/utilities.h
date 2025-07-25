@@ -285,4 +285,26 @@ inline auto readAs32(const std::span<const u8> span) -> u32 { return span[0] << 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 inline auto readAs16(const std::span<const u8> span) -> u16 { return span[0] << 8 | span[1]; };
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \fn	template<typename T, unsigned B> inline T signExtend(const T x)
+///
+/// \brief	Generic sign extension.
+/// 		int r = signExtend<signed int,9>(x);  // sign extend 9 bit number x to r
+///
+/// \tparam	T	Type of the resulting sign extended number.
+/// \tparam	B	Number of bits of the number to sign extend.
+/// \param 	x	Number to sign extent.
+///
+/// \returns	A sign extended number of type T.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+template<typename T, unsigned B>
+inline T signExtend(const T x) {
+    struct {
+        T x : B;
+    } s;
+    return s.x = x;
+}
+
 } // namespace saturnin::utilities

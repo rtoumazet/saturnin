@@ -27,17 +27,18 @@ jobs:
     runs-on: windows-latest
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
+        ref: vdp2-cache
         fetch-depth: 0 # Shallow clones should be disabled for a better relevancy of analysis    
 
     - name: Add MSBuild to PATH
-      uses: microsoft/setup-msbuild@v1.1
+      uses: microsoft/setup-msbuild@v2
 
     - name: Restore from cache and install vcpkg
-      uses: lukka/run-vcpkg@v10
+      uses: lukka/run-vcpkg@v11
       with:
-        vcpkgGitCommitId: '08c4e71048eb54733d9b180a28b9b1d7ce637454' #2023.12.05
+        vcpkgGitCommitId: 'd7a13425bd701f4897dd5ec54a81a6882d0d21e5' #2025.04.24
         vcpkgDirectory: D:\a\saturnin\saturnin\vcpkg
         
     - name: Install vcpkg dependencies
@@ -70,4 +71,5 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }} # Put the name of your token here
       run: |
-        sonar-scanner --define sonar.cfamily.build-wrapper-output="${{ env.BUILD_WRAPPER_OUT_DIR }}"
+        # sonar-scanner --define sonar.cfamily.build-wrapper-output="${{ env.BUILD_WRAPPER_OUT_DIR }}"
+        sonar-scanner --define sonar.cfamily.compile-commands="${{ env.BUILD_WRAPPER_OUT_DIR }}/compile_commands.json"

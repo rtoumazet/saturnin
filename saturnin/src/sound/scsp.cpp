@@ -85,6 +85,9 @@ void Scsp::scspHostInterruptHandler() {
 
 void Scsp::scsp68kInterruptHandler(const u32 level) { m68k_set_irq(level); }
 
+// static
+auto Scsp::ram() -> std::array<u8, core::sound_ram_size>& { return external_access_modules_.memory()->sound_ram_; }
+
 auto Scsp::read8(const u32 addr) const -> u8 {
     auto local_addr = addr & sound_ram_mask;
     if (local_addr < sound_ram_upper_boundary) { return rawRead<u8>(Scsp::ram(), local_addr ^ 1); }

@@ -33,7 +33,7 @@
 #include <saturnin/src/video/texture.h>
 #include <saturnin/src/video/vdp1.h>
 #include <saturnin/src/video/vdp1_part.h>
-#include <saturnin/src/video/vdp2.h>
+#include <saturnin/src/video/vdp2/vdp2.h>
 
 using namespace gl21;
 using namespace gl21ext;
@@ -46,7 +46,7 @@ using core::Config;
 using core::EmulatorContext;
 using core::Log;
 using core::Logger;
-using core::rawRead;
+// using core::rawRead;
 using core::Smpc;
 using core::tr;
 
@@ -95,6 +95,17 @@ void Vdp1::onVblankIn() {
     }
 }
 
+auto Vdp1::vdp1Parts() const -> std::vector<Vdp1Part> { return vdp1_parts_; }
+
+auto Vdp1::vdp1Parts(const u8 priority) const -> std::vector<Vdp1Part> {
+    auto parts = std::vector<video::Vdp1Part>{};
+    std::ranges::copy_if(vdp1_parts_, std::back_inserter(parts), [priority](const Vdp1Part& part) {
+        return part.common_vdp_data_.priority == priority;
+    });
+
+    return parts;
+}
+
 auto Vdp1::getDebugDrawList() const -> std::vector<std::string> {
     std::vector<std::string> debug_draw_list;
     for (const auto& p : vdp1_parts_) {
@@ -115,7 +126,7 @@ void Vdp1::populateRenderData() {
     vdp1_parts_.clear();
     // Texture::discardCache(modules_.opengl(), VdpType::vdp1);
 
-    color_offset_ = modules_.vdp2()->getColorOffset(Layer::sprite);
+    color_offset_ = modules_.vdp2()->getColorOffset(VdpLayer::sprite);
 
     while ((cmdctrl >> CmdCtrl::end_enum) == CmdCtrl::EndBit::command_selection_valid) {
         auto skip_table = false;
@@ -183,12 +194,8 @@ void Vdp1::populateRenderData() {
                     break;
                 }
                 case local_coordinate: {
-                    vdp1_parts_.emplace_back(modules_,
-                                             DrawType::not_drawable,
-                                             current_table_address,
-                                             cmdctrl,
-                                             cmdlink,
-                                             color_offset_.as_float);
+                    vdp1_parts_
+                        .emplace_back(modules_, DrawType::not_drawable, current_table_address, cmdctrl, cmdlink, color_offset_);
                     break;
                 }
                 case normal_sprite_draw: {
@@ -197,7 +204,7 @@ void Vdp1::populateRenderData() {
                                              current_table_address,
                                              cmdctrl,
                                              cmdlink,
-                                             color_offset_.as_float);
+                                             color_offset_);
                     break;
                 }
                 case scaled_sprite_draw: {
@@ -206,7 +213,7 @@ void Vdp1::populateRenderData() {
                                              current_table_address,
                                              cmdctrl,
                                              cmdlink,
-                                             color_offset_.as_float);
+                                             color_offset_);
                     break;
                 }
                 case distorted_sprite_draw: {
@@ -215,7 +222,7 @@ void Vdp1::populateRenderData() {
                                              current_table_address,
                                              cmdctrl,
                                              cmdlink,
-                                             color_offset_.as_float);
+                                             color_offset_);
                     break;
                 }
                 case polygon_draw: {
@@ -224,21 +231,16 @@ void Vdp1::populateRenderData() {
                                              current_table_address,
                                              cmdctrl,
                                              cmdlink,
-                                             color_offset_.as_float);
+                                             color_offset_);
                     break;
                 }
                 case polyline_draw: {
-                    vdp1_parts_.emplace_back(modules_,
-                                             DrawType::polyline,
-                                             current_table_address,
-                                             cmdctrl,
-                                             cmdlink,
-                                             color_offset_.as_float);
+                    vdp1_parts_
+                        .emplace_back(modules_, DrawType::polyline, current_table_address, cmdctrl, cmdlink, color_offset_);
                     break;
                 }
                 case line_draw: {
-                    vdp1_parts_
-                        .emplace_back(modules_, DrawType::line, current_table_address, cmdctrl, cmdlink, color_offset_.as_float);
+                    vdp1_parts_.emplace_back(modules_, DrawType::line, current_table_address, cmdctrl, cmdlink, color_offset_);
                     break;
                 }
                 default: {
@@ -295,5 +297,7 @@ void Vdp1::write16(const u32 addr, const u16 data) {
         default: Log::warning(Logger::vdp1, core::tr("Unimplemented register write {:#010x}"), addr);
     }
 }
+
+auto Vdp1::vdp2() const -> const Vdp2* { return modules_.vdp2(); }
 
 } // namespace saturnin::video

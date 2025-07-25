@@ -30,16 +30,17 @@
 #include <saturnin/src/sh2/basic_interpreter/sh2_instructions.h>
 #include <saturnin/src/smpc.h> // SaturnDigitalPad, PeripheralKey
 #include <saturnin/src/tests.h>
-#include <saturnin/src/thread_pool.h>                 // ThreadPool
-#include <saturnin/src/utilities.h>                   // stringToVector, format
-#include <saturnin/src/cdrom/scsi.h>                  // ScsiDriveInfo
-#include <saturnin/src/video/opengl.h>                // Opengl
-#include <saturnin/src/video/texture.h>               // Texture
-#include <saturnin/src/video/vdp1.h>                  // Vdp1
-#include <saturnin/src/video/vdp2.h>                  // vram_timing_size
-#include <saturnin/lib/imgui/imgui_custom_controls.h> // peripheralKeyCombo
-#include <saturnin/lib/imgui/imgui_memory_editor.h>   // MemoryEditor
-#include <saturnin/lib/imgui/imfilebrowser.h>         // imfilebrowser
+#include <saturnin/src/thread_pool.h>                   // ThreadPool
+#include <saturnin/src/utilities.h>                     // stringToVector, format
+#include <saturnin/src/cdrom/scsi.h>                    // ScsiDriveInfo
+#include <saturnin/src/video/opengl/opengl_texturing.h> // OpenglTexturing
+#include <saturnin/src/video/opengl/opengl_render.h>    // OpenglRender
+#include <saturnin/src/video/texture.h>                 // Texture
+#include <saturnin/src/video/vdp1.h>                    // Vdp1
+#include <saturnin/src/video/vdp2/vdp2.h>               // vram_timing_size
+#include <saturnin/lib/imgui/imgui_custom_controls.h>   // peripheralKeyCombo
+#include <saturnin/lib/imgui/imgui_memory_editor.h>     // MemoryEditor
+#include <saturnin/lib/imgui/imfilebrowser.h>           // imfilebrowser
 
 #if defined(__clang__)
 #pragma clang diagnostic ignored "-Wformat-security" // warning: format string is not a string literal
@@ -67,6 +68,9 @@ using core::tr;
 using sh2::Sh2Register;
 using sh2::Sh2Type;
 using video::Vdp2;
+
+constexpr auto stv_player_1 = u8{1};
+constexpr auto stv_player_2 = u8{2};
 
 void showImguiDemoWindow(const bool show_window) {
     // 3. Show the ImGui test window. Most of the sample code is in ImGui::ShowTestWindow()
@@ -502,7 +506,7 @@ void showMainMenu(GuiConfiguration& conf, core::EmulatorContext& state) {
 
                             ImGui::BeginChild("ChildSaturnPlayer1", ImVec2(child_width, child_height), true, window_flags);
 
-                            ImGui::PushItemWidth(ImGui::GetWindowContentRegionWidth() - second_column_offset);
+                            ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x - second_column_offset);
 
                             ImGui::CenteredText(tr("Player 1"));
 
@@ -583,7 +587,7 @@ void showMainMenu(GuiConfiguration& conf, core::EmulatorContext& state) {
                                 state.config()->readPeripheralConfiguration(core::AccessKeys::cfg_controls_saturn_player_2));
 
                             ImGui::BeginChild("ChildSaturnPlayer2", ImVec2(child_width, child_height), true, window_flags);
-                            ImGui::PushItemWidth(ImGui::GetWindowContentRegionWidth() - second_column_offset);
+                            ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x - second_column_offset);
 
                             ImGui::CenteredText(tr("Player 2"));
 
@@ -707,44 +711,7 @@ void showMainMenu(GuiConfiguration& conf, core::EmulatorContext& state) {
                             controls.fromConfig(
                                 state.config()->readPeripheralConfiguration(core::AccessKeys::cfg_controls_stv_player_1));
 
-                            constexpr auto child_height = u16{220};
-                            ImGui::BeginChild("ChildStvPlayer1", ImVec2(child_width, child_height), true, window_flags);
-
-                            ImGui::PushItemWidth(ImGui::GetWindowContentRegionWidth() - second_column_offset);
-
-                            ImGui::CenteredText(tr("Player 1"));
-
-                            ImGui::TextUnformatted(tr("Left").c_str());
-                            ImGui::SameLine(second_column_offset);
-                            ImGui::peripheralKeyCombo(keys, controls.direction_left, "direction_left");
-
-                            ImGui::TextUnformatted(tr("Right").c_str());
-                            ImGui::SameLine(second_column_offset);
-                            ImGui::peripheralKeyCombo(keys, controls.direction_right, "direction_right");
-
-                            ImGui::TextUnformatted(tr("Up").c_str());
-                            ImGui::SameLine(second_column_offset);
-                            ImGui::peripheralKeyCombo(keys, controls.direction_up, "direction_up");
-
-                            ImGui::TextUnformatted(tr("Down").c_str());
-                            ImGui::SameLine(second_column_offset);
-                            ImGui::peripheralKeyCombo(keys, controls.direction_down, "direction_down");
-
-                            ImGui::TextUnformatted(tr("Button 1").c_str());
-                            ImGui::SameLine(second_column_offset);
-                            ImGui::peripheralKeyCombo(keys, controls.button_1, "button_1");
-
-                            ImGui::TextUnformatted(tr("Button 2").c_str());
-                            ImGui::SameLine(second_column_offset);
-                            ImGui::peripheralKeyCombo(keys, controls.button_2, "button_2");
-
-                            ImGui::TextUnformatted(tr("Button 3").c_str());
-                            ImGui::SameLine(second_column_offset);
-                            ImGui::peripheralKeyCombo(keys, controls.button_3, "button_3");
-
-                            ImGui::TextUnformatted(tr("Button 4").c_str());
-                            ImGui::SameLine(second_column_offset);
-                            ImGui::peripheralKeyCombo(keys, controls.button_4, "button_4");
+                            formatStvPlayerControls(second_column_offset, keys, controls, stv_player_1);
 
                             state.config()->writeValue(core::AccessKeys::cfg_controls_stv_player_1,
                                                        controls.toConfig(PeripheralLayout::current_layout));
@@ -758,51 +725,13 @@ void showMainMenu(GuiConfiguration& conf, core::EmulatorContext& state) {
                             controls.fromConfig(
                                 state.config()->readPeripheralConfiguration(core::AccessKeys::cfg_controls_stv_player_2));
 
-                            constexpr auto child_height = u16{220};
-                            ImGui::BeginChild("ChildStvPlayer2", ImVec2(child_width, child_height), true, window_flags);
-
-                            ImGui::PushItemWidth(ImGui::GetWindowContentRegionWidth() - second_column_offset);
-
-                            ImGui::CenteredText(tr("Player 2"));
-
-                            ImGui::TextUnformatted(tr("Left").c_str());
-                            ImGui::SameLine(second_column_offset);
-                            ImGui::peripheralKeyCombo(keys, controls.direction_left, "direction_left");
-
-                            ImGui::TextUnformatted(tr("Right").c_str());
-                            ImGui::SameLine(second_column_offset);
-                            ImGui::peripheralKeyCombo(keys, controls.direction_right, "direction_right");
-
-                            ImGui::TextUnformatted(tr("Up").c_str());
-                            ImGui::SameLine(second_column_offset);
-                            ImGui::peripheralKeyCombo(keys, controls.direction_up, "direction_up");
-
-                            ImGui::TextUnformatted(tr("Down").c_str());
-                            ImGui::SameLine(second_column_offset);
-                            ImGui::peripheralKeyCombo(keys, controls.direction_down, "direction_down");
-
-                            ImGui::TextUnformatted(tr("Button 1").c_str());
-                            ImGui::SameLine(second_column_offset);
-                            ImGui::peripheralKeyCombo(keys, controls.button_1, "button_1");
-
-                            ImGui::TextUnformatted(tr("Button 2").c_str());
-                            ImGui::SameLine(second_column_offset);
-                            ImGui::peripheralKeyCombo(keys, controls.button_2, "button_2");
-
-                            ImGui::TextUnformatted(tr("Button 3").c_str());
-                            ImGui::SameLine(second_column_offset);
-                            ImGui::peripheralKeyCombo(keys, controls.button_3, "button_3");
-
-                            ImGui::TextUnformatted(tr("Button 4").c_str());
-                            ImGui::SameLine(second_column_offset);
-                            ImGui::peripheralKeyCombo(keys, controls.button_4, "button_4");
+                            formatStvPlayerControls(second_column_offset, keys, controls, stv_player_2);
 
                             state.config()->writeValue(core::AccessKeys::cfg_controls_stv_player_2,
                                                        controls.toConfig(PeripheralLayout::current_layout));
 
                             ImGui::EndChild();
                         }
-
                         ImGui::EndTabItem();
                     }
                     ImGui::EndTabBar();
@@ -846,6 +775,11 @@ void showMainMenu(GuiConfiguration& conf, core::EmulatorContext& state) {
                 ImGui::TextUnformatted(tr("Memory").c_str());
                 ImGui::SameLine(second_column_offset);
                 setupLog(core::AccessKeys::cfg_log_memory, "##log_memory", levels);
+
+                // opengl
+                ImGui::TextUnformatted(tr("OpenGL").c_str());
+                ImGui::SameLine(second_column_offset);
+                setupLog(core::AccessKeys::cfg_log_opengl, "##log_opengl", levels);
 
                 // sh2
                 ImGui::TextUnformatted(tr("Sh2").c_str());
@@ -944,9 +878,57 @@ void showMainMenu(GuiConfiguration& conf, core::EmulatorContext& state) {
     }
 }
 
+void formatStvPlayerControls(const u8                          second_column_offset,
+                             const std::vector<PeripheralKey>& keys,
+                             StvPlayerControls&                controls,
+                             const u8                          player_number) {
+    constexpr auto child_height = u16{220};
+    constexpr auto child_width  = u16{260};
+    auto           window_flags = ImGuiWindowFlags{ImGuiWindowFlags_None};
+
+    const auto child_name = std::string("ChildStvPlayer").append(std::to_string(player_number));
+    ImGui::BeginChild(child_name.c_str(), ImVec2(child_width, child_height), true, window_flags);
+
+    ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x - second_column_offset);
+
+    const auto player_name = std::string(tr("Player ")).append(std::to_string(player_number));
+    ImGui::CenteredText(player_name);
+
+    ImGui::TextUnformatted(tr("Left").c_str());
+    ImGui::SameLine(second_column_offset);
+    ImGui::peripheralKeyCombo(keys, controls.direction_left, "direction_left");
+
+    ImGui::TextUnformatted(tr("Right").c_str());
+    ImGui::SameLine(second_column_offset);
+    ImGui::peripheralKeyCombo(keys, controls.direction_right, "direction_right");
+
+    ImGui::TextUnformatted(tr("Up").c_str());
+    ImGui::SameLine(second_column_offset);
+    ImGui::peripheralKeyCombo(keys, controls.direction_up, "direction_up");
+
+    ImGui::TextUnformatted(tr("Down").c_str());
+    ImGui::SameLine(second_column_offset);
+    ImGui::peripheralKeyCombo(keys, controls.direction_down, "direction_down");
+
+    ImGui::TextUnformatted(tr("Button 1").c_str());
+    ImGui::SameLine(second_column_offset);
+    ImGui::peripheralKeyCombo(keys, controls.button_1, "button_1");
+
+    ImGui::TextUnformatted(tr("Button 2").c_str());
+    ImGui::SameLine(second_column_offset);
+    ImGui::peripheralKeyCombo(keys, controls.button_2, "button_2");
+
+    ImGui::TextUnformatted(tr("Button 3").c_str());
+    ImGui::SameLine(second_column_offset);
+    ImGui::peripheralKeyCombo(keys, controls.button_3, "button_3");
+
+    ImGui::TextUnformatted(tr("Button 4").c_str());
+    ImGui::SameLine(second_column_offset);
+    ImGui::peripheralKeyCombo(keys, controls.button_4, "button_4");
+}
+
 void showRenderingWindow(core::EmulatorContext& state) {
     // The rendering window is stretched to fill the area of the main window minus the core window.
-    // glfwMakeContextCurrent(state.openglWindow());
     auto width  = s32{};
     auto height = s32{};
     glfwGetWindowSize(state.openglWindow(), &width, &height);
@@ -970,16 +952,23 @@ void showRenderingWindow(core::EmulatorContext& state) {
     ImGui::Begin("Video rendering", nullptr, flags);
 
     if (state.opengl()->areFbosInitialized()) {
-        if (state.opengl()->isThereSomethingToRender()) {
-            state.opengl()->generateTextures();
-            state.opengl()->render();
+        if (state.opengl()->render()->isThereSomethingToRender()) {
+            state.opengl()->texturing()->generateTextures();
+            state.opengl()->render()->renderSelector();
         }
         const auto alpha = 0xff;
-        gui::addTextureToDrawList(state.opengl()->getRenderedBufferTextureId(), width, height, alpha);
+        gui::addTextureToDrawList(state.opengl()->getRenderedBufferTextureId(video::GuiTextureType::render_buffer),
+                                  width,
+                                  height,
+                                  alpha);
         if ((state.debugStatus() != core::DebugStatus::disabled) && state.opengl()->isSaturnResolutionSet()) {
-            state.opengl()->renderVdp1DebugOverlay();
+            state.opengl()->render()->renderVdp1DebugOverlay();
             const auto overlay_alpha = 0x80;
-            gui::addTextureToDrawList(state.opengl()->vdp1DebugOverlayTextureId(), width, height, overlay_alpha);
+            // gui::addTextureToDrawList(state.opengl()->vdp1DebugOverlayTextureId(), width, height, overlay_alpha);
+            gui::addTextureToDrawList(state.opengl()->getRenderedBufferTextureId(video::GuiTextureType::vdp1_debug_buffer),
+                                      width,
+                                      height,
+                                      overlay_alpha);
         }
     }
     ImGui::Text("%s", state.vdp2()->fps().c_str());
@@ -1423,7 +1412,7 @@ void showDebugVdp1Window(core::EmulatorContext& state, bool* opened) {
             // Draw list
             ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2());
             const auto child_size = ImVec2(310, 280);
-            ImGui::BeginChild("ChildDrawList", child_size, true, window_flags | ImGuiWindowFlags_MenuBar);
+            ImGui::BeginChild("ChildDrawList", child_size, true);
 
             if (ImGui::BeginMenuBar()) {
                 ImGui::TextUnformatted(tr("Draw list").c_str());
@@ -1457,19 +1446,9 @@ void showDebugVdp1Window(core::EmulatorContext& state, bool* opened) {
                 const auto content_size = ImVec2(512, 280);
 
                 ImGui::SetNextWindowContentSize(content_size);
-                ImGui::BeginChild("ChildPartDetail",
-                                  child_size,
-                                  true,
-                                  window_flags | ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_HorizontalScrollbar
-                                      | ImGuiWindowFlags_AlwaysAutoResize);
-
-                if (ImGui::BeginMenuBar()) {
-                    ImGui::TextUnformatted(draw_list[current_part_idx].debugHeader().c_str());
-
-                    ImGui::EndMenuBar();
-                }
+                ImGui::BeginChild("ChildPartDetail", child_size, true);
                 ImGui::TextWithColors(draw_list[current_part_idx].getDebugDetail().c_str());
-                state.opengl()->partToHighlight(draw_list[current_part_idx]);
+                state.opengl()->render()->partToHighlight(draw_list[current_part_idx]);
                 ImGui::EndChild();
             }
         }
@@ -1480,15 +1459,15 @@ void showDebugVdp1Window(core::EmulatorContext& state, bool* opened) {
             if (!draw_list.empty()) {
                 const auto child_size = ImVec2(260, 280);
                 ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2());
-                ImGui::BeginChild("ChildPartTexture", child_size, true, window_flags | ImGuiWindowFlags_MenuBar);
+                ImGui::BeginChild("ChildPartTexture", child_size, true);
 
                 if (ImGui::BeginMenuBar()) {
                     ImGui::TextUnformatted(tr("Texture").c_str());
                     ImGui::EndMenuBar();
                 }
 
-                if (draw_list[current_part_idx].textureKey() != 0) {
-                    const auto& texture = video::Texture::getTexture(draw_list[current_part_idx].textureKey());
+                if (draw_list[current_part_idx].common_vdp_data_.texture_key != 0) {
+                    const auto& texture = video::Texture::getTexture(draw_list[current_part_idx].common_vdp_data_.texture_key);
                     // Preview is 260*260 max. When image ratio isn't 1:1, preview size must be adapted to keep the image
                     // ratio.
                     const auto max_size     = Size{260, 260};
@@ -1497,10 +1476,11 @@ void showDebugVdp1Window(core::EmulatorContext& state, bool* opened) {
 
                     static auto opengl_id = 0;
                     if (texture) {
-                        if (opengl_id != 0) { state.opengl()->deleteTexture(opengl_id); }
-                        opengl_id
-                            = state.opengl()->generateTexture((*texture)->width(), (*texture)->height(), (*texture)->rawData());
-                        ImGui::Image(reinterpret_cast<ImTextureID>(static_cast<uptr>(opengl_id)), preview_size);
+                        if (opengl_id != 0) { video::OpenglTexturing::deleteTexture(opengl_id); }
+                        opengl_id = video::OpenglTexturing::generateTexture((*texture)->width(),
+                                                                            (*texture)->height(),
+                                                                            (*texture)->rawData());
+                        ImGui::Image(static_cast<uptr>(opengl_id), preview_size);
                     }
                 }
                 ImGui::EndChild();
@@ -1758,11 +1738,11 @@ void showDebugVdp2Window(core::EmulatorContext& state, bool* opened) {
 
                     if (state.debugStatus() != core::DebugStatus::disabled) {
                         if (state.vdp2()->screenInDebug() != video::ScrollScreen::none) {
-                            state.opengl()->renderVdp2DebugLayer(state);
+                            state.opengl()->render()->renderVdp2DebugLayer(state);
                         }
-                        const auto tex_id       = state.opengl()->vdp2DebugLayerTextureId();
+                        const auto tex_id       = state.opengl()->texturing()->vdp2DebugLayerTextureId();
                         const auto preview_size = ImVec2(500, 500);
-                        ImGui::Image(reinterpret_cast<ImTextureID>(static_cast<uptr>(tex_id)), preview_size);
+                        ImGui::Image(static_cast<uptr>(tex_id), preview_size);
                     } else {
                         ImGui::TextUnformatted(tr("Pause emulation to display debug data ...").c_str());
                     }
@@ -1861,7 +1841,7 @@ void showDebugTexturesWindow(core::EmulatorContext& state, bool* opened) {
 
                     if (!keys_list.empty()) {
                         const auto& texture_key = keys_list[current_texture_idx].second;
-                        ImGui::TextUnformatted(state.opengl()->getOpenglTextureDetails(texture_key).c_str());
+                        ImGui::TextUnformatted(state.opengl()->texturing()->getOpenglTextureDetails(texture_key).c_str());
                     }
                     ImGui::EndChild();
 
@@ -1879,14 +1859,14 @@ void showDebugTexturesWindow(core::EmulatorContext& state, bool* opened) {
                             // Reloading texture data from the new selected entry.
                             const auto texture = video::Texture::getTexture(texture_key);
                             if (texture) {
-                                if (opengl_id != 0) { state.opengl()->deleteTexture(opengl_id); }
-                                opengl_id = state.opengl()->generateTexture((*texture)->width(),
-                                                                            (*texture)->height(),
-                                                                            (*texture)->rawData());
+                                if (opengl_id != 0) { video::OpenglTexturing::deleteTexture(opengl_id); }
+                                opengl_id = video::OpenglTexturing::generateTexture((*texture)->width(),
+                                                                                    (*texture)->height(),
+                                                                                    (*texture)->rawData());
                             }
                             previous_texture_idx = current_texture_idx;
                         }
-                        ImGui::Image(reinterpret_cast<ImTextureID>(static_cast<uptr>(opengl_id)), preview_size);
+                        ImGui::Image(static_cast<uptr>(opengl_id), preview_size);
                     }
 
                     ImGui::EndChild();
@@ -1894,15 +1874,16 @@ void showDebugTexturesWindow(core::EmulatorContext& state, bool* opened) {
                 {
                     // Full layer display
                     const auto& key        = keys_list[current_texture_idx].second;
-                    const auto  opengl_tex = state.opengl()->getOpenglTexture(key);
+                    const auto  opengl_tex = state.opengl()->texturing()->getOpenglTexture(key);
 
-                    auto tex_id = state.opengl()->generateTextureFromTextureArrayLayer(opengl_tex->texture_array_index, key);
+                    auto tex_id
+                        = state.opengl()->texturing()->generateTextureFromTextureArrayLayer(video::GuiTextureType::layer_buffer,
+                                                                                            static_cast<u8>(key));
                     ImGui::SetCursorPos(layer_window_pos);
                     const auto child_size = ImVec2(area_3_width, ImGui::GetContentRegionAvail().y);
                     ImGui::BeginChild("ChildTextureLayer", child_size, false, window_flags);
                     const auto preview_size = ImGui::GetContentRegionAvail();
-                    ImGui::Image(reinterpret_cast<ImTextureID>(static_cast<uptr>(tex_id)), preview_size);
-
+                    ImGui::Image(static_cast<uptr>(tex_id), preview_size);
                     ImGui::EndChild();
                 }
 
@@ -1918,11 +1899,13 @@ void showDebugTexturesWindow(core::EmulatorContext& state, bool* opened) {
                 static auto layers        = std::vector<std::string>{"0", "1", "2", "3", "4", "5"};
                 static auto current_layer = int{};
                 if (ImGui::Combo("Layer", &current_layer, layers)) {}
-                auto tex_id = state.opengl()->generateTextureFromTextureArrayLayer(current_layer, 0);
+                auto tex_id
+                    = state.opengl()->texturing()->generateTextureFromTextureArrayLayer(video::GuiTextureType::layer_buffer,
+                                                                                        static_cast<u8>(current_layer));
 
                 ImGui::BeginChild("child_part_texture", child_size, true, window_flags);
                 const auto preview_size = ImVec2(500, 500);
-                ImGui::Image(reinterpret_cast<ImTextureID>(static_cast<uptr>(tex_id)), preview_size);
+                ImGui::Image(static_cast<uptr>(tex_id), preview_size);
 
                 ImGui::EndChild();
                 ImGui::PopStyleVar();

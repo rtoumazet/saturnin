@@ -33,92 +33,26 @@
 #include <vector>    // vector
 #include <Windows.h> // VK constants
 #define GLFW_INCLUDE_NONE
+#include <saturnin/src/emulator_context.h>
+#include <saturnin/src/emulator_modules.h> // EmulatorModules
+#include <saturnin/src/cdrom/cdrom.h>
+#include <saturnin/src/video/vdp1.h>
 #include <saturnin/src/emulator_defs.h>
 #include <saturnin/src/emulator_enums.h>
-#include <saturnin/src/emulator_modules.h> // EmulatorModules
-#include <saturnin/src/log.h>              // Log, Logger
+#include <saturnin/src/log.h> // Log, Logger
+#include <saturnin/src/memory_constants.h>
 #include <saturnin/src/scu.h>
+#include <saturnin/src/sound/scsp.h>
 #include <saturnin/src/smpc.h>
 #include <saturnin/src/utilities.h> // toUnderlying
-
-// Forward declarations
-namespace saturnin::cdrom {
-class Cdrom;
-}
-namespace saturnin::sh2 {
-class Sh2;
-enum class Sh2Type;
-} // namespace saturnin::sh2
-namespace sh2 = saturnin::sh2;
-
-namespace saturnin::video {
-class Vdp2;
-} // namespace saturnin::video
-
-namespace saturnin::sound {
-class Scsp;
-}
 
 namespace util = saturnin::utilities;
 
 namespace saturnin::core {
 
-using AreaMask = std::optional<std::pair<u8*, u32>>;
+using AreaMask = std::optional<std::tuple<u8*, u32>>; // pointer to area data, data mask
 
-// Forward declarations
-class EmulatorContext;
-class Config;
-class Scu;
-class Smpc;
-
-constexpr auto workram_low_size             = u32{0x100000};
-constexpr auto workram_high_size            = u32{0x100000};
-constexpr auto rom_size                     = u32{0x80000};
-constexpr auto smpc_size                    = u8{0x80};
-constexpr auto backup_ram_size              = u32{0x10000};
-constexpr auto scu_size                     = u8{0xD0};
-constexpr auto vdp2_vram_size               = u32{0x80000};
-constexpr auto vdp2_cram_size               = u16{0x1000};
-constexpr auto vdp2_registers_size          = u16{0x200};
-constexpr auto vdp1_vram_size               = u32{0x80000};
-constexpr auto vdp1_framebuffer_size        = u32{0x40000};
-constexpr auto vdp1_registers_size          = u8{0x18};
-constexpr auto sound_ram_size               = u32{0x100000};
-constexpr auto stv_io_size                  = u16{0x100};
-constexpr auto cart_size                    = u32{0x3000000};
-constexpr auto rom_memory_mask              = u32{0x7FFFF};
-constexpr auto smpc_memory_mask             = u32{0x7F};
-constexpr auto backup_ram_memory_mask       = u32{0xFFFF};
-constexpr auto workram_low_memory_mask      = u32{0xFFFFF};
-constexpr auto stv_io_memory_mask           = u32{0xFF};
-constexpr auto cart_memory_mask             = u32{0x01FFFFFF};
-constexpr auto vdp1_ram_memory_mask         = u32{0x7FFFF};
-constexpr auto vdp1_framebuffer_memory_mask = u32{0x3FFFF};
-constexpr auto vdp1_registers_memory_mask   = u32{0x1F};
-constexpr auto vdp2_vram_memory_mask        = u32{0x7FFFF};
-constexpr auto vdp2_cram_memory_mask        = u32{0xFFF};
-constexpr auto vdp2_registers_memory_mask   = u32{0x1FF};
-constexpr auto scu_memory_mask              = u32{0xFF};
-constexpr auto workram_high_memory_mask     = u32{0xFFFFF};
-constexpr auto stv_io_port_a                = u32{0x400001};
-constexpr auto stv_io_port_b                = u32{0x400003};
-constexpr auto stv_io_port_c                = u32{0x400005};
-constexpr auto stv_io_port_d                = u32{0x400007};
-
-constexpr auto stv_protection_register_address = u32{0x04FFFFFC};
-constexpr auto stv_protection_enabled          = u32{0x04FFFFF1};
-static auto    stv_protection_offset           = u32{};
-
-constexpr auto memory_handler_size = u32{0x10000};
-
-constexpr auto cart_absolute_address = u32{0x02000000};
-
-constexpr auto full_memory_map_size = u32{0x10000000};
-
-constexpr auto vdp2_page_disp           = u8{11};
-constexpr auto vdp2_minimum_page_size   = u16{0x800};
-constexpr auto vdp2_bitmap_disp         = u8{17};
-constexpr auto vdp2_minimum_bitmap_size = u32{0x20000};
+static auto stv_protection_offset = u32{};
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \enum   StvIOPort
@@ -246,6 +180,8 @@ struct BinaryFileConfiguration {
     u32         start_address;
     bool        is_auto_started;
 };
+
+// namespace
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \class  Memory
@@ -465,21 +401,21 @@ class Memory {
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn	auto Memory::read(const MemoryMapArea area, const u32 start_addr, const u32 size) -> std::vector<u32>;
+    /// \fn	auto Memory::read(const u32 start_addr, const u32 size) -> std::vector<u8>;
     ///
     /// \brief	Reads a chunk of data from a memory area.
     ///
     /// \author	Runik
-    /// \date	27/07/2023
+    /// \date	09/02/2024
     ///
-    /// \param 	area	  	The area to read from.
     /// \param 	start_addr	The start address.
     /// \param 	size	  	The size to read.
     ///
-    /// \returns	A vector of u32.
+    /// \returns	A vector of u8.
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    auto read(const MemoryMapArea area, const u32 start_addr, const u32 size) const -> std::vector<u32>;
+    // auto read(const u32 start_addr, const u32 size) -> std::vector<u8>;
+    auto read(const u32 start_addr, const u32 size) -> std::span<u8>;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn void Memory::sendFrtInterruptToMaster() const;
@@ -561,18 +497,25 @@ class Memory {
 
     void burstCopy(const u32 source_address, const u32 destination_address, const u32 amount);
 
-    /// \name Context objects accessors
-    //@{
-    //[[nodiscard]] auto masterSh2() const -> sh2::Sh2*;
-    //[[nodiscard]] auto slaveSh2() const -> sh2::Sh2*;
-    //[[nodiscard]] auto scu() const -> Scu*;
-    //[[nodiscard]] auto config() const -> Config*;
-    //[[nodiscard]] auto smpc() const -> Smpc*;
-    //[[nodiscard]] auto openglWindow() const -> GLFWwindow*;
-    //[[nodiscard]] auto cdrom() const -> cdrom::Cdrom*;
-    //[[nodiscard]] auto vdp2() const -> video::Vdp2*;
-    //[[nodiscard]] auto scsp() const -> sound::Scsp*;
-    //@}
+    // template<typename T, typename U, size_t N>
+    // static auto rawRead(const std::array<U, N>& arr, u32 addr) -> T {
+    //     T return_value{arr[addr]};
+    //     for (u8 i = 1; i < sizeof(T); ++i) {
+    //         return_value <<= 8;
+    //         return_value |= arr[addr + i];
+    //     }
+    //     return return_value;
+    // }
+
+    // template<typename T, typename U, size_t N>
+    // static void rawWrite(std::array<U, N>& arr, const u32 addr, const T value) {
+    //     constexpr u8 bits_by_byte{std::numeric_limits<u8>::digits};
+    //     constexpr u8 offset{std::numeric_limits<T>::digits};
+    //     for (u8 i = 0; i <= sizeof(T) - 1; ++i) {
+    //         arr[addr + i] = (value >> (offset - (bits_by_byte * i + bits_by_byte))) & 0xFF;
+    //     }
+    // }
+
     EmulatorModules modules_;
 
   private:
@@ -754,25 +697,8 @@ auto defaultStvGame() -> StvGameConfiguration;
 
 auto defaultBinaryFile() -> BinaryFileConfiguration;
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \fn template<typename T, typename U, size_t N> auto rawRead(const std::array<U, N>& arr, u32 addr) -> T
-///
-/// \brief  Reads a value from an array. Usage : auto val = read&lt;u32&gt;(memory, 0);
-///         Don't forget to use the related mask against the address value not to be off bounds
-///         ...
-///
-/// \author Runik
-/// \date   07/06/2018
-///
-/// \tparam T   Generic type parameter.
-/// \tparam U   Generic type parameter.
-/// \tparam N   Type of the n.
-/// \param  arr     The array to read from.
-/// \param  addr    The address to read data from.
-///
-/// \return Data read.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
+// Reads a value from an array. Usage : auto val = read<&lt;u32&gt;(memory, 0);
+// Don't forget to use the related mask against the address value not to be off bounds ...
 template<typename T, typename U, size_t N>
 auto rawRead(const std::array<U, N>& arr, u32 addr) -> T {
     T return_value{arr[addr]};
@@ -812,17 +738,7 @@ void rawWrite(std::array<U, N>& arr, const u32 addr, const T value) {
 
 // Handlers
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \struct writeDummy
-///
-/// \brief  Write dummy handler.
-///
-/// \author Runik
-/// \date   18/12/2018
-///
-/// \tparam T   type of data to read (u8, u16 or u32).
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
+// Write dummy handler. T is the type of data to write (u8, u16 or u32).
 template<typename T>
 struct writeDummy {
     operator Memory::WriteType<T>() const {
@@ -834,17 +750,7 @@ struct writeDummy {
     }
 };
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \struct readDummy
-///
-/// \brief  Read dummy handler.
-///
-/// \author Runik
-/// \date   01/11/2018
-///
-/// \tparam T   type of data to read (u8, u16 or u32).
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
+// Read dummy handler. T is the type of data to read (u8, u16 or u32).
 template<typename T>
 struct readDummy {
     operator Memory::ReadType<T>() const {
@@ -856,17 +762,7 @@ struct readDummy {
     }
 };
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \struct readRom
-///
-/// \brief  ROM read handler.
-///
-/// \author Runik
-/// \date   01/11/2018
-///
-/// \tparam T   type of data to read (u8, u16 or u32).
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
+// ROM read handler. T is the type of data to read (u8, u16 or u32).
 template<typename T>
 struct readRom {
     operator Memory::ReadType<T>() const {
@@ -874,17 +770,7 @@ struct readRom {
     }
 };
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \struct readSmpc
-///
-/// \brief  SMPC read handler.
-///
-/// \author Runik
-/// \date   01/11/2018
-///
-/// \tparam T   type of data to read (u8, u16 or u32).
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
+// SMPC read handler. T is the type of data to read (u8, u16 or u32).
 template<typename T>
 struct readSmpc {
     operator Memory::ReadType<T>() const {
@@ -907,17 +793,7 @@ struct readSmpc<uint8_t> {
     }
 };
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \struct writeSmpc
-///
-/// \brief  SMPC write handler.
-///
-/// \author Runik
-/// \date   01/11/2018
-///
-/// \tparam T   type of data to write (u8, u16 or u32).
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
+// SMPC write handler. T is the type of data to write (u8, u16 or u32).
 template<typename T>
 struct writeSmpc {
     operator Memory::WriteType<T>() const {
@@ -1238,22 +1114,17 @@ struct writeCart<u8> {
     }
 };
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \struct readCdBlock
-///
-/// \brief  CD block read handler.
-///
-/// \author Runik
-/// \date   28/12/2018
-///
-/// \tparam T   type of data to read (u8, u16 or u32).
-////////////////////////////////////////////////////////////////////////////////////////////////////
+// template<typename T>
+// struct readCdBlock {
+//    operator Memory::ReadType<T>() const {
+//        return [](const Memory& m, const u32 addr) -> T { return m.modules_.cdrom()->readRegisters<T>(addr); };
+//    }
+//};
 
+// CD block read handler. T is the type of data to read (u8, u16 or u32).
 template<typename T>
 struct readCdBlock {
-    operator Memory::ReadType<T>() const {
-        return [](const Memory& m, const u32 addr) -> T { return m.modules_.cdrom()->readRegisters<T>(addr); };
-    }
+    operator Memory::ReadType<T>() const;
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1267,11 +1138,17 @@ struct readCdBlock {
 /// \tparam T   type of data to write (u8, u16 or u32).
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
+// template<typename T>
+// struct writeCdBlock {
+//     operator Memory::WriteType<T>() const {
+//         return [](Memory& m, const u32 addr, const T data) { m.modules_.cdrom()->writeRegisters<T>(addr, data); };
+//     }
+// };
+
+// CD block write handler.
 template<typename T>
 struct writeCdBlock {
-    operator Memory::WriteType<T>() const {
-        return [](Memory& m, const u32 addr, const T data) { m.modules_.cdrom()->writeRegisters<T>(addr, data); };
-    }
+    operator Memory::WriteType<T>() const;
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1285,11 +1162,17 @@ struct writeCdBlock {
 /// \tparam T   type of data to read (u8, u16 or u32).
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
+// template<typename T>
+// struct readScsp {
+//     operator Memory::ReadType<T>() const {
+//         return [](const Memory& m, const u32 addr) -> T { return m.modules_.scsp()->read<T>(addr); };
+//     }
+// };
+
+// SCSP read handler.
 template<typename T>
 struct readScsp {
-    operator Memory::ReadType<T>() const {
-        return [](const Memory& m, const u32 addr) -> T { return m.modules_.scsp()->read<T>(addr); };
-    }
+    operator Memory::ReadType<T>() const;
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1303,11 +1186,16 @@ struct readScsp {
 /// \tparam T   type of data to write (u8, u16 or u32).
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
+// template<typename T>
+// struct writeScsp {
+//     operator Memory::WriteType<T>() const {
+//         return [](Memory& m, const u32 addr, const T data) { m.modules_.scsp()->write<T>(addr, data); };
+//     }
+// };
+//  SCSP write handler.
 template<typename T>
 struct writeScsp {
-    operator Memory::WriteType<T>() const {
-        return [](Memory& m, const u32 addr, const T data) { m.modules_.scsp()->write<T>(addr, data); };
-    }
+    operator Memory::WriteType<T>() const;
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1404,11 +1292,15 @@ struct writeVdp1Framebuffer {
 /// \tparam T   type of data to read (u8, u16 or u32).
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
+// template<typename T>
+// struct readVdp1Registers {
+//     operator Memory::ReadType<T>() const {
+//         return [](const Memory& m, const u32 addr) -> T { return m.modules_.vdp1()->readRegisters<T>(addr); };
+//     }
+// };
 template<typename T>
 struct readVdp1Registers {
-    operator Memory::ReadType<T>() const {
-        return [](const Memory& m, const u32 addr) -> T { return m.modules_.vdp1()->readRegisters<T>(addr); };
-    }
+    operator Memory::ReadType<T>() const;
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1422,11 +1314,15 @@ struct readVdp1Registers {
 /// \tparam T   type of data to write (u8, u16 or u32).
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
+// template<typename T>
+// struct writeVdp1Registers {
+//     operator Memory::WriteType<T>() const {
+//         return [](Memory& m, const u32 addr, const T data) { m.modules_.vdp1()->writeRegisters<T>(addr, data); };
+//     }
+// };
 template<typename T>
 struct writeVdp1Registers {
-    operator Memory::WriteType<T>() const {
-        return [](Memory& m, const u32 addr, const T data) { m.modules_.vdp1()->writeRegisters<T>(addr, data); };
-    }
+    operator Memory::WriteType<T>() const;
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1519,11 +1415,15 @@ struct writeVdp2Cram {
 /// \tparam T   type of data to read (u8, u16 or u32).
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
+// template<typename T>
+// struct readVdp2Registers {
+//     operator Memory::ReadType<T>() const {
+//         return [](const Memory& m, const u32 addr) -> T { return m.modules_.vdp2()->readRegisters<T>(addr); };
+//     }
+// };
 template<typename T>
 struct readVdp2Registers {
-    operator Memory::ReadType<T>() const {
-        return [](const Memory& m, const u32 addr) -> T { return m.modules_.vdp2()->readRegisters<T>(addr); };
-    }
+    operator Memory::ReadType<T>() const;
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1537,14 +1437,18 @@ struct readVdp2Registers {
 /// \tparam T   type of data to write (u8, u16 or u32).
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
+// template<typename T>
+// struct writeVdp2Registers {
+//     operator Memory::WriteType<T>() const {
+//         return [](Memory& m, const u32 addr, const T data) {
+//             m.modules_.vdp2()->writeRegisters(addr, data);
+//             // :TODO: handle bitmap update
+//         };
+//     }
+// };
 template<typename T>
 struct writeVdp2Registers {
-    operator Memory::WriteType<T>() const {
-        return [](Memory& m, const u32 addr, const T data) {
-            m.modules_.vdp2()->writeRegisters(addr, data);
-            // :TODO: handle bitmap update
-        };
-    }
+    operator Memory::WriteType<T>() const;
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1636,18 +1540,8 @@ struct writeWorkramHigh {
     }
 };
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \fn inline bool isMasterSh2InOperation(const Memory& m);
-///
-/// \brief  Checks which SH2 is in operation.
-///
-/// \author Runik
-/// \date   01/01/2019
-///
-/// \return Returns true if master SH2 is in operation, false if slave SH2 is in operation.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-inline auto isMasterSh2InOperation(const Memory& m) -> bool;
+// Checks which SH2 is in operation. Returns true if master SH2 is in operation, false if slave SH2 is in operation.
+auto isMasterSh2InOperation(const Memory& m) -> bool;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \struct readSh2Registers
@@ -1660,14 +1554,18 @@ inline auto isMasterSh2InOperation(const Memory& m) -> bool;
 /// \tparam T   type of data to read (u8, u16 or u32).
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
+// template<typename T>
+// struct readSh2Registers {
+//     operator Memory::ReadType<T>() const {
+//         return []<typename T>(const Memory& m, const u32 addr) -> T {
+//             if (isMasterSh2InOperation(m)) { return m.modules_.masterSh2()->readRegisters<T>(addr); }
+//             return m.modules_.slaveSh2()->readRegisters<T>(addr);
+//         };
+//     }
+// };
 template<typename T>
 struct readSh2Registers {
-    operator Memory::ReadType<T>() const {
-        return [](const Memory& m, const u32 addr) -> T {
-            if (isMasterSh2InOperation(m)) { return m.modules_.masterSh2()->readRegisters<T>(addr); }
-            return m.modules_.slaveSh2()->readRegisters<T>(addr);
-        };
-    }
+    operator Memory::ReadType<T>() const;
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1681,14 +1579,18 @@ struct readSh2Registers {
 /// \tparam T   type of data to write (u8, u16 or u32).
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
+// template<typename T>
+// struct writeSh2Registers {
+//     operator Memory::WriteType<T>() const {
+//         return []<typename T>(Memory& m, const u32 addr, const T data) {
+//             if (isMasterSh2InOperation(m)) { return m.modules_.masterSh2()->writeRegisters<T>(addr, data); }
+//             return m.modules_.slaveSh2()->writeRegisters<T>(addr, data);
+//         };
+//     }
+// };
 template<typename T>
 struct writeSh2Registers {
-    operator Memory::WriteType<T>() const {
-        return [](Memory& m, const u32 addr, const T data) {
-            if (isMasterSh2InOperation(m)) { return m.modules_.masterSh2()->writeRegisters<T>(addr, data); }
-            return m.modules_.slaveSh2()->writeRegisters<T>(addr, data);
-        };
-    }
+    operator Memory::WriteType<T>() const;
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1760,14 +1662,18 @@ struct writeSlaveSh2Frt<u16> {
 /// \tparam	T	Generic type parameter.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
+// template<typename T>
+// struct writeCachePurgeArea {
+//     operator Memory::WriteType<T>() const {
+//         return [](Memory& m, const u32 addr, const T data) {
+//             if (isMasterSh2InOperation(m)) { return m.modules_.masterSh2()->writeCachePurgeArea<T>(addr, data); }
+//             return m.modules_.slaveSh2()->writeCachePurgeArea<T>(addr, data);
+//         };
+//     }
+// };
 template<typename T>
 struct writeCachePurgeArea {
-    operator Memory::WriteType<T>() const {
-        return [](Memory& m, const u32 addr, const T data) {
-            if (isMasterSh2InOperation(m)) { return m.modules_.masterSh2()->writeCachePurgeArea<T>(addr, data); }
-            return m.modules_.slaveSh2()->writeCachePurgeArea<T>(addr, data);
-        };
-    }
+    operator Memory::WriteType<T>() const;
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1781,14 +1687,18 @@ struct writeCachePurgeArea {
 /// \tparam T   type of data to read (u8, u16 or u32).
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
+// template<typename T>
+// struct readCacheAddresses {
+//     operator Memory::ReadType<T>() const {
+//         return []<typename T>(const Memory& m, const u32 addr) -> T {
+//             if (isMasterSh2InOperation(m)) { return m.modules_.masterSh2()->readCacheAddresses<T>(addr); }
+//             return m.modules_.slaveSh2()->readCacheAddresses<T>(addr);
+//         };
+//     }
+// };
 template<typename T>
 struct readCacheAddresses {
-    operator Memory::ReadType<T>() const {
-        return [](const Memory& m, const u32 addr) -> T {
-            if (isMasterSh2InOperation(m)) { return m.modules_.masterSh2()->readCacheAddresses<T>(addr); }
-            return m.modules_.slaveSh2()->readCacheAddresses<T>(addr);
-        };
-    }
+    operator Memory::ReadType<T>() const;
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1802,14 +1712,18 @@ struct readCacheAddresses {
 /// \tparam T   type of data to write (u8, u16 or u32).
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
+// template<typename T>
+// struct writeCacheAddresses {
+//     operator Memory::WriteType<T>() const {
+//         return [](Memory& m, const u32 addr, const T data) {
+//             if (isMasterSh2InOperation(m)) { return m.modules_.masterSh2()->writeCacheAddresses<T>(addr, data); }
+//             return m.modules_.slaveSh2()->writeCacheAddresses<T>(addr, data);
+//         };
+//     }
+// };
 template<typename T>
 struct writeCacheAddresses {
-    operator Memory::WriteType<T>() const {
-        return [](Memory& m, const u32 addr, const T data) {
-            if (isMasterSh2InOperation(m)) { return m.modules_.masterSh2()->writeCacheAddresses<T>(addr, data); }
-            return m.modules_.slaveSh2()->writeCacheAddresses<T>(addr, data);
-        };
-    }
+    operator Memory::WriteType<T>() const;
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1823,14 +1737,18 @@ struct writeCacheAddresses {
 /// \tparam T   type of data to read (u8, u16 or u32).
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
+// template<typename T>
+// struct readCacheData {
+//     operator Memory::ReadType<T>() const {
+//         return []<typename T>(const Memory& m, const u32 addr) -> T {
+//             if (isMasterSh2InOperation(m)) { return m.modules_.masterSh2()->readCacheData<T>(addr); }
+//             return m.modules_.slaveSh2()->readCacheData<T>(addr);
+//         };
+//     }
+// };
 template<typename T>
 struct readCacheData {
-    operator Memory::ReadType<T>() const {
-        return [](const Memory& m, const u32 addr) -> T {
-            if (isMasterSh2InOperation(m)) { return m.modules_.masterSh2()->readCacheData<T>(addr); }
-            return m.modules_.slaveSh2()->readCacheData<T>(addr);
-        };
-    }
+    operator Memory::ReadType<T>() const;
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1844,14 +1762,18 @@ struct readCacheData {
 /// \tparam T   type of data to write (u8, u16 or u32).
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
+// template<typename T>
+// struct writeCacheData {
+//     operator Memory::WriteType<T>() const {
+//         return [](Memory& m, const u32 addr, const T data) {
+//             if (isMasterSh2InOperation(m)) { return m.modules_.masterSh2()->writeCacheData<T>(addr, data); }
+//             return m.modules_.slaveSh2()->writeCacheData<T>(addr, data);
+//         };
+//     }
+// };
 template<typename T>
 struct writeCacheData {
-    operator Memory::WriteType<T>() const {
-        return [](Memory& m, const u32 addr, const T data) {
-            if (isMasterSh2InOperation(m)) { return m.modules_.masterSh2()->writeCacheData<T>(addr, data); }
-            return m.modules_.slaveSh2()->writeCacheData<T>(addr, data);
-        };
-    }
+    operator Memory::WriteType<T>() const;
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

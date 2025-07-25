@@ -25,7 +25,7 @@
 
 #include <saturnin/src/pch.h>
 #include <saturnin/src/utilities.h> // format
-#include <saturnin/src/video/vdp2.h>
+#include <saturnin/src/video/vdp2/vdp2.h>
 
 namespace uti = saturnin::utilities;
 
@@ -192,49 +192,22 @@ auto Vdp2::getDebugVramAccessBanks() const -> std::vector<VramTiming> {
     const auto banks_used = getDebugVramAccessBanksUsed();
     auto       banks      = std::vector<VramTiming>{};
 
-    const VramTiming bank_a0 = {regs_.cyca0l >> Cycxxl::t0_enum,
-                                regs_.cyca0l >> Cycxxl::t1_enum,
-                                regs_.cyca0l >> Cycxxl::t2_enum,
-                                regs_.cyca0l >> Cycxxl::t3_enum,
-                                is_normal_mode ? regs_.cyca0u >> Cycxxu::t4_enum : no_access,
-                                is_normal_mode ? regs_.cyca0u >> Cycxxu::t5_enum : no_access,
-                                is_normal_mode ? regs_.cyca0u >> Cycxxu::t6_enum : no_access,
-                                is_normal_mode ? regs_.cyca0u >> Cycxxu::t7_enum : no_access};
-    banks.emplace_back(bank_a0);
+    auto readBank = [&is_normal_mode](const Vdp2Regs::CycxxlType& cycl, const Vdp2Regs::CycxxuType& cycu) -> VramTiming {
+        return {cycl >> Cycxxl::t0_enum,
+                cycl >> Cycxxl::t1_enum,
+                cycl >> Cycxxl::t2_enum,
+                cycl >> Cycxxl::t3_enum,
+                is_normal_mode ? cycu >> Cycxxu::t4_enum : no_access,
+                is_normal_mode ? cycu >> Cycxxu::t5_enum : no_access,
+                is_normal_mode ? cycu >> Cycxxu::t6_enum : no_access,
+                is_normal_mode ? cycu >> Cycxxu::t7_enum : no_access};
+    };
 
-    if (banks_used[vram_bank_a1_index]) {
-        const VramTiming bank_a1 = {regs_.cyca0l >> Cycxxl::t0_enum,
-                                    regs_.cyca1l >> Cycxxl::t1_enum,
-                                    regs_.cyca1l >> Cycxxl::t2_enum,
-                                    regs_.cyca1l >> Cycxxl::t3_enum,
-                                    is_normal_mode ? regs_.cyca1u >> Cycxxu::t4_enum : no_access,
-                                    is_normal_mode ? regs_.cyca1u >> Cycxxu::t5_enum : no_access,
-                                    is_normal_mode ? regs_.cyca1u >> Cycxxu::t6_enum : no_access,
-                                    is_normal_mode ? regs_.cyca1u >> Cycxxu::t7_enum : no_access};
-        banks.emplace_back(bank_a1);
-    }
+    banks.emplace_back(readBank(regs_.cyca0l, regs_.cyca0u));
+    if (banks_used[vram_bank_a1_index]) { banks.emplace_back(readBank(regs_.cyca1l, regs_.cyca1u)); }
+    banks.emplace_back(readBank(regs_.cycb0l, regs_.cycb0u));
+    if (banks_used[vram_bank_b1_index]) { banks.emplace_back(readBank(regs_.cycb1l, regs_.cycb1u)); }
 
-    const VramTiming bank_b0 = {regs_.cycb0l >> Cycxxl::t0_enum,
-                                regs_.cycb0l >> Cycxxl::t1_enum,
-                                regs_.cycb0l >> Cycxxl::t2_enum,
-                                regs_.cycb0l >> Cycxxl::t3_enum,
-                                is_normal_mode ? regs_.cycb0u >> Cycxxu::t4_enum : no_access,
-                                is_normal_mode ? regs_.cycb0u >> Cycxxu::t5_enum : no_access,
-                                is_normal_mode ? regs_.cycb0u >> Cycxxu::t6_enum : no_access,
-                                is_normal_mode ? regs_.cycb0u >> Cycxxu::t7_enum : no_access};
-    banks.emplace_back(bank_b0);
-
-    if (banks_used[vram_bank_a1_index]) {
-        const VramTiming bank_b1 = {regs_.cycb1l >> Cycxxl::t0_enum,
-                                    regs_.cycb1l >> Cycxxl::t1_enum,
-                                    regs_.cycb1l >> Cycxxl::t2_enum,
-                                    regs_.cycb1l >> Cycxxl::t3_enum,
-                                    is_normal_mode ? regs_.cycb1u >> Cycxxu::t4_enum : no_access,
-                                    is_normal_mode ? regs_.cycb1u >> Cycxxu::t5_enum : no_access,
-                                    is_normal_mode ? regs_.cycb1u >> Cycxxu::t6_enum : no_access,
-                                    is_normal_mode ? regs_.cycb1u >> Cycxxu::t7_enum : no_access};
-        banks.emplace_back(bank_b1);
-    }
     return banks;
 }
 
@@ -274,22 +247,23 @@ auto Vdp2::getDebugVramAccessCommandDescription(const Vdp2Regs::VramAccessComman
     using VramCommandsDescription = std::map<Vdp2Regs::VramAccessCommand, LabelValue>;
     using enum Vdp2Regs::VramAccessCommand;
     const auto vram_commands_descriptions = VramCommandsDescription{
-        {nbg0_pattern_name_read, {"N0PN", tr("NBG0 Pattern Name Data Read")}},
-        {nbg1_pattern_name_read, {"N1PN", tr("NBG1 Pattern Name Data Read")}},
-        {nbg2_pattern_name_read, {"N2PN", tr("NBG2 Pattern Name Data Read")}},
-        {nbg3_pattern_name_read, {"N3PN", tr("NBG3 Pattern Name Data Read")}},
-        {nbg0_character_pattern_data_read, {"N0CG", tr("NBG0 Character Pattern Data Read")}},
-        {nbg1_character_pattern_data_read, {"N1CG", tr("NBG1 Character Pattern Data Read")}},
-        {nbg2_character_pattern_data_read, {"N2CG", tr("NBG2 Character Pattern Data Read")}},
-        {nbg3_character_pattern_data_read, {"N3CG", tr("NBG3 Character Pattern Data Read")}},
-        {setting_not_allowed_1, {"XXX", tr("Setting not allowed")}},
-        {setting_not_allowed_2, {"XXX", tr("Setting not allowed")}},
-        {setting_not_allowed_3, {"XXX", tr("Setting not allowed")}},
-        {setting_not_allowed_4, {"XXX", tr("Setting not allowed")}},
+        {nbg0_pattern_name_read,                    {"N0PN", tr("NBG0 Pattern Name Data Read")}              },
+        {nbg1_pattern_name_read,                    {"N1PN", tr("NBG1 Pattern Name Data Read")}              },
+        {nbg2_pattern_name_read,                    {"N2PN", tr("NBG2 Pattern Name Data Read")}              },
+        {nbg3_pattern_name_read,                    {"N3PN", tr("NBG3 Pattern Name Data Read")}              },
+        {nbg0_character_pattern_data_read,          {"N0CG", tr("NBG0 Character Pattern Data Read")}         },
+        {nbg1_character_pattern_data_read,          {"N1CG", tr("NBG1 Character Pattern Data Read")}         },
+        {nbg2_character_pattern_data_read,          {"N2CG", tr("NBG2 Character Pattern Data Read")}         },
+        {nbg3_character_pattern_data_read,          {"N3CG", tr("NBG3 Character Pattern Data Read")}         },
+        {setting_not_allowed_1,                     {"XXX", tr("Setting not allowed")}                       },
+        {setting_not_allowed_2,                     {"XXX", tr("Setting not allowed")}                       },
+        {setting_not_allowed_3,                     {"XXX", tr("Setting not allowed")}                       },
+        {setting_not_allowed_4,                     {"XXX", tr("Setting not allowed")}                       },
         {nbg0_vertical_cell_scroll_table_data_read, {"N0CE", tr("NBG0 Vertical Cell Scroll Table Data Read")}},
         {nbg1_vertical_cell_scroll_table_data_read, {"N1CE", tr("NBG1 Vertical Cell Scroll Table Data Read")}},
-        {cpu_read_write, {"CPU", tr("CPU Read/Write")}},
-        {no_access, {"NA", tr("No Access")}}};
+        {cpu_read_write,                            {"CPU", tr("CPU Read/Write")}                            },
+        {no_access,                                 {"NA", tr("No Access")}                                  }
+    };
 
     return vram_commands_descriptions.at(command);
 }
@@ -456,9 +430,9 @@ auto Vdp2::getDebugScrollScreenData(const ScrollScreen s) -> std::optional<std::
     if (screen.is_color_offset_enabled) {
         values.emplace_back(tr("Color offset"),
                             uti::format("R:{:+d} G:{:+d} B:{:+d}",
-                                        screen.color_offset.as_s16.r,
-                                        screen.color_offset.as_s16.g,
-                                        screen.color_offset.as_s16.b));
+                                        screen.color_offset.values[0],
+                                        screen.color_offset.values[1],
+                                        screen.color_offset.values[2]));
     } else {
         values.emplace_back(tr("Color offset"), tr("Disabled"));
     }

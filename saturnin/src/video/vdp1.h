@@ -25,21 +25,18 @@
 
 #pragma once
 
-#include <array>                          // array
-#include <saturnin/src/emulator_defs.h>   // u8, u16, u32
+#include <array>                        // array
+#include <saturnin/src/emulator_defs.h> // u8, u16, u32
 #include <saturnin/src/emulator_modules.h>
-#include <saturnin/src/locale.h>          // tr
-#include <saturnin/src/log.h>             // Log
+#include <saturnin/src/locale.h> // tr
+#include <saturnin/src/log.h>    // Log
 #include <saturnin/src/video/vdp1_registers.h>
 #include <saturnin/src/video/vdp1_part.h> // Vdp1Part
 
-// Forward declarations
-namespace saturnin::core {
-class EmulatorContext;
-class EmulatorModules;
-} // namespace saturnin::core
-
 namespace saturnin::video {
+
+// Forward declaration
+class Vdp2;
 
 using saturnin::core::EmulatorContext;
 using saturnin::core::EmulatorModules;
@@ -52,7 +49,7 @@ class Vdp1 {
     //@{
     // Constructors / Destructors
     Vdp1() = delete;
-    explicit Vdp1(EmulatorContext* ec) : modules_(ec){};
+    explicit Vdp1(EmulatorContext* ec) : modules_(ec) {};
     Vdp1(const Vdp1&)                      = delete;
     Vdp1(Vdp1&&)                           = delete;
     auto operator=(const Vdp1&) & -> Vdp1& = delete;
@@ -104,18 +101,8 @@ class Vdp1 {
         return read16(addr);
     }
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn auto Vdp1::vdp2() const -> const Vdp2*
-    ///
-    /// \brief  Pointer to the VDP2 module, will be used by VDP1 parts.
-    ///
-    /// \author Runik
-    /// \date   14/05/2021
-    ///
-    /// \returns    A const pointer to Vdp2.
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    auto vdp2() const -> const Vdp2* { return modules_.vdp2(); }
+    // Pointer to the VDP2 module, will be used by VDP1 parts.
+    auto vdp2() const -> const Vdp2*;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn auto Vdp1::getColorRamAddressOffset() -> u16
@@ -154,7 +141,22 @@ class Vdp1 {
     /// \returns    A reference to a const std::vector&lt;Vdp1Part&gt;
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    auto vdp1Parts() const -> std::vector<Vdp1Part> { return vdp1_parts_; }
+    auto vdp1Parts() const -> std::vector<Vdp1Part>;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn auto Vdp1::vdp1Parts(const u8 priority) const -> const std::vector<Vdp1Part>
+    ///
+    /// \brief  Returns the current VDP1 draw list for given priority.
+    ///
+    /// \author Runik
+    /// \date   20/02/2024
+    ///
+    /// \param      Priority of the parts to return.
+    ///
+    /// \returns    A reference to a const std::vector&lt;Vdp1Part&gt;
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    auto vdp1Parts(const u8 priority) const -> std::vector<Vdp1Part>;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn auto Vdp1::getDebugDrawList() const -> std::vector<std::string>;
@@ -216,12 +218,12 @@ class Vdp1 {
     // VDP1 registers
     Vdp1Regs regs_;
 
-    std::array<u32, 2> framebuffer_;                 ///< Framebuffers texture id.
+    std::array<u32, 2> framebuffer_; ///< Framebuffers texture id.
 
     std::vector<Vdp1Part> vdp1_parts_;               ///< Storage of vdp1 rendering parts .
     u16                   color_ram_address_offset_; ///< The color ram address offset.
 
-    ColorOffset color_offset_;                       ///< Current color offset configuration for the sprite layer.
+    ColorOffset color_offset_; ///< Current color offset configuration for the sprite layer.
 };
 
 } // namespace saturnin::video

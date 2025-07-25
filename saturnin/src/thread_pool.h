@@ -24,7 +24,6 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #pragma once
-
 #include <BS_thread_pool.hpp> // thread_pool
 
 namespace saturnin::core {
@@ -77,6 +76,7 @@ class ThreadPool {
 
     static void shutdown();
 
-    static BS::thread_pool pool_; ///< Pool of threads
+    // static BS::thread_pool pool_; ///< Pool of threads
+    static BS::light_thread_pool pool_; ///< Pool of threads
 };
 }; // namespace saturnin::core

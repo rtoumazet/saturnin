@@ -19,7 +19,7 @@
 
 #include <saturnin/src/pch.h>
 #include <saturnin/src/video/texture.h>
-#include <saturnin/src/video/opengl.h>
+#include <saturnin/src/video/opengl/opengl_texturing.h>
 #include <saturnin/src/utilities.h> // hashCombine, format
 
 namespace uti = saturnin::utilities;
@@ -30,14 +30,12 @@ using core::Log;
 using core::Logger;
 using core::tr;
 
-using ReadOnlyLock  = std::shared_lock<SharedMutex>;
-using UpdatableLock = std::unique_lock<SharedMutex>;
-
 std::unordered_map<size_t, Texture> Texture::texture_storage_;
 SharedMutex                         Texture::storage_mutex_;
+AddressToPlaneData                  Texture::address_to_plane_data_;
 
 Texture::Texture(const VdpType    vp,
-                 const Layer      layer,
+                 const VdpLayer   layer,
                  const u32        address,
                  const u8         color_count,
                  const u16        palette_number,
@@ -70,6 +68,16 @@ void Texture::storeTextures(std::vector<Texture>& textures) {
         texture_storage_.erase(t.key());
         texture_storage_.try_emplace(t.key(), std::move(t));
     }
+}
+
+void Texture::storePlaneData(AddressToPlaneData& address_to_plane_data) {
+    UpdatableLock lock(storage_mutex_);
+    address_to_plane_data_.swap(address_to_plane_data);
+}
+
+auto Texture::getPlaneData() -> AddressToPlaneData& {
+    UpdatableLock lock(storage_mutex_);
+    return address_to_plane_data_;
 }
 
 auto Texture::getTexture(const size_t key) -> std::optional<Texture*> {
@@ -147,7 +155,7 @@ void Texture::cleanCache(Opengl* ogl, const VdpType t) {
 
             if (value.isDiscarded()) {
                 // WIP
-                ogl->addOrUpdateTexture(value.key(), value.layer());
+                ogl->texturing()->addOrUpdateTexture(value.key(), value.layer());
                 keys_to_erase.emplace_back(key);
             }
         }
@@ -155,7 +163,7 @@ void Texture::cleanCache(Opengl* ogl, const VdpType t) {
 
     for (const auto& key : keys_to_erase) {
         texture_storage_.erase(key);
-        ogl->removeTextureLink(key);
+        ogl->texturing()->removeTextureLink(key);
     }
 }
 
@@ -209,7 +217,7 @@ auto Texture::statistics() -> std::vector<std::string> {
     stats.push_back(uti::format("Number of VDP1 textures : {}", vdp1_nb));
 
     const auto vdp2_nb
-        = std::ranges::count_if(texture_storage_, [](const auto& t) { return t.second.vdpType() == VdpType::vdp2; });
+        = std::ranges::count_if(texture_storage_, [](const auto& t) { return t.second.vdpType() == VdpType::vdp2_cell; });
     stats.push_back(uti::format("Number of VDP2 textures : {}", vdp2_nb));
 
     auto max_width  = 0;

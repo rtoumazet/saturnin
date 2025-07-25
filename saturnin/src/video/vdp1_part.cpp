@@ -20,7 +20,7 @@
 #include <saturnin/src/pch.h>
 #include <saturnin/src/memory.h>
 #include <saturnin/src/video/vdp1_part.h>
-#include <saturnin/src/video/opengl.h>
+#include <saturnin/src/video/opengl/opengl_texturing.h>
 #include <saturnin/src/video/texture.h>
 #include <saturnin/src/video/vdp1.h>
 #include <saturnin/src/emulator_modules.h>
@@ -33,9 +33,10 @@ namespace excpt = saturnin::exception;
 namespace saturnin::video {
 
 using core::EmulatorModules;
-using core::rawRead;
-using core::rawWrite;
+// using core::rawRead;
+// using core::rawWrite;
 using core::tr;
+using utilities::readAs16;
 using utilities::toUnderlying;
 
 constexpr auto horizontal_multiplier = u8{8};
@@ -48,86 +49,76 @@ Vdp1Part::Vdp1Part(const EmulatorModules& modules,
                    const u32              table_address,
                    const CmdCtrlType&     cmdctrl,
                    const CmdLinkType&     cmdlink,
-                   const ColorF&          color_offset) :
-    BaseRenderingPart(VdpType::vdp1, type, 0, 0, color_offset) {
-    cmdctrl_       = cmdctrl;
-    cmdlink_       = cmdlink;
-    table_address_ = table_address;
+                   const ColorOffset&     color_offset) {
+    common_vdp_data_.vdp_type     = VdpType::vdp1;
+    common_vdp_data_.draw_type    = type;
+    common_vdp_data_.color_offset = color_offset;
+    cmdctrl_                      = cmdctrl;
+    cmdlink_                      = cmdlink;
+    table_address_                = table_address;
     readParameters(modules.memory(), table_address);
     calculatePriority(modules);
     generatePartData(modules);
 };
 
 void Vdp1Part::readParameters(Memory* m, const u32 address) {
+    const auto ram_chunk = m->read(address, 0x20);
     switch (cmdctrl_ >> CmdCtrl::comm_enum) {
         using enum CmdCtrl::CommandSelect;
         case system_clipping: {
-            cmdxc_ = m->read<u16>(address + cmdxc_offset);
-            cmdyc_ = m->read<u16>(address + cmdyc_offset);
+            cmdxc_ = readAs16(ram_chunk.subspan(cmdxc_offset, 2));
+            cmdyc_ = readAs16(ram_chunk.subspan(cmdyc_offset, 2));
             break;
         }
         case user_clipping: {
-            cmdxa_ = m->read<u16>(address + cmdxa_offset);
-            cmdya_ = m->read<u16>(address + cmdya_offset);
-            cmdxc_ = m->read<u16>(address + cmdxc_offset);
-            cmdyc_ = m->read<u16>(address + cmdyc_offset);
+            cmdxa_ = readAs16(ram_chunk.subspan(cmdxa_offset, 2));
+            cmdya_ = readAs16(ram_chunk.subspan(cmdya_offset, 2));
+            cmdxc_ = readAs16(ram_chunk.subspan(cmdxc_offset, 2));
+            cmdyc_ = readAs16(ram_chunk.subspan(cmdyc_offset, 2));
             break;
         }
         case local_coordinate: {
-            cmdxa_ = m->read<u16>(address + cmdxa_offset);
-            cmdya_ = m->read<u16>(address + cmdya_offset);
+            cmdxa_ = readAs16(ram_chunk.subspan(cmdxa_offset, 2));
+            cmdya_ = readAs16(ram_chunk.subspan(cmdya_offset, 2));
             break;
         }
         case normal_sprite_draw: {
-            cmdpmod_ = m->read<u16>(address + cmdpmod_offset);
-            cmdcolr_ = m->read<u16>(address + cmdcolr_offset);
-            cmdsrca_ = m->read<u16>(address + cmdsrca_offset);
-            cmdsize_ = m->read<u16>(address + cmdsize_offset);
-            cmdxa_   = m->read<u16>(address + cmdxa_offset);
-            cmdya_   = m->read<u16>(address + cmdya_offset);
-            cmdgrda_ = m->read<u16>(address + cmdgrda_offset);
-            break;
-        }
-        case scaled_sprite_draw: {
-            cmdpmod_ = m->read<u16>(address + cmdpmod_offset);
-            cmdcolr_ = m->read<u16>(address + cmdcolr_offset);
-            cmdsrca_ = m->read<u16>(address + cmdsrca_offset);
-            cmdsize_ = m->read<u16>(address + cmdsize_offset);
-            cmdxa_   = m->read<u16>(address + cmdxa_offset);
-            cmdya_   = m->read<u16>(address + cmdya_offset);
-            cmdxb_   = m->read<u16>(address + cmdxb_offset);
-            cmdyb_   = m->read<u16>(address + cmdyb_offset);
-            cmdxc_   = m->read<u16>(address + cmdxc_offset);
-            cmdyc_   = m->read<u16>(address + cmdyc_offset);
-            cmdgrda_ = m->read<u16>(address + cmdgrda_offset);
+            cmdpmod_ = readAs16(ram_chunk.subspan(cmdpmod_offset, 2));
+            cmdcolr_ = readAs16(ram_chunk.subspan(cmdcolr_offset, 2));
+            cmdsrca_ = readAs16(ram_chunk.subspan(cmdsrca_offset, 2));
+            cmdsize_ = readAs16(ram_chunk.subspan(cmdsize_offset, 2));
+            cmdxa_   = readAs16(ram_chunk.subspan(cmdxa_offset, 2));
+            cmdya_   = readAs16(ram_chunk.subspan(cmdya_offset, 2));
+            cmdgrda_ = readAs16(ram_chunk.subspan(cmdgrda_offset, 2));
             break;
         }
         case distorted_sprite_draw:
+        case scaled_sprite_draw:
         case polygon_draw:
         case polyline_draw: {
-            cmdpmod_ = m->read<u16>(address + cmdpmod_offset);
-            cmdcolr_ = m->read<u16>(address + cmdcolr_offset);
-            cmdsrca_ = m->read<u16>(address + cmdsrca_offset);
-            cmdsize_ = m->read<u16>(address + cmdsize_offset);
-            cmdxa_   = m->read<u16>(address + cmdxa_offset);
-            cmdya_   = m->read<u16>(address + cmdya_offset);
-            cmdxb_   = m->read<u16>(address + cmdxb_offset);
-            cmdyb_   = m->read<u16>(address + cmdyb_offset);
-            cmdxc_   = m->read<u16>(address + cmdxc_offset);
-            cmdyc_   = m->read<u16>(address + cmdyc_offset);
-            cmdxd_   = m->read<u16>(address + cmdxd_offset);
-            cmdyd_   = m->read<u16>(address + cmdyd_offset);
-            cmdgrda_ = m->read<u16>(address + cmdgrda_offset);
+            cmdpmod_ = readAs16(ram_chunk.subspan(cmdpmod_offset, 2));
+            cmdcolr_ = readAs16(ram_chunk.subspan(cmdcolr_offset, 2));
+            cmdsrca_ = readAs16(ram_chunk.subspan(cmdsrca_offset, 2));
+            cmdsize_ = readAs16(ram_chunk.subspan(cmdsize_offset, 2));
+            cmdxa_   = readAs16(ram_chunk.subspan(cmdxa_offset, 2));
+            cmdya_   = readAs16(ram_chunk.subspan(cmdya_offset, 2));
+            cmdxb_   = readAs16(ram_chunk.subspan(cmdxb_offset, 2));
+            cmdyb_   = readAs16(ram_chunk.subspan(cmdyb_offset, 2));
+            cmdxc_   = readAs16(ram_chunk.subspan(cmdxc_offset, 2));
+            cmdyc_   = readAs16(ram_chunk.subspan(cmdyc_offset, 2));
+            cmdxd_   = readAs16(ram_chunk.subspan(cmdxd_offset, 2)); // not used for scaled sprites
+            cmdyd_   = readAs16(ram_chunk.subspan(cmdyd_offset, 2)); // not used for scaled sprites
+            cmdgrda_ = readAs16(ram_chunk.subspan(cmdgrda_offset, 2));
             break;
         }
         case line_draw: {
-            cmdpmod_ = m->read<u16>(address + cmdpmod_offset);
-            cmdcolr_ = m->read<u16>(address + cmdcolr_offset);
-            cmdxa_   = m->read<u16>(address + cmdxa_offset);
-            cmdya_   = m->read<u16>(address + cmdya_offset);
-            cmdxb_   = m->read<u16>(address + cmdxb_offset);
-            cmdyb_   = m->read<u16>(address + cmdyb_offset);
-            cmdgrda_ = m->read<u16>(address + cmdgrda_offset);
+            cmdpmod_ = readAs16(ram_chunk.subspan(cmdpmod_offset, 2));
+            cmdcolr_ = readAs16(ram_chunk.subspan(cmdcolr_offset, 2));
+            cmdxa_   = readAs16(ram_chunk.subspan(cmdxa_offset, 2));
+            cmdya_   = readAs16(ram_chunk.subspan(cmdya_offset, 2));
+            cmdxb_   = readAs16(ram_chunk.subspan(cmdxb_offset, 2));
+            cmdyb_   = readAs16(ram_chunk.subspan(cmdyb_offset, 2));
+            cmdgrda_ = readAs16(ram_chunk.subspan(cmdgrda_offset, 2));
             break;
         }
     }
@@ -167,12 +158,12 @@ void Vdp1Part::generatePartData(const EmulatorModules& modules) {
             break;
         }
         case polygon_draw: {
-            polygonDraw(modules, *this);
+            polyDraw(modules, *this, polygon_draw);
             debug_header_ = tr("Polygon draw");
             break;
         }
         case polyline_draw: {
-            polylineDraw(modules, *this);
+            polyDraw(modules, *this, polyline_draw);
             debug_header_ = tr("Polyline draw");
             break;
         }
@@ -338,7 +329,7 @@ void Vdp1Part::calculatePriority(const EmulatorModules& modules) {
         }
     }
 
-    priority(modules.vdp2()->getSpritePriority(priority_number_register));
+    common_vdp_data_.priority = modules.vdp2()->getSpritePriority(priority_number_register);
 }
 
 auto Vdp1Part::getPriorityRegister(const EmulatorModules& modules, const u8 priority) const -> u8 {
@@ -499,7 +490,7 @@ Gouraud shading
                                        (cmdsize_ >> CmdSize::chszy_shft));
             part_detail += getDrawMode(cmdpmod_);
             part_detail += getGouraudShadingData();
-            part_detail += uti::format("Texture key: [cccccc]{:#x}[]", textureKey());
+            part_detail += uti::format("Texture key: [cccccc]{:#x}[]", common_vdp_data_.texture_key);
             break;
         }
         case scaled_sprite_draw: {
@@ -509,7 +500,7 @@ Gouraud shading
             part_detail += uti::format("{}\n", getCharacterReadDirection(cmdctrl_ >> CmdCtrl::dir_enum));
             part_detail += getDrawMode(cmdpmod_);
             part_detail += getGouraudShadingData();
-            part_detail += uti::format("Texture key: [cccccc]{:#x}[]", textureKey());
+            part_detail += uti::format("Texture key: [cccccc]{:#x}[]", common_vdp_data_.texture_key);
             break;
         }
         case distorted_sprite_draw: {
@@ -524,23 +515,10 @@ Gouraud shading
             part_detail += uti::format("{}", getCharacterReadDirection(cmdctrl_ >> CmdCtrl::dir_enum));
             part_detail += getDrawMode(cmdpmod_);
             part_detail += getGouraudShadingData();
-            part_detail += uti::format("Texture key: [cccccc]{:#x}[]", textureKey());
+            part_detail += uti::format("Texture key: [cccccc]{:#x}[]", common_vdp_data_.texture_key);
             break;
         }
-        case polygon_draw: {
-            part_detail
-                += uti::format("Vertex A [cccccc]({}, {})[]\n", twosComplement(cmdxa_.data()), twosComplement(cmdya_.data()));
-            part_detail
-                += uti::format("Vertex B [cccccc]({}, {})[]\n", twosComplement(cmdxb_.data()), twosComplement(cmdyb_.data()));
-            part_detail
-                += uti::format("Vertex C [cccccc]({}, {})[]\n", twosComplement(cmdxc_.data()), twosComplement(cmdyc_.data()));
-            part_detail
-                += uti::format("Vertex D [cccccc]({}, {})[]\n", twosComplement(cmdxd_.data()), twosComplement(cmdyd_.data()));
-            auto color = Color(cmdcolr_.data());
-            part_detail += uti::format("Color [cccccc]({}, {}, {}, {})[]\n", color.r, color.g, color.b, color.a);
-            part_detail += getGouraudShadingData();
-            break;
-        }
+        case polygon_draw:
         case polyline_draw: {
             part_detail
                 += uti::format("Vertex A [cccccc]({}, {})[]\n", twosComplement(cmdxa_.data()), twosComplement(cmdya_.data()));
@@ -586,6 +564,8 @@ void normalSpriteDraw(const EmulatorModules& modules, Vdp1Part& part) {
 
     loadTextureData(modules, part);
 
+    part.common_vdp_data_.draw_type = DrawType::textured_polygon;
+
     const auto     color          = Color{u16{}};
     const auto     gouraud_values = readGouraudData(modules, part);
     VertexPosition a{part.calculatedXA(), part.calculatedYA()};
@@ -598,35 +578,24 @@ void normalSpriteDraw(const EmulatorModules& modules, Vdp1Part& part) {
         Log::error(Logger::vdp1, tr("VDP1 normal sprite draw coordinates error"));
         throw excpt::Vdp1Error("VDP1 normal sprite draw coordinates error !");
     }
-    // part.vertexes_.emplace_back(Vertex{a, coords[0], {color.r, color.g, color.b, color.a}, gouraud_values[0]}); // lower left
-    // part.vertexes_.emplace_back(Vertex{b, coords[1], {color.r, color.g, color.b, color.a}, gouraud_values[1]}); // lower right
-    // part.vertexes_.emplace_back(Vertex{c, coords[2], {color.r, color.g, color.b, color.a}, gouraud_values[2]}); // upper right
-    // part.vertexes_.emplace_back(Vertex{d, coords[3], {color.r, color.g, color.b, color.a}, gouraud_values[3]}); // upper left
-    part.vertexes_.reserve(4);
-    // part.vertexes_
-    //     .emplace_back(a.x, a.y, coords[0].s, coords[0].t, color.r, color.g, color.b, color.a, gouraud_values[0]); // lower left
-    // part.vertexes_
-    //    .emplace_back(b.x, b.y, coords[1].s, coords[1].t, color.r, color.g, color.b, color.a, gouraud_values[1]); // lower right
-    // part.vertexes_
-    //    .emplace_back(c.x, c.y, coords[2].s, coords[2].t, color.r, color.g, color.b, color.a, gouraud_values[2]); // upper right
-    // part.vertexes_
-    //    .emplace_back(d.x, d.y, coords[3].s, coords[3].t, color.r, color.g, color.b, color.a, gouraud_values[3]); // upper left
 
-    // part.vertexes_.push_back(Vertex(a.x, a.y, coords[0].s, coords[0].t, color.r, color.g, color.b, color.a,
-    // gouraud_values[0])); part.vertexes_.push_back(Vertex(b.x, b.y, coords[1].s, coords[1].t, color.r, color.g, color.b,
-    // color.a, gouraud_values[1])); part.vertexes_.push_back(Vertex(c.x, c.y, coords[2].s, coords[2].t, color.r, color.g,
-    // color.b, color.a, gouraud_values[2])); part.vertexes_.push_back(Vertex(d.x, d.y, coords[3].s, coords[3].t, color.r,
-    // color.g, color.b, color.a, gouraud_values[3]));
-    part.vertexes_.emplace_back(a.x, a.y, coords[0].s, coords[0].t, 0.0f, color.r, color.g, color.b, color.a, gouraud_values[0]);
-    part.vertexes_.emplace_back(b.x, b.y, coords[1].s, coords[1].t, 0.0f, color.r, color.g, color.b, color.a, gouraud_values[1]);
-    part.vertexes_.emplace_back(c.x, c.y, coords[2].s, coords[2].t, 0.0f, color.r, color.g, color.b, color.a, gouraud_values[2]);
-    part.vertexes_.emplace_back(d.x, d.y, coords[3].s, coords[3].t, 0.0f, color.r, color.g, color.b, color.a, gouraud_values[3]);
+    part.common_vdp_data_.vertexes.reserve(4);
+    part.common_vdp_data_.vertexes
+        .emplace_back(a.x, a.y, coords[0].s, coords[0].t, 0.0f, color.r, color.g, color.b, color.a, gouraud_values[0]);
+    part.common_vdp_data_.vertexes
+        .emplace_back(b.x, b.y, coords[1].s, coords[1].t, 0.0f, color.r, color.g, color.b, color.a, gouraud_values[1]);
+    part.common_vdp_data_.vertexes
+        .emplace_back(c.x, c.y, coords[2].s, coords[2].t, 0.0f, color.r, color.g, color.b, color.a, gouraud_values[2]);
+    part.common_vdp_data_.vertexes
+        .emplace_back(d.x, d.y, coords[3].s, coords[3].t, 0.0f, color.r, color.g, color.b, color.a, gouraud_values[3]);
 }
 
 void scaledSpriteDraw(const EmulatorModules& modules, Vdp1Part& part) {
     Log::debug(Logger::vdp1, tr("Command - Scaled sprite draw"));
 
     loadTextureData(modules, part);
+
+    part.common_vdp_data_.draw_type = DrawType::textured_polygon;
 
     std::vector<VertexPosition> vertexes_pos;
 
@@ -718,53 +687,55 @@ void scaledSpriteDraw(const EmulatorModules& modules, Vdp1Part& part) {
 
     auto       color          = Color{u16{}};
     const auto gouraud_values = readGouraudData(modules, part);
-    part.vertexes_.reserve(4);
-    part.vertexes_.emplace_back(vertexes_pos[0].x,
-                                vertexes_pos[0].y,
-                                coords[0].s,
-                                coords[0].t,
-                                0.0f,
-                                color.r,
-                                color.g,
-                                color.b,
-                                color.a,
-                                gouraud_values[0]); // lower left
-    part.vertexes_.emplace_back(vertexes_pos[1].x,
-                                vertexes_pos[1].y,
-                                coords[1].s,
-                                coords[1].t,
-                                0.0f,
-                                color.r,
-                                color.g,
-                                color.b,
-                                color.a,
-                                gouraud_values[1]); // lower right
-    part.vertexes_.emplace_back(vertexes_pos[2].x,
-                                vertexes_pos[2].y,
-                                coords[2].s,
-                                coords[2].t,
-                                0.0f,
-                                color.r,
-                                color.g,
-                                color.b,
-                                color.a,
-                                gouraud_values[2]); // upper right
-    part.vertexes_.emplace_back(vertexes_pos[3].x,
-                                vertexes_pos[3].y,
-                                coords[3].s,
-                                coords[3].t,
-                                0.0f,
-                                color.r,
-                                color.g,
-                                color.b,
-                                color.a,
-                                gouraud_values[3]); // upper left
+    part.common_vdp_data_.vertexes.reserve(4);
+    part.common_vdp_data_.vertexes.emplace_back(vertexes_pos[0].x,
+                                                vertexes_pos[0].y,
+                                                coords[0].s,
+                                                coords[0].t,
+                                                0.0f,
+                                                color.r,
+                                                color.g,
+                                                color.b,
+                                                color.a,
+                                                gouraud_values[0]); // lower left
+    part.common_vdp_data_.vertexes.emplace_back(vertexes_pos[1].x,
+                                                vertexes_pos[1].y,
+                                                coords[1].s,
+                                                coords[1].t,
+                                                0.0f,
+                                                color.r,
+                                                color.g,
+                                                color.b,
+                                                color.a,
+                                                gouraud_values[1]); // lower right
+    part.common_vdp_data_.vertexes.emplace_back(vertexes_pos[2].x,
+                                                vertexes_pos[2].y,
+                                                coords[2].s,
+                                                coords[2].t,
+                                                0.0f,
+                                                color.r,
+                                                color.g,
+                                                color.b,
+                                                color.a,
+                                                gouraud_values[2]); // upper right
+    part.common_vdp_data_.vertexes.emplace_back(vertexes_pos[3].x,
+                                                vertexes_pos[3].y,
+                                                coords[3].s,
+                                                coords[3].t,
+                                                0.0f,
+                                                color.r,
+                                                color.g,
+                                                color.b,
+                                                color.a,
+                                                gouraud_values[3]); // upper left
 }
 
 void distortedSpriteDraw(const EmulatorModules& modules, Vdp1Part& part) {
     Log::debug(Logger::vdp1, tr("Command - Distorted sprite draw"));
 
     loadTextureData(modules, part);
+
+    part.common_vdp_data_.draw_type = DrawType::textured_polygon;
 
     auto color = Color{u16{}};
 
@@ -776,180 +747,148 @@ void distortedSpriteDraw(const EmulatorModules& modules, Vdp1Part& part) {
 
     const auto gouraud_values = readGouraudData(modules, part);
 
-    part.vertexes_.reserve(4);
-    part.vertexes_.emplace_back(part.calculatedXA(),
-                                part.calculatedYA(),
-                                coords[0].s,
-                                coords[0].t,
-                                0.0f,
-                                color.r,
-                                color.g,
-                                color.b,
-                                color.a,
-                                gouraud_values[0]); // lower left
+    part.common_vdp_data_.vertexes.reserve(4);
+    part.common_vdp_data_.vertexes.emplace_back(part.calculatedXA(),
+                                                part.calculatedYA(),
+                                                coords[0].s,
+                                                coords[0].t,
+                                                0.0f,
+                                                color.r,
+                                                color.g,
+                                                color.b,
+                                                color.a,
+                                                gouraud_values[0]); // lower left
 
-    part.vertexes_.emplace_back(part.calculatedXB() + 1,
-                                part.calculatedYB(),
-                                coords[1].s,
-                                coords[1].t,
-                                0.0f,
-                                color.r,
-                                color.g,
-                                color.b,
-                                color.a,
-                                gouraud_values[1]); // lower right
-    part.vertexes_.emplace_back(part.calculatedXC() + 1,
-                                part.calculatedYC() + 1,
-                                coords[2].s,
-                                coords[2].t,
-                                0.0f,
-                                color.r,
-                                color.g,
-                                color.b,
-                                color.a,
-                                gouraud_values[2]); // upper right
-    part.vertexes_.emplace_back(part.calculatedXD(),
-                                part.calculatedYD() + 1,
-                                coords[3].s,
-                                coords[3].t,
-                                0.0f,
-                                color.r,
-                                color.g,
-                                color.b,
-                                color.a,
-                                gouraud_values[3]); // upper left
+    part.common_vdp_data_.vertexes.emplace_back(part.calculatedXB() + 1,
+                                                part.calculatedYB(),
+                                                coords[1].s,
+                                                coords[1].t,
+                                                0.0f,
+                                                color.r,
+                                                color.g,
+                                                color.b,
+                                                color.a,
+                                                gouraud_values[1]); // lower right
+    part.common_vdp_data_.vertexes.emplace_back(part.calculatedXC() + 1,
+                                                part.calculatedYC() + 1,
+                                                coords[2].s,
+                                                coords[2].t,
+                                                0.0f,
+                                                color.r,
+                                                color.g,
+                                                color.b,
+                                                color.a,
+                                                gouraud_values[2]); // upper right
+    part.common_vdp_data_.vertexes.emplace_back(part.calculatedXD(),
+                                                part.calculatedYD() + 1,
+                                                coords[3].s,
+                                                coords[3].t,
+                                                0.0f,
+                                                color.r,
+                                                color.g,
+                                                color.b,
+                                                color.a,
+                                                gouraud_values[3]); // upper left
 }
 
-void polygonDraw(const EmulatorModules& modules, Vdp1Part& part) {
-    Log::debug(Logger::vdp1, tr("Command - Polygon draw"));
+void polyDraw(const EmulatorModules& modules, Vdp1Part& part, CmdCtrl::CommandSelect command) {
+    switch (command) {
+        using enum CmdCtrl::CommandSelect;
+        using enum Logger;
+        case polygon_draw: {
+            Log::debug(vdp1, tr("Command - Polygon draw"));
+            part.common_vdp_data_.draw_type = DrawType::non_textured_polygon;
+            break;
+        }
+        case polyline_draw: {
+            Log::debug(vdp1, tr("Command - Polyline draw"));
+            part.common_vdp_data_.draw_type = DrawType::polyline;
+            break;
+        }
+        default: {
+            Log::error(vdp1, tr("Command - Unknown poly draw"));
+            return;
+        }
+    }
 
     auto color = Color(part.cmdcolr_.data());
     if (part.cmdcolr_.is(0)) { color.a = 0; }
     const auto gouraud_values = readGouraudData(modules, part);
 
-    part.vertexes_.reserve(4);
-    part.vertexes_.emplace_back(part.calculatedXA(),
-                                part.calculatedYA(),
-                                0.0f,
-                                0.0f,
-                                0.0f,
-                                color.r,
-                                color.g,
-                                color.b,
-                                color.a,
-                                gouraud_values[0]); // lower left
-    part.vertexes_.emplace_back(part.calculatedXB(),
-                                part.calculatedYB(),
-                                1.0f,
-                                0.0f,
-                                0.0f,
-                                color.r,
-                                color.g,
-                                color.b,
-                                color.a,
-                                gouraud_values[1]); // lower right
-    part.vertexes_.emplace_back(part.calculatedXC(),
-                                part.calculatedYC(),
-                                1.0f,
-                                1.0f,
-                                0.0f,
-                                color.r,
-                                color.g,
-                                color.b,
-                                color.a,
-                                gouraud_values[2]); // upper right
-    part.vertexes_.emplace_back(part.calculatedXD(),
-                                part.calculatedYD(),
-                                0.0f,
-                                1.0f,
-                                0.0f,
-                                color.r,
-                                color.g,
-                                color.b,
-                                color.a,
-                                gouraud_values[3]); // upper left
-}
-
-void polylineDraw(const EmulatorModules& modules, Vdp1Part& part) {
-    Log::debug(Logger::vdp1, tr("Command - Polyline draw"));
-
-    auto color = Color(part.cmdcolr_.data());
-    if (part.cmdcolr_.is(0)) { color.a = 0; }
-
-    const auto gouraud_values = readGouraudData(modules, part);
-
-    part.vertexes_.reserve(4);
-    part.vertexes_.emplace_back(part.calculatedXA(),
-                                part.calculatedYA(),
-                                0.0f,
-                                0.0f,
-                                0.0f,
-                                color.r,
-                                color.g,
-                                color.b,
-                                color.a,
-                                gouraud_values[0]); // lower left
-    part.vertexes_.emplace_back(part.calculatedXB(),
-                                part.calculatedYB(),
-                                1.0f,
-                                0.0f,
-                                0.0f,
-                                color.r,
-                                color.g,
-                                color.b,
-                                color.a,
-                                gouraud_values[1]); // lower right
-    part.vertexes_.emplace_back(part.calculatedXC(),
-                                part.calculatedYC(),
-                                1.0f,
-                                1.0f,
-                                0.0f,
-                                color.r,
-                                color.g,
-                                color.b,
-                                color.a,
-                                gouraud_values[2]); // upper right
-    part.vertexes_.emplace_back(part.calculatedXD(),
-                                part.calculatedYD(),
-                                0.0f,
-                                1.0f,
-                                0.0f,
-                                color.r,
-                                color.g,
-                                color.b,
-                                color.a,
-                                gouraud_values[3]); // upper left
+    part.common_vdp_data_.vertexes.reserve(4);
+    part.common_vdp_data_.vertexes.emplace_back(part.calculatedXA(),
+                                                part.calculatedYA(),
+                                                0.0f,
+                                                0.0f,
+                                                0.0f,
+                                                color.r,
+                                                color.g,
+                                                color.b,
+                                                color.a,
+                                                gouraud_values[0]); // lower left
+    part.common_vdp_data_.vertexes.emplace_back(part.calculatedXB(),
+                                                part.calculatedYB(),
+                                                1.0f,
+                                                0.0f,
+                                                0.0f,
+                                                color.r,
+                                                color.g,
+                                                color.b,
+                                                color.a,
+                                                gouraud_values[1]); // lower right
+    part.common_vdp_data_.vertexes.emplace_back(part.calculatedXC(),
+                                                part.calculatedYC(),
+                                                1.0f,
+                                                1.0f,
+                                                0.0f,
+                                                color.r,
+                                                color.g,
+                                                color.b,
+                                                color.a,
+                                                gouraud_values[2]); // upper right
+    part.common_vdp_data_.vertexes.emplace_back(part.calculatedXD(),
+                                                part.calculatedYD(),
+                                                0.0f,
+                                                1.0f,
+                                                0.0f,
+                                                color.r,
+                                                color.g,
+                                                color.b,
+                                                color.a,
+                                                gouraud_values[3]); // upper left
 }
 
 void lineDraw(const EmulatorModules& modules, Vdp1Part& part) {
     Log::debug(Logger::vdp1, tr("Command - Line draw"));
 
+    part.common_vdp_data_.draw_type = DrawType::line;
+
     auto color = Color(part.cmdcolr_.data());
     if (part.cmdcolr_.is(0)) { color.a = 0; }
 
     const auto gouraud_values = readGouraudData(modules, part);
 
-    part.vertexes_.reserve(2);
-    part.vertexes_.emplace_back(part.calculatedXA(),
-                                part.calculatedYA(),
-                                0.0f,
-                                0.0f,
-                                0.0f,
-                                color.r,
-                                color.g,
-                                color.b,
-                                color.a,
-                                gouraud_values[0]); // lower left
-    part.vertexes_.emplace_back(part.calculatedXB(),
-                                part.calculatedYB(),
-                                1.0f,
-                                0.0f,
-                                0.0f,
-                                color.r,
-                                color.g,
-                                color.b,
-                                color.a,
-                                gouraud_values[1]); // lower right
+    part.common_vdp_data_.vertexes.reserve(2);
+    part.common_vdp_data_.vertexes.emplace_back(part.calculatedXA(),
+                                                part.calculatedYA(),
+                                                0.0f,
+                                                0.0f,
+                                                0.0f,
+                                                color.r,
+                                                color.g,
+                                                color.b,
+                                                color.a,
+                                                gouraud_values[0]); // lower left
+    part.common_vdp_data_.vertexes.emplace_back(part.calculatedXB(),
+                                                part.calculatedYB(),
+                                                1.0f,
+                                                0.0f,
+                                                0.0f,
+                                                color.r,
+                                                color.g,
+                                                color.b,
+                                                color.a,
+                                                gouraud_values[1]); // lower right
 }
 
 void loadTextureData(const EmulatorModules& modules, Vdp1Part& part) {
@@ -1027,16 +966,16 @@ void loadTextureData(const EmulatorModules& modules, Vdp1Part& part) {
         }
 
         Texture::storeTexture(Texture(VdpType::vdp1,
-                                      Layer::sprite,
+                                      VdpLayer::sprite,
                                       start_address,
                                       toUnderlying(color_mode),
                                       0,
                                       texture_data,
                                       texture_width,
                                       texture_height));
-        modules.opengl()->addOrUpdateTexture(key, Layer::sprite);
+        modules.opengl()->texturing()->addOrUpdateTexture(key, VdpLayer::sprite);
     }
-    part.textureKey(key);
+    part.common_vdp_data_.texture_key = key;
 }
 
 auto readGouraudData(const EmulatorModules& modules, const Vdp1Part& part) -> std::vector<Gouraud> {
@@ -1099,5 +1038,4 @@ void checkColorCalculation(const Vdp1Part& part) {
         }
     }
 }
-
 } // namespace saturnin::video

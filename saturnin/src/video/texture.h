@@ -27,12 +27,11 @@
 
 #include <vector> // vector
 #include <saturnin/src/emulator_defs.h>
-#include <saturnin/src/video/base_rendering_part.h> // VdpType
-#include <saturnin/src/video/vdp2.h>                // ColorCount
+#include <saturnin/src/video/vdp2/vdp2.h> // ColorCount
 
 namespace saturnin::video {
 
-class Opengl;
+// class Opengl;
 
 using DebugKey = std::pair<std::string, size_t>; // Debug information of the texture and its key.
 
@@ -44,7 +43,7 @@ class Texture {
     /// Constructors / Destructors
     Texture() = delete;
     Texture(const VdpType    vp,
-            const Layer      layer,
+            const VdpLayer   layer,
             const u32        address,
             const u8         color_count,
             const u16        palette_number,
@@ -112,6 +111,32 @@ class Texture {
     static void storeTextures(std::vector<Texture>& textures);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn	static void Texture::storePlaneData(AddressToPlaneData& address_to_plane_data);
+    ///
+    /// \brief	Stores plane data needed to generate plane textures
+    ///
+    /// \author	Runik
+    /// \date	13/10/2023
+    ///
+    /// \param [in,out]	address_to_plane_data	Information describing the address to plane.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    static void storePlaneData(AddressToPlaneData& address_to_plane_data);
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn	static auto Texture::getPlaneData() -> AddressToPlaneData&;
+    ///
+    /// \brief	Gets plane data
+    ///
+    /// \author	Runik
+    /// \date	19/10/2023
+    ///
+    /// \returns	The plane data.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    static auto getPlaneData() -> AddressToPlaneData&;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn	static auto Texture::getTexture(const size_t key) -> std::optional<Texture*>;
     ///
     /// \brief	Gets a texture
@@ -125,7 +150,6 @@ class Texture {
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     static auto getTexture(const size_t key) -> std::optional<Texture*>;
-    // static auto getTexture(const size_t key) -> std::optional<Texture>;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn static void Texture::deleteTextureData(Texture& t);
@@ -279,18 +303,19 @@ class Texture {
     static auto calculateTextureSize(const Size& max_size, const size_t texture_key) -> Size;
 
   private:
-    static std::unordered_map<size_t, Texture> texture_storage_; ///< The current texture storage.
-    static SharedMutex                         storage_mutex_;   ///< Used for multithreading access to the texture pool.
+    static std::unordered_map<size_t, Texture> texture_storage_;       ///< The current texture storage.
+    static SharedMutex                         storage_mutex_;         ///< Used for multithreading access to the texture pool.
+    static AddressToPlaneData                  address_to_plane_data_; ///< Information describing the address to plane
 
-    VdpType vdp_type_{VdpType::not_set}; ///< What kind of VDP type is linked to this texture.
-    Layer   layer_;                      ///< Layer linked to this texture.
-    u16     width_{};                    ///< The texture width.
-    u16     height_{};                   ///< The texture height.
-    bool    is_discarded_{false};        ///< True if the texture is discarded.
-    bool    is_recently_used_{true};     ///< True if the texture was used during the current frame.
-                                         //    bool    delete_on_gpu_{false};       ///< True to delete the texture on the GPU.
-    size_t key_{};                       ///< The key of the part.
-    u32    api_handle_{};                ///< Handle to the graphics API.
+    VdpType  vdp_type_{VdpType::not_set}; ///< What kind of VDP type is linked to this texture.
+    VdpLayer layer_;                      ///< Layer linked to this texture.
+    u16      width_{};                    ///< The texture width.
+    u16      height_{};                   ///< The texture height.
+    bool     is_discarded_{false};        ///< True if the texture is discarded.
+    bool     is_recently_used_{true};     ///< True if the texture was used during the current frame.
+                                          //    bool    delete_on_gpu_{false};       ///< True to delete the texture on the GPU.
+    size_t key_{};                        ///< The key of the part.
+    u32    api_handle_{};                 ///< Handle to the graphics API.
 
     std::vector<u8> raw_data_{}; ///< Raw texture data.
 };

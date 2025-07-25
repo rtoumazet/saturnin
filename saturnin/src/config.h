@@ -24,26 +24,23 @@
 
 #pragma once
 
-#pragma warning(disable : 4275)       // libconfig specific warning disable
+#pragma warning(disable : 4275) // libconfig specific warning disable
 #include <libconfig.h++>
-#include <any>                        // any
-#include <map>                        // map
-#include <optional>                   // optional
-#include <string>                     // string
-#include <vector>                     // vector
-#include <saturnin/src/exceptions.h>  // ConfigError
-#include <saturnin/src/memory.h>      // RomLoad, RomType
-#include <saturnin/src/smpc.h>        // for AreaCode, PeripheralKey, PortStatus
-#include <saturnin/src/utilities.h>   // toUnderlying
-#include <saturnin/src/cdrom/cdrom.h> // CdromAccessMethod
-#include <saturnin/src/sh2/sh2.h>     // Sh2Core
-#include <saturnin/src/video/vdp2.h>  // TvStandard
+#include <any>                            // any
+#include <map>                            // map
+#include <optional>                       // optional
+#include <string>                         // string
+#include <vector>                         // vector
+#include <saturnin/src/exceptions.h>      // ConfigError
+#include <saturnin/src/memory.h>          // RomLoad, RomType
+#include <saturnin/src/smpc.h>            // for AreaCode, PeripheralKey, PortStatus
+#include <saturnin/src/utilities.h>       // toUnderlying
+#include <saturnin/src/cdrom/cdrom.h>     // CdromAccessMethod
+#include <saturnin/src/sh2/sh2.h>         // Sh2Core
+#include <saturnin/src/video/vdp2/vdp2.h> // TvStandard
 
 namespace libcfg = libconfig;
-namespace cdrom  = saturnin::cdrom;
-namespace sh2    = saturnin::sh2;
 namespace util   = saturnin::utilities;
-namespace video  = saturnin::video;
 
 namespace saturnin::core {
 
@@ -53,7 +50,7 @@ namespace saturnin::core {
 /// \brief  Keys used for accessing configuration data.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class AccessKeys {
+enum class AccessKeys : u8 {
     cfg_global_language,
     cfg_global_hardware_mode,
     cfg_global_area_code,
@@ -79,6 +76,7 @@ enum class AccessKeys {
     cfg_log_config,
     cfg_log_main,
     cfg_log_memory,
+    cfg_log_opengl,
     cfg_log_sh2,
     cfg_log_scu,
     cfg_log_vdp1,
@@ -773,9 +771,9 @@ class Config {
 
     auto getLogLevel(const std::string& key) -> LogLevel;
 
-    std::string filename_;        ///< Name of the configuration file used
+    std::string filename_; ///< Name of the configuration file used
 
-    libconfig::Config cfg_;       ///< Internal configuration object
+    libconfig::Config cfg_; ///< Internal configuration object
 
     MapKeys        full_keys_;    ///< Link between access keys enumerators and string keys.
     MapKeysDefault default_keys_; ///< Link between access keys enumerators and default values.

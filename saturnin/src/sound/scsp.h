@@ -31,11 +31,10 @@
 #include <saturnin/src/memory.h>
 
 // Forward declarations
-namespace saturnin::core {
-class EmulatorContext;
-class EmulatorModules;
-class Memory;
-} // namespace saturnin::core
+// namespace saturnin::core {
+// class EmulatorContext;
+// class EmulatorModules;
+//} // namespace saturnin::core
 
 namespace saturnin::sound {
 
@@ -43,6 +42,7 @@ using saturnin::core::EmulatorContext;
 using saturnin::core::EmulatorModules;
 using saturnin::core::Log;
 using saturnin::core::Logger;
+using saturnin::core::Memory;
 
 class Scsp {
   public:
@@ -99,78 +99,23 @@ class Scsp {
         return read32(addr);
     }
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn void Scsp::initialize();
-    ///
-    /// \brief  Initializes the SCSP module (including the 68K).
-    ///
-    /// \author Runik
-    /// \date   05/05/2021
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-
+    // Initializes the SCSP module (including the 68K).
     void initialize();
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn void Scsp::reset();
-    ///
-    /// \brief  Resets the sound system.
-    ///
-    /// \author Runik
-    /// \date   05/05/2021
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-
+    // Resets the sound system.
     void reset();
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn void Scsp::run(const u32 cycles);
-    ///
-    /// \brief  Runs the SCSP for the number of cycles specified.
-    ///
-    /// \author Runik
-    /// \date   05/05/2021
-    ///
-    /// \param  cycles  Number of cycles to execute.
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-
+    // Runs the SCSP for the scpecified number of cycles.
     void run(const u32 cycles);
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn static void Scsp::scspHostInterruptHandler();
-    ///
-    /// \brief  Interrupt sent to the host system by the SCSP.
-    ///
-    /// \author Runik
-    /// \date   05/05/2021
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-
+    // Interrupt sent to the host system by the SCSP.
     static void scspHostInterruptHandler();
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn static void Scsp::scsp68kInterruptHandler(const u32 level);
-    ///
-    /// \brief  Interrupt sent to the 68K sound CPU by the SCSP.
-    ///
-    /// \author Runik
-    /// \date   05/05/2021
-    ///
-    /// \param  level   The interrupt level.
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-
+    // Interrupt level sent to the 68K sound CPU by the SCSP.
     static void scsp68kInterruptHandler(const u32 level);
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn static auto Scsp::ram() -> std::array<u8, core::sound_ram_size>&
-    ///
-    /// \brief  Reference to the SCSP RAM area to allow access from external functions (like
-    ///         Musashi's)
-    ///
-    /// \author Runik
-    /// \date   05/05/2021
-    ///
-    /// \returns    A reference to the SCSP RAM.
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    static auto ram() -> std::array<u8, core::sound_ram_size>& { return external_access_modules_.memory()->sound_ram_; }
+    // A reference to the SCSP RAM area to allow access from external functions (like Musashi's)
+    static auto ram() -> std::array<u8, core::sound_ram_size>&;
 
   private:
     /// \name SCSP memory accessors
@@ -183,26 +128,10 @@ class Scsp {
     [[nodiscard]] auto read32(u32 addr) const -> u32;
     ///@}
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn void Scsp::calculateSamplesPerFrame();
-    ///
-    /// \brief  Calculates the number of samples per frame.
-    ///
-    /// \author Runik
-    /// \date   07/05/2021
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-
+    // Calculates the number of samples per frame.
     void calculateSamplesPerFrame();
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn void Scsp::calculate68KCyclesRatio();
-    ///
-    /// \brief  Calculates the 68K cycles ratio relative to the SH2 cycles
-    ///
-    /// \author Runik
-    /// \date   07/05/2021
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-
+    // Calculates the 68K cycles ratio relative to the SH2 cycles
     void calculate68KCyclesRatio();
 
     static EmulatorModules external_access_modules_; ///< Used to get access to the soundram data from Musashi's functions

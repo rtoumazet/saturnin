@@ -33,32 +33,29 @@ namespace saturnin::video {
 constexpr auto vram_start_address      = u32{0x25e00000};
 constexpr auto cram_start_address      = u32{0x25f00000};
 constexpr auto vdp1_address_multiplier = u8{8};
+constexpr auto uses_fbo                = true;
 
 constexpr auto gouraud_offset = s8{0x10};
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   VdpType
-///
-/// \brief  Values that represent VDP types
-////////////////////////////////////////////////////////////////////////////////////////////////////
+// VDP types.
+enum class VdpType : u8 { not_set, vdp1, vdp2_cell, vdp2_bitmap };
 
-enum class VdpType { not_set, vdp1, vdp2 };
+// Rendered layers.
+enum class VdpLayer : s8 {
+    nbg0      = 0,
+    rbg1      = 0,
+    nbg1      = 1,
+    exbg      = 1,
+    nbg2      = 2,
+    nbg3      = 3,
+    rbg0      = 4,
+    back      = 5,
+    sprite    = 6,
+    undefined = -1
+};
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum	Layer
-///
-/// \brief	Values that represent rendered layers.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-enum class Layer { nbg0 = 0, rbg1 = 0, nbg1 = 1, exbg = 1, nbg2 = 2, nbg3 = 3, rbg0 = 4, back = 5, sprite = 6, undefined = -1 };
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   DrawType
-///
-/// \brief  Values that represent draw types.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-enum class DrawType {
+// Draw types.
+enum class DrawType : u8 {
     textured_polygon, // VDP2 cells, normal/scaled/distorted sprites
     non_textured_polygon,
     polyline,
@@ -66,6 +63,9 @@ enum class DrawType {
     not_drawable, // Setting local coordinates, clipping commands, etc ..
     undefined
 };
+
+// Scroll screens.
+enum class ScrollScreen { nbg0 = 0, nbg1 = 1, nbg2 = 2, nbg3 = 3, rbg0 = 4, rbg1 = 5, none = -1 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// \struct Color
@@ -84,8 +84,8 @@ struct Color {
     explicit Color(const u16 raw_data) :
         r(static_cast<u8>((raw_data & 0x1F) << 3)),
         g((raw_data & 0x3E0) >> 2),
-        b((raw_data & 0x7C00) >> 7){};
-    explicit Color(const u32 raw_data) : r(raw_data & 0x0000FF), g((raw_data & 0x00FF00) >> 8), b((raw_data & 0xFF0000) >> 16){};
+        b((raw_data & 0x7C00) >> 7) {};
+    explicit Color(const u32 raw_data) : r(raw_data & 0x0000FF), g((raw_data & 0x00FF00) >> 8), b((raw_data & 0xFF0000) >> 16) {};
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -101,6 +101,7 @@ struct Gouraud {
     s8 r = 0;
     s8 g = 0;
     s8 b = 0;
+    s8 p = 0;
     explicit Gouraud(const u16 raw_data) :
         r((raw_data & 0x1F) - 0x10),
         g(((raw_data & 0x3E0) >> 5) - 0x10),
@@ -109,18 +110,17 @@ struct Gouraud {
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \struct	ColorS16
+/// \struct	ColorOffset
 ///
-/// \brief	A color with internal components as s16.
+/// \brief	Color offset components, one for each color.
 ///
 /// \author	Runik
 /// \date	10/08/2022
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-struct ColorS16 {
-    s16 r;
-    s16 g;
-    s16 b;
+struct ColorOffset {
+    std::array<u8, 4> signs;
+    std::array<u8, 4> values;
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -133,9 +133,10 @@ struct ColorS16 {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 struct ColorF {
-    float r;
-    float g;
-    float b;
+    float       r;
+    float       g;
+    float       b;
+    inline auto arrayData() const { return std::array<float, 3>{r, g, b}.data(); }
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -150,7 +151,7 @@ struct ColorF {
 struct VertexPosition {
     s16 x;
     s16 y;
-    VertexPosition(const s16 x, const s16 y) : x(x), y(y){};
+    VertexPosition(const s16 x, const s16 y) : x(x), y(y) {};
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -167,7 +168,7 @@ struct VertexColor {
     u8 g; // green
     u8 b; // blue
     u8 a; // alpha
-    VertexColor(const u8 r, const u8 g, const u8 b, const u8 a) : r(r), g(g), b(b), a(a){};
+    VertexColor(const u8 r, const u8 g, const u8 b, const u8 a) : r(r), g(g), b(b), a(a) {};
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -183,8 +184,8 @@ struct TextureCoordinates {
     float s;
     float t;
     float p;
-    TextureCoordinates(const float s, const float t, const float p) : s(s), t(t), p(p){};
-    TextureCoordinates(const float s, const float t) : s(s), t(t), p(0.0f){};
+    TextureCoordinates(const float s, const float t, const float p) : s(s), t(t), p(p) {};
+    TextureCoordinates(const float s, const float t) : s(s), t(t), p(0.0f) {};
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -197,16 +198,17 @@ struct TextureCoordinates {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 struct Vertex {
-    VertexPosition     pos;        ///< Position in Saturn space.
-    TextureCoordinates tex_coords; ///< Texture coordinates.
-    VertexColor        color;      ///< Color.
-    Gouraud            gouraud;    ///< Gouraud color.
+    VertexPosition     pos;          ///< Position in Saturn space.
+    TextureCoordinates tex_coords;   ///< Texture coordinates.
+    VertexColor        color;        ///< Color.
+    Gouraud            gouraud;      ///< Gouraud color.
+    ColorOffset        color_offset; ///< Color offset.
 
     Vertex(const s16 x, const s16 y, const float s, const float t) :
         pos(VertexPosition(x, y)),
         tex_coords(TextureCoordinates(s, t, 0.0f)),
         color(VertexColor(0, 0, 0, 0)),
-        gouraud(Gouraud()){};
+        gouraud(Gouraud()) {};
 
     Vertex(const s16     x,
            const s16     y,
@@ -221,7 +223,7 @@ struct Vertex {
         pos(VertexPosition(x, y)),
         tex_coords(TextureCoordinates(s, t, p)),
         color(VertexColor(r, g, b, a)),
-        gouraud(grd){};
+        gouraud(grd) {};
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -404,6 +406,44 @@ struct DataExtraction {
     };
     using As4BitsType = Reg<u32, As4Bits>;
     As4BitsType as_4bits;
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \struct	Vdp2PartPosition
+///
+/// \brief	Stores the position and texture key of a Vdp2Part.
+///
+/// \author	Runik
+/// \date	12/10/2023
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+struct Vdp2PartPosition {
+    ScreenPos plane_position; ///< Position of the part in the plane.
+    size_t    key;            ///< Key of the part, used to get the correct part texture.
+    Vdp2PartPosition(const ScreenPos plane_position, const size_t key) : plane_position(plane_position), key(key) {};
+};
+
+struct Vdp2PlaneData {
+    Size                          plane_size;
+    std::vector<Vdp2PartPosition> parts_position;
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \struct	CommonVdpData
+///
+/// \brief	Data shared between different VDP parts.
+///
+/// \author	Runik
+/// \date	06/01/2024
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+struct CommonVdpData {
+    std::vector<Vertex> vertexes;                       ///< Contains the geometry vertexes of the part.
+    ColorOffset         color_offset{};                 ///< Color offset for the part.
+    size_t              texture_key{};                  ///< Link to the texture.
+    VdpType             vdp_type{VdpType::not_set};     ///< Type of the part.
+    DrawType            draw_type{DrawType::undefined}; ///< Type of the draw
+    u8                  priority{0};                    ///< Priority of the part.
 };
 
 } // namespace saturnin::video

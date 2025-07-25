@@ -66,8 +66,10 @@ auto Scu::read32(const u32 addr) const -> u32 {
         case level_2_dma_transfer_byte_number: return regs_.d2c.data();
         case interrupt_status_register: return regs_.ist.data();
         case interrupt_mask_register: return regs_.ims.data();
+        // default: return rawRead<u32>(modules_.memory()->scu_, addr & scu_memory_mask);
         default: return rawRead<u32>(modules_.memory()->scu_, addr & scu_memory_mask);
     }
+    // return rawRead<u32>(modules_.memory()->scu_, addr & scu_memory_mask);
     return rawRead<u32>(modules_.memory()->scu_, addr & scu_memory_mask);
 };
 
@@ -99,6 +101,7 @@ void Scu::write32(const u32 addr, const u32 data) {
         }
         case dsp_program_ram_dataport: {
             auto index = regs_.ppaf >> Ppaf::p_shft;
+            // rawWrite(program_ram_, index * 4, data);
             rawWrite(program_ram_, index * 4, data);
             ++index;
             regs_.ppaf.upd(ScuRegs::Ppaf::programRamAddress(index));
@@ -175,6 +178,7 @@ void Scu::write32(const u32 addr, const u32 data) {
         default: break;
     }
 
+    // rawWrite<u32>(modules_.memory()->scu_, addr & scu_memory_mask, data);
     rawWrite<u32>(modules_.memory()->scu_, addr & scu_memory_mask, data);
 };
 

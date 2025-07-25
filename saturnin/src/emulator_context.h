@@ -27,44 +27,40 @@
 
 #pragma once
 
-#include <atomic> // atomic
-#include <memory> // unique_ptr, make_unique
+#include <memory> // unique_ptr
 #include <string> // string
-#include <thread> // thread
+#include <thread> // jthread
 #include <saturnin/src/emulator_enums.h>
 #include <saturnin/src/stv_definitions.h>
 
-// Forward declarations
-namespace saturnin::cdrom {
-class Cdrom;
-}
+struct GLFWwindow;
+
 namespace saturnin::sh2 {
 class Sh2;
 enum class Sh2Type;
 } // namespace saturnin::sh2
+
 namespace saturnin::sound {
 class Scsp;
 }
+
+namespace saturnin::cdrom {
+class Cdrom;
+}
+
 namespace saturnin::video {
-class BaseRenderingPart;
-class Opengl;
 class Vdp1;
 class Vdp2;
+class Opengl;
 } // namespace saturnin::video
-
-struct GLFWwindow;
 
 namespace saturnin::core {
 
-/// \name Forward class declarations.
-/// Used to speed up build time as the .h files are included in the .cpp
-///
-//@{
+// Forward declarations
 class Config;
 class Memory;
 class Scu;
 class Smpc;
-//@}
 
 static const std::string saturnin_version{"0.5.0"};
 
@@ -362,17 +358,17 @@ class EmulatorContext {
 
     void emulationMainThread();
 
-    std::unique_ptr<Config>        config_;                      ///< Configuration object
-    std::unique_ptr<Memory>        memory_;                      ///< Memory object
-    std::unique_ptr<sh2::Sh2>      master_sh2_;                  ///< Master SH2 object
-    std::unique_ptr<sh2::Sh2>      slave_sh2_;                   ///< Slave SH2 object
-    std::unique_ptr<Scu>           scu_;                         ///< SCU object
-    std::unique_ptr<Smpc>          smpc_;                        ///< SMPC object
-    std::unique_ptr<sound::Scsp>   scsp_;                        ///< SCSP object
-    std::unique_ptr<cdrom::Cdrom>  cdrom_;                       ///< CDROM object
-    std::unique_ptr<video::Vdp1>   vdp1_;                        ///< Vdp1 object
-    std::unique_ptr<video::Vdp2>   vdp2_;                        ///< Vdp2 object
-    std::unique_ptr<video::Opengl> opengl_;                      ///< Opengl object
+    std::unique_ptr<Config>        config_;     ///< Configuration object
+    std::unique_ptr<Memory>        memory_;     ///< Memory object
+    std::unique_ptr<sh2::Sh2>      master_sh2_; ///< Master SH2 object
+    std::unique_ptr<sh2::Sh2>      slave_sh2_;  ///< Slave SH2 object
+    std::unique_ptr<Scu>           scu_;        ///< SCU object
+    std::unique_ptr<Smpc>          smpc_;       ///< SMPC object
+    std::unique_ptr<sound::Scsp>   scsp_;       ///< SCSP object
+    std::unique_ptr<cdrom::Cdrom>  cdrom_;      ///< CDROM object
+    std::unique_ptr<video::Vdp1>   vdp1_;       ///< Vdp1 object
+    std::unique_ptr<video::Vdp2>   vdp2_;       ///< Vdp2 object
+    std::unique_ptr<video::Opengl> opengl_;     ///< Opengl object
 
     HardwareMode    hardware_mode_{HardwareMode::saturn};        ///< Hardware mode
     EmulationStatus emulation_status_{EmulationStatus::stopped}; ///< Emulation status
@@ -387,11 +383,11 @@ class EmulatorContext {
     uint32_t    binary_address_{0};      ///< The PC will be set to this address after loading the binary.
     //@}
 
-    Rom_stv stv_rom_{Rom_stv::none};     ///< Current ST-V ROM loaded.
+    Rom_stv stv_rom_{Rom_stv::none}; ///< Current ST-V ROM loaded.
 
     std::jthread emulation_main_thread_; ///< The emulation main thread.
 
-    GLFWwindow* opengl_window_;          ///< The OpenGL window.
+    GLFWwindow* opengl_window_; ///< The OpenGL window.
 
     std::vector<u32> trace_;
 };
