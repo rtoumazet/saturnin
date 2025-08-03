@@ -39,15 +39,7 @@
 #include <saturnin/src/video/vdp2/vdp2_part.h> // ScrollScreenPos
 #include <saturnin/src/video/vdp2/vdp2_registers.h>
 
-// Forward declarations
-// namespace saturnin::core {
-// class Scu;
-//} // namespace saturnin::core
-
 namespace saturnin::video {
-
-// class Vdp1;
-// class Texture;
 
 using saturnin::core::EmulatorContext;
 using saturnin::core::EmulatorModules;
@@ -96,12 +88,7 @@ constexpr auto vertical_res_512   = u16{512};
 //     - 224 or 240 active lines
 //     - 39 or 23 corresponding blanking lines
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   TvStandard
-///
-/// \brief  Tv standard used.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
+// Tv standard used.
 enum class TvStandard : s8 {
     unknown = -1, ///< Unknown.
     pal     = 0,  ///< PAL.
@@ -110,11 +97,7 @@ enum class TvStandard : s8 {
 
 using DisabledScrollScreen = std::unordered_map<ScrollScreen, bool>;
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   ColorCount
-///
-/// \brief  Number of colors.
-////////////////////////////////////////////////////////////////////////////////////////////////////
+// Number of colors.
 enum class ColorCount {
     palette_16,    ///< 16 colors
     palette_256,   ///< 256 colors
@@ -127,31 +110,13 @@ enum class ColorCount {
 
 };
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   ScrollScreenFormat
-///
-/// \brief  Values that represent scroll screen formats
-////////////////////////////////////////////////////////////////////////////////////////////////////
+// Scroll screen format values.
+enum class ScrollScreenFormat { cell, bitmap };
 
-enum class ScrollScreenFormat {
-    cell,  ///< An enum constant representing the cell format.
-    bitmap ///< An enum constant representing the bitmap format.
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   BitmapSize
-///
-/// \brief  Values that represent bitmap sizes
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
+// Bitmap size values.
 enum class BitmapSize { size_512_by_256, size_512_by_512, size_1024_by_256, size_1024_by_512, not_set };
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   ScreenMode
-///
-/// \brief  Values that represent TV screen modes.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
+// TV screen mode values.
 enum class ScreenMode {
     not_set,
     normal_320_224,
