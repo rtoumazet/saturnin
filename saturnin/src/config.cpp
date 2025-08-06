@@ -41,7 +41,7 @@ Config::Config(std::string_view configuration_filename) : filename_(configuratio
         {cfg_global_area_code,                    "global.area_code"                   },
         {cfg_global_set_time,                     "global.set_time"                    },
         {cfg_global_stv_bios_bypass,              "global.stv_bios_bypass"             },
-        {cfg_rendering_legacy_opengl,             "rendering.legacy_opengl"            },
+        {cfg_rendering_renderer,                  "rendering.renderer"                 },
         {cfg_rendering_tv_standard,               "rendering.tv_standard"              },
         {cfg_paths_roms_stv,                      "paths.roms_stv"                     },
         {cfg_paths_bios_stv,                      "paths.bios_stv"                     },
@@ -86,7 +86,7 @@ Config::Config(std::string_view configuration_filename) : filename_(configuratio
         {cfg_global_set_time,                     true                            },
         {cfg_global_stv_bios_bypass,              true                            },
         {cfg_rendering_tv_standard,               std::string("pal")              },
-        {cfg_rendering_legacy_opengl,             false                           },
+        {cfg_rendering_renderer,                  std::string("opengl")           },
         {cfg_paths_roms_stv,                      std::string("")                 },
         {cfg_paths_bios_stv,                      std::string("")                 },
         {cfg_paths_bios_saturn,                   std::string("")                 },
@@ -166,6 +166,13 @@ Config::Config(std::string_view configuration_filename) : filename_(configuratio
         {"basic_interpreter", sh2::Sh2Core::basic_interpreter},
         {"fast_interpreter",  sh2::Sh2Core::fast_interpreter }
     };
+
+    renderer_ = {
+        {"opengl_legacy",         video::RendererType::renderer_opengl_legacy        },
+        {"opengl_modern",         video::RendererType::renderer_opengl_modern        },
+        {"opengl_compute_shader", video::RendererType::renderer_opengl_compute_shader},
+        {"vulkan",                video::RendererType::renderer_vulkan               }
+    };
 };
 
 void Config::writeFile() { cfg_.writeFile(this->filename_.c_str()); }
@@ -201,7 +208,7 @@ void Config::generateConfigurationTree(const bool isModernOpenglCapable) {
     add(full_keys_[cfg_global_set_time],                     std::any_cast<const bool>(default_keys_[cfg_global_set_time]));
     add(full_keys_[cfg_global_stv_bios_bypass],              std::any_cast<const bool>(default_keys_[cfg_global_stv_bios_bypass]));
     add(full_keys_[cfg_rendering_tv_standard],               std::any_cast<const std::string&>(default_keys_[cfg_rendering_tv_standard]));
-    add(full_keys_[cfg_rendering_legacy_opengl],             !isModernOpenglCapable);
+    add(full_keys_[cfg_rendering_renderer],                 std::any_cast<const std::string&>(default_keys_[cfg_rendering_renderer]));
     add(full_keys_[cfg_paths_roms_stv],                      std::any_cast<const std::string&>(default_keys_[cfg_paths_roms_stv]));
     add(full_keys_[cfg_paths_bios_stv],                      std::any_cast<const std::string&>(default_keys_[cfg_paths_bios_stv]));
     add(full_keys_[cfg_paths_bios_saturn],                   std::any_cast<const std::string&>(default_keys_[cfg_paths_bios_saturn]));
@@ -288,6 +295,7 @@ void Config::createDefault(const AccessKeys& key) {
             {cfg_global_hardware_mode,                createStringDefault          },
             {cfg_global_area_code,                    createStringDefault          },
             {cfg_rendering_tv_standard,               createStringDefault          },
+            {cfg_rendering_renderer,                  createStringDefault          },
             {cfg_paths_roms_stv,                      createStringDefault          },
             {cfg_paths_bios_stv,                      createStringDefault          },
             {cfg_paths_bios_saturn,                   createStringDefault          },
@@ -310,7 +318,6 @@ void Config::createDefault(const AccessKeys& key) {
             {cfg_log_unimplemented,                   createStringDefault          },
             {cfg_global_set_time,                     createBoolDefault            },
             {cfg_global_stv_bios_bypass,              createBoolDefault            },
-            {cfg_rendering_legacy_opengl,             createBoolDefault            },
             {cfg_sound_disabled,                      createBoolDefault            },
             {cfg_controls_saturn_player_1,            createSaturnControlDefault   },
             {cfg_controls_saturn_player_2,            createSaturnControlEmpty     },
@@ -381,6 +388,11 @@ auto Config::getCurrentSh2Core() -> sh2::Sh2Core {
     return sh2_core_[key];
 }
 
+auto Config::getRenderer(const std::string& key) -> video::RendererType {
+    // const std::string key = readValue(core::AccessKeys::cfg_rendering_renderer);
+    return renderer_[key];
+}
+
 void Config::updateLogLevel() {
     using enum AccessKeys;
     Log::setLogLevel("cdrom", getLogLevel(readValue(cfg_log_cdrom)));
@@ -439,6 +451,14 @@ auto Config::listSh2Cores() const -> std::vector<std::string> {
         cores.push_back(key);
     }
     return cores;
+}
+
+auto Config::listRenderers() const -> std::vector<std::string> {
+    auto renderers = std::vector<std::string>{};
+    for (const auto& [key, value] : renderer_) {
+        renderers.push_back(key);
+    }
+    return renderers;
 }
 
 auto Config::configToPortStatus(const std::string& value) -> PortStatus { return port_status_[value]; }

@@ -129,7 +129,9 @@ auto Opengl::isSaturnResolutionSet() const -> bool {
 }
 
 auto runOpengl(core::EmulatorContext& state) -> s32 {
-    const bool is_legacy_opengl = state.config()->readValue(core::AccessKeys::cfg_rendering_legacy_opengl);
+    auto              is_legacy_opengl = false;
+    const std::string renderer         = state.config()->readValue(core::AccessKeys::cfg_rendering_renderer);
+    if (state.config()->getRenderer(renderer) == video::RendererType::renderer_opengl_legacy) { is_legacy_opengl = true; }
 
     // Setup window
     glfwSetErrorCallback(errorCallback);

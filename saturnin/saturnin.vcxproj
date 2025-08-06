@@ -366,6 +366,7 @@
     <ClCompile Include="src\emulator_modules.cpp" />
     <ClCompile Include="src\memory_impl.cpp" />
     <ClCompile Include="src\video\opengl\opengl.cpp" />
+    <ClCompile Include="src\video\renderer.cpp" />
     <ClCompile Include="src\video\vdp1_part_impl.cpp" />
     <ClCompile Include="src\video\vdp2\vdp2_cache.cpp" />
     <ClCompile Include="src\video\vdp2\vdp2_cycle_patterns.cpp" />
@@ -476,6 +477,7 @@
     <ClInclude Include="src\video\opengl\opengl_shaders.h" />
     <ClInclude Include="src\video\opengl\opengl_texturing.h" />
     <ClInclude Include="src\video\opengl\opengl_utilities.h" />
+    <ClInclude Include="src\video\renderer.h" />
     <ClInclude Include="src\video\texture.h" />
     <ClInclude Include="src\video\vdp1_part.h" />
     <ClInclude Include="src\video\vdp1_registers.h" />

@@ -37,6 +37,7 @@
 #include <saturnin/src/utilities.h>       // toUnderlying
 #include <saturnin/src/cdrom/cdrom.h>     // CdromAccessMethod
 #include <saturnin/src/sh2/sh2.h>         // Sh2Core
+#include <saturnin/src/video/renderer.h>  // RendererType
 #include <saturnin/src/video/vdp2/vdp2.h> // TvStandard
 
 namespace libcfg = libconfig;
@@ -44,12 +45,7 @@ namespace util   = saturnin::utilities;
 
 namespace saturnin::core {
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \enum   AccessKeys
-///
-/// \brief  Keys used for accessing configuration data.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
+// Keys used for accessing configuration data.
 enum class AccessKeys : u8 {
     cfg_global_language,
     cfg_global_hardware_mode,
@@ -57,7 +53,8 @@ enum class AccessKeys : u8 {
     cfg_global_set_time,
     cfg_global_stv_bios_bypass,
     cfg_rendering_tv_standard,
-    cfg_rendering_legacy_opengl,
+    // cfg_rendering_legacy_opengl,
+    cfg_rendering_renderer,
     cfg_paths_roms_stv,
     cfg_paths_bios_stv,
     cfg_paths_bios_saturn,
@@ -94,27 +91,20 @@ enum class AccessKeys : u8 {
     stv_files
 };
 
-using MapKeys         = std::map<const AccessKeys, const std::string>;               ///< MapKeys alias definition.
-using MapKeysDefault  = std::map<const AccessKeys, const std::any>;                  ///< MapKeysDefault alias definition.
-using MapRomLoad      = std::map<const std::string, const RomLoad>;                  ///< MapRomLoad alias definition.
-using MapRomType      = std::map<const std::string, const RomType>;                  ///< MapRomType alias definition.
-using MapHardwareMode = std::map<const std::string, const HardwareMode>;             ///< MapHardwareMode alias definition.
-using MapCdromAccess  = std::map<const std::string, const cdrom::CdromAccessMethod>; ///< MapCdromAccess alias definition.
-using MapTvStandard   = std::map<const std::string, const video::TvStandard>;        ///< MapHardwareMode alias definition.
-using MapAreaCode     = std::map<const std::string, const AreaCode>;                 ///< MapAreaCode alias definition.
-using MapPortStatus   = std::map<const std::string, const PortStatus>;   ///< MapPeripheralConnection alias definition.
-using MapLogLevel     = std::map<const std::string, const LogLevel>;     ///< MapLogLevel alias definition.
-using MapSh2Core      = std::map<const std::string, const sh2::Sh2Core>; ///< MapSh2Core alias definition.
+using MapKeys         = std::map<const AccessKeys, const std::string>;               // MapKeys alias definition.
+using MapKeysDefault  = std::map<const AccessKeys, const std::any>;                  // MapKeysDefault alias definition.
+using MapRomLoad      = std::map<const std::string, const RomLoad>;                  // MapRomLoad alias definition.
+using MapRomType      = std::map<const std::string, const RomType>;                  // MapRomType alias definition.
+using MapHardwareMode = std::map<const std::string, const HardwareMode>;             // MapHardwareMode alias definition.
+using MapCdromAccess  = std::map<const std::string, const cdrom::CdromAccessMethod>; // MapCdromAccess alias definition.
+using MapTvStandard   = std::map<const std::string, const video::TvStandard>;        // MapHardwareMode alias definition.
+using MapAreaCode     = std::map<const std::string, const AreaCode>;                 // MapAreaCode alias definition.
+using MapPortStatus   = std::map<const std::string, const PortStatus>;               // MapPeripheralConnection alias definition.
+using MapLogLevel     = std::map<const std::string, const LogLevel>;                 // MapLogLevel alias definition.
+using MapSh2Core      = std::map<const std::string, const sh2::Sh2Core>;             // MapSh2Core alias definition.
+using MapRenderer     = std::map<const std::string, const video::RendererType>;      // MapRenderer alias definition.
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  Config
-///
-/// \brief  Manages configuration of the emulator.
-///
-/// \author Runik
-/// \date   21/06/2018
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
+// Manages configuration of the emulator.
 class Config {
   public:
     //@{
@@ -128,76 +118,21 @@ class Config {
     ~Config()                                  = default;
     //@}
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn void Config::writeFile();
-    ///
-    /// \brief  Writes the current configuration to the file linked to the object.
-    ///
-    /// \author Runik
-    /// \date   13/09/2018
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-
+    // Writes the current configuration to the file linked to the object.
     void writeFile();
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn auto Config::readFile() -> bool;
-    ///
-    /// \brief  Reads the configuration file linked to the object.
-    ///
-    /// \author Runik
-    /// \date   24/12/2017
-    ///
-    /// \return True if it succeeds.
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-
+    // Reads the configuration file linked to the object.
     auto readFile() -> bool;
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn auto Config::initialize(const bool isModernOpenGlCapable) -> bool;
-    ///
-    /// \brief  Initializes the configuration by reading 'saturnin.cfg'. The file is created if missing
-    ///
-    /// \author Runik
-    /// \date   24/12/2017
-    ///
-    /// \param  isModernOpenGlCapable   True if the graphics card supports modern Opengl.
-    ///
-    /// \return True if it succeeds.
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-
+    // Initializes the configuration by reading 'saturnin.cfg'. The file is created if missing
     auto initialize(bool isModernOpenGlCapable) -> bool;
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn static auto Config::getGroup(libconfig::Setting& root, const std::string& group_name) -> libconfig::Setting&
-    ///
-    /// \brief  Returns the group under the specified root setting, creates it if missing.
-    ///
-    /// \author Runik
-    /// \date   18/06/2018
-    ///
-    /// \param [in,out] root        Setting to get the group from.
-    /// \param          group_name  Name of the group to get.
-    ///
-    /// \return A reference to a Setting.
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-
+    // Returns the group under the specified root setting, creates it if missing.
     static auto getGroup(libconfig::Setting& root, const std::string& group_name) -> libconfig::Setting&;
 
     void test();
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn void Config::writeValue(libconfig::Setting& root, const std::string& key, const T& value)
-    ///
-    /// \brief  Writes a value under the specified root setting.
-    ///
-    /// \author Runik
-    /// \date   21/06/2018
-    ///
-    /// \param [in,out] root    Root setting to write the value to .
-    /// \param          key     Key of the value to write.
-    /// \param          value   Value to write.
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-
+    // Writes a value under the specified root setting.
     template<class T>
     struct ToMySetting;
     template<>
@@ -252,19 +187,7 @@ class Config {
         }
     }
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn void Config::writeValue(libconfig::Setting& root, const std::string& key, const std::string& value)
-    ///
-    /// \brief  String specilization of write_value.
-    ///
-    /// \author Runik
-    /// \date   21/06/2018
-    ///
-    /// \param [in,out] root    Root setting to write the value to .
-    /// \param          key     Key of the value to write.
-    /// \param          value   Value to write.
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-
+    // String specilization of write_value.
     static void writeValue(libconfig::Setting& root, const std::string& key, const std::string& value) {
         if (!root.exists(key.c_str())) {
             root.add(key.c_str(), libconfig::Setting::TypeString) = value.c_str();
@@ -289,19 +212,7 @@ class Config {
         }
     }
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn template<size_t N> void Config::writeValue(libconfig::Setting& root, const std::string& key, const char (&value)[N])
-    ///
-    /// \brief  Char array specilization of write_value.
-    ///
-    /// \author Runik
-    /// \date   21/06/2018
-    ///
-    /// \param [in,out] root    Root setting to write the value to .
-    /// \param          key     Key of the value to write.
-    /// \param          value   Value to write.
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-
+    // Char array specialization of write_value.
     template<size_t N>
     void
         writeValue(libconfig::Setting& root, const std::string& key, const char (&value)[N]) { // NOLINT(modernize-avoid-c-arrays)
@@ -313,18 +224,7 @@ class Config {
         }
     }
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn void Config::writeValue(const std::string& key, const T& value)
-    ///
-    /// \brief  Writes a value for the specified key.
-    ///
-    /// \author Runik
-    /// \date   21/06/2018
-    ///
-    /// \param          key     Path of the value to write.
-    /// \param          value   Value to write.
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-
+    // Writes a value for the specified key.
     template<class T>
     void writeValue(const AccessKeys& key, const T& value) {
         try {
@@ -354,129 +254,34 @@ class Config {
         }
     }
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn  auto Config::readValue(const AccessKeys& value) -> libconfig::Setting&;
-    ///
-    /// \brief   Reads a value from the specified root setting.
-    ///
-    /// \author  Runik
-    /// \date    28/08/2018
-    ///
-    /// \param   value   key of the value to read.
-    ///
-    /// \return  Read value.
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-
+    // Reads a value from the specified root setting.
     auto readValue(const AccessKeys& value) -> libconfig::Setting&;
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn  auto Config::existsValue(const AccessKeys& key) -> bool;
-    ///
-    /// \brief   Checks if the key exists in the configuration file.
-    ///
-    /// \author  Runik
-    /// \date    28/12/2019
-    ///
-    /// \param   key The key to check.
-    ///
-    /// \return  True if the key exists.
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-
+    // Checks if the key exists in the configuration file.
     auto existsValue(const AccessKeys& value) -> bool;
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn static auto Config::listAvailableLanguages() -> std::vector<std::string>;
-    ///
-    /// \brief   Returns a vector populated with available languages.
-    ///
-    /// \author  Runik
-    /// \date    15/09/2018
-    ///
-    /// \return  Available languages.
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-
+    // Returns a vector populated with available languages.
     static auto listAvailableLanguages() -> std::vector<std::string>;
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn auto saturnin::core::Config::listAreaCodes() const -> std::vector<std::string>;
-    ///
-    /// \brief  Returns a vector populated with area codes.
-    ///
-    /// \author Runik
-    /// \date   26/01/2020
-    ///
-    /// \returns    A std::vector&lt;std::string&gt;
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-
+    // Returns a vector populated with area codes.
     auto listAreaCodes() const -> std::vector<std::string>;
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn auto saturnin::core::Config::listPeripheralConnections() const -> std::vector<std::string>;
-    ///
-    /// \brief  Returns a vector populated with peripheral connections.
-    ///
-    /// \author Runik
-    /// \date   17/03/2020
-    ///
-    /// \returns    A std::vector&lt;std::string&gt;
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-
+    // Returns a vector populated with peripheral connections.
     auto listPeripheralConnections() const -> std::vector<std::string>;
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn auto Config::listLogLevels() const -> std::vector<std::string>;
-    ///
-    /// \brief  Returns a vector populated with the different log levels.
-    ///
-    /// \author Runik
-    /// \date   12/05/2021
-    ///
-    /// \returns    A std::vector&lt;std::string&gt;
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-
+    // Returns a vector populated with the different log levels.
     auto listLogLevels() const -> std::vector<std::string>;
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn	auto Config::listSh2Cores() const -> std::vector<std::string>;
-    ///
-    /// \brief	Returns a vector populated with the different SH2 cores.
-    ///
-    /// \author	Runik
-    /// \date	22/04/2023
-    ///
-    /// \returns	A std::vector&lt;std::string&gt;
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-
+    // Returns a vector populated with the different SH2 cores.
     auto listSh2Cores() const -> std::vector<std::string>;
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn	auto Config::configToPortStatus(const std::string& value) -> PortStatus;
-    ///
-    /// \brief	Configuration entry to port status
-    ///
-    /// \author	Runik
-    /// \date	18/03/2020
-    ///
-    /// \param 	value	The config value.
-    ///
-    /// \returns	A PortStatus.
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    // Returns a vector populated with the different renderers.
+    auto listRenderers() const -> std::vector<std::string>;
 
+    // Configuration entry to port status
     auto configToPortStatus(const std::string& value) -> PortStatus;
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn  template<class T> void Config::add(const std::string key, T default)
-    ///
-    /// \brief   Creates a configuration key with subgroups if needed, and adds the default value to the last token of the key.
-    ///
-    /// \author  Runik
-    /// \date    17/12/2019
-    ///
-    /// \tparam  T   Type of the default value
-    /// \param   key     The key.
-    /// \param   def_value Default value to add.
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-
+    // Creates a configuration key with subgroups if needed, and adds the default value to the last token of the key.
     template<class T>
     void add(const std::string key, T def_value) { // NOLINT(readability-avoid-const-params-in-decls)
         const auto tokens{util::explode(key, '.')};
@@ -521,254 +326,59 @@ class Config {
         }
     }
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn  auto Config::createDefault(const AccessKeys& key) -> std::vector<PeripheralKey>;
-    ///
-    /// \brief   Creates a default entry for the specified key.
-    ///
-    /// \author  Runik
-    /// \date    28/12/2019
-    ///
-    /// \param   key The key to create.
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-
+    // Creates a default entry for the specified key.
     void createDefault(const AccessKeys& key);
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn auto saturnin::core::Config::readPeripheralConfiguration(const AccessKeys& key) -> std::vector<PeripheralKey>;
-    ///
-    /// \brief  Reads peripheral configuration of the key
-    ///
-    /// \author Runik
-    /// \date   13/12/2020
-    ///
-    /// \param  key The key.
-    ///
-    /// \returns    The peripheral configuration.
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-
+    // Reads peripheral configuration of the key
     auto readPeripheralConfiguration(const AccessKeys& key) -> std::vector<PeripheralKey>;
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn auto Config::getHardwareMode(const std::string& key) -> HardwareMode;
-    ///
-    /// \brief  Returns the hardware mode corresponding to the key.
-    ///
-    /// \author Runik
-    /// \date   13/12/2020
-    ///
-    /// \param  key The key.
-    ///
-    /// \returns    The hardware mode.
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-
+    // Returns the hardware mode corresponding to the key.
     auto getHardwareMode(const std::string& key) -> HardwareMode;
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn auto saturnin::core::Config::getHardwareModeKey(const HardwareMode value) const -> std::optional<std::string>;
-    ///
-    /// \brief  Gets the hardware mode string key from a value. Returns nullopt if value is not found
-    ///
-    /// \author Runik
-    /// \date   13/12/2020
-    ///
-    /// \param  value   The value.
-    ///
-    /// \returns    The hardware mode key.
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-
+    // Gets the hardware mode string key from a value. Returns nullopt if value is not found
     auto getHardwareModeKey(const HardwareMode value) const -> std::optional<std::string>;
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn auto Config::getCdromAccess(const std::string& key) -> cdrom::CdromAccessMethod;
-    ///
-    /// \brief  Returns the cdrom access method corresponding to the key.
-    ///
-    /// \author Runik
-    /// \date   13/12/2020
-    ///
-    /// \param  key The key.
-    ///
-    /// \returns    The cdrom access method.
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-
+    // Returns the cdrom access method corresponding to the key.
     auto getCdromAccess(const std::string& key) -> cdrom::CdromAccessMethod;
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn auto saturnin::core::Config::getCdromAccessKey(const cdrom::CdromAccessMethod value) const ->
-    /// std::optional<std::string>;
-    ///
-    /// \brief  Gets the cdrom access method string key from a value. Returns nullopt if value is not
-    ///         found
-    ///
-    /// \author Runik
-    /// \date   13/12/2020
-    ///
-    /// \param  value   The value.
-    ///
-    /// \returns    The cdrom access method key.
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-
+    // Gets the cdrom access method string key from a value. Returns nullopt if value is not found.
     auto getCdromAccessKey(const cdrom::CdromAccessMethod value) const -> std::optional<std::string>;
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn auto saturnin::core::Config::getTvStandard(const std::string& key) -> video::TvStandard;
-    ///
-    /// \brief  Returns the TV standard method corresponding to the key.
-    ///
-    /// \author Runik
-    /// \date   13/12/2020
-    ///
-    /// \param  key The key.
-    ///
-    /// \returns    The TV standard.
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-
+    // Returns the TV standard method corresponding to the key.
     auto getTvStandard(const std::string& key) -> video::TvStandard;
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn auto saturnin::core::Config::getTvStandardKey(const video::TvStandard value) const -> std::optional<std::string>;
-    ///
-    /// \brief  Gets the TV standard string key from a value. Returns nullopt if value is not
-    ///         found
-    ///
-    /// \author Runik
-    /// \date   13/12/2020
-    ///
-    /// \param  value   The value.
-    ///
-    /// \returns    The TV standard key.
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-
+    // Gets the TV standard string key from a value. Returns nullopt if value is not found.
     auto getTvStandardKey(const video::TvStandard value) const -> std::optional<std::string>;
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn auto Config::getRomLoad(const std::string& key) -> RomLoad;
-    ///
-    /// \brief  Returns the rom load method corresponding to the key.
-    ///
-    /// \author Runik
-    /// \date   13/12/2020
-    ///
-    /// \param  key The key.
-    ///
-    /// \returns    The rom load method.
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-
+    // Returns the rom load method corresponding to the key.
     auto getRomLoad(const std::string& key) -> RomLoad;
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn auto Config::getRomType(const std::string& key) -> RomType;
-    ///
-    /// \brief  Returns the rom type corresponding to the key.
-    ///
-    /// \author Runik
-    /// \date   13/12/2020
-    ///
-    /// \param  key The key.
-    ///
-    /// \returns    The rom type.
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-
+    // Returns the rom type corresponding to the key.
     auto getRomType(const std::string& key) -> RomType;
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn auto Config::getAreaCode(const std::string& key) -> AreaCode;
-    ///
-    /// \brief  Returns the area code corresponding to the key.
-    ///
-    /// \author Runik
-    /// \date   13/12/2020
-    ///
-    /// \param  key The key.
-    ///
-    /// \returns    The area code.
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-
+    // Returns the area code corresponding to the key.
     auto getAreaCode(const std::string& key) -> AreaCode;
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn auto saturnin::core::Config::getAreaCodeKey(const AreaCode value) const -> std::optional<std::string>;
-    ///
-    /// \brief  Gets the area code string key from a value. Returns nullopt if value is not found
-    ///
-    /// \author Runik
-    /// \date   13/12/2020
-    ///
-    /// \param  value   The value.
-    ///
-    /// \returns    The area code key.
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-
+    // Gets the area code string key from a value. Returns nullopt if value is not found
     auto getAreaCodeKey(const AreaCode value) const -> std::optional<std::string>;
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn	auto Config::getCurrentSh2Core() -> sh2::Sh2Core;
-    ///
-    /// \brief	Returns the SH2 core saved in the configuration.
-    ///
-    /// \author	Runik
-    /// \date	13/05/2023
-    ///
-    /// \returns	The SH2 core.
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-
+    // Returns the SH2 core saved in the configuration.
     auto getCurrentSh2Core() -> sh2::Sh2Core;
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn void Config::updateLogLevel();
-    ///
-    /// \brief  Updates the log level of the various loggers.
-    ///
-    /// \author Runik
-    /// \date   13/05/2021
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    // Returns the renderer corresponding to the key.
+    auto getRenderer(const std::string& key) -> video::RendererType;
 
+    // Updates the log level of the various loggers.
     void updateLogLevel();
 
   private:
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn void Config::generateConfigurationTree(bool isModernOpenglCapable);
-    ///
-    /// \brief  Generates the configuration tree with default values in the configuration file.
-    ///
-    /// \author Runik
-    /// \date   21/06/2018
-    ///
-    /// \param  isModernOpenglCapable   The is modern opengl capable.
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-
+    // Generates the configuration tree with default values in the configuration file.
     void generateConfigurationTree(bool isModernOpenglCapable);
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn static auto Config::addGroup(libcfg::Setting& root, const std::string& group_name) -> std::string;
-    ///
-    /// \brief  Adds a group to a setting.
-    ///
-    /// \author Runik
-    /// \date   17/12/2019
-    ///
-    /// \param [in,out] root        Root setting to add the group to.
-    /// \param          group_name  Group name to add.
-    ///
-    /// \return A std::string.
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-
+    // Adds a group to a setting.
     static auto addGroup(libcfg::Setting& root, const std::string& group_name) -> std::string;
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn auto Config::getLogLevel(const std::string& key) -> LogLevel;
-    ///
-    /// \brief  Returns the log level corresponding to the key.
-    ///
-    /// \author Runik
-    /// \date   12/05/2021
-    ///
-    /// \param  key The key.
-    ///
-    /// \returns    The log level.
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-
+    // Returns the log level corresponding to the key.
     auto getLogLevel(const std::string& key) -> LogLevel;
 
     std::string filename_; ///< Name of the configuration file used
@@ -788,6 +398,7 @@ class Config {
     MapPortStatus port_status_; ///< Link between the port status string value defined in the config file and the PortStatus type.
     MapLogLevel   log_level_;   ///< Link between the log level string value defined in the config file and the LogLevel type.
     MapSh2Core    sh2_core_;    ///< Link between the sh2 core string value defined in the config file and the Sh2Core type.
+    MapRenderer   renderer_;    ///< Link between the renderer string value defined in the config file and the Renderer type.
 };
 
 }; // namespace saturnin::core

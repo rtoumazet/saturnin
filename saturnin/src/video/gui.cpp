@@ -321,15 +321,15 @@ void showMainMenu(GuiConfiguration& conf, core::EmulatorContext& state) {
                     }
                 }
 
-                // Legacy opengl
-                ImGui::TextUnformatted(tr("Legacy OpenGL").c_str());
+                // Renderer
+                ImGui::TextUnformatted(tr("Renderer").c_str());
                 ImGui::SameLine(second_column_offset);
-
-                static bool is_legacy         = state.config()->readValue(core::AccessKeys::cfg_rendering_legacy_opengl);
-                const auto  initial_rendering = bool{is_legacy};
-                if (ImGui::Checkbox("##checkbox_legacy", &is_legacy)) {
-                    state.config()->writeValue(core::AccessKeys::cfg_rendering_legacy_opengl, is_legacy);
-                    if (initial_rendering != is_legacy) { reset_rendering = true; }
+                static auto renderers      = state.config()->listRenderers();
+                std::string r              = state.config()->readValue(core::AccessKeys::cfg_rendering_renderer);
+                const auto  it_renderer    = std::ranges::find_if(renderers, [&r](std::string_view str) { return r == str; });
+                static auto index_renderer = static_cast<s32>(it_renderer - renderers.begin());
+                if (ImGui::Combo("##renderers", &index_renderer, renderers)) {
+                    state.config()->writeValue(core::AccessKeys::cfg_rendering_renderer, renderers[index_renderer]);
                 }
             }
 
