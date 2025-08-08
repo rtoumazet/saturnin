@@ -34,6 +34,7 @@
 #include <saturnin/src/cdrom/cdrom.h>
 #include <saturnin/src/cdrom/scsi.h>
 #include <saturnin/src/sound/scsp.h>
+#include <saturnin/src/video/renderer.h>
 #include <saturnin/src/video/opengl/opengl_utilities.h>
 #include <saturnin/src/video/vdp1.h>
 #include <saturnin/src/video/vdp2/vdp2.h>
@@ -45,6 +46,7 @@ using sh2::Sh2;
 using sh2::Sh2Type;
 using sound::Scsp;
 using video::Opengl;
+using video::RendererType;
 using video::Vdp1;
 using video::Vdp2;
 
@@ -205,7 +207,24 @@ void EmulatorContext::emulationMainThread() {
 
 void EmulatorContext::startInterface() {
     renderingStatus(core::RenderingStatus::running);
-    video::runOpengl(*this);
+    const std::string renderer = config()->readValue(core::AccessKeys::cfg_rendering_renderer);
+    switch (config()->getRenderer(renderer)) {
+        case RendererType::renderer_opengl_legacy:
+        case RendererType::renderer_opengl_modern:
+        case RendererType::renderer_opengl_compute_shader: {
+            video::runOpengl(*this);
+            break;
+        }
+        case RendererType::renderer_vulkan: {
+            Log::error(Logger::gui, "Vulkan renderer not implemented !");
+            renderingStatus(core::RenderingStatus::stopped);
+            break;
+        }
+        default: {
+            Log::error(Logger::gui, "Unknown renderer !");
+            renderingStatus(core::RenderingStatus::stopped);
+        }
+    }
 }
 
 void EmulatorContext::debugStatus(const DebugStatus status) { debug_status_ = status; };
