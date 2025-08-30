@@ -59,17 +59,18 @@ jobs:
       # See https://docs.microsoft.com/visualstudio/msbuild/msbuild-command-line-reference
       #run: msbuild /m /p:Platform=${{env.BUILD_PLATFORM}}  /p:PlatformTarget=${{env.BUILD_PLATFORM}} /p:Configuration=${{env.BUILD_CONFIGURATION}}  ${{env.SOLUTION_FILE_PATH}}
 
-    - name: Install sonar-scanner and build-wrapper
-      uses: SonarSource/sonarcloud-github-c-cpp@v2
+    - name: Install Build Wrapper
+      uses: SonarSource/sonarqube-scan-action/install-build-wrapper@v5
     
     - name: Run build-wrapper
       run: |
         # build-wrapper-win-x86-64 --out-dir ${{ env.BUILD_WRAPPER_OUT_DIR }} msbuild sonar_scanner_example.vcxproj /t:rebuild /nodeReuse:false
         build-wrapper-win-x86-64 --out-dir ${{ env.BUILD_WRAPPER_OUT_DIR }} msbuild /m /p:Platform=${{env.BUILD_PLATFORM}}  /p:PlatformTarget=${{env.BUILD_PLATFORM}} /p:Configuration=${{env.BUILD_CONFIGURATION}}  ${{env.SOLUTION_FILE_PATH}} /t:rebuild /nodeReuse:false
     - name: Run sonar-scanner
+      uses: SonarSource/sonarqube-scan-action@v5
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }} # Put the name of your token here
-      run: |
-        # sonar-scanner --define sonar.cfamily.build-wrapper-output="${{ env.BUILD_WRAPPER_OUT_DIR }}"
-        sonar-scanner --define sonar.cfamily.compile-commands="${{ env.BUILD_WRAPPER_OUT_DIR }}/compile_commands.json"
+      with:
+        args: >
+          --define sonar.cfamily.compile-commands="${{ env.BUILD_WRAPPER_OUT_DIR }}/compile_commands.json"
