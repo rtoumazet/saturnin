@@ -32,7 +32,7 @@
 #include <type_traits>                  // underlying_type_t
 #include <vector>                       // vector
 #include <saturnin/src/emulator_defs.h> // u8, u16, u32
-#include <fmt/core.h>
+#include <fmt/format.h>
 
 namespace saturnin::utilities {
 
