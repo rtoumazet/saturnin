@@ -225,15 +225,20 @@ auto runOpengl(core::EmulatorContext& state) -> s32 {
     // io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\ArialUni.ttf", 18.0f, NULL, io.Fonts->GetGlyphRangesJapanese());
 
     // Adding glyphs that will be used as images in text
-    io.Fonts->AddFontDefault();
+    ImFontConfig   configDefault;
+    constexpr auto font_size           = 13.0f;
+    configDefault.SizePixels           = font_size;
+    configDefault.FontDataOwnedByAtlas = false;
+    io.Fonts->AddFontDefault(&configDefault);
     static const std::array<ImWchar, 3> icons_ranges = {0xe900, 0xe908, 0}; // Will not be copied by AddFont* so keep in scope.
     ImFontConfig                        config;
-    config.MergeMode            = true;
+    config.MergeMode        = true;
+    auto       data         = rh::embed("saturnin-icons.ttf");
+    const auto glyph_offset = ImVec2(0, 2);
+    config.GlyphOffset      = glyph_offset;
+
+    config.SizePixels           = font_size;
     config.FontDataOwnedByAtlas = false;
-    auto       data             = rh::embed("saturnin-icons.ttf");
-    const auto glyph_offset     = ImVec2(0, 2);
-    config.GlyphOffset          = glyph_offset;
-    constexpr auto font_size    = 13.0f;
 
     io.Fonts->AddFontFromMemoryTTF((void*)data.data(), static_cast<u32>(data.size()), font_size, &config, icons_ranges.data());
     io.Fonts->Build();
