@@ -45,12 +45,27 @@ static auto vectorGetter = [](void* vec, int idx, const char** out_text) {
 
 auto Combo(const char* label, int* current_index, std::vector<std::string>& values) -> bool {
     if (values.empty()) { return false; }
-    return Combo(label, current_index, vectorGetter, static_cast<void*>(&values), static_cast<int32_t>(values.size()));
+    if (ImGui::BeginCombo(label, values[*current_index].c_str())) {
+        for (int i = 0; i < values.size(); ++i) {
+            const bool is_selected = (*current_index == i);
+            if (ImGui::Selectable(values[i].c_str(), is_selected)) { *current_index = i; }
+            if (is_selected) { ImGui::SetItemDefaultFocus(); }
+        }
+        ImGui::EndCombo();
+    }
+    return true;
 }
 
 auto ListBox(const char* label, int* current_index, std::vector<std::string>& values) -> bool {
     if (values.empty()) { return false; }
-    return ListBox(label, current_index, vectorGetter, static_cast<void*>(&values), static_cast<int32_t>(values.size()));
+    if (ImGui::BeginListBox(label)) {
+        for (int n = 0; n < values.size(); n++) {
+            const bool is_selected = (*current_index == n);
+            if (ImGui::Selectable(values[n].c_str(), is_selected)) { *current_index = n; }
+            if (is_selected) { ImGui::SetItemDefaultFocus(); }
+        }
+        ImGui::EndListBox();
+    }
 }
 
 } // namespace ImGui

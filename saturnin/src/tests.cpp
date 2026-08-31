@@ -1,4 +1,4 @@
-//
+﻿//
 // tests.cpp
 // Saturnin
 //
@@ -37,7 +37,7 @@ auto Test::endTest() -> std::string {
     auto res      = (std::chrono::duration_cast<std::chrono::microseconds>(elapsed_time_)).count();
 
     using namespace std::literals;
-    return utilities::format("{} micros", res);
+    return utilities::format("{} µs", res);
 }
 
 void runTests() {
@@ -106,11 +106,13 @@ void runTests() {
         }
 
         std::vector<u8> texture_data;
-        auto            os = std::ostringstream{};
-        auto            b  = ankerl::nanobench::Bench();
+        // core::Log::info(Logger::test, "{}", arr[0x3f]);
+        auto os = std::ostringstream{};
+        auto b  = ankerl::nanobench::Bench();
         b.output(&os).relative(true);
 
-        b.run("Direct copy", [&texture_data, &current_address, &row, &ec] {
+        // ankerl::nanobench::Bench().output(&os).run("Direct copy", [&] {
+        b.run("Direct copy", [&] {
             texture_data.clear();
             current_address = u32{0x25e00000};
             for (u32 i = 0; i < 8; ++i) {
@@ -127,6 +129,8 @@ void runTests() {
                 texture_data.emplace_back(row.as_8bits >> DataExtraction::As8Bits::dot3_shift);
                 current_address += 4;
             }
+
+            // ankerl::nanobench::doNotOptimizeAway(d);
         });
 
         core::Log::info(Logger::test, "{}", os.str());

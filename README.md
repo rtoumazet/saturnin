@@ -45,3 +45,5 @@ Saturnin is a Sega Saturn emulator
 ### Who do I talk to? ###
 
   * Runik (Renaud Toumazet)
+
+  [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/S6S2122MKA)
