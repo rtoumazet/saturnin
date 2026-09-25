@@ -8,10 +8,15 @@ Saturnin is a Sega Saturn emulator
 ### How do I get set up? ###
 
   #### Configuration ####
-	
-  Before doing anything after cloning the repository, remove template extensions from properties files in the **./props** directory.
 
-  Next, you must update user macros from properties sheets inside VS2022 to set up your directories. To do so, open the Property Manager first ( **View** | **Property Manager** ), then update the **solution** sheet macros according to your setup.
+  Configure the project with CMake and the x64 vcpkg triplet:
+
+  ```powershell
+  cmake --preset windows-x64-debug -DCMAKE_TOOLCHAIN_FILE=<path-to-vcpkg>/scripts/buildsystems/vcpkg.cmake
+  cmake --build --preset build-debug
+  ```
+
+  The available configurations are `Debug`, `RelWithDebInfo` and `Release`. `RelWithDebInfo` replaces the former `DebugFast` configuration. 32-bit configurations are no longer supported.
 
   #### Dependencies ####
 

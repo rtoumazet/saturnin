@@ -1,0 +1,29 @@
+{
+  "name": "saturnin",
+  "version-string": "0.1.0",
+  "builtin-baseline": "5f96cd15fd745122cf27e0524606d6c1efc5fd07",
+  "description": "Saturnin",
+  "dependencies": [
+    "argagg",
+    "date",
+    "bshoshany-thread-pool",
+    "fmt",
+    "glbinding",
+    "glfw3",
+    "glm",
+    {
+      "name": "imgui",
+      "features": [
+        "docking-experimental",
+        "glfw-binding",
+        "opengl3-binding"
+      ]
+    },
+    "libconfig",
+    "libzippp",
+    "lodepng",
+    "nanobench",
+    "opengl",
+    "spdlog"
+  ]
+}
