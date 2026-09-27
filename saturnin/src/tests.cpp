@@ -90,7 +90,7 @@ void runTests() {
         core::Log::info(Logger::test, result, "BitReg"s, reg.endTest(), val);
     }
 
-    if constexpr (constexpr auto run_data_copy_benchmarks = true) {
+    if constexpr (constexpr auto run_data_copy_benchmarks = false) {
         using namespace core;
         using namespace video;
 
