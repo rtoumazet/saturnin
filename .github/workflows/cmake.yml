@@ -1,4 +1,4 @@
-name: MSBuild
+name: CMake
 
 on:
   push:
@@ -6,16 +6,12 @@ on:
     branches: [ "master" ]
 
 env:
-  # Path to the solution file relative to the root of the project.
-  SOLUTION_FILE_PATH: .
-
-  # Configuration type to build.
-  # You can convert this to a build matrix if you need coverage of multiple configuration types.
-  # https://docs.github.com/actions/learn-github-actions/managing-complex-workflows#using-a-build-matrix
+  # RelWithDebInfo is the CMake equivalent of the former DebugFast configuration.
   BUILD_PLATFORM: x64
-  BUILD_CONFIGURATION: DebugFast
+  BUILD_CONFIGURATION: RelWithDebInfo
   
   VCPKG_DEFAULT_TRIPLET: x64-windows-static
+  BUILD_DIR: ${{ runner.temp }}\saturnin-build
   
   BUILD_WRAPPER_OUT_DIR: build_wrapper_output_directory # Directory where build-wrapper output will be placed
   
@@ -31,9 +27,6 @@ jobs:
       with:
         ref: master
         fetch-depth: 0 # Shallow clones should be disabled for a better relevancy of analysis    
-
-    - name: Add MSBuild to PATH
-      uses: microsoft/setup-msbuild@v2
 
     - name: Expose GitHub runtime variables
       uses: actions/github-script@v9
@@ -52,29 +45,25 @@ jobs:
         
     - name: Install vcpkg dependencies
       run: |
-        $VCPKG_ROOT/vcpkg install argagg bshoshany-thread-pool date glbinding glfw3 glm imgui[docking-experimental,glfw-binding,opengl3-binding] libconfig libzip libzippp lodepng spdlog nanobench
+        $VCPKG_ROOT/vcpkg install --triplet $VCPKG_DEFAULT_TRIPLET
       shell: bash  
 
-    - name: Copy properties file
-      run: |
-          cp props/solution.props.template props/solution.props
-    
-    - name: Integrate vcpkg
-      run: $VCPKG_ROOT/vcpkg integrate install
-      shell: bash
-
-   #- name: Build
-      # Add additional options to the MSBuild command line here (like platform or verbosity level).
-      # See https://docs.microsoft.com/visualstudio/msbuild/msbuild-command-line-reference
-      #run: msbuild /m /p:Platform=${{env.BUILD_PLATFORM}}  /p:PlatformTarget=${{env.BUILD_PLATFORM}} /p:Configuration=${{env.BUILD_CONFIGURATION}}  ${{env.SOLUTION_FILE_PATH}}
+    - name: Configure CMake
+      shell: pwsh
+      run: >-
+        cmake -S . -B "${{ env.BUILD_DIR }}"
+        -G "Visual Studio 18 2026"
+        -A ${{ env.BUILD_PLATFORM }}
+        -DCMAKE_TOOLCHAIN_FILE="$env:VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake"
+        -DVCPKG_TARGET_TRIPLET=${{ env.VCPKG_DEFAULT_TRIPLET }}
+        -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
     
     - name: Install Build Wrapper
       uses: SonarSource/sonarqube-scan-action/install-build-wrapper@v5
     
     - name: Run build-wrapper
       run: |
-        # build-wrapper-win-x86-64 --out-dir ${{ env.BUILD_WRAPPER_OUT_DIR }} msbuild sonar_scanner_example.vcxproj /t:rebuild /nodeReuse:false
-        build-wrapper-win-x86-64 --out-dir ${{ env.BUILD_WRAPPER_OUT_DIR }} msbuild /m /p:Platform=${{env.BUILD_PLATFORM}}  /p:PlatformTarget=${{env.BUILD_PLATFORM}} /p:Configuration=${{env.BUILD_CONFIGURATION}}  ${{env.SOLUTION_FILE_PATH}} /t:rebuild /nodeReuse:false
+        build-wrapper-win-x86-64 --out-dir ${{ env.BUILD_WRAPPER_OUT_DIR }} cmake --build "${{ env.BUILD_DIR }}" --config ${{ env.BUILD_CONFIGURATION }} --parallel
     - name: Run sonar-scanner
       uses: SonarSource/sonarqube-scan-action@v8
       env:

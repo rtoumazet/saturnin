@@ -18,3 +18,4 @@ saturnin/docs/.$render.drawio.bkp
 saturnin/docs/.$nbg.drawio.bkp
 *.bkp
 /suggested_fixes
+/build-cmake-validation
