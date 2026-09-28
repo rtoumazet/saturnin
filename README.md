@@ -1,6 +1,6 @@
 Saturnin is a Sega Saturn emulator
 
-[![MSBuild](https://github.com/rtoumazet/saturnin/actions/workflows/msbuild.yml/badge.svg)](https://github.com/rtoumazet/saturnin/actions/workflows/msbuild.yml)
+[![MSBuild](https://github.com/rtoumazet/saturnin/actions/workflows/cmake.yml/badge.svg)](https://github.com/rtoumazet/saturnin/actions/workflows/cmake.yml)
 [![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=rtoumazet_saturnin&metric=reliability_rating)](https://sonarcloud.io/summary/new_code?id=rtoumazet_saturnin)
 [![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=rtoumazet_saturnin&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=rtoumazet_saturnin)
 [![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=rtoumazet_saturnin&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=rtoumazet_saturnin)
