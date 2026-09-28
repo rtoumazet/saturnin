@@ -20,13 +20,7 @@ Saturnin is a Sega Saturn emulator
 
   #### Dependencies ####
 
-  They are handled using [vcpkg](https://github.com/Microsoft/vcpkg). You'll find in **./saturnin/lib/vcpkg** everything necessary to build the libraries used by Saturnin.
-    
-  Follow these steps:
-    
-1. remove **template** extension from **vcpkg.cfg.template**
-1. update **vcpkg_full_path** in **vcpkg.cfg** according to your vcpkg install.
-1. run **install_libraries.bat dynamic** for building and installing dynamic libraries or **install_libraries.bat static** for building and installing static ones.
+  They are handled using [vcpkg](https://github.com/Microsoft/vcpkg).
     
   List of used libraries for reference:
     
