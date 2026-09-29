@@ -27,7 +27,7 @@ Saturnin is a Sega Saturn emulator
   cmake --build build --config Release --parallel
   ```
 
-  `RelWithDebInfo` replaces the former `DebugFast` configuration. 32-bit configurations are no longer supported. The executable and runtime assets are written below `build/bin/<configuration>`.
+  `RelWithDebInfo` replaces the former `DebugFast` configuration. 32-bit configurations are no longer supported. The executable and runtime assets are written below `build/bin/<configuration>`. They are handled using [vcpkg](https://github.com/Microsoft/vcpkg).
 
   CMake presets are also available as `windows-x64-debug`, `windows-x64-relwithdebinfo`, and `windows-x64-release`, with matching build presets. They use the same x64 static vcpkg triplet. Set the `external-build-root.binaryDir` value in `CMakePresets.json` to a suitable local build directory before using them.
     
