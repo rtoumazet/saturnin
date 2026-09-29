@@ -1,32 +1,35 @@
 Saturnin is a Sega Saturn emulator
 
-[![MSBuild](https://github.com/rtoumazet/saturnin/actions/workflows/msbuild.yml/badge.svg)](https://github.com/rtoumazet/saturnin/actions/workflows/msbuild.yml)
+[![MSBuild](https://github.com/rtoumazet/saturnin/actions/workflows/cmake.yml/badge.svg)](https://github.com/rtoumazet/saturnin/actions/workflows/cmake.yml)
 [![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=rtoumazet_saturnin&metric=reliability_rating)](https://sonarcloud.io/summary/new_code?id=rtoumazet_saturnin)
 [![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=rtoumazet_saturnin&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=rtoumazet_saturnin)
 [![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=rtoumazet_saturnin&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=rtoumazet_saturnin)
 
 ### How do I get set up? ###
 
-  #### Configuration ####
+  #### Configuration and build ####
 
-  Configure the project with CMake and the x64 vcpkg triplet:
+  Saturnin requires Windows, Visual Studio 2026 (18.10 or later), CMake 4.4 or later, and [vcpkg](https://github.com/Microsoft/vcpkg). Set `VCPKG_ROOT` to your vcpkg installation and make sure the Visual Studio C++ workload is installed.
+
+  From the repository root, configure the x64 static build with CMake:
 
   ```powershell
-  cmake --preset windows-x64-debug -DCMAKE_TOOLCHAIN_FILE=<path-to-vcpkg>/scripts/buildsystems/vcpkg.cmake
-  cmake --build --preset build-debug
+  cmake -S . -B build -G "Visual Studio 18 2026" -A x64 `
+    -DCMAKE_TOOLCHAIN_FILE="$env:VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake" `
+    -DVCPKG_TARGET_TRIPLET=x64-windows-static
   ```
 
-  The available configurations are `Debug`, `RelWithDebInfo` and `Release`. `RelWithDebInfo` replaces the former `DebugFast` configuration. 32-bit configurations are no longer supported.
+  The vcpkg manifest in `vcpkg.json` supplies the dependencies and they are installed during configuration. Build the desired configuration with:
 
-  #### Dependencies ####
+  ```powershell
+  cmake --build build --config Debug --parallel
+  cmake --build build --config RelWithDebInfo --parallel
+  cmake --build build --config Release --parallel
+  ```
 
-  They are handled using [vcpkg](https://github.com/Microsoft/vcpkg). You'll find in **./saturnin/lib/vcpkg** everything necessary to build the libraries used by Saturnin.
-    
-  Follow these steps:
-    
-1. remove **template** extension from **vcpkg.cfg.template**
-1. update **vcpkg_full_path** in **vcpkg.cfg** according to your vcpkg install.
-1. run **install_libraries.bat dynamic** for building and installing dynamic libraries or **install_libraries.bat static** for building and installing static ones.
+  `RelWithDebInfo` replaces the former `DebugFast` configuration. 32-bit configurations are no longer supported. The executable and runtime assets are written below `build/bin/<configuration>`.
+
+  CMake presets are also available as `windows-x64-debug`, `windows-x64-relwithdebinfo`, and `windows-x64-release`, with matching build presets. They use the same x64 static vcpkg triplet. Set the `external-build-root.binaryDir` value in `CMakePresets.json` to a suitable local build directory before using them.
     
   List of used libraries for reference:
     
