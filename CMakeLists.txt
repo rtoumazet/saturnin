@@ -88,7 +88,10 @@ target_link_libraries(saturnin PRIVATE
 	Shlwapi.lib
 )
 
-target_link_options(saturnin PRIVATE /ENTRY:mainCRTStartup)
+target_link_options(saturnin PRIVATE
+	/ENTRY:mainCRTStartup
+	"$<$<CONFIG:Release,RelWithDebInfo>:/LTCG>"
+)
 
 set_target_properties(saturnin PROPERTIES
 	MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>"
