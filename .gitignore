@@ -20,3 +20,5 @@ saturnin/docs/.$nbg.drawio.bkp
 /suggested_fixes
 /build-cmake-validation
 .cortexkit/magic-context/
+/sessions
+opencode.json
