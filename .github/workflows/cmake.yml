@@ -25,7 +25,7 @@ jobs:
     steps:
     - uses: actions/checkout@v7
       with:
-        ref: master
+        ref: ${{ github.head_ref || github.ref_name }}
         fetch-depth: 0 # Shallow clones should be disabled for a better relevancy of analysis    
 
     - name: Expose GitHub runtime variables
