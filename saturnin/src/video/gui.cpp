@@ -1446,7 +1446,7 @@ void showDebugVdp1Window(core::EmulatorContext& state, bool* opened) {
                 const auto content_size = ImVec2(512, 280);
 
                 ImGui::SetNextWindowContentSize(content_size);
-                ImGui::BeginChild("ChildPartDetail", child_size, true);
+                ImGui::BeginChild("ChildPartDetail", child_size, ImGuiChildFlags_Borders);
                 ImGui::TextWithColors(draw_list[current_part_idx].getDebugDetail().c_str());
                 state.opengl()->render()->partToHighlight(draw_list[current_part_idx]);
                 ImGui::EndChild();
@@ -1459,7 +1459,7 @@ void showDebugVdp1Window(core::EmulatorContext& state, bool* opened) {
             if (!draw_list.empty()) {
                 const auto child_size = ImVec2(260, 280);
                 ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2());
-                ImGui::BeginChild("ChildPartTexture", child_size, true);
+                ImGui::BeginChild("ChildPartTexture", child_size, ImGuiChildFlags_Borders);
 
                 if (ImGui::BeginMenuBar()) {
                     ImGui::TextUnformatted(tr("Texture").c_str());
@@ -1577,7 +1577,7 @@ void showDebugVdp2Window(core::EmulatorContext& state, bool* opened) {
                 };
 
                 const auto child_size = ImVec2(580, 35);
-                ImGui::BeginChild("vdp2_disable_layers", child_size, true, window_flags);
+                ImGui::BeginChild("vdp2_disable_layers", child_size, ImGuiChildFlags_Borders, window_flags);
                 ImGui::TextUnformatted(tr("Disable layers").c_str());
                 ImGui::SameLine();
                 addCheckbox(ScrollScreen::nbg0);
@@ -1637,7 +1637,7 @@ void showDebugVdp2Window(core::EmulatorContext& state, bool* opened) {
         }
         if (ImGui::BeginTabItem(tr("Registers").c_str())) {
             current_tab = Vdp2DebugTab::registers;
-            ImGui::BeginChild("vdp2_registers_child");
+            ImGui::BeginChild("vdp2_registers_child", ImVec2(0, 0), ImGuiChildFlags_None);
 
             static ImGuiTableFlags flags = ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg | ImGuiTableFlags_SizingFixedFit;
             constexpr auto         columns_number = u8{3};
@@ -1680,7 +1680,7 @@ void showDebugVdp2Window(core::EmulatorContext& state, bool* opened) {
 
                 ImGui::PushStyleColor(ImGuiCol_FrameBg, style.Colors[ImGuiCol_ChildBg]);
                 const auto child_size = ImVec2(50, 110);
-                ImGui::BeginChild("ChildScrollScreen", child_size, true, window_flags);
+                ImGui::BeginChild("ChildScrollScreen", child_size, ImGuiChildFlags_Borders, window_flags);
 
                 const auto scroll_child_size = ImVec2(70, 110);
                 if (ImGui::BeginListBox("##scroll_screen", scroll_child_size)) {
@@ -1734,7 +1734,7 @@ void showDebugVdp2Window(core::EmulatorContext& state, bool* opened) {
                 if (ImGui::BeginTabItem(tr("Viewer").c_str())) {
                     const auto child_size = ImVec2(500, 520);
                     ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2());
-                    ImGui::BeginChild("child_part_texture", child_size, true, window_flags);
+                    ImGui::BeginChild("child_part_texture", child_size, ImGuiChildFlags_Borders, window_flags);
 
                     if (state.debugStatus() != core::DebugStatus::disabled) {
                         if (state.vdp2()->screenInDebug() != video::ScrollScreen::none) {
@@ -1805,12 +1805,12 @@ void showDebugTexturesWindow(core::EmulatorContext& state, bool* opened) {
                 const auto& keys_list            = video::Texture::keysList();
 
                 ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2());
-                ImGui::BeginChild("texture_viewer", child_size, true, window_flags);
+                ImGui::BeginChild("texture_viewer", child_size, ImGuiChildFlags_Borders, window_flags);
                 {
                     // Keys list
                     ImGuiWindowFlags window_flags = ImGuiWindowFlags_HorizontalScrollbar;
                     const auto child_size = ImVec2(ImGui::GetContentRegionAvail().x * 0.2f, ImGui::GetContentRegionAvail().y);
-                    ImGui::BeginChild("ChildTexturesList", child_size, false, window_flags);
+                    ImGui::BeginChild("ChildTexturesList", child_size, ImGuiChildFlags_None, window_flags);
 
                     const auto texture_list_size = ImVec2(area_1_width, ImGui::GetContentRegionAvail().y);
                     if (ImGui::BeginListBox("##texture_list", texture_list_size)) {
@@ -1837,7 +1837,7 @@ void showDebugTexturesWindow(core::EmulatorContext& state, bool* opened) {
                     const auto       child_size
                         = ImVec2(ImGui::GetContentRegionAvail().y * 0.5f, ImGui::GetContentRegionAvail().y * 0.5f);
 
-                    ImGui::BeginChild("ChildTextureDetails", child_size, true, window_flags);
+                    ImGui::BeginChild("ChildTextureDetails", child_size, ImGuiChildFlags_Borders, window_flags);
 
                     if (!keys_list.empty()) {
                         const auto& texture_key = keys_list[current_texture_idx].second;
@@ -1846,7 +1846,7 @@ void showDebugTexturesWindow(core::EmulatorContext& state, bool* opened) {
                     ImGui::EndChild();
 
                     ImGui::SetCursorPos(preview_window_pos);
-                    ImGui::BeginChild("ChildTexturePreview", child_size, true, window_flags);
+                    ImGui::BeginChild("ChildTexturePreview", child_size, ImGuiChildFlags_Borders, window_flags);
 
                     // When image ratio isn't 1:1, preview size must be adapted to keep the image ratio.
                     if (!keys_list.empty()) {
@@ -1881,7 +1881,7 @@ void showDebugTexturesWindow(core::EmulatorContext& state, bool* opened) {
                                                                                             static_cast<u8>(key));
                     ImGui::SetCursorPos(layer_window_pos);
                     const auto child_size = ImVec2(area_3_width, ImGui::GetContentRegionAvail().y);
-                    ImGui::BeginChild("ChildTextureLayer", child_size, false, window_flags);
+                    ImGui::BeginChild("ChildTextureLayer", child_size, ImGuiChildFlags_None, window_flags);
                     const auto preview_size = ImGui::GetContentRegionAvail();
                     ImGui::Image(static_cast<uptr>(tex_id), preview_size);
                     ImGui::EndChild();
@@ -1903,7 +1903,7 @@ void showDebugTexturesWindow(core::EmulatorContext& state, bool* opened) {
                     = state.opengl()->texturing()->generateTextureFromTextureArrayLayer(video::GuiTextureType::layer_buffer,
                                                                                         static_cast<u8>(current_layer));
 
-                ImGui::BeginChild("child_part_texture", child_size, true, window_flags);
+                ImGui::BeginChild("child_part_texture", child_size, ImGuiChildFlags_Borders, window_flags);
                 const auto preview_size = ImVec2(500, 500);
                 ImGui::Image(static_cast<uptr>(tex_id), preview_size);
 
@@ -1928,7 +1928,7 @@ void showDebugSmpcWindow(core::EmulatorContext& state, bool* opened) {
         = ImGuiWindowFlags{ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoCollapse};
     ImGui::Begin(tr("SMPC debug").c_str(), opened, window_flags);
 
-    ImGui::BeginChild("smpc_registers_child");
+    ImGui::BeginChild("smpc_registers_child", ImVec2(0, 0), ImGuiChildFlags_None);
 
     static ImGuiTableFlags flags          = ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg | ImGuiTableFlags_SizingFixedFit;
     constexpr auto         columns_number = u8{3};

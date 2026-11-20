@@ -22,6 +22,7 @@
 #include <saturnin/src/emulator_defs.h>
 #include <saturnin/src/video/opengl/opengl.h>
 #include <saturnin/src/video/opengl/opengl_texturing.h>
+#include <saturnin/src/video/render_interface.h>
 #include <saturnin/src/video/vdp_common.h>
 
 namespace saturnin::video {
@@ -31,7 +32,7 @@ constexpr auto render_type = RenderType::RenderType_drawElements;
 
 using MapOfPartsList = std::map<FboKey, PartsList>; // Parts list by priority + layer
 
-class OpenglRender {
+class OpenglRender : public RenderInterface {
   public:
     OpenglRender() = default;
     explicit OpenglRender(Opengl* opengl) : opengl_(opengl) {};
@@ -41,15 +42,20 @@ class OpenglRender {
     OpenglRender& operator=(const OpenglRender&) = delete;
     OpenglRender& operator=(OpenglRender&&)      = delete;
 
-    void initialize();
-    void shutdown() const;
+    void initialize() override;
+    void shutdown() const override;
 
     // Pre/post rendering functions
     void preRender();
     void postRender() const;
 
     // Renders the list of parts to a specific texture.
-    void renderParts(const PartsList& parts_list, const u32 texture_id);
+    virtual void renderParts(const PartsList& parts_list, const u32 texture_id);
+    // Renders all priority lists in painter's order. The compute backend flattens them into one dispatch.
+    virtual void renderPartsLists(const MapOfPartsList& lists, const u32 texture_id);
+
+    // Called once after every OpenGL module (renderer + texturing) is initialized.
+    virtual void postInitialize() {}
 
     // Renders data if available.
     void render();
@@ -60,16 +66,16 @@ class OpenglRender {
     void renderTest();
 
     // Renders the vertexes of the vdp1 part currently saved to a specific overlay layer. Useful for debugging.
-    void renderVdp1DebugOverlay();
+    void renderVdp1DebugOverlay() override;
 
     // Renders the vertexes of the vdp2 layer currently selected for display in the debug window.
-    void renderVdp2DebugLayer(core::EmulatorContext& state);
+    void renderVdp2DebugLayer(core::EmulatorContext& state) override;
 
     // Selects the renderer to use, depending on conditions
-    void renderSelector();
+    void renderSelector() override;
 
     // Checks if there's something to render.
-    auto isThereSomethingToRender() const -> bool;
+    auto isThereSomethingToRender() const -> bool override;
 
     // Switch between back and front rendering buffers.
     void switchRenderedBuffer();
@@ -82,19 +88,20 @@ class OpenglRender {
     auto calculateViewportPosAndSize() const -> std::tuple<u32, u32, u32, u32>;
 
     // Displays the framebuffer content (VDP1 + VDP2)
-    void displayFramebuffer(core::EmulatorContext& state);
+    void displayFramebuffer(core::EmulatorContext& state) override;
     void displayFramebufferByScreenPriority(core::EmulatorContext& state);
     void displayFramebufferByParts(core::EmulatorContext& state);
 
     // Accessors / mutators
-    void               partToHighlight(const Vdp1Part& part) { part_to_highlight_ = part; };
+    void               partToHighlight(const Vdp1Part& part) override { part_to_highlight_ = part; };
     auto               partToHighlight() const -> Vdp1Part { return part_to_highlight_; };
-    [[nodiscard]] auto currentRenderedBuffer() const { return current_rendered_buffer_; };
-    void               currentRenderedBuffer(const FboTextureType type) { current_rendered_buffer_ = type; };
+    [[nodiscard]] auto currentRenderedBuffer() const -> FboTextureType override { return current_rendered_buffer_; };
+    void               currentRenderedBuffer(const FboTextureType type) override { current_rendered_buffer_ = type; };
 
-  private:
+  protected:
     Opengl* opengl_;
 
+  private:
     Vdp1Part part_to_highlight_; // Part that will be highlighted during debug.
 
     FboTextureType current_rendered_buffer_; // The current rendered buffer (front or back)

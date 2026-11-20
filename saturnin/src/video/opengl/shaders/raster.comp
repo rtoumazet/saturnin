@@ -1,0 +1,120 @@
+#version 430 core
+
+layout(local_size_x = 16, local_size_y = 16) in;
+
+layout(binding = 0, rgba8) uniform highp image2D out_image;
+layout(binding = 0) uniform sampler2DArray atlas;
+
+struct GpuVertex { vec4 pos; vec4 tex; vec4 color; vec4 gouraud; vec4 offset_pos; vec4 offset_val; };
+struct GpuPart   { uint first; uint count; uint flags; uint pad; };
+
+layout(std430, binding = 1) buffer VertexBuffer { GpuVertex verts[]; };
+layout(std430, binding = 2) buffer PartBuffer   { GpuPart   parts[]; };
+
+uniform int  part_count;
+uniform mat4 proj_matrix;
+uniform vec2 fb_size;
+
+const uint PRIM_POLYGON  = 0u;
+const uint PRIM_POLYLINE = 1u;
+const uint PRIM_LINE     = 2u;
+
+// GL rasterizes 1-pixel lines with the diamond-exit rule: |dx| + |dy| < 0.5 from the segment.
+float lineDiamondDistance(vec2 a, vec2 b, vec2 p) {
+    vec2  ab   = b - a;
+    float len2 = dot(ab, ab);
+    if (len2 < 1e-6) { return abs(p.x - a.x) + abs(p.y - a.y); }
+    float t = clamp(dot(p - a, ab) / len2, 0.0, 1.0);
+    vec2  q = a + t * ab;
+    return abs(q.x - p.x) + abs(q.y - p.y);
+}
+
+float edge(vec2 a, vec2 b, vec2 p) {
+    return (b.x - a.x) * (p.y - a.y) - (b.y - a.y) * (p.x - a.x);
+}
+
+// Same maths as main.frag.
+vec4 shade(bool textured, vec4 vc, vec4 tc, vec4 grd, vec4 op, vec4 ov) {
+    vec4 c = textured ? texture(atlas, vec3(tc.x, tc.y, tc.z)) : vc;
+    c.rgb += grd.rgb;
+    c.r += op.r > 0.0 ? ov.r : -ov.r;
+    c.g += op.g > 0.0 ? ov.g : -ov.g;
+    c.b += op.b > 0.0 ? ov.b : -ov.b;
+    c.rgb = clamp(c.rgb, vec3(0.0), vec3(1.0));
+    return c;
+}
+
+void main() {
+    ivec2 ip = ivec2(gl_GlobalInvocationID.xy);
+    if (ip.x >= int(fb_size.x) || ip.y >= int(fb_size.y)) { return; }
+
+    vec2 p = vec2(ip) + vec2(0.5);
+    // Start from the cleared destination, like GL_SRC_ALPHA / GL_ONE_MINUS_SRC_ALPHA blending.
+    vec4 color = imageLoad(out_image, ip);
+
+    // Painter's order: later parts overwrite earlier ones.
+    for (int pi = 0; pi < part_count; ++pi) {
+        uint flags    = parts[pi].flags;
+        uint prim     = (flags >> 1u) & 3u;
+        bool textured = (flags & 1u) != 0u;
+        int first = int(parts[pi].first);
+        int count = int(parts[pi].count);
+
+        if (prim == PRIM_POLYLINE || prim == PRIM_LINE) {
+            int segments = (prim == PRIM_LINE) ? 1 : count;
+            for (int s = 0; s < segments; ++s) {
+                GpuVertex va = verts[first + s];
+                GpuVertex vb = verts[first + ((s + 1) % count)];
+                vec4 pa = proj_matrix * vec4(va.pos.xy, 0.0, 1.0); pa.xy /= pa.w;
+                vec4 pb = proj_matrix * vec4(vb.pos.xy, 0.0, 1.0); pb.xy /= pb.w;
+                vec2 sa = (pa.xy * 0.5 + 0.5) * fb_size;
+                vec2 sb = (pb.xy * 0.5 + 0.5) * fb_size;
+                vec2 ab = sb - sa;
+                float len2 = dot(ab, ab);
+                if (len2 < 1e-6) { continue; }
+                // Keep the closest point strictly inside the segment: GL excludes the pixel just
+                // before a segment start when the endpoint lands exactly on a pixel boundary.
+                float t = clamp(dot(p - sa, ab) / len2, 0.001f / sqrt(len2), 1.0f - 0.6f / sqrt(len2));
+                // Pixel ip covers [ip, ip+1); GL's diamond-exit ties go to the higher index.
+                vec2 q = sa + t * ab;
+                if (ivec2(floor(q - vec2(0.0001f))) != ip) { continue; }
+                vec4 src = shade(textured,
+                    va.color * (1.0 - t) + vb.color * t,
+                    va.tex   * (1.0 - t) + vb.tex   * t,
+                    va.gouraud * (1.0 - t) + vb.gouraud * t,
+                    va.offset_pos * (1.0 - t) + vb.offset_pos * t,
+                    va.offset_val * (1.0 - t) + vb.offset_val * t);
+                color = vec4(src.rgb * src.a + color.rgb * (1.0 - src.a),
+                             src.a + color.a * (1.0 - src.a));
+            }
+            continue;
+        }
+
+        for (int i = 1; i < count - 1; ++i) {
+            GpuVertex a = verts[first];
+            GpuVertex b = verts[first + i];
+            GpuVertex c = verts[first + i + 1];
+            vec4 pa = proj_matrix * vec4(a.pos.xy, 0.0, 1.0); pa.xy /= pa.w;
+            vec4 pb = proj_matrix * vec4(b.pos.xy, 0.0, 1.0); pb.xy /= pb.w;
+            vec4 pc = proj_matrix * vec4(c.pos.xy, 0.0, 1.0); pc.xy /= pc.w;
+            vec2 sa = (pa.xy * 0.5 + 0.5) * fb_size;
+            vec2 sb = (pb.xy * 0.5 + 0.5) * fb_size;
+            vec2 sc = (pc.xy * 0.5 + 0.5) * fb_size;
+            float w0 = edge(sb, sc, p), w1 = edge(sc, sa, p), w2 = edge(sa, sb, p);
+            float area = w0 + w1 + w2;
+            if (abs(area) < 1e-6) { continue; }
+            if ((w0 >= 0.0 && w1 >= 0.0 && w2 >= 0.0) || (w0 <= 0.0 && w1 <= 0.0 && w2 <= 0.0)) {
+                vec3 w = vec3(w0, w1, w2) / area;
+                vec4 src = shade(textured,
+                    a.color * w.x + b.color * w.y + c.color * w.z,
+                    a.tex   * w.x + b.tex   * w.y + c.tex   * w.z,
+                    a.gouraud * w.x + b.gouraud * w.y + c.gouraud * w.z,
+                    a.offset_pos * w.x + b.offset_pos * w.y + c.offset_pos * w.z,
+                    a.offset_val * w.x + b.offset_val * w.y + c.offset_val * w.z);
+                color = vec4(src.rgb * src.a + color.rgb * (1.0 - src.a),
+                             src.a + color.a * (1.0 - src.a));
+            }
+        }
+    }
+    imageStore(out_image, ip, color);
+}

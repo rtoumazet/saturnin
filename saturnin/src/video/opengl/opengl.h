@@ -56,6 +56,7 @@ namespace saturnin::video {
 // Forward declaration
 class OpenglRender;
 class OpenglTexturing;
+class RenderInterface;
 
 enum class DrawType : u8;
 enum class ScrollScreen;
@@ -180,9 +181,13 @@ class Opengl {
     auto getMutex(const MutexType& type) -> std::mutex&;
 
     // Interface to the OpenglRender object.
-    auto render() -> OpenglRender* { return opengl_render_.get(); };
+    auto render() -> RenderInterface* { return opengl_render_.get(); };
     // Interface to the OpenglTexturing object.
     auto texturing() -> OpenglTexturing* { return opengl_texturing_.get(); };
+
+    // Called when a 4.3 context could not be created: forces the fixed-function backend.
+    void forceModernRenderer() { force_modern_renderer_ = true; };
+    [[nodiscard]] auto isModernRendererForced() const -> bool { return force_modern_renderer_; };
 
   private:
     friend class OpenglRender;
@@ -195,8 +200,9 @@ class Opengl {
 
     core::Config* config_; // Configuration object.
 
-    std::unique_ptr<OpenglRender>    opengl_render_;    // OpenGL render object.
+    std::unique_ptr<RenderInterface> opengl_render_;    // Rendering backend (OpenGL 3.3 or compute).
     std::unique_ptr<OpenglTexturing> opengl_texturing_; // OpenGL texturing object.
+    bool                             force_modern_renderer_{false}; // Set when a 4.3 context is unavailable.
 
     ScreenResolutions screen_resolutions_; // Host and Saturn screen resolution
 

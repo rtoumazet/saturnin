@@ -50,6 +50,7 @@ auto initializeShaders() -> GraphicShaders {
     auto shaders_list = GraphicShaders{};
     shaders_list.try_emplace("main.vert", readFile("main.vert"));
     shaders_list.try_emplace("main.frag", readFile("main.frag"));
+    shaders_list.try_emplace("raster.comp", readFile("raster.comp"));
     return shaders_list;
 }
 
@@ -87,6 +88,17 @@ auto createFragmentShader(const GraphicShaders& shaders_list, std::string_view s
     checkShaderCompilation(fragment_shader);
 
     return fragment_shader;
+}
+
+auto createComputeShader(const GraphicShaders& shaders_list, std::string_view shader_name) -> u32 {
+    const auto compute_shader = gl::glCreateShader(gl::GL_COMPUTE_SHADER);
+    auto       source         = getShaderSource(shaders_list, shader_name);
+    glShaderSource(compute_shader, 1, &source, nullptr);
+    glCompileShader(compute_shader);
+
+    checkShaderCompilation(compute_shader);
+
+    return compute_shader;
 }
 
 auto createProgramShader(const u32 vertex_shader_id, const u32 fragment_shader_id) -> u32 {

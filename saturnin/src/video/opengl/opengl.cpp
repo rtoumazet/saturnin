@@ -21,6 +21,7 @@
 #include <saturnin/src/video/opengl/opengl.h>
 #include <Windows.h> // removes C4005 warning
 #include <algorithm>
+#include <cstdlib>    // getenv
 #include <fstream>    // ifstream
 #include <filesystem> // filesystem
 #include <iostream>   // cout
@@ -48,6 +49,7 @@
 #include <saturnin/src/timer.h>     // Timer
 #include <saturnin/src/video/gui.h>
 #include <saturnin/src/video/opengl/opengl_render.h>
+#include <saturnin/src/video/opengl/opengl_compute_render.h>
 #include <saturnin/src/video/opengl/opengl_texturing.h>
 #include <saturnin/src/video/opengl/opengl_utilities.h>
 #include <saturnin/src/video/opengl/opengl_texturing.h>
@@ -68,6 +70,27 @@ using core::Log;
 using core::Logger;
 using core::tr;
 
+namespace {
+// Picks the rendering backend matching the configured renderer type.
+auto createRenderBackend(core::Config* config, Opengl* opengl) -> std::unique_ptr<RenderInterface> {
+    const std::string renderer = config->readValue(core::AccessKeys::cfg_rendering_renderer);
+    if (!opengl->isModernRendererForced()
+        && config->getRenderer(renderer) == RendererType::renderer_opengl_compute_shader) {
+        core::Log::info(core::Logger::opengl, "Rendering backend : OpenGL compute (raster.comp).");
+        return std::make_unique<OpenglComputeRender>(opengl);
+    }
+    if (opengl->isModernRendererForced()) {
+        core::Log::warning(core::Logger::opengl, "OpenGL 4.3 unavailable: using fixed-function renderer instead.");
+    }
+    if (opengl->isModernRendererForced()) {
+        core::Log::info(core::Logger::opengl, "Rendering backend : fixed function (OpenGL 4.3 fallback).");
+    } else {
+        core::Log::info(core::Logger::opengl, "Rendering backend : {} (fixed function).", renderer);
+    }
+    return std::make_unique<OpenglRender>(opengl);
+}
+} // namespace
+
 Opengl::Opengl(core::Config* config) :
     config_(config),
     opengl_render_(std::make_unique<OpenglRender>(this)),
@@ -82,8 +105,12 @@ void Opengl::initialize() {
 
     glbinding::initialize(glfwGetProcAddress);
 
+    // The configuration file is only loaded by now, so the backend is chosen here rather than in the constructor.
+    opengl_render_ = createRenderBackend(config_, this);
+
     render()->initialize();
     texturing()->initialize();
+    render()->postInitialize();
 }
 
 void Opengl::shutdown() {
@@ -129,9 +156,15 @@ auto Opengl::isSaturnResolutionSet() const -> bool {
 }
 
 auto runOpengl(core::EmulatorContext& state) -> s32 {
-    auto              is_legacy_opengl = false;
-    const std::string renderer         = state.config()->readValue(core::AccessKeys::cfg_rendering_renderer);
-    if (state.config()->getRenderer(renderer) == video::RendererType::renderer_opengl_legacy) { is_legacy_opengl = true; }
+    auto              is_legacy_opengl  = false;
+    auto              is_compute_shader = false;
+    const std::string renderer          = state.config()->readValue(core::AccessKeys::cfg_rendering_renderer);
+    switch (state.config()->getRenderer(renderer)) {
+        using enum video::RendererType;
+        case renderer_opengl_legacy: is_legacy_opengl = true; break;
+        case renderer_opengl_compute_shader: is_compute_shader = true; break;
+        default: break;
+    }
 
     // Setup window
     glfwSetErrorCallback(errorCallback);
@@ -142,29 +175,52 @@ auto runOpengl(core::EmulatorContext& state) -> s32 {
     // GL 3.2 + GLSL 150
     const char* glsl_version = "#version 150";
     if (!is_legacy_opengl) {
-        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, is_compute_shader ? 4 : 3);
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, is_compute_shader ? 3 : 2);
         glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE); // 3.2+ only
         glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);           // Required on Mac
+        if (is_compute_shader) { glsl_version = "#version 430"; }
     }
 #else
     // GL 3.0 + GLSL 130
     const char* glsl_version = "#version 130";
     if (!is_legacy_opengl) {
-        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, is_compute_shader ? 4 : 3);
         glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
         glfwWindowHint(GLFW_OPENGL_PROFILE,
                        GLFW_OPENGL_CORE_PROFILE); // 3.2+ only
         // Change call to glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); for 3.0+ only
 
         glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, true);
+        if (is_compute_shader) { glsl_version = "#version 430"; }
     }
 #endif
+    // Dev hook: force an impossible context version so the fallback path can be tested on any GPU.
+    if (is_compute_shader && std::getenv("SATURNIN_FORCE_NO_GL43") != nullptr) {
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 9);
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 9);
+    }
     const std::string rendering_mode = is_legacy_opengl ? core::tr("Legacy") : core::tr("Modern");
     const std::string window_title
         = util::format(core::tr("Saturnin {0} - {1} rendering"), core::saturnin_version, rendering_mode);
 
-    const auto window = createMainWindow(minimum_window_width, minimum_window_height, window_title);
+    auto window = createMainWindow(minimum_window_width, minimum_window_height, window_title);
+    if (window == nullptr && is_compute_shader) {
+        // Some GPUs/drivers have no 4.3 context. Retry with 3.3 and switch the backend accordingly.
+        core::Log::warning(core::Logger::opengl,
+                           "Could not create an OpenGL 4.3 context; falling back to the fixed-function renderer.");
+        state.opengl()->forceModernRenderer();
+        is_compute_shader = false;
+        glsl_version       = "#version 130";
+#if __APPLE__
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
+#else
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+#endif
+        window = createMainWindow(minimum_window_width, minimum_window_height, window_title);
+    }
     if (window == nullptr) { return EXIT_FAILURE; }
     state.openglWindow(window);
 
@@ -241,8 +297,14 @@ auto runOpengl(core::EmulatorContext& state) -> s32 {
     config.FontDataOwnedByAtlas = false;
 
     io.Fonts->AddFontFromMemoryTTF((void*)data.data(), static_cast<u32>(data.size()), font_size, &config, icons_ranges.data());
-    io.Fonts->Build();
+    if (!io.Fonts->Build()) {
+        Log::error(Logger::opengl, "ImFontAtlas build failed.");
+    }
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+
+    if (ImGui::GetCurrentContext() != nullptr) {
+        ImGui::GetStyle().ScaleAllSizes(1.0f);
+    }
 
     const auto clear_color = ImVec4{0.0f, 0.0f, 0.0f, 1.00f};
 

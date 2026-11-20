@@ -30,6 +30,7 @@ void deleteShaders(const std::vector<u32>& shaders);
 
 auto createVertexShader(const GraphicShaders& shaders_list, std::string_view shader_name) -> u32;
 auto createFragmentShader(const GraphicShaders& shaders_list, std::string_view shader_name) -> u32;
+auto createComputeShader(const GraphicShaders& shaders_list, std::string_view shader_name) -> u32;
 auto createProgramShader(u32 vertex_shader_id, u32 fragment_shader_id) -> u32;
 auto getShaderSource(const GraphicShaders& shaders_list, std::string_view name) -> const char*;
 

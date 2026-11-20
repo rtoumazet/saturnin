@@ -168,6 +168,11 @@ void OpenglRender::render() {
     }
 }
 
+void OpenglRender::renderPartsLists(const MapOfPartsList& lists, const u32 texture_id) {
+    // Fixed-function path keeps one draw pass per priority list.
+    for (const auto& [key, parts_list] : lists | std::views::reverse) { renderParts(parts_list, texture_id); }
+}
+
 void OpenglRender::renderByScreenPriority() {
     // Parts to be displayed are moved to global_parts_list_, with one entry by priority + linked FBO (FboKey).
     // Goal is to reuse FBOs which are identical from previous frame to improve performances.
@@ -181,9 +186,7 @@ void OpenglRender::renderByScreenPriority() {
 
     preRender();
 
-    for (const auto& [key, parts_list] : global_parts_list | std::views::reverse) {
-        renderParts(parts_list, opengl_->texturing()->getTextureArrayId());
-    }
+    renderPartsLists(global_parts_list, opengl_->texturing()->getTextureArrayId());
 
 
     
