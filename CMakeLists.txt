@@ -91,6 +91,7 @@ target_link_libraries(saturnin PRIVATE
 target_link_options(saturnin PRIVATE
 	/ENTRY:mainCRTStartup
 	"$<$<CONFIG:Release,RelWithDebInfo>:/LTCG>"
+	"$<$<CONFIG:Release,RelWithDebInfo>:/INCREMENTAL:NO>"
 )
 
 set_target_properties(saturnin PROPERTIES

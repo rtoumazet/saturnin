@@ -202,7 +202,7 @@ void EmulatorContext::emulationMainThread() {
         }
     } catch (...) { Log::error(Logger::main, tr("Exception raised in emulation thread !")); }
     Log::info(Logger::main, tr("Emulation main thread finished"));
-    dumpTrace();
+    // dumpTrace();
 }
 
 void EmulatorContext::startInterface() {
