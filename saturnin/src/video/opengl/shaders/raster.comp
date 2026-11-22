@@ -6,14 +6,18 @@ layout(binding = 0, rgba8) uniform highp image2D out_image;
 layout(binding = 0) uniform sampler2DArray atlas;
 
 struct GpuVertex { vec4 pos; vec4 tex; vec4 color; vec4 gouraud; vec4 offset_pos; vec4 offset_val; };
-struct GpuPart   { uint first; uint count; uint flags; uint pad; };
+struct GpuPart   { uint first; uint count; uint flags; uint pad; vec4 bounds; };
 
 layout(std430, binding = 1) buffer VertexBuffer { GpuVertex verts[]; };
 layout(std430, binding = 2) buffer PartBuffer   { GpuPart   parts[]; };
+// Per-tile part buckets: tile_offsets[t] .. tile_offsets[t + 1] index into tile_indices, which
+// holds part indices in draw order (painter's order) for that tile.
+layout(std430, binding = 3) buffer TileIndexBuffer  { uint tile_indices[]; };
+layout(std430, binding = 4) buffer TileOffsetBuffer { uint tile_offsets[]; };
 
-uniform int  part_count;
-uniform mat4 proj_matrix;
-uniform vec2 fb_size;
+uniform vec2  fb_size;
+uniform ivec2 dispatch_origin;
+uniform int   tiles_x;
 
 const uint PRIM_POLYGON  = 0u;
 const uint PRIM_POLYLINE = 1u;
@@ -45,30 +49,38 @@ vec4 shade(bool textured, vec4 vc, vec4 tc, vec4 grd, vec4 op, vec4 ov) {
 }
 
 void main() {
-    ivec2 ip = ivec2(gl_GlobalInvocationID.xy);
+    ivec2 ip = ivec2(gl_GlobalInvocationID.xy) + dispatch_origin;
     if (ip.x >= int(fb_size.x) || ip.y >= int(fb_size.y)) { return; }
 
     vec2 p = vec2(ip) + vec2(0.5);
     // Start from the cleared destination, like GL_SRC_ALPHA / GL_ONE_MINUS_SRC_ALPHA blending.
     vec4 color = imageLoad(out_image, ip);
 
+    // One workgroup rasterizes exactly one tile, so a pixel only inspects the parts overlapping
+    // that tile instead of the whole parts list.
+    int  tile         = int(gl_WorkGroupID.y) * tiles_x + int(gl_WorkGroupID.x);
+    uint bucket_begin = tile_offsets[tile];
+    uint bucket_end   = tile_offsets[tile + 1];
+    if (bucket_begin == bucket_end) { return; }
+
     // Painter's order: later parts overwrite earlier ones.
-    for (int pi = 0; pi < part_count; ++pi) {
+    for (uint k = bucket_begin; k < bucket_end; ++k) {
+        int pi = int(tile_indices[k]);
         uint flags    = parts[pi].flags;
         uint prim     = (flags >> 1u) & 3u;
         bool textured = (flags & 1u) != 0u;
         int first = int(parts[pi].first);
         int count = int(parts[pi].count);
+        vec4 bounds = parts[pi].bounds;
+        if (p.x < bounds.x || p.x > bounds.z || p.y < bounds.y || p.y > bounds.w) { continue; }
 
         if (prim == PRIM_POLYLINE || prim == PRIM_LINE) {
             int segments = (prim == PRIM_LINE) ? 1 : count;
             for (int s = 0; s < segments; ++s) {
                 GpuVertex va = verts[first + s];
                 GpuVertex vb = verts[first + ((s + 1) % count)];
-                vec4 pa = proj_matrix * vec4(va.pos.xy, 0.0, 1.0); pa.xy /= pa.w;
-                vec4 pb = proj_matrix * vec4(vb.pos.xy, 0.0, 1.0); pb.xy /= pb.w;
-                vec2 sa = (pa.xy * 0.5 + 0.5) * fb_size;
-                vec2 sb = (pb.xy * 0.5 + 0.5) * fb_size;
+                vec2 sa = va.pos.xy;
+                vec2 sb = vb.pos.xy;
                 vec2 ab = sb - sa;
                 float len2 = dot(ab, ab);
                 if (len2 < 1e-6) { continue; }
@@ -94,16 +106,13 @@ void main() {
             GpuVertex a = verts[first];
             GpuVertex b = verts[first + i];
             GpuVertex c = verts[first + i + 1];
-            vec4 pa = proj_matrix * vec4(a.pos.xy, 0.0, 1.0); pa.xy /= pa.w;
-            vec4 pb = proj_matrix * vec4(b.pos.xy, 0.0, 1.0); pb.xy /= pb.w;
-            vec4 pc = proj_matrix * vec4(c.pos.xy, 0.0, 1.0); pc.xy /= pc.w;
-            vec2 sa = (pa.xy * 0.5 + 0.5) * fb_size;
-            vec2 sb = (pb.xy * 0.5 + 0.5) * fb_size;
-            vec2 sc = (pc.xy * 0.5 + 0.5) * fb_size;
+            vec2 sa = a.pos.xy;
+            vec2 sb = b.pos.xy;
+            vec2 sc = c.pos.xy;
             float w0 = edge(sb, sc, p), w1 = edge(sc, sa, p), w2 = edge(sa, sb, p);
             float area = w0 + w1 + w2;
             if (abs(area) < 1e-6) { continue; }
-            if ((w0 >= 0.0 && w1 >= 0.0 && w2 >= 0.0) || (w0 <= 0.0 && w1 <= 0.0 && w2 <= 0.0)) {
+            if ((w0 > 0.0 && w1 > 0.0 && w2 > 0.0) || (w0 < 0.0 && w1 < 0.0 && w2 < 0.0)) {
                 vec3 w = vec3(w0, w1, w2) / area;
                 vec4 src = shade(textured,
                     a.color * w.x + b.color * w.y + c.color * w.z,

@@ -22,7 +22,9 @@
 
 #include <algorithm>
 #include <chrono>
+#include <cmath>
 #include <ranges>
+#include <utility>
 #include <vector>
 
 #include <glm/gtc/type_ptr.hpp>
@@ -148,6 +150,25 @@ auto isDrawable(const DrawType type) -> bool {
 auto normalizeGouraud(const s8 value) -> float {
     return std::clamp(static_cast<float>(value) / 127.0f, -1.0f, 1.0f);
 }
+
+auto projectToScreen(const glm::mat4& projection, const float x, const float y, const float width, const float height)
+    -> std::pair<float, float> {
+    auto p = projection * glm::vec4(x, y, 0.0f, 1.0f);
+    p.x /= p.w;
+    p.y /= p.w;
+    return {(p.x * 0.5f + 0.5f) * width, (p.y * 0.5f + 0.5f) * height};
+}
+
+// Must match local_size_x / local_size_y in raster.comp: one workgroup rasterizes one tile.
+constexpr auto compute_tile_size = 16;
+
+auto alignDown(const int value) -> int {
+    return (value / compute_tile_size) * compute_tile_size;
+}
+
+auto alignUp(const int value) -> int {
+    return ((value + compute_tile_size - 1) / compute_tile_size) * compute_tile_size;
+}
 } // namespace
 
 void OpenglComputeRender::initialize() {
@@ -165,6 +186,8 @@ void OpenglComputeRender::initialize() {
 
     glGenBuffers(1, &vertex_ssbo_);
     glGenBuffers(1, &part_ssbo_);
+    glGenBuffers(1, &tile_index_ssbo_);
+    glGenBuffers(1, &tile_offset_ssbo_);
 
     core::Log::info(core::Logger::opengl, "OpenGL compute renderer (raster.comp) initialized.");
 }
@@ -369,48 +392,164 @@ void OpenglComputeRender::parityTest() {
 void OpenglComputeRender::renderParts(const PartsList& parts_list, const u32 texture_id) {
     if (parts_list.empty()) { return; }
 
-    // 1. Flatten the parts list into GPU-friendly pools.
+    // 1. Flatten the parts list into GPU-friendly pools. Projection is done once per vertex here;
+    //    the compute kernel only consumes framebuffer-space coordinates.
     std::vector<GpuVertex> verts;
     std::vector<GpuPart>   parts;
     verts.reserve(parts_list.size() * vertexes_per_polyline);
     parts.reserve(parts_list.size());
 
-    for (const auto& part : parts_list) {
-        if (!isDrawable(part.draw_type)) { continue; }
+    const auto projection = calculateDisplayViewportMatrix();
+    const auto fb_width   = static_cast<float>(fbo_texture_array_width);
+    const auto fb_height  = static_cast<float>(fbo_texture_array_height);
 
-        const auto textured = (part.draw_type == DrawType::textured_polygon) ? u32{1} : u32{0};
-        parts.push_back({static_cast<u32>(verts.size()),
-                         static_cast<u32>(part.vertexes.size()),
-                         textured | (primitiveKind(part.draw_type) << 1u),
-                         u32{0}});
-
-        for (const auto& v : part.vertexes) {
-            verts.push_back(
-                {{static_cast<float>(v.pos.x), static_cast<float>(v.pos.y), 0.0f, 0.0f},
-                 {v.tex_coords.s, v.tex_coords.t, v.tex_coords.p, 0.0f},
-                 {v.color.r / 255.0f, v.color.g / 255.0f, v.color.b / 255.0f, v.color.a / 255.0f},
-                 {normalizeGouraud(v.gouraud.r), normalizeGouraud(v.gouraud.g), normalizeGouraud(v.gouraud.b), 0.0f},
-                 {static_cast<float>(v.color_offset.signs[0]),
-                  static_cast<float>(v.color_offset.signs[1]),
-                  static_cast<float>(v.color_offset.signs[2]),
-                  0.0f},
-                 {v.color_offset.values[0] / 255.0f, v.color_offset.values[1] / 255.0f, v.color_offset.values[2] / 255.0f, 0.0f}});
+    // Only the area the fixed-function path would touch needs rasterizing: its scissor rect.
+    // Clipping is done here, per frame and after projection, rather than when the VDP2 parts are
+    // generated: part positions are screen space for the current frame only, so a cell that
+    // scrolls into view must still be available.
+    auto clip_min_x = 0.0f;
+    auto clip_min_y = 0.0f;
+    auto clip_max_x = fb_width;
+    auto clip_max_y = fb_height;
+    if (glIsEnabled(GL_SCISSOR_TEST)) {
+        if (const auto [vx, vy, vw, vh] = calculateViewportPosAndSize(); (vw > 0) && (vh > 0)) {
+            clip_min_x = static_cast<float>(vx);
+            clip_min_y = static_cast<float>(vy);
+            clip_max_x = static_cast<float>(vx + vw);
+            clip_max_y = static_cast<float>(vy + vh);
         }
     }
+
+    // Use the same vertex preparation as the fixed-function path: it remaps texture coordinates to
+    // the registered atlas subtexture and applies the part-level colour offset.
+    const auto vertexes = opengl_->texturing()->readVertexes(parts_list);
+    auto       index    = size_t{0};
+    auto       screen   = std::vector<std::pair<float, float>>{};
+    auto       min_x    = fb_width;
+    auto       min_y    = fb_height;
+    auto       max_x    = 0.0f;
+    auto       max_y    = 0.0f;
+    for (const auto& part : parts_list) {
+        const auto count = part.vertexes.size();
+        screen.resize(count);
+
+        auto part_min_x = fb_width;
+        auto part_min_y = fb_height;
+        auto part_max_x = 0.0f;
+        auto part_max_y = 0.0f;
+        for (auto i = size_t{0}; i < count; ++i) {
+            const auto& v = vertexes[index + i];
+            screen[i] = projectToScreen(projection,
+                                        static_cast<float>(v.pos.x),
+                                        static_cast<float>(v.pos.y),
+                                        fb_width,
+                                        fb_height);
+            part_min_x = std::min(part_min_x, screen[i].first);
+            part_min_y = std::min(part_min_y, screen[i].second);
+            part_max_x = std::max(part_max_x, screen[i].first);
+            part_max_y = std::max(part_max_y, screen[i].second);
+        }
+
+        // Discard what the fixed-function path would scissor out; it cannot contribute a pixel.
+        const auto bounds_min_x = std::max(part_min_x - 1.0f, clip_min_x);
+        const auto bounds_min_y = std::max(part_min_y - 1.0f, clip_min_y);
+        const auto bounds_max_x = std::min(part_max_x + 1.0f, clip_max_x);
+        const auto bounds_max_y = std::min(part_max_y + 1.0f, clip_max_y);
+
+        if (isDrawable(part.draw_type) && (count > 0) && (bounds_min_x <= bounds_max_x)
+            && (bounds_min_y <= bounds_max_y)) {
+            const auto textured = (part.draw_type == DrawType::textured_polygon) ? u32{1} : u32{0};
+            parts.push_back({static_cast<u32>(verts.size()),
+                             static_cast<u32>(count),
+                             textured | (primitiveKind(part.draw_type) << 1u),
+                             u32{0},
+                             {bounds_min_x, bounds_min_y, bounds_max_x, bounds_max_y}});
+            min_x = std::min(min_x, bounds_min_x);
+            min_y = std::min(min_y, bounds_min_y);
+            max_x = std::max(max_x, bounds_max_x);
+            max_y = std::max(max_y, bounds_max_y);
+
+            for (auto i = size_t{0}; i < count; ++i) {
+                const auto& v = vertexes[index + i];
+                verts.push_back(
+                    {{screen[i].first, screen[i].second, 0.0f, 0.0f},
+                     {v.tex_coords.s, v.tex_coords.t, v.tex_coords.p, 0.0f},
+                     {v.color.r / 255.0f, v.color.g / 255.0f, v.color.b / 255.0f, v.color.a / 255.0f},
+                     {normalizeGouraud(v.gouraud.r), normalizeGouraud(v.gouraud.g), normalizeGouraud(v.gouraud.b), 0.0f},
+                     {static_cast<float>(v.color_offset.signs[0]),
+                      static_cast<float>(v.color_offset.signs[1]),
+                      static_cast<float>(v.color_offset.signs[2]),
+                      0.0f},
+                     {v.color_offset.values[0] / 255.0f, v.color_offset.values[1] / 255.0f, v.color_offset.values[2] / 255.0f, 0.0f}});
+            }
+        }
+        index += count;
+    }
     if (parts.empty()) { return; }
-    // 2. Upload to the SSBOs.
+
+    // Dispatch only the tile-aligned rectangle that actually contains visible geometry. The padding
+    // in each part bound absorbs conservative rounding at polygon edges.
+    const auto fb_w     = static_cast<int>(fbo_texture_array_width);
+    const auto fb_h     = static_cast<int>(fbo_texture_array_height);
+    const auto origin_x = alignDown(std::clamp(static_cast<int>(std::floor(min_x)), 0, fb_w - 1));
+    const auto origin_y = alignDown(std::clamp(static_cast<int>(std::floor(min_y)), 0, fb_h - 1));
+    const auto end_x    = std::min(alignUp(std::clamp(static_cast<int>(std::ceil(max_x)), origin_x + 1, fb_w)), fb_w);
+    const auto end_y    = std::min(alignUp(std::clamp(static_cast<int>(std::ceil(max_y)), origin_y + 1, fb_h)), fb_h);
+    const auto tiles_x  = (end_x - origin_x) / compute_tile_size;
+    const auto tiles_y  = (end_y - origin_y) / compute_tile_size;
+
+    // 2. Bucket the parts per tile: one workgroup of the dispatch is exactly one tile, so a pixel
+    //    only inspects the parts overlapping its own tile instead of the whole list. Parts are
+    //    appended in draw order, which preserves painter's order inside every bucket.
+    const auto tileSpan = [](const float lo, const float hi, const int origin, const int limit) {
+        const auto first = std::clamp(static_cast<int>(std::floor(lo)), origin, limit - 1);
+        const auto last  = std::clamp(static_cast<int>(std::ceil(hi)), origin, limit - 1);
+        return std::pair{(first - origin) / compute_tile_size, (last - origin) / compute_tile_size};
+    };
+
+    const auto tile_count = static_cast<size_t>(tiles_x) * static_cast<size_t>(tiles_y);
+    auto       tile_offsets = std::vector<u32>(tile_count + 1, 0);
+    for (const auto& p : parts) {
+        const auto [tx0, tx1] = tileSpan(p.bounds[0], p.bounds[2], origin_x, end_x);
+        const auto [ty0, ty1] = tileSpan(p.bounds[1], p.bounds[3], origin_y, end_y);
+        for (auto ty = ty0; ty <= ty1; ++ty) {
+            for (auto tx = tx0; tx <= tx1; ++tx) { ++tile_offsets[static_cast<size_t>(ty) * tiles_x + tx + 1]; }
+        }
+    }
+    for (auto t = size_t{0}; t < tile_count; ++t) { tile_offsets[t + 1] += tile_offsets[t]; }
+
+    auto tile_indices = std::vector<u32>(tile_offsets.back());
+    auto cursor       = std::vector<u32>(tile_offsets.begin(), tile_offsets.end() - 1);
+    for (auto pi = size_t{0}; pi < parts.size(); ++pi) {
+        const auto& p         = parts[pi];
+        const auto [tx0, tx1] = tileSpan(p.bounds[0], p.bounds[2], origin_x, end_x);
+        const auto [ty0, ty1] = tileSpan(p.bounds[1], p.bounds[3], origin_y, end_y);
+        for (auto ty = ty0; ty <= ty1; ++ty) {
+            for (auto tx = tx0; tx <= tx1; ++tx) {
+                tile_indices[cursor[static_cast<size_t>(ty) * tiles_x + tx]++] = static_cast<u32>(pi);
+            }
+        }
+    }
+
+    // 3. Upload to the SSBOs.
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, vertex_ssbo_);
     glBufferData(GL_SHADER_STORAGE_BUFFER, static_cast<GLsizeiptr>(verts.size() * sizeof(GpuVertex)), verts.data(), GL_STREAM_DRAW);
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, part_ssbo_);
     glBufferData(GL_SHADER_STORAGE_BUFFER, static_cast<GLsizeiptr>(parts.size() * sizeof(GpuPart)), parts.data(), GL_STREAM_DRAW);
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, tile_index_ssbo_);
+    glBufferData(GL_SHADER_STORAGE_BUFFER, static_cast<GLsizeiptr>(tile_indices.size() * sizeof(u32)), tile_indices.data(), GL_STREAM_DRAW);
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, tile_offset_ssbo_);
+    glBufferData(GL_SHADER_STORAGE_BUFFER, static_cast<GLsizeiptr>(tile_offsets.size() * sizeof(u32)), tile_offsets.data(), GL_STREAM_DRAW);
     glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, vertex_ssbo_);
     glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, part_ssbo_);
+    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, tile_index_ssbo_);
+    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 4, tile_offset_ssbo_);
 
-    // 3. Bind the Saturn texture array (source) on unit 0.
+    // 4. Bind the Saturn texture array (source) on unit 0.
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D_ARRAY, texture_id);
 
-    // 4. Bind the target layer as an image. The FBO must be unbound first: a texture must not be a
+    // 5. Bind the target layer as an image. The FBO must be unbound first: a texture must not be a
     //    framebuffer attachment and an image at the same time (feedback loop => dropped stores).
     auto previous_fbo = GLint{0};
     glGetIntegerv(GL_FRAMEBUFFER_BINDING, &previous_fbo);
@@ -419,22 +558,94 @@ void OpenglComputeRender::renderParts(const PartsList& parts_list, const u32 tex
     const auto target_layer   = opengl_->texturing()->getFboTextureLayer(currentRenderedBuffer());
     glBindImageTexture(0, target_texture, 0, GL_FALSE, target_layer, GL_READ_WRITE, GL_RGBA8);
 
-    // 5. One dispatch over the whole framebuffer.
-    glUseProgram(compute_program_);
-    glUniform1i(glGetUniformLocation(compute_program_, "part_count"), static_cast<GLint>(parts.size()));
-    glUniform2f(glGetUniformLocation(compute_program_, "fb_size"),
-                static_cast<GLfloat>(fbo_texture_array_width),
-                static_cast<GLfloat>(fbo_texture_array_height));
-    glUniformMatrix4fv(glGetUniformLocation(compute_program_, "proj_matrix"),
-                       1,
-                       GL_FALSE,
-                       glm::value_ptr(calculateDisplayViewportMatrix()));
+    // Dev-only GPU timing hook: glFinish() makes the measured interval include actual execution.
+    static const auto timing_enabled = std::getenv("SATURNIN_COMPUTE_TIMING") != nullptr;
+    static auto       timing_frame   = u32{0};
+    if (timing_enabled) { glFinish(); }
+    const auto timing_start = std::chrono::steady_clock::now();
 
-    glDispatchCompute(fbo_texture_array_width / 16u, fbo_texture_array_height / 16u, 1);
+    // 6. One dispatch, one workgroup per tile.
+    glUseProgram(compute_program_);
+    glUniform2f(glGetUniformLocation(compute_program_, "fb_size"), fb_width, fb_height);
+    glUniform2i(glGetUniformLocation(compute_program_, "dispatch_origin"), origin_x, origin_y);
+    glUniform1i(glGetUniformLocation(compute_program_, "tiles_x"), tiles_x);
+
+    glDispatchCompute(static_cast<u32>(tiles_x), static_cast<u32>(tiles_y), 1);
     glMemoryBarrier(MemoryBarrierMask::GL_ALL_BARRIER_BITS);
+
+    if (timing_enabled) {
+        glFinish();
+        const auto elapsed = std::chrono::duration<double, std::milli>(
+            std::chrono::steady_clock::now() - timing_start).count();
+        if (++timing_frame % 60u == 1u) {
+            core::Log::info(core::Logger::opengl,
+                            "Compute dispatch rect=({},{}) {}x{} tiles={}x{} parts={} entries={} gpu_ms={:.2f}",
+                            origin_x, origin_y, end_x - origin_x, end_y - origin_y,
+                            tiles_x, tiles_y, parts.size(), tile_indices.size(), elapsed);
+        }
+    }
 
     // Restore the FBO binding for the rest of the frame.
     glBindFramebuffer(GL_FRAMEBUFFER, static_cast<GLuint>(previous_fbo));
+
+    if (live_parity_pending_) { liveParityCompare(parts_list, texture_id, target_layer); }
+}
+
+// Dev-only: render the first real (non-synthetic) parts list through both backends and compare the
+// displayed area. Triggered by SATURNIN_COMPUTE_LIVE_PARITY=1.
+void OpenglComputeRender::liveParityCompare(const PartsList& parts, const u32 texture_id, const u8 compute_layer) {
+    live_parity_pending_ = false;
+    auto skipped = 0u;
+    for (const auto& p : parts) { if (!isDrawable(p.draw_type)) { ++skipped; } }
+    core::Log::info(core::Logger::opengl, "Live parity input: {} parts, {} non-drawable", parts.size(), skipped);
+
+    const auto fbo   = opengl_->texturing()->getFboId(FboType::general);
+    const auto array = opengl_->texturing()->getFboTextureArrayId();
+    const auto count = static_cast<size_t>(fbo_texture_array_width) * fbo_texture_array_height * 4u;
+
+    const auto readLayer = [&](const u8 layer) {
+        auto pixels = std::vector<u8>(count);
+        glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+        glFramebufferTextureLayer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, array, 0, layer);
+        glReadBuffer(GL_COLOR_ATTACHMENT0);
+        glReadPixels(0, 0, fbo_texture_array_width, fbo_texture_array_height, GL_RGBA, GL_UNSIGNED_BYTE, pixels.data());
+        return pixels;
+    };
+
+    const auto cmp = readLayer(compute_layer);
+
+    // The fixed-function path needs its own target layer, cleared and with the same GL state.
+    const auto scratch = opengl_->texturing()->getFboTextureLayer(FboTextureType::priority);
+    glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+    glFramebufferTextureLayer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, array, 0, scratch);
+    glViewport(0, 0, fbo_texture_array_width, fbo_texture_array_height);
+    glDisable(GL_SCISSOR_TEST);
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT);
+    OpenglRender::renderParts(parts, texture_id);
+    const auto ref = readLayer(scratch);
+
+    // Only the visible (scissored) area matters; the compute kernel intentionally ignores scissor.
+    const auto [sx, sy, sw, sh] = calculateViewportPosAndSize();
+    auto differing = 0u;
+    auto max_diff  = 0u;
+    auto total     = 0u;
+    for (auto y = sy; y < sy + sh; ++y) {
+        for (auto x = sx; x < sx + sw; ++x) {
+            const auto i = (static_cast<size_t>(y) * fbo_texture_array_width + x) * 4u;
+            ++total;
+            for (auto c = 0u; c < 3u; ++c) {
+                const auto d = static_cast<u32>(ref[i + c] > cmp[i + c]
+                                                    ? ref[i + c] - cmp[i + c]
+                                                    : cmp[i + c] - ref[i + c]);
+                if (d != 0u) { ++differing; }
+                if (d > max_diff) { max_diff = d; }
+            }
+        }
+    }
+    core::Log::info(core::Logger::opengl,
+                    "Live parity parts={} visible_px={} differing={} max_diff={} gl_error={}",
+                    parts.size(), total, differing, max_diff, static_cast<s32>(glGetError()));
 }
 
 void OpenglComputeRender::renderPartsLists(const MapOfPartsList& lists, const u32 texture_id) {

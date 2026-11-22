@@ -317,6 +317,9 @@ auto runOpengl(core::EmulatorContext& state) -> s32 {
     if (state.memory()->selectedBinaryFile().full_path.size() > 0) {
         state.startEmulation();
         if (!state.memory()->selectedBinaryFile().is_auto_started) { state.debugStatus(core::DebugStatus::paused); }
+    } else if (std::getenv("SATURNIN_COMPUTE_LIVE_PARITY") != nullptr) {
+        // Dev hook: boot the BIOS with no disc so real VDP output reaches the parity check.
+        state.startEmulation();
     }
 
     // Main loop

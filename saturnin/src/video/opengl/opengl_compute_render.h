@@ -17,13 +17,14 @@
 
 #pragma once
 
+#include <cstdlib>
 #include <saturnin/src/video/opengl/opengl_render.h>
 #include <saturnin/src/video/vdp_common.h>
 
 namespace saturnin::video {
 
 // Byte-compatible with the std430 structs declared in shaders/raster.comp.
-// 6 * vec4 = 96 bytes.
+// 6 * vec4 = 96 bytes. pos.xy are already transformed to framebuffer pixel coordinates.
 struct GpuVertex {
     float pos[4];
     float tex[4];
@@ -33,12 +34,13 @@ struct GpuVertex {
     float offset_val[4];
 };
 
-// 4 * uint = 16 bytes.
+// Byte-compatible with the std430 struct in shaders/raster.comp: 32 bytes.
 struct GpuPart {
     u32 first;
     u32 count;
     u32 flags; ///< bit0: textured, bits1-2: primitive kind (0 polygon, 1 polyline, 2 line).
     u32 pad;
+    float bounds[4]; ///< min_x, min_y, max_x, max_y in framebuffer pixel coordinates.
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -63,10 +65,14 @@ class OpenglComputeRender final : public OpenglRender {
   private:
     void selfTest();
     void parityTest();
+    void liveParityCompare(const PartsList& parts, const u32 texture_id, const u8 compute_layer);
 
+    bool live_parity_pending_{std::getenv("SATURNIN_COMPUTE_LIVE_PARITY") != nullptr};
     u32 compute_program_{0};
     u32 vertex_ssbo_{0};
     u32 part_ssbo_{0};
+    u32 tile_index_ssbo_{0};
+    u32 tile_offset_ssbo_{0};
 };
 
 } // namespace saturnin::video
