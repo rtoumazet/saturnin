@@ -392,6 +392,11 @@ void OpenglComputeRender::parityTest() {
 void OpenglComputeRender::renderParts(const PartsList& parts_list, const u32 texture_id) {
     if (parts_list.empty()) { return; }
 
+    // Dev-only timing hook: separates the CPU cost of building the GPU pools from the dispatch.
+    static const auto timing_enabled = std::getenv("SATURNIN_COMPUTE_TIMING") != nullptr;
+    static auto       timing_frame   = u32{0};
+    const auto        cpu_start      = std::chrono::steady_clock::now();
+
     // 1. Flatten the parts list into GPU-friendly pools. Projection is done once per vertex here;
     //    the compute kernel only consumes framebuffer-space coordinates.
     std::vector<GpuVertex> verts;
@@ -558,9 +563,10 @@ void OpenglComputeRender::renderParts(const PartsList& parts_list, const u32 tex
     const auto target_layer   = opengl_->texturing()->getFboTextureLayer(currentRenderedBuffer());
     glBindImageTexture(0, target_texture, 0, GL_FALSE, target_layer, GL_READ_WRITE, GL_RGBA8);
 
+    // CPU cost of turning the parts list into GPU pools, measured up to the dispatch.
+    const auto cpu_ms = std::chrono::duration<double, std::milli>(
+        std::chrono::steady_clock::now() - cpu_start).count();
     // Dev-only GPU timing hook: glFinish() makes the measured interval include actual execution.
-    static const auto timing_enabled = std::getenv("SATURNIN_COMPUTE_TIMING") != nullptr;
-    static auto       timing_frame   = u32{0};
     if (timing_enabled) { glFinish(); }
     const auto timing_start = std::chrono::steady_clock::now();
 
@@ -579,9 +585,9 @@ void OpenglComputeRender::renderParts(const PartsList& parts_list, const u32 tex
             std::chrono::steady_clock::now() - timing_start).count();
         if (++timing_frame % 60u == 1u) {
             core::Log::info(core::Logger::opengl,
-                            "Compute dispatch rect=({},{}) {}x{} tiles={}x{} parts={} entries={} gpu_ms={:.2f}",
+                            "Compute dispatch rect=({},{}) {}x{} tiles={}x{} parts={} entries={} cpu_ms={:.2f} gpu_ms={:.2f}",
                             origin_x, origin_y, end_x - origin_x, end_y - origin_y,
-                            tiles_x, tiles_y, parts.size(), tile_indices.size(), elapsed);
+                            tiles_x, tiles_y, parts.size(), tile_indices.size(), cpu_ms, elapsed);
         }
     }
 
@@ -648,12 +654,19 @@ void OpenglComputeRender::liveParityCompare(const PartsList& parts, const u32 te
                     parts.size(), total, differing, max_diff, static_cast<s32>(glGetError()));
 }
 
-void OpenglComputeRender::renderPartsLists(const MapOfPartsList& lists, const u32 texture_id) {
+void OpenglComputeRender::renderPartsLists(MapOfPartsList& lists, const u32 texture_id) {
     // All priority lists end up in the same FBO layer in reverse key order, so flattening them into
-    // one parts list produces the same painter's-order result with a single dispatch.
+    // one parts list produces the same painter's-order result with a single dispatch. The lists are
+    // moved, not copied: their RenderParts own the vertex vectors.
     auto flattened = PartsList{};
-    for (const auto& [key, parts_list] : lists | std::views::reverse) {
-        flattened.insert(flattened.end(), parts_list.begin(), parts_list.end());
+    auto total     = size_t{0};
+    for (const auto& [key, parts_list] : lists) { total += parts_list.size(); }
+    flattened.reserve(total);
+
+    for (auto& [key, parts_list] : lists | std::views::reverse) {
+        flattened.insert(flattened.end(),
+                         std::make_move_iterator(parts_list.begin()),
+                         std::make_move_iterator(parts_list.end()));
     }
     renderParts(flattened, texture_id);
 }

@@ -52,7 +52,7 @@ class OpenglRender : public RenderInterface {
     // Renders the list of parts to a specific texture.
     virtual void renderParts(const PartsList& parts_list, const u32 texture_id);
     // Renders all priority lists in painter's order. The compute backend flattens them into one dispatch.
-    virtual void renderPartsLists(const MapOfPartsList& lists, const u32 texture_id);
+    virtual void renderPartsLists(MapOfPartsList& lists, const u32 texture_id);
 
     // Called once after every OpenGL module (renderer + texturing) is initialized.
     virtual void postInitialize() {}

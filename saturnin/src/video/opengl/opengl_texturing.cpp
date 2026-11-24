@@ -135,20 +135,26 @@ void OpenglTexturing::generateTextures() {
 
     // OpenglTextures don't have to be deleted, as they are part of a texture atlas now
 
-    //
-
-    auto local_textures_link = TexturesLink();
-    local_textures_link      = textures_link_;
+    // Nothing changed since the last call: skip the rebuild entirely. The old implementation walked
+    // (and deep-copied) the whole texture map every frame before discovering there was nothing to do.
+    if (std::ranges::none_of(layer_to_cache_reload_state_, [](const auto& entry) { return entry.second; })) { return; }
 
     using LayerToTextures  = std::unordered_map<VdpLayer, std::vector<OpenglTexture>>;
     auto layer_to_textures = LayerToTextures{};
 
-    for (const auto& [key, ogl_tex] : local_textures_link) {
-        const auto t = Texture::getTexture(key);
+    // Only the key and the size are needed by packTextures(). In particular, copying coords (a vector)
+    // for every texture would allocate once per texture, so build lightweight entries instead.
+    {
+        std::lock_guard lock(opengl_->getMutex(MutexType::textures_link));
+        for (const auto& [key, link] : textures_link_) {
+            const auto t = Texture::getTexture(key);
+            if (!t || !*t) { continue; }
 
-        auto opengl_tex = getOpenglTexture(key);
-        if (opengl_tex) { (*opengl_tex).size = {(**t).width(), (**t).height()}; }
-        layer_to_textures[(*t)->layer()].push_back(*opengl_tex);
+            auto to_pack  = OpenglTexture{};
+            to_pack.key   = key;
+            to_pack.size  = {(*t)->width(), (*t)->height()};
+            layer_to_textures[(*t)->layer()].push_back(to_pack);
+        }
     }
 
     for (auto& [layer, textures] : layer_to_textures) {
@@ -167,7 +173,8 @@ void OpenglTexturing::generateTextures() {
 void OpenglTexturing::packTextures(std::vector<OpenglTexture>& textures, const VdpLayer layer) {
     glBindTexture(GL_TEXTURE_2D_ARRAY, texture_array_id_);
     // First, indexes used by the layer are cleared and removed from the used list.
-    auto empty_data = std::vector<u8>(texture_array_width * texture_array_height * 4);
+    // Reused across calls: allocating and zeroing 4 MB per dirty layer per frame is pure overhead.
+    static const auto empty_data = std::vector<u8>(texture_array_width * texture_array_height * 4);
     if (!layer_to_texture_array_indexes_[layer].empty()) {
         for (const auto& index : layer_to_texture_array_indexes_[layer]) {
             glTexSubImage3D(GL_TEXTURE_2D_ARRAY,
@@ -252,33 +259,33 @@ auto OpenglTexturing::calculateTextureCoordinates(const ScreenPos& texture_pos_i
 }
 
 auto OpenglTexturing::readVertexes(const PartsList& parts) -> std::vector<Vertex> {
-    auto updateCoords = [](RenderPart& p, const OpenglTexture& opengl_tex) {
-        for (auto& v : p.vertexes) {
-            v.color_offset = p.color_offset;
-
-            if ((v.tex_coords.s == 0.0) && (v.tex_coords.t == 0.0)) {
-                v.tex_coords = opengl_tex.coords[0];
-            } else if ((v.tex_coords.s == 1.0) && (v.tex_coords.t == 0.0)) {
-                v.tex_coords = opengl_tex.coords[1];
-            } else if ((v.tex_coords.s == 1.0) && (v.tex_coords.t == 1.0)) {
-                v.tex_coords = opengl_tex.coords[2];
-            } else if ((v.tex_coords.s == 0.0) && (v.tex_coords.t == 1.0)) {
-                v.tex_coords = opengl_tex.coords[3];
-            }
-        }
-    };
-
     auto vertexes = std::vector<Vertex>{};
-    for (auto p : parts) {
-        if (const auto opengl_tex = getOpenglTexture(p.texture_key); opengl_tex.has_value()) {
-            // Replacing texture coordinates of the vertex by those of the OpenGL texture.
-            updateCoords(p, *opengl_tex);
-        } else {
-            for (auto& v : p.vertexes) {
-                v.color_offset = p.color_offset;
+    auto total    = size_t{0};
+    for (const auto& p : parts) { total += p.vertexes.size(); }
+    vertexes.reserve(total);
+
+    // Build the flat vertex list in one pass: no per-part copy (each RenderPart owns a vector) and
+    // no reallocation while appending.
+    for (const auto& p : parts) {
+        const auto opengl_tex = getOpenglTexture(p.texture_key);
+        for (const auto& v : p.vertexes) {
+            auto vertex         = v;
+            vertex.color_offset = p.color_offset;
+
+            if (opengl_tex.has_value()) {
+                // Replace the corner texture coordinates by those of the OpenGL atlas subtexture.
+                if ((v.tex_coords.s == 0.0) && (v.tex_coords.t == 0.0)) {
+                    vertex.tex_coords = opengl_tex->coords[0];
+                } else if ((v.tex_coords.s == 1.0) && (v.tex_coords.t == 0.0)) {
+                    vertex.tex_coords = opengl_tex->coords[1];
+                } else if ((v.tex_coords.s == 1.0) && (v.tex_coords.t == 1.0)) {
+                    vertex.tex_coords = opengl_tex->coords[2];
+                } else if ((v.tex_coords.s == 0.0) && (v.tex_coords.t == 1.0)) {
+                    vertex.tex_coords = opengl_tex->coords[3];
+                }
             }
+            vertexes.push_back(vertex);
         }
-        std::ranges::copy(p.vertexes.begin(), p.vertexes.end(), std::back_inserter(vertexes));
     }
 
     return vertexes;

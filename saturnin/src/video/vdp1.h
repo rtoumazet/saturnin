@@ -159,6 +159,39 @@ class Vdp1 {
     auto vdp1Parts(const u8 priority) const -> std::vector<Vdp1Part>;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn void Vdp1::forEachPart(Fn&& fn) const
+    ///
+    /// \brief  Iterates over every part of the current draw list without copying it.
+    ///
+    /// \author Runik
+    ///
+    /// \param  fn  Callable taking a const Vdp1Part&.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    template <typename Fn>
+    void forEachPart(Fn&& fn) const {
+        for (const auto& part : vdp1_parts_) { fn(part); }
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn void Vdp1::forEachPart(const u8 priority, Fn&& fn) const
+    ///
+    /// \brief  Iterates over the parts of the current draw list matching the given priority.
+    ///
+    /// \author Runik
+    ///
+    /// \param  priority    Priority of the parts to visit.
+    /// \param  fn          Callable taking a const Vdp1Part&.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    template <typename Fn>
+    void forEachPart(const u8 priority, Fn&& fn) const {
+        for (const auto& part : vdp1_parts_) {
+            if (part.common_vdp_data_.priority == priority) { fn(part); }
+        }
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn auto Vdp1::getDebugDrawList() const -> std::vector<std::string>;
     ///
     /// \brief  Returns the draw list to be used in the debugger.

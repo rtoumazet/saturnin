@@ -19,6 +19,8 @@
 
 #include <saturnin/src/pch.h>
 #include <saturnin/src/video/opengl/opengl_render.h>
+#include <chrono>
+#include <cstdlib>
 #include <ranges>
 #include <glbinding/glbinding.h>
 #include <glbinding/Version.h>
@@ -168,7 +170,7 @@ void OpenglRender::render() {
     }
 }
 
-void OpenglRender::renderPartsLists(const MapOfPartsList& lists, const u32 texture_id) {
+void OpenglRender::renderPartsLists(MapOfPartsList& lists, const u32 texture_id) {
     // Fixed-function path keeps one draw pass per priority list.
     for (const auto& [key, parts_list] : lists | std::views::reverse) { renderParts(parts_list, texture_id); }
 }
@@ -210,6 +212,9 @@ void OpenglRender::renderByScreenPriority() {
 void OpenglRender::renderByParts() {
     // All the parts to be displayed are read, regardless of their screen of attachment.
     // Parts are sorted by priority, nothing's cached.
+    static const auto frame_timing = std::getenv("SATURNIN_FRAME_TIMING") != nullptr;
+    static auto       frame_index  = u32{0};
+    const auto        frame_start  = std::chrono::steady_clock::now();
 
     PartsList parts_list;
 
@@ -231,6 +236,12 @@ void OpenglRender::renderByParts() {
     notifyMainThread();
 
     postRender();
+
+    if (frame_timing && (++frame_index % 60u == 1u)) {
+        const auto render_ms = std::chrono::duration<double, std::milli>(
+            std::chrono::steady_clock::now() - frame_start).count();
+        core::Log::info(core::Logger::opengl, "Frame render render_ms={:.2f}", render_ms);
+    }
 }
 
 void OpenglRender::renderTest() {
@@ -601,13 +612,9 @@ void OpenglRender::displayFramebufferByScreenPriority(core::EmulatorContext& sta
 
     // Step two : populate parts list for each priority + layer couple
     const auto addVdp1PartsToList = [&](const u8 priority) {
-        auto        local_parts = PartsList();
-        const auto& vdp1_parts  = state.vdp1()->vdp1Parts(priority);
-        if (!vdp1_parts.empty()) {
-            local_parts.reserve(vdp1_parts.size());
-            for (const auto& p : vdp1_parts) {
-                local_parts.emplace_back(p);
-            }
+        auto local_parts = PartsList();
+        state.vdp1()->forEachPart(priority, [&local_parts](const Vdp1Part& p) { local_parts.emplace_back(p); });
+        if (!local_parts.empty()) {
             global_parts_list[{priority, VdpLayer::sprite}] = std::move(local_parts);
             // Sprite layer is recalculated every time, there's no cache for now.
             //opengl_->setFboTextureStatus(priority, VdpLayer::sprite, FboTextureStatus::to_clear);
@@ -615,13 +622,9 @@ void OpenglRender::displayFramebufferByScreenPriority(core::EmulatorContext& sta
     };
 
     const auto addVdp2PartsToList = [&](const ScrollScreen screen, const u32 priority) {
-        auto        local_parts = PartsList();
-        const auto& vdp2_parts  = state.vdp2()->vdp2Parts(screen, priority);
-        if (!vdp2_parts.empty()) {
-            local_parts.reserve(vdp2_parts.size());
-            for (const auto& p : vdp2_parts) {
-                local_parts.emplace_back(p);
-            }
+        auto local_parts = PartsList();
+        state.vdp2()->forEachPart(screen, priority, [&local_parts](const Vdp2Part& p) { local_parts.emplace_back(p); });
+        if (!local_parts.empty()) {
             global_parts_list[{priority, screen_to_layer.at(screen)}] = std::move(local_parts);
         }
     };
@@ -644,33 +647,21 @@ void OpenglRender::displayFramebufferByScreenPriority(core::EmulatorContext& sta
 }
 
 void OpenglRender::displayFramebufferByParts(core::EmulatorContext& state) {
+    // Dev-only frame timing hook: splits the frame between building the parts list on the emulation
+    // thread, sorting it, and waiting for the render thread to consume it.
+    static const auto frame_timing = std::getenv("SATURNIN_FRAME_TIMING") != nullptr;
+    static auto       frame_index  = u32{0};
+    const auto        frame_start  = std::chrono::steady_clock::now();
+
     auto parts_list = PartsList{};
 
     const auto addVdp2PartsToList = [&](const ScrollScreen s) {
-        if (const auto& vdp2_planes = state.vdp2()->vdp2Parts(s, VdpType::vdp2_cell); !vdp2_planes.empty()) {
-            parts_list.reserve(parts_list.size() + vdp2_planes.size());
-            for (const auto& p : vdp2_planes) {
-                parts_list.emplace_back(p);
-            }
-        }
-
-        const auto& vdp2_bitmaps = state.vdp2()->vdp2Parts(s, VdpType::vdp2_bitmap);
-        if (!vdp2_bitmaps.empty()) {
-            parts_list.reserve(parts_list.size() + vdp2_bitmaps.size());
-            for (const auto& p : vdp2_bitmaps) {
-                parts_list.emplace_back(p);
-            }
-        }
+        state.vdp2()->forEachPart(s, VdpType::vdp2_cell, [&parts_list](const Vdp2Part& p) { parts_list.emplace_back(p); });
+        state.vdp2()->forEachPart(s, VdpType::vdp2_bitmap, [&parts_list](const Vdp2Part& p) { parts_list.emplace_back(p); });
     };
 
     const auto addVdp1PartsToList = [&]() {
-        const auto& vdp1_parts = state.vdp1()->vdp1Parts();
-        if (!vdp1_parts.empty()) {
-            parts_list.reserve(parts_list.size() + vdp1_parts.size());
-            for (const auto& p : vdp1_parts) {
-                parts_list.emplace_back(p);
-            }
-        }
+        state.vdp1()->forEachPart([&parts_list](const Vdp1Part& p) { parts_list.emplace_back(p); });
     };
 
     if (!state.vdp2()->isLayerDisabled(ScrollScreen::nbg3)) { addVdp2PartsToList(ScrollScreen::nbg3); }
@@ -680,13 +671,28 @@ void OpenglRender::displayFramebufferByParts(core::EmulatorContext& state) {
     if (!state.vdp2()->isLayerDisabled(ScrollScreen::rbg1)) { addVdp2PartsToList(ScrollScreen::rbg1); }
     if (!state.vdp2()->isLayerDisabled(ScrollScreen::rbg0)) { addVdp2PartsToList(ScrollScreen::rbg0); }
     addVdp1PartsToList();
+    const auto build_ms = std::chrono::duration<double, std::milli>(
+        std::chrono::steady_clock::now() - frame_start).count();
+
     std::ranges::stable_sort(parts_list, [](const RenderPart& a, const RenderPart& b) { return a.priority < b.priority; });
+    const auto sort_ms = std::chrono::duration<double, std::milli>(
+        std::chrono::steady_clock::now() - frame_start).count();
     if constexpr (render_type == RenderType::RenderType_drawElements) {
         if (parts_lists_[mixed_parts_key].empty()) {
             std::unique_lock lk(opengl_->getMutex(MutexType::parts_list));
             parts_lists_[mixed_parts_key] = std::move(parts_list);
             data_condition_.wait(lk, [this]() { return parts_lists_[mixed_parts_key].empty(); });
         }
+    }
+
+    if (frame_timing && (++frame_index % 60u == 1u)) {
+        const auto total_ms = std::chrono::duration<double, std::milli>(
+            std::chrono::steady_clock::now() - frame_start).count();
+        core::Log::info(core::Logger::opengl,
+                        "Frame emulation build_ms={:.2f} sort_ms={:.2f} total_ms={:.2f}",
+                        build_ms,
+                        sort_ms,
+                        total_ms);
     }
 }
 

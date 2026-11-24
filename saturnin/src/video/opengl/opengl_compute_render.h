@@ -59,7 +59,7 @@ class OpenglComputeRender final : public OpenglRender {
 
     void initialize() override;
     void renderParts(const PartsList& parts_list, const u32 texture_id) override;
-    void renderPartsLists(const MapOfPartsList& lists, const u32 texture_id) override;
+    void renderPartsLists(MapOfPartsList& lists, const u32 texture_id) override;
     void postInitialize() override;
 
   private:

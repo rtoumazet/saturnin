@@ -323,7 +323,10 @@ auto runOpengl(core::EmulatorContext& state) -> s32 {
     }
 
     // Main loop
+    static const auto frame_timing = std::getenv("SATURNIN_FRAME_TIMING") != nullptr;
+    static auto       loop_index   = u32{0};
     while (glfwWindowShouldClose(window) == GLFW_FALSE) {
+        const auto loop_start = std::chrono::steady_clock::now();
         // Poll and handle events (inputs, window resize, etc.)
         // You can read the io.WantCaptureMouse, io.WantCaptureKeyboard flags to tell if dear imgui wants to use your inputs.
         // - When io.WantCaptureMouse is true, do not dispatch mouse input data to your main application.
@@ -348,6 +351,8 @@ auto runOpengl(core::EmulatorContext& state) -> s32 {
         glClear(GL_COLOR_BUFFER_BIT);
 
         gui::buildGui(state);
+        const auto gui_ms
+            = std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - loop_start).count();
         if (state.renderingStatus() != core::RenderingStatus::running) { glfwSetWindowShouldClose(window, GLFW_TRUE); }
 
         ImGui::Render();
@@ -360,6 +365,12 @@ auto runOpengl(core::EmulatorContext& state) -> s32 {
         }
 
         glfwSwapBuffers(window);
+
+        if (frame_timing && (++loop_index % 60u == 1u)) {
+            const auto total_ms
+                = std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - loop_start).count();
+            core::Log::info(core::Logger::opengl, "Frame loop gui_ms={:.2f} total_ms={:.2f}", gui_ms, total_ms);
+        }
     }
 
     // Cleanup

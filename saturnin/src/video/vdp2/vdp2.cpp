@@ -246,18 +246,14 @@ void Vdp2::onVblankIn() {
 
 auto Vdp2::vdp2Parts(const ScrollScreen s, const VdpType t) const -> std::vector<video::Vdp2Part> {
     auto parts = std::vector<video::Vdp2Part>{};
-    std::ranges::copy_if(vdp2_parts_[utilities::toUnderlying(s)], std::back_inserter(parts), [=](const Vdp2Part& part) {
-        return part.common_vdp_data_.vdp_type == t;
-    });
+    forEachPart(s, t, [&parts](const Vdp2Part& part) { parts.push_back(part); });
 
     return parts;
 }
 
 auto Vdp2::vdp2Parts(const ScrollScreen s, const u32 p) const -> std::vector<video::Vdp2Part> {
     auto parts = std::vector<video::Vdp2Part>{};
-    std::ranges::copy_if(vdp2_parts_[utilities::toUnderlying(s)], std::back_inserter(parts), [=](const Vdp2Part& part) {
-        return part.common_vdp_data_.priority == p;
-    });
+    forEachPart(s, p, [&parts](const Vdp2Part& part) { parts.push_back(part); });
 
     return parts;
 }

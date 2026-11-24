@@ -683,6 +683,44 @@ class Vdp2 {
     auto vdp2Parts(const ScrollScreen s, const u32 p) const -> std::vector<video::Vdp2Part>;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn void Vdp2::forEachPart(const ScrollScreen s, const VdpType t, Fn&& fn) const
+    ///
+    /// \brief  Iterates over the parts of a scroll screen matching the given type, without copying them.
+    ///
+    /// \author Runik
+    ///
+    /// \param  s   A ScrollScreen.
+    /// \param  t   Type of part to visit.
+    /// \param  fn  Callable taking a const Vdp2Part&.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    template <typename Fn>
+    void forEachPart(const ScrollScreen s, const VdpType t, Fn&& fn) const {
+        for (const auto& part : vdp2_parts_[utilities::toUnderlying(s)]) {
+            if (part.common_vdp_data_.vdp_type == t) { fn(part); }
+        }
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// \fn void Vdp2::forEachPart(const ScrollScreen s, const u32 p, Fn&& fn) const
+    ///
+    /// \brief  Iterates over the parts of a scroll screen matching the given priority, without copying them.
+    ///
+    /// \author Runik
+    ///
+    /// \param  s   A ScrollScreen.
+    /// \param  p   Priority of the parts to visit.
+    /// \param  fn  Callable taking a const Vdp2Part&.
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    template <typename Fn>
+    void forEachPart(const ScrollScreen s, const u32 p, Fn&& fn) const {
+        for (const auto& part : vdp2_parts_[utilities::toUnderlying(s)]) {
+            if (part.common_vdp_data_.priority == p) { fn(part); }
+        }
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// \fn auto Vdp2::getSpriteColorAddressOffset() const -> u16;
     ///
     /// \brief  Gets the color address offset of sprites.
