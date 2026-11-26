@@ -37,6 +37,49 @@ float edge(vec2 a, vec2 b, vec2 p) {
     return (b.x - a.x) * (p.y - a.y) - (b.y - a.y) * (p.x - a.x);
 }
 
+// GL top-left fill rule (window coords, y up): for a CCW triangle (interior w > 0), a pixel center
+// exactly on an edge (w == 0) is drawn only if that edge is a top or left edge.
+bool edgeTopLeft(vec2 a, vec2 b) {
+    float dx = b.x - a.x, dy = b.y - a.y;
+    return (dy < 0.0f) || (dy == 0.0f && dx < 0.0f);
+}
+
+// Triangle coverage of pixel center p, both windings accepted, GL fill rule on boundaries.
+bool triCovers(vec2 sa, vec2 sb, vec2 sc, vec2 p) {
+    float w0 = edge(sb, sc, p), w1 = edge(sc, sa, p), w2 = edge(sa, sb, p);
+    float area = w0 + w1 + w2;
+    if (abs(area) < 1e-6) { return false; }
+    if (area > 0.0f) {
+        return (w0 > 0.0f || (w0 == 0.0f && edgeTopLeft(sb, sc)))
+            && (w1 > 0.0f || (w1 == 0.0f && edgeTopLeft(sc, sa)))
+            && (w2 > 0.0f || (w2 == 0.0f && edgeTopLeft(sa, sb)));
+    }
+    // CW triangle: mirror the rule so a shared edge is drawn by exactly one of the two triangles.
+    return (w0 < 0.0f || (w0 == 0.0f && !edgeTopLeft(sb, sc)))
+        && (w1 < 0.0f || (w1 == 0.0f && !edgeTopLeft(sc, sa)))
+        && (w2 < 0.0f || (w2 == 0.0f && !edgeTopLeft(sa, sb)));
+}
+
+// GL diamond-exit rule for 1-pixel lines: pixel center c is drawn if the segment intersects the
+// interior of its diamond |dx|+|dy| < 0.5 around c, or touches the boundary while exiting the
+// diamond through the top or right edge.
+bool lineCovers(vec2 a, vec2 b, vec2 c, out float tOut) {
+    vec2  d    = b - a;
+    float len2 = dot(d, d);
+    tOut = 0.0f;
+    if (len2 < 1e-12f) { return false; } // zero-length segments draw nothing here
+    if (c.x < min(a.x, b.x) - 0.5f || c.x > max(a.x, b.x) + 0.5f
+        || c.y < min(a.y, b.y) - 0.5f || c.y > max(a.y, b.y) + 0.5f) { return false; }
+    float t = clamp(dot(c - a, d) / len2, 0.0f, 1.0f);
+    vec2  q = a + t * d;
+    float m = abs(q.x - c.x) + abs(q.y - c.y);
+    tOut = t;
+    if (m < 0.5f) { return true; }
+    if (m > 0.5f) { return false; }
+    // On the diamond boundary: draw only if the segment exits through the top or right edge.
+    return (d.y > 0.0f) || (d.y == 0.0f && d.x > 0.0f);
+}
+
 // Same maths as main.frag.
 vec4 shade(bool textured, vec4 vc, vec4 tc, vec4 grd, vec4 op, vec4 ov) {
     vec4 c = textured ? texture(atlas, vec3(tc.x, tc.y, tc.z)) : vc;
@@ -79,17 +122,8 @@ void main() {
             for (int s = 0; s < segments; ++s) {
                 GpuVertex va = verts[first + s];
                 GpuVertex vb = verts[first + ((s + 1) % count)];
-                vec2 sa = va.pos.xy;
-                vec2 sb = vb.pos.xy;
-                vec2 ab = sb - sa;
-                float len2 = dot(ab, ab);
-                if (len2 < 1e-6) { continue; }
-                // Keep the closest point strictly inside the segment: GL excludes the pixel just
-                // before a segment start when the endpoint lands exactly on a pixel boundary.
-                float t = clamp(dot(p - sa, ab) / len2, 0.001f / sqrt(len2), 1.0f - 0.6f / sqrt(len2));
-                // Pixel ip covers [ip, ip+1); GL's diamond-exit ties go to the higher index.
-                vec2 q = sa + t * ab;
-                if (ivec2(floor(q - vec2(0.0001f))) != ip) { continue; }
+                float t = 0.0f;
+                if (!lineCovers(va.pos.xy, vb.pos.xy, p, t)) { continue; }
                 vec4 src = shade(textured,
                     va.color * (1.0 - t) + vb.color * t,
                     va.tex   * (1.0 - t) + vb.tex   * t,
@@ -98,6 +132,7 @@ void main() {
                     va.offset_val * (1.0 - t) + vb.offset_val * t);
                 color = vec4(src.rgb * src.a + color.rgb * (1.0 - src.a),
                              src.a + color.a * (1.0 - src.a));
+                break; // diamond-exit rule: a pixel is owned by exactly one segment
             }
             continue;
         }
@@ -109,10 +144,11 @@ void main() {
             vec2 sa = a.pos.xy;
             vec2 sb = b.pos.xy;
             vec2 sc = c.pos.xy;
-            float w0 = edge(sb, sc, p), w1 = edge(sc, sa, p), w2 = edge(sa, sb, p);
-            float area = w0 + w1 + w2;
-            if (abs(area) < 1e-6) { continue; }
-            if ((w0 > 0.0 && w1 > 0.0 && w2 > 0.0) || (w0 < 0.0 && w1 < 0.0 && w2 < 0.0)) {
+            if (!triCovers(sa, sb, sc, p)) { continue; }
+            {
+                // Barycentric weights for interpolation (same edge values as the coverage test).
+                float w0 = edge(sb, sc, p), w1 = edge(sc, sa, p), w2 = edge(sa, sb, p);
+                float area = w0 + w1 + w2;
                 vec3 w = vec3(w0, w1, w2) / area;
                 vec4 src = shade(textured,
                     a.color * w.x + b.color * w.y + c.color * w.z,

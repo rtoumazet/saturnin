@@ -19,6 +19,7 @@
 
 #pragma once
 
+#include <array>
 #include <saturnin/src/emulator_defs.h>
 #include <saturnin/src/video/opengl/opengl.h>
 #include <saturnin/src/video/opengl/opengl_texturing.h>
@@ -112,6 +113,23 @@ class OpenglRender : public RenderInterface {
     PartsList parts_list_debug_; // List of parts used to generate textures for debugging.
 
     std::condition_variable data_condition_; // Condition variable to synchronize between emulation and UI thread.
+
+    // Double-buffered handoff for the mixed parts path: the emulation thread deposits into
+    // render_slots_[render_slot_write_] and only blocks when that slot is still unconsumed, so it can run one
+    // frame ahead of the render thread. The consumer always takes the newest slot and drops the stale one.
+    std::array<PartsList, 2> render_slots_{};
+    u8                       render_slot_write_{0};
+
+    // Persistent GL objects shared by every draw path (created once in initialize()). Creating and deleting a
+    // VAO + two buffers on every draw call was pure driver overhead.
+    mutable u32 vao_{0};
+    mutable u32 vertex_buffer_{0};
+    mutable u32 elements_buffer_{0};
+
+    // Uniform locations are constant for the program's lifetime: queried once instead of per draw call.
+    s32 uni_proj_matrix_{-1};
+    s32 uni_sampler_{-1};
+    s32 uni_is_texture_used_{-1};
 
     Shaders shaders_; // Shaders storage
 };

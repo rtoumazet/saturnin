@@ -27,6 +27,7 @@
 #include <iostream>   // cout
 #include <lodepng.h>
 #include <ranges>
+#include <span>
 #include <sstream> // stringstream
 #include <glbinding/glbinding.h>
 #include <glbinding/Version.h>
@@ -384,44 +385,35 @@ auto runOpengl(core::EmulatorContext& state) -> s32 {
     return EXIT_SUCCESS;
 }
 
-auto generateVertexIndicesAndDrawRanges(const PartsList& parts) -> std::tuple<std::vector<u32>, std::vector<DrawRange>> {
-    const auto indices_per_polygon  = std::vector<u32>{0, 1, 2, 0, 2, 3};
-    const auto indices_per_polyline = std::vector<u32>{0, 1, 2, 3};
-    const auto indices_per_line     = std::vector<u32>{0, 1};
+namespace {
+// Per draw-type parameters for generateVertexIndicesAndDrawRanges. A switch replaces the previous four
+// std::map lookups per part (this runs once per part per frame).
+struct DrawTypeParams {
+    std::span<const u32> indices;
+    u32                  vertex_increment;
+    bool                 is_textured;
+    gl::GLenum           primitive;
+    bool                 drawable;
+};
 
-    using TypeToIndices = std::map<const DrawType, const std::vector<u32>>;
+const auto polygon_indices  = std::array<u32, 6>{0, 1, 2, 0, 2, 3};
+const auto polyline_indices = std::array<u32, 4>{0, 1, 2, 3};
+const auto line_indices     = std::array<u32, 2>{0, 1};
 
+auto drawTypeParams(const DrawType type) -> DrawTypeParams {
     using enum DrawType;
-    const auto typeToIndices = TypeToIndices{
-        {textured_polygon,     indices_per_polygon },
-        {non_textured_polygon, indices_per_polygon },
-        {polyline,             indices_per_polyline},
-        {line,                 indices_per_line    }
-    };
+    switch (type) {
+        case textured_polygon:     return {polygon_indices, 4, true,  gl::GL_TRIANGLES, true};
+        case non_textured_polygon: return {polygon_indices, 4, false, gl::GL_TRIANGLES, true};
+        case polyline:             return {polyline_indices, 4, false, gl::GL_LINE_LOOP, true};
+        case line:                 return {line_indices, 2, false, gl::GL_LINES, true};
+        default:                   return {{}, 0, false, gl::GL_TRIANGLES, false};
+    }
+}
+} // namespace
 
-    using TypeToVertexIncrement      = std::map<const DrawType, const u32>;
-    const auto typeToVertexIncrement = TypeToVertexIncrement{
-        {textured_polygon,     4},
-        {non_textured_polygon, 4},
-        {polyline,             4},
-        {line,                 2}
-    };
-
-    using TypeIsTextured      = std::map<const DrawType, const bool>;
-    const auto typeIsTextured = TypeIsTextured{
-        {textured_polygon,     true },
-        {non_textured_polygon, false},
-        {polyline,             false},
-        {line,                 false}
-    };
-
-    using TypeToPrimitive      = std::map<const DrawType, const gl::GLenum>;
-    const auto typeToPrimitive = TypeToPrimitive{
-        {textured_polygon,     gl::GL_TRIANGLES},
-        {non_textured_polygon, gl::GL_TRIANGLES},
-        {polyline,             gl::GL_LINE_LOOP},
-        {line,                 gl::GL_LINES    }
-    };
+auto generateVertexIndicesAndDrawRanges(const PartsList& parts) -> std::tuple<std::vector<u32>, std::vector<DrawRange>> {
+    using enum DrawType;
 
     auto indices              = std::vector<u32>{};
     auto ranges               = std::vector<DrawRange>{};
@@ -438,10 +430,10 @@ auto generateVertexIndicesAndDrawRanges(const PartsList& parts) -> std::tuple<st
     if (!parts.empty()) {
         current_range.draw_type = parts.at(0).draw_type;
 
-        indices.reserve(parts.size()
-                        * indices_per_polygon.size()); // Size will be a bit bigger than needed, but that's not important.
+        indices.reserve(parts.size() * polygon_indices.size()); // Size will be a bit bigger than needed, but that's not important.
         for (const auto& p : parts) {
-            if (!typeToIndices.contains(p.draw_type)) { continue; } // Non drawable parts are skipped
+            const auto params = drawTypeParams(p.draw_type);
+            if (!params.drawable) { continue; } // Non drawable parts are skipped
 
             if (current_range.draw_type != p.draw_type && current_range.indices_nb > 0) {
                 --current_range.vertex_array_end;
@@ -452,30 +444,28 @@ auto generateVertexIndicesAndDrawRanges(const PartsList& parts) -> std::tuple<st
                 current_range.vertex_array_start = current_range.vertex_array_end + 1;
                 current_range.vertex_array_end   = current_range.vertex_array_start;
                 current_range.indices_nb         = 0;
-                current_range.is_textured        = typeIsTextured.at(p.draw_type);
+                current_range.is_textured        = params.is_textured;
                 current_range.draw_type          = p.draw_type;
-                current_range.primitive          = typeToPrimitive.at(p.draw_type);
+                current_range.primitive          = params.primitive;
             } else {
-                current_range.is_textured = typeIsTextured.at(p.draw_type);
+                current_range.is_textured = params.is_textured;
             }
 
-            std::ranges::transform(typeToIndices.at(p.draw_type), std::back_inserter(indices), [&increment](u32 i) {
-                return i + increment;
-            });
+            for (const auto i : params.indices) { indices.push_back(i + increment); }
 
-            increment += typeToVertexIncrement.at(p.draw_type);
+            increment += params.vertex_increment;
 
-            current_range.vertex_array_end += typeToVertexIncrement.at(p.draw_type);
-            current_range.indices_nb += static_cast<u32>(typeToIndices.at(p.draw_type).size());
+            current_range.vertex_array_end += params.vertex_increment;
+            current_range.indices_nb += static_cast<u32>(params.indices.size());
         }
 
         // The last range is added if needed
-        if (typeToPrimitive.contains(current_range.draw_type)) {
+        const auto last_params = drawTypeParams(current_range.draw_type);
+        if (last_params.drawable) {
             --current_range.vertex_array_end;
             current_range.indices_array_start += previous_vertexes_nb;
-            current_range.is_textured = typeIsTextured.at(current_range.draw_type);
-            current_range.draw_type   = current_range.draw_type;
-            current_range.primitive   = typeToPrimitive.at(current_range.draw_type);
+            current_range.is_textured = last_params.is_textured;
+            current_range.primitive   = last_params.primitive;
 
             ranges.push_back(current_range);
         }

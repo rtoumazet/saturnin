@@ -58,12 +58,14 @@ class OpenglTexturing {
     void generateTextures();
 
     // Generates a subtexture in the texture array of texture atlas.
+    // Caller must hold the textures-link mutex (see Opengl::getMutex(MutexType::textures_link)).
     void generateSubTexture(const size_t key);
 
     // Deletes the texture on the GPU using its OpenGL texture id.
     static void deleteTexture(const u32 texture_id);
 
     // Pack textures in a texture array of texture atlases for the selected layer.
+    // Caller must hold the textures-link mutex (see Opengl::getMutex(MutexType::textures_link)).
     void packTextures(std::vector<OpenglTexture>& textures, const VdpLayer layer);
 
     // Texture key is added so the linked texture is created or marked for recreation. Layer is used for cache management.

@@ -21,6 +21,7 @@
 #include <saturnin/src/video/opengl/opengl_render.h>
 #include <chrono>
 #include <cstdlib>
+#include <iterator>
 #include <ranges>
 #include <glbinding/glbinding.h>
 #include <glbinding/Version.h>
@@ -66,12 +67,25 @@ void OpenglRender::initialize() {
 
     const auto shaders_to_delete = std::vector<u32>{main_vertex, main_fragment};
     deleteShaders(shaders_to_delete);
+
+    // Persistent VAO + buffers, reused by every draw path for the whole lifetime of the context.
+    std::tie(vao_, vertex_buffer_) = initializeVao();
+    glGenBuffers(1, &elements_buffer_);
+
+    // Uniform locations don't change once the program is linked: cache them instead of querying per draw.
+    const auto program   = shaders_.programs[ProgramShader::main];
+    uni_proj_matrix_     = glGetUniformLocation(program, "proj_matrix");
+    uni_sampler_         = glGetUniformLocation(program, "sampler");
+    uni_is_texture_used_ = glGetUniformLocation(program, "is_texture_used");
 }
 
 void OpenglRender::shutdown() const {
     for (auto& [name, id] : shaders_.programs) {
         glDeleteProgram(id);
     }
+    glDeleteBuffers(1, &elements_buffer_);
+    glDeleteBuffers(1, &vertex_buffer_);
+    glDeleteVertexArrays(1, &vao_);
 }
 
 void OpenglRender::preRender() {
@@ -110,41 +124,32 @@ void OpenglRender::postRender() const {
 
 void OpenglRender::renderParts(const PartsList& parts_list, const u32 texture_id) {
     if (!parts_list.empty()) {
-        const auto [vao, vertex_buffer] = initializeVao();
-
+        // Persistent VAO + buffers created in initialize(); uniform locations are cached there too.
         glUseProgram(shaders_.programs[ProgramShader::main]);
-        glBindVertexArray(vao);                       // binding VAO
-        glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer); // binding vertex buffer
+        glBindVertexArray(vao_);
+        glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer_);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elements_buffer_);
 
         // Calculating the ortho projection matrix
         const auto proj_matrix = calculateDisplayViewportMatrix();
 
         // Sending the ortho projection matrix to the shader
-        const auto uni_proj_matrix = glGetUniformLocation(shaders_.programs[ProgramShader::main], "proj_matrix");
-        glUniformMatrix4fv(uni_proj_matrix, 1, GL_FALSE, glm::value_ptr(proj_matrix));
+        glUniformMatrix4fv(uni_proj_matrix_, 1, GL_FALSE, glm::value_ptr(proj_matrix));
 
         glActiveTexture(GLenum::GL_TEXTURE0);
-        const auto sampler_loc = glGetUniformLocation(shaders_.programs[ProgramShader::main], "sampler");
-
-        glUniform1i(sampler_loc, 0);
+        glUniform1i(uni_sampler_, 0);
         glBindTexture(GL_TEXTURE_2D_ARRAY, texture_id);
-
-        const auto texture_used_loc = glGetUniformLocation(shaders_.programs[ProgramShader::main], "is_texture_used");
-
-        auto elements_buffer = u32{};
-        glGenBuffers(1, &elements_buffer); // This buffer will be used to send indices data to the GPU
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elements_buffer);
 
         const auto&& [indices, draw_ranges] = generateVertexIndicesAndDrawRanges(parts_list);
         const auto vertexes                 = opengl_->texturing()->readVertexes(parts_list);
 
-        // Sending data to the GPU
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(u32) * indices.size(), indices.data(), GL_STATIC_DRAW);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * vertexes.size(), vertexes.data(), GL_STATIC_DRAW);
+        // Sending data to the GPU. Buffers are re-uploaded every frame, so STREAM_DRAW is the correct usage.
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(u32) * indices.size(), indices.data(), GL_STREAM_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * vertexes.size(), vertexes.data(), GL_STREAM_DRAW);
 
         for (const auto& range : draw_ranges) {
             const auto is_texture_used = GLboolean(range.is_textured);
-            glUniform1i(texture_used_loc, is_texture_used);
+            glUniform1i(uni_is_texture_used_, is_texture_used);
 
             glDrawRangeElements(range.primitive,
                                 range.vertex_array_start,
@@ -154,11 +159,10 @@ void OpenglRender::renderParts(const PartsList& parts_list, const u32 texture_id
                                 static_cast<GLuint*>(nullptr) + range.indices_array_start);
         }
 
-        gl::glDeleteBuffers(1, &vertex_buffer);
-        gl::glDeleteVertexArrays(1, &vao);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
         glBindTexture(GL_TEXTURE_2D_ARRAY, 0);
-        gl::glDeleteBuffers(1, &elements_buffer);
+        glBindVertexArray(0);
     }
 }
 
@@ -218,22 +222,25 @@ void OpenglRender::renderByParts() {
 
     PartsList parts_list;
 
+    // Take the newest deposited slot before touching the FBO. If the other slot still holds an older
+    // unconsumed frame, it is dropped: displaying the latest frame matters more than displaying every frame.
+    {
+        std::lock_guard lock(opengl_->getMutex(MutexType::parts_list));
+        const auto read_slot = static_cast<u8>(1u - render_slot_write_);
+        if (!render_slots_[read_slot].empty()) {
+            parts_list = std::move(render_slots_[read_slot]);
+            render_slots_[render_slot_write_].clear();
+            data_condition_.notify_one();
+        }
+    }
+
+    // Nothing deposited: leave the framebuffer alone instead of clearing the displayed buffer with an
+    // empty draw.
+    if (parts_list.empty()) { return; }
+
     preRender();
 
-    const auto getParts = [this, &parts_list]() {
-        std::lock_guard lock(opengl_->getMutex(MutexType::parts_list));
-        if (!parts_lists_[mixed_parts_key].empty()) { parts_list = std::move(parts_lists_[mixed_parts_key]); }
-    };
-    getParts();
-
     renderParts(parts_list, opengl_->texturing()->getTextureArrayId());
-
-    const auto notifyMainThread = [this, &parts_list]() {
-        std::lock_guard lk(opengl_->getMutex(MutexType::parts_list));
-        PartsList().swap(parts_list);
-        data_condition_.notify_one();
-    };
-    notifyMainThread();
 
     postRender();
 
@@ -247,32 +254,24 @@ void OpenglRender::renderByParts() {
 void OpenglRender::renderTest() {
     preRender();
 
-    const auto [vao, vertex_buffer] = initializeVao();
-
     glUseProgram(shaders_.programs[ProgramShader::main]);
-    glBindVertexArray(vao);                       // binding VAO
-    glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer); // binding vertex buffer
+    glBindVertexArray(vao_);                       // binding VAO
+    glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer_); // binding vertex buffer
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elements_buffer_);
 
     // Calculating the ortho projection matrix
     const auto proj_matrix = calculateDisplayViewportMatrix();
 
     // Sending the ortho projection matrix to the shader
-    const auto uni_proj_matrix = glGetUniformLocation(shaders_.programs[ProgramShader::main], "proj_matrix");
-    glUniformMatrix4fv(uni_proj_matrix, 1, GL_FALSE, glm::value_ptr(proj_matrix));
+    glUniformMatrix4fv(uni_proj_matrix_, 1, GL_FALSE, glm::value_ptr(proj_matrix));
 
     glActiveTexture(GLenum::GL_TEXTURE0);
-    const auto sampler_loc = glGetUniformLocation(shaders_.programs[ProgramShader::main], "sampler");
-    glUniform1i(sampler_loc, 0);
+    glUniform1i(uni_sampler_, 0);
     glBindTexture(GL_TEXTURE_2D_ARRAY, opengl_->texturing()->getTextureArrayId());
 
-    const auto texture_used_loc = glGetUniformLocation(shaders_.programs[ProgramShader::main], "is_texture_used");
     // Sending the variable to configure the shader to use texture data.
     const auto is_texture_used = GLboolean(false);
-    glUniform1i(texture_used_loc, is_texture_used);
-
-    auto elements_buffer = u32{};
-    glGenBuffers(1, &elements_buffer); // This buffer will be used to send indices data to the GPU
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elements_buffer);
+    glUniform1i(uni_is_texture_used_, is_texture_used);
 
     if constexpr (false) {
         std::vector<GLuint> indices = {0, 1, 2, 0, 2, 3, 4, 5, 6, 4, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15};
@@ -302,7 +301,7 @@ void OpenglRender::renderTest() {
         };
 
         // Sending data to the GPU
-        glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * vertexes.size(), vertexes.data(), GL_STATIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * vertexes.size(), vertexes.data(), GL_STREAM_DRAW);
 
         glDrawRangeElements(GL_TRIANGLES, 0, 7, 12, GL_UNSIGNED_INT, static_cast<GLuint*>(nullptr));
         glDrawRangeElements(GL_LINES, 8, 11, 4, GL_UNSIGNED_INT, static_cast<GLuint*>(nullptr) + 12);
@@ -367,10 +366,10 @@ void OpenglRender::renderTest() {
         parts.emplace_back(render_part);
 
         const auto&& [indices, draw_ranges] = generateVertexIndicesAndDrawRanges(parts);
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint) * indices.size(), indices.data(), GL_STATIC_DRAW);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint) * indices.size(), indices.data(), GL_STREAM_DRAW);
 
         const auto vertexes = opengl_->texturing()->readVertexes(parts);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * vertexes.size(), vertexes.data(), GL_STATIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * vertexes.size(), vertexes.data(), GL_STREAM_DRAW);
 
         for (const auto& range : draw_ranges) {
             glDrawRangeElements(range.primitive,
@@ -382,11 +381,10 @@ void OpenglRender::renderTest() {
         }
     }
 
-    gl::glDeleteBuffers(1, &vertex_buffer);
-    gl::glDeleteVertexArrays(1, &vao);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindTexture(GL_TEXTURE_2D_ARRAY, 0);
-    gl::glDeleteBuffers(1, &elements_buffer);
+    glBindVertexArray(0);
 
     postRender();
 }
@@ -413,8 +411,7 @@ void OpenglRender::renderVdp1DebugOverlay() {
 
     //----------- Render -----------------//
     // Calculating the ortho projection matrix
-    const auto [vao_simple, vertex_buffer_simple] = initializeVao();
-    const auto proj_matrix                        = calculateDisplayViewportMatrix();
+    const auto proj_matrix = calculateDisplayViewportMatrix();
 
     auto part = partToHighlight();
 
@@ -436,20 +433,18 @@ void OpenglRender::renderVdp1DebugOverlay() {
         vertexes.emplace_back(part.common_vdp_data_.vertexes[3]);
 
         glUseProgram(shaders_.programs[ProgramShader::main]);
-        glBindVertexArray(vao_simple);                       // binding VAO
-        glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer_simple); // binding vertex buffer
+        glBindVertexArray(vao_);                       // binding VAO
+        glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer_); // binding vertex buffer
 
         // Sending vertex buffer data to the GPU
-        glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * vertexes.size(), vertexes.data(), GL_STATIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * vertexes.size(), vertexes.data(), GL_STREAM_DRAW);
 
         // Sending the ortho projection matrix to the shader
-        const auto uni_proj_matrix = glGetUniformLocation(shaders_.programs[ProgramShader::main], "proj_matrix");
-        glUniformMatrix4fv(uni_proj_matrix, 1, GL_FALSE, glm::value_ptr(proj_matrix));
+        glUniformMatrix4fv(uni_proj_matrix_, 1, GL_FALSE, glm::value_ptr(proj_matrix));
 
         // Sending the variable to configure the shader to use color.
-        const auto uni_use_texture = glGetUniformLocation(shaders_.programs[ProgramShader::main], "is_texture_used");
         const auto is_texture_used = GLboolean(false);
-        glUniform1i(uni_use_texture, is_texture_used);
+        glUniform1i(uni_is_texture_used_, is_texture_used);
 
         // Drawing the list
         glDrawArrays(GL_TRIANGLES, 0, vertexes_per_tessellated_quad);
@@ -458,6 +453,8 @@ void OpenglRender::renderVdp1DebugOverlay() {
     //------ Post render --------//
 
     glDisable(GL_SCISSOR_TEST);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
     glBindFramebuffer(GLenum::GL_FRAMEBUFFER, 0);
 };
 
@@ -500,8 +497,9 @@ auto OpenglRender::isThereSomethingToRender() const -> bool {
         if constexpr (uses_fbo) {
             return !parts_lists_.empty();
         } else {
-            if (parts_lists_.contains(mixed_parts_key)) { return !parts_lists_.at(mixed_parts_key).empty(); }
-            return false;
+            // Locked: the producer move-assigns the slots concurrently, an unlocked read could tear.
+            std::lock_guard lock(opengl_->getMutex(MutexType::parts_list));
+            return !render_slots_[0].empty() || !render_slots_[1].empty();
         }
     }
     if constexpr (render_type == RenderType::RenderType_drawTest) { return true; }
@@ -653,15 +651,21 @@ void OpenglRender::displayFramebufferByParts(core::EmulatorContext& state) {
     static auto       frame_index  = u32{0};
     const auto        frame_start  = std::chrono::steady_clock::now();
 
-    auto parts_list = PartsList{};
+    // Parts are bucketed by priority (0-7) at insertion time instead of a full stable_sort afterwards:
+    // same draw order (ascending priority, insertion order preserved within a priority), but O(n).
+    auto priority_buckets = std::array<PartsList, 8>{};
 
     const auto addVdp2PartsToList = [&](const ScrollScreen s) {
-        state.vdp2()->forEachPart(s, VdpType::vdp2_cell, [&parts_list](const Vdp2Part& p) { parts_list.emplace_back(p); });
-        state.vdp2()->forEachPart(s, VdpType::vdp2_bitmap, [&parts_list](const Vdp2Part& p) { parts_list.emplace_back(p); });
+        const auto add = [&priority_buckets](const Vdp2Part& p) {
+            priority_buckets[p.common_vdp_data_.priority & 7u].emplace_back(p);
+        };
+        state.vdp2()->forEachPart(s, VdpType::vdp2_cell, add);
+        state.vdp2()->forEachPart(s, VdpType::vdp2_bitmap, add);
     };
 
     const auto addVdp1PartsToList = [&]() {
-        state.vdp1()->forEachPart([&parts_list](const Vdp1Part& p) { parts_list.emplace_back(p); });
+        state.vdp1()->forEachPart(
+            [&priority_buckets](const Vdp1Part& p) { priority_buckets[p.common_vdp_data_.priority & 7u].emplace_back(p); });
     };
 
     if (!state.vdp2()->isLayerDisabled(ScrollScreen::nbg3)) { addVdp2PartsToList(ScrollScreen::nbg3); }
@@ -674,24 +678,34 @@ void OpenglRender::displayFramebufferByParts(core::EmulatorContext& state) {
     const auto build_ms = std::chrono::duration<double, std::milli>(
         std::chrono::steady_clock::now() - frame_start).count();
 
-    std::ranges::stable_sort(parts_list, [](const RenderPart& a, const RenderPart& b) { return a.priority < b.priority; });
-    const auto sort_ms = std::chrono::duration<double, std::milli>(
+    auto parts_list = PartsList{};
+    for (auto& bucket : priority_buckets) {
+        parts_list.insert(parts_list.end(),
+                          std::make_move_iterator(bucket.begin()),
+                          std::make_move_iterator(bucket.end()));
+    }
+    const auto flatten_ms = std::chrono::duration<double, std::milli>(
         std::chrono::steady_clock::now() - frame_start).count();
     if constexpr (render_type == RenderType::RenderType_drawElements) {
-        if (parts_lists_[mixed_parts_key].empty()) {
-            std::unique_lock lk(opengl_->getMutex(MutexType::parts_list));
-            parts_lists_[mixed_parts_key] = std::move(parts_list);
-            data_condition_.wait(lk, [this]() { return parts_lists_[mixed_parts_key].empty(); });
-        }
+        std::unique_lock lk(opengl_->getMutex(MutexType::parts_list));
+        // Deposit into the current write slot. Wait only when that slot still holds an unconsumed frame
+        // (render thread at least two frames behind), and never indefinitely: if the render thread is gone
+        // or stalled, the stale slot is overwritten (frame drop) rather than blocking emulation forever.
+        data_condition_.wait_for(lk,
+                                 std::chrono::milliseconds(100),
+                                 [this]() { return render_slots_[render_slot_write_].empty(); });
+        render_slots_[render_slot_write_] = std::move(parts_list);
+        render_slot_write_                = static_cast<u8>(1u - render_slot_write_);
+        data_condition_.notify_one();
     }
 
     if (frame_timing && (++frame_index % 60u == 1u)) {
         const auto total_ms = std::chrono::duration<double, std::milli>(
             std::chrono::steady_clock::now() - frame_start).count();
         core::Log::info(core::Logger::opengl,
-                        "Frame emulation build_ms={:.2f} sort_ms={:.2f} total_ms={:.2f}",
+                        "Frame emulation build_ms={:.2f} flatten_ms={:.2f} total_ms={:.2f}",
                         build_ms,
-                        sort_ms,
+                        flatten_ms,
                         total_ms);
     }
 }

@@ -96,20 +96,18 @@ void Texture::deleteTextureData(Texture& t) {
 }
 
 auto Texture::isTextureLoadingNeeded(const size_t key) -> bool {
-    if (!isTextureKeyStored(key)) { return true; }
+    // Single lock for the whole check-and-update: this runs once per VDP2 cell per frame, and the previous
+    // version took up to three locks per call (contains + at + flag update).
+    UpdatableLock lock(storage_mutex_);
+    const auto    it = texture_storage_.find(key);
+    if (it == texture_storage_.end()) { return true; }
 
-    if (auto t = Texture::getTexture(key); t) {
-        if ((*t)->isDiscarded()) {
-            UpdatableLock lock(storage_mutex_);
-            (*t)->isDiscarded(false);
-            return true;
-        }
-        UpdatableLock lock(storage_mutex_);
-        (*t)->isRecentlyUsed(true);
-        return false;
+    if (it->second.isDiscarded()) {
+        it->second.isDiscarded(false);
+        return true;
     }
-
-    return true;
+    it->second.isRecentlyUsed(true);
+    return false;
 }
 
 auto Texture::isTextureKeyStored(const size_t key) -> bool {
@@ -142,29 +140,35 @@ void Texture::setCache(const VdpType t) {
 }
 
 void Texture::cleanCache(Opengl* ogl, const VdpType t) {
-    UpdatableLock                                     lock(storage_mutex_);
     std::vector<decltype(texture_storage_)::key_type> keys_to_erase;
-    for (const auto& [key, value] : texture_storage_) {
-        const auto is_found        = ((value.vdpType() == t) ? true : false);
-        const auto is_elt_selected = (t == VdpType::not_set) ? true : is_found;
-        if (is_elt_selected) {
-            if (!(value.isRecentlyUsed())) {
-                keys_to_erase.emplace_back(key);
-                return;
-            }
+    std::vector<std::pair<size_t, VdpLayer>>          keys_to_readd;
+    {
+        UpdatableLock lock(storage_mutex_);
+        for (const auto& [key, value] : texture_storage_) {
+            const auto is_found        = ((value.vdpType() == t) ? true : false);
+            const auto is_elt_selected = (t == VdpType::not_set) ? true : is_found;
+            if (is_elt_selected) {
+                if (!(value.isRecentlyUsed())) {
+                    keys_to_erase.emplace_back(key);
+                    return;
+                }
 
-            if (value.isDiscarded()) {
-                // WIP
-                ogl->texturing()->addOrUpdateTexture(value.key(), value.layer());
-                keys_to_erase.emplace_back(key);
+                if (value.isDiscarded()) {
+                    // WIP
+                    keys_to_readd.emplace_back(value.key(), value.layer());
+                    keys_to_erase.emplace_back(key);
+                }
             }
         }
+
+        for (const auto& key : keys_to_erase) { texture_storage_.erase(key); }
     }
 
-    for (const auto& key : keys_to_erase) {
-        texture_storage_.erase(key);
-        ogl->texturing()->removeTextureLink(key);
-    }
+    // OpenGL-side updates are done after releasing the storage lock: generateTextures() takes the
+    // textures-link mutex and then the storage mutex, so taking them in the opposite order here
+    // (storage -> textures-link) could deadlock.
+    for (const auto& [key, layer] : keys_to_readd) { ogl->texturing()->addOrUpdateTexture(key, layer); }
+    for (const auto& key : keys_to_erase) { ogl->texturing()->removeTextureLink(key); }
 }
 
 void Texture::deleteCache() {

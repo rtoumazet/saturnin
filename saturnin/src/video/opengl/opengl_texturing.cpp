@@ -122,7 +122,10 @@ void OpenglTexturing::addOrUpdateTexture(const size_t key, const VdpLayer layer)
     // }
 }
 
-void OpenglTexturing::removeTextureLink(const size_t key) { textures_link_.erase(key); }
+void OpenglTexturing::removeTextureLink(const size_t key) {
+    std::lock_guard lock(opengl_->getMutex(MutexType::textures_link));
+    textures_link_.erase(key);
+}
 
 void OpenglTexturing::generateTextures() {
     // Textures are generated in a 128 layers texture array, each layer being a texture atlas of
@@ -135,6 +138,11 @@ void OpenglTexturing::generateTextures() {
 
     // OpenglTextures don't have to be deleted, as they are part of a texture atlas now
 
+    // The whole rebuild runs under the textures-link mutex: the emulation thread updates the same maps
+    // concurrently through addOrUpdateTexture()/removeTextureLink(), and packTextures() rewrites them.
+    // Lock order is always textures_link -> storage (Texture::getTexture), never the reverse.
+    std::lock_guard lock(opengl_->getMutex(MutexType::textures_link));
+
     // Nothing changed since the last call: skip the rebuild entirely. The old implementation walked
     // (and deep-copied) the whole texture map every frame before discovering there was nothing to do.
     if (std::ranges::none_of(layer_to_cache_reload_state_, [](const auto& entry) { return entry.second; })) { return; }
@@ -144,17 +152,14 @@ void OpenglTexturing::generateTextures() {
 
     // Only the key and the size are needed by packTextures(). In particular, copying coords (a vector)
     // for every texture would allocate once per texture, so build lightweight entries instead.
-    {
-        std::lock_guard lock(opengl_->getMutex(MutexType::textures_link));
-        for (const auto& [key, link] : textures_link_) {
-            const auto t = Texture::getTexture(key);
-            if (!t || !*t) { continue; }
+    for (const auto& [key, link] : textures_link_) {
+        const auto t = Texture::getTexture(key);
+        if (!t || !*t) { continue; }
 
-            auto to_pack  = OpenglTexture{};
-            to_pack.key   = key;
-            to_pack.size  = {(*t)->width(), (*t)->height()};
-            layer_to_textures[(*t)->layer()].push_back(to_pack);
-        }
+        auto to_pack  = OpenglTexture{};
+        to_pack.key   = key;
+        to_pack.size  = {(*t)->width(), (*t)->height()};
+        layer_to_textures[(*t)->layer()].push_back(to_pack);
     }
 
     for (auto& [layer, textures] : layer_to_textures) {
@@ -170,6 +175,8 @@ void OpenglTexturing::generateTextures() {
 // Using the simplest (and fastest) method to pack textures in the atlas. Better algorithms could be used to
 // improve packing, but there's a non trivial performance tradeoff, with a big increase in complexity.
 // So for now, keeping things simple.
+// Caller (generateTextures) must hold the textures-link mutex: this rewrites textures_link_ and
+// layer_to_texture_array_indexes_.
 void OpenglTexturing::packTextures(std::vector<OpenglTexture>& textures, const VdpLayer layer) {
     glBindTexture(GL_TEXTURE_2D_ARRAY, texture_array_id_);
     // First, indexes used by the layer are cleared and removed from the used list.
@@ -265,9 +272,12 @@ auto OpenglTexturing::readVertexes(const PartsList& parts) -> std::vector<Vertex
     vertexes.reserve(total);
 
     // Build the flat vertex list in one pass: no per-part copy (each RenderPart owns a vector) and
-    // no reallocation while appending.
+    // no reallocation while appending. The textures link map is locked once for the whole pass instead of
+    // once per part (getOpenglTexture locks per call, and this runs per part per frame).
+    std::lock_guard lock(opengl_->getMutex(MutexType::textures_link));
     for (const auto& p : parts) {
-        const auto opengl_tex = getOpenglTexture(p.texture_key);
+        const auto it         = textures_link_.find(p.texture_key);
+        const auto opengl_tex = (it == textures_link_.end()) ? std::nullopt : std::optional<OpenglTexture>(it->second);
         for (const auto& v : p.vertexes) {
             auto vertex         = v;
             vertex.color_offset = p.color_offset;
@@ -336,25 +346,26 @@ auto OpenglTexturing::generateTexture(const u32 width, const u32 height, const s
     return texture;
 }
 
+// Caller (packTextures) must hold the textures-link mutex: this reads textures_link_ without locking.
 void OpenglTexturing::generateSubTexture(const size_t key) {
-    const auto ogl_tex = getOpenglTexture(key);
+    const auto it = textures_link_.find(key);
+    if (it == textures_link_.end()) { return; }
+    const auto& ogl_tex = it->second;
 
-    if (ogl_tex) {
-        const auto tex = Texture::getTexture(key);
-        if (tex) {
-            glTexSubImage3D(GL_TEXTURE_2D_ARRAY,
-                            0,
-                            ogl_tex->pos.x,
-                            ogl_tex->pos.y,
-                            ogl_tex->texture_array_index,
-                            ogl_tex->size.w,
-                            ogl_tex->size.h,
-                            1,
-                            GLenum::GL_RGBA,
-                            GLenum::GL_UNSIGNED_BYTE,
-                            (*tex)->rawData().data());
-            checkGlError();
-        }
+    const auto tex = Texture::getTexture(key);
+    if (tex) {
+        glTexSubImage3D(GL_TEXTURE_2D_ARRAY,
+                        0,
+                        ogl_tex.pos.x,
+                        ogl_tex.pos.y,
+                        ogl_tex.texture_array_index,
+                        ogl_tex.size.w,
+                        ogl_tex.size.h,
+                        1,
+                        GLenum::GL_RGBA,
+                        GLenum::GL_UNSIGNED_BYTE,
+                        (*tex)->rawData().data());
+        checkGlError();
     }
 }
 

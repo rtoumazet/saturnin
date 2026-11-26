@@ -33,9 +33,15 @@
 #include <saturnin/src/video/opengl/opengl_texturing.h>
 #include <saturnin/src/video/opengl/opengl_utilities.h>
 #include <saturnin/src/log.h>
+#include <saturnin/src/utilities.h>
 #include <saturnin/src/video/opengl/opengl_utilities.h>
+#include <saturnin/src/video/texture.h>
 #include <saturnin/src/video/vdp1_part.h>
 #include <cstdlib>
+#include <fstream>
+#include <map>
+#include <string>
+#include <tuple>
 
 using namespace gl;
 
@@ -279,6 +285,10 @@ void OpenglComputeRender::parityTest() {
     parts.push_back(makeQuad(60, 40, 180, 120, 255, 255, 255, 4, 128));
     parts.push_back(makeLines(DrawType::polyline, {{11, 11}, {61, 11}, {61, 61}, {11, 61}}, 255, 255, 0, 5));
     parts.push_back(makeLines(DrawType::line, {{201, 181}, {301, 181}}, 0, 255, 255, 6));
+    // Diagonal lines/polyline at various slopes: exercises the diamond-exit tie-breaking.
+    parts.push_back(makeLines(DrawType::line, {{5, 5}, {300, 220}}, 255, 0, 255, 6));
+    parts.push_back(makeLines(DrawType::line, {{300, 5}, {5, 220}}, 255, 128, 0, 6));
+    parts.push_back(makeLines(DrawType::polyline, {{20, 200}, {100, 40}, {250, 150}, {310, 30}}, 0, 255, 128, 6));
 
     // Simulate renderByScreenPriority: distinct priority lists rendered sequentially into the
     // same FBO layer, with a single clear before the whole sequence.
@@ -536,6 +546,34 @@ void OpenglComputeRender::renderParts(const PartsList& parts_list, const u32 tex
         }
     }
 
+    // Dev-only self-check (SATURNIN_COMPUTE_VERIFY=1): every kept part must appear in at least one tile
+    // bucket, and bucket ranges must be consistent.
+    if (std::getenv("SATURNIN_COMPUTE_VERIFY") != nullptr) {
+        auto seen = std::vector<u32>(parts.size(), 0);
+        for (auto t = size_t{0}; t < tile_count; ++t) {
+            for (auto k = tile_offsets[t]; k < tile_offsets[t + 1]; ++k) {
+                const auto pi = tile_indices[k];
+                if (pi < parts.size()) { ++seen[pi]; }
+            }
+        }
+        auto missing = 0u;
+        for (auto pi = size_t{0}; pi < parts.size(); ++pi) {
+            if (seen[pi] == 0u) {
+                if (missing < 10u) {
+                    const auto& p = parts[pi];
+                    core::Log::info(core::Logger::opengl,
+                                    "  VERIFY missing part pi={} count={} flags={} bounds=({:.1f},{:.1f},{:.1f},{:.1f})",
+                                    pi, p.count, p.flags, p.bounds[0], p.bounds[1], p.bounds[2], p.bounds[3]);
+                }
+                ++missing;
+            }
+        }
+        core::Log::info(core::Logger::opengl,
+                        "VERIFY rect=({},{}) {}x{} tiles={}x{} parts={} entries={} missing_from_buckets={}",
+                        origin_x, origin_y, end_x - origin_x, end_y - origin_y, tiles_x, tiles_y,
+                        parts.size(), tile_indices.size(), missing);
+    }
+
     // 3. Upload to the SSBOs.
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, vertex_ssbo_);
     glBufferData(GL_SHADER_STORAGE_BUFFER, static_cast<GLsizeiptr>(verts.size() * sizeof(GpuVertex)), verts.data(), GL_STREAM_DRAW);
@@ -597,13 +635,21 @@ void OpenglComputeRender::renderParts(const PartsList& parts_list, const u32 tex
     if (live_parity_pending_) { liveParityCompare(parts_list, texture_id, target_layer); }
 }
 
-// Dev-only: render the first real (non-synthetic) parts list through both backends and compare the
-// displayed area. Triggered by SATURNIN_COMPUTE_LIVE_PARITY=1.
+// Dev-only: render real (non-synthetic) parts lists through both backends and compare the displayed
+// area. Triggered by SATURNIN_COMPUTE_LIVE_PARITY=1; SATURNIN_COMPUTE_LIVE_PARITY_FRAMES=N compares the
+// first N frames (default 1). Differing pixels are reported with their bounding box and attributed to
+// the parts (texture layer, vdp type, draw type, priority) overlapping that box.
 void OpenglComputeRender::liveParityCompare(const PartsList& parts, const u32 texture_id, const u8 compute_layer) {
     live_parity_pending_ = false;
+    static auto frame_no = u32{0};
+    ++frame_no;
+    static const auto max_frames = [] {
+        const auto e = std::getenv("SATURNIN_COMPUTE_LIVE_PARITY_FRAMES");
+        return e != nullptr ? std::atoi(e) : 1;
+    }();
+
     auto skipped = 0u;
     for (const auto& p : parts) { if (!isDrawable(p.draw_type)) { ++skipped; } }
-    core::Log::info(core::Logger::opengl, "Live parity input: {} parts, {} non-drawable", parts.size(), skipped);
 
     const auto fbo   = opengl_->texturing()->getFboId(FboType::general);
     const auto array = opengl_->texturing()->getFboTextureArrayId();
@@ -618,7 +664,22 @@ void OpenglComputeRender::liveParityCompare(const PartsList& parts, const u32 te
         return pixels;
     };
 
-    const auto cmp = readLayer(compute_layer);
+    // Optional dev filter (SATURNIN_COMPUTE_PARITY_LAYER=N): compare only the parts of one texture layer
+    // (e.g. 2 = nbg2) through both paths.
+    static const auto parity_layer = [] {
+        const auto e = std::getenv("SATURNIN_COMPUTE_PARITY_LAYER");
+        return e != nullptr ? std::atoi(e) : -1;
+    }();
+    auto compare_parts = std::cref(parts);
+    auto filtered      = PartsList{};
+    if (parity_layer >= 0) {
+        for (const auto& p : parts) {
+            const auto t = Texture::getTexture(p.texture_key);
+            if (t && *t && static_cast<int>((*t)->layer()) == parity_layer) { filtered.push_back(p); }
+        }
+        compare_parts = std::cref(filtered);
+        core::Log::info(core::Logger::opengl, "Live parity filter layer={} kept {}/{}", parity_layer, filtered.size(), parts.size());
+    }
 
     // The fixed-function path needs its own target layer, cleared and with the same GL state.
     const auto scratch = opengl_->texturing()->getFboTextureLayer(FboTextureType::priority);
@@ -628,30 +689,212 @@ void OpenglComputeRender::liveParityCompare(const PartsList& parts, const u32 te
     glDisable(GL_SCISSOR_TEST);
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
-    OpenglRender::renderParts(parts, texture_id);
+    OpenglRender::renderParts(compare_parts.get(), texture_id);
     const auto ref = readLayer(scratch);
+
+    // Compute path: normally the layer was already rendered by renderParts() before this call; with the
+    // layer filter active, re-render the filtered list through the compute kernel into the same layer.
+    std::vector<u8> cmp;
+    if (parity_layer >= 0) {
+        glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+        glFramebufferTextureLayer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, array, 0, compute_layer);
+        glViewport(0, 0, fbo_texture_array_width, fbo_texture_array_height);
+        glDisable(GL_SCISSOR_TEST);
+        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT);
+        renderParts(compare_parts.get(), texture_id); // this backend's own compute path
+        cmp = readLayer(compute_layer);
+    } else {
+        cmp = readLayer(compute_layer);
+    }
 
     // Only the visible (scissored) area matters; the compute kernel intentionally ignores scissor.
     const auto [sx, sy, sw, sh] = calculateViewportPosAndSize();
-    auto differing = 0u;
-    auto max_diff  = 0u;
-    auto total     = 0u;
+    auto       differing = 0u;
+    auto       max_diff  = 0u;
+    auto       total     = 0u;
+    auto       bbox_min_x = u32{~0u}, bbox_min_y = u32{~0u}, bbox_max_x = u32{0}, bbox_max_y = u32{0};
+    auto       worst_x = u32{0}, worst_y = u32{0}, worst_d = 0u;
+    u8         worst_ref[3]{0, 0, 0}, worst_cmp[3]{0, 0, 0};
     for (auto y = sy; y < sy + sh; ++y) {
         for (auto x = sx; x < sx + sw; ++x) {
             const auto i = (static_cast<size_t>(y) * fbo_texture_array_width + x) * 4u;
             ++total;
+            auto px_diff = 0u;
             for (auto c = 0u; c < 3u; ++c) {
                 const auto d = static_cast<u32>(ref[i + c] > cmp[i + c]
                                                     ? ref[i + c] - cmp[i + c]
                                                     : cmp[i + c] - ref[i + c]);
-                if (d != 0u) { ++differing; }
+                if (d != 0u) { ++differing; px_diff = std::max(px_diff, d); }
                 if (d > max_diff) { max_diff = d; }
+            }
+            if (px_diff > 0u) {
+                bbox_min_x = std::min(bbox_min_x, x);
+                bbox_min_y = std::min(bbox_min_y, y);
+                bbox_max_x = std::max(bbox_max_x, x);
+                bbox_max_y = std::max(bbox_max_y, y);
+                if (px_diff > worst_d) {
+                    worst_d   = px_diff;
+                    worst_x   = x;
+                    worst_y   = y;
+                    worst_ref[0] = ref[i]; worst_ref[1] = ref[i + 1]; worst_ref[2] = ref[i + 2];
+                    worst_cmp[0] = cmp[i]; worst_cmp[1] = cmp[i + 1]; worst_cmp[2] = cmp[i + 2];
+                }
             }
         }
     }
     core::Log::info(core::Logger::opengl,
-                    "Live parity parts={} visible_px={} differing={} max_diff={} gl_error={}",
-                    parts.size(), total, differing, max_diff, static_cast<s32>(glGetError()));
+                    "Live parity frame={} parts={} non_drawable={} visible_px={} differing={} max_diff={} "
+                    "bbox=({},{})-({},{}) worst=({},{}) d={} ref=({},{},{}) cmp=({},{},{}) gl_error={}",
+                    frame_no, parts.size(), skipped, total, differing, max_diff,
+                    bbox_min_x, bbox_min_y, bbox_max_x, bbox_max_y,
+                    worst_x, worst_y, worst_d,
+                    worst_ref[0], worst_ref[1], worst_ref[2],
+                    worst_cmp[0], worst_cmp[1], worst_cmp[2],
+                    static_cast<s32>(glGetError()));
+
+    // Attribute the differing pixels to the parts overlapping the diff bounding box: project each part's
+    // AABB to framebuffer space and report layer / vdp type / draw type / priority of the overlapping ones.
+    if (differing > 0u) {
+        const auto projection = calculateDisplayViewportMatrix();
+        const auto fb_w       = static_cast<float>(fbo_texture_array_width);
+        const auto fb_h       = static_cast<float>(fbo_texture_array_height);
+        auto       combos     = std::map<std::tuple<int, int, int, int>, std::pair<u32, size_t>>{}; // (layer, vdptype, drawtype, priority) -> (count, first key)
+        auto       detailed   = 0u;
+        const auto remapped   = opengl_->texturing()->readVertexes(parts);
+        auto       remap_idx  = size_t{0};
+        for (const auto& p : parts) {
+            const auto count = p.vertexes.size();
+            if (!isDrawable(p.draw_type) || count == 0u) { remap_idx += count; continue; }
+            auto min_x = fb_w, min_y = fb_h, max_x = 0.0f, max_y = 0.0f;
+            for (const auto& v : p.vertexes) {
+                const auto [px, py] = projectToScreen(projection,
+                                                      static_cast<float>(v.pos.x),
+                                                      static_cast<float>(v.pos.y),
+                                                      fb_w,
+                                                      fb_h);
+                min_x = std::min(min_x, px); max_x = std::max(max_x, px);
+                min_y = std::min(min_y, py); max_y = std::max(max_y, py);
+            }
+            const auto overlaps_bbox = !(max_x < static_cast<float>(bbox_min_x) || min_x > static_cast<float>(bbox_max_x)
+                                          || max_y < static_cast<float>(bbox_min_y) || min_y > static_cast<float>(bbox_max_y));
+            if (overlaps_bbox) {
+                const auto t     = Texture::getTexture(p.texture_key);
+                const auto layer = (t && *t) ? static_cast<int>((*t)->layer()) : -1;
+                const auto vtype = (t && *t) ? static_cast<int>((*t)->vdpType()) : -1;
+                const auto key   = std::tuple{layer, vtype, static_cast<int>(p.draw_type), static_cast<int>(p.priority)};
+                auto& [cnt, first_key] = combos[key];
+                if (cnt == 0u) { first_key = p.texture_key; }
+                ++cnt;
+            }
+            // Full detail for up to 4 parts covering the worst pixel.
+            const auto covers_worst = (min_x <= static_cast<float>(worst_x) && static_cast<float>(worst_x) <= max_x
+                                       && min_y <= static_cast<float>(worst_y) && static_cast<float>(worst_y) <= max_y);
+            if (covers_worst && detailed < 4u) {
+                ++detailed;
+                const auto ogl_tex = opengl_->texturing()->getOpenglTexture(p.texture_key);
+                core::Log::info(core::Logger::opengl,
+                                "  worst part #{}: key={:#x} drawtype={} priority={} count={} saturn_aabb=({:.1f},{:.1f})-({:.1f},{:.1f}) fb_aabb=({:.1f},{:.1f})-({:.1f},{:.1f})",
+                                &p - parts.data(), p.texture_key, static_cast<int>(p.draw_type), static_cast<int>(p.priority), count,
+                                p.vertexes.front().pos.x, p.vertexes.front().pos.y,
+                                p.vertexes.back().pos.x, p.vertexes.back().pos.y,
+                                min_x, min_y, max_x, max_y);
+                for (auto i = size_t{0}; i < count && i < 8u; ++i) {
+                    const auto& rv = remapped[remap_idx + i];
+                    core::Log::info(core::Logger::opengl,
+                                    "    v{}: saturn=({},{}) tex=({:.6f},{:.6f},{:.6f}) color=({},{},{},{})",
+                                    i, rv.pos.x, rv.pos.y, rv.tex_coords.s, rv.tex_coords.t, rv.tex_coords.p,
+                                    rv.color.r, rv.color.g, rv.color.b, rv.color.a);
+                }
+                if (ogl_tex) {
+                    core::Log::info(core::Logger::opengl,
+                                    "    atlas: index={} pos=({},{}) size=({},{}) coords=({:.6f},{:.6f},{:.6f})({:.6f},{:.6f},{:.6f})({:.6f},{:.6f},{:.6f})({:.6f},{:.6f},{:.6f})",
+                                    ogl_tex->texture_array_index, ogl_tex->pos.x, ogl_tex->pos.y, ogl_tex->size.w, ogl_tex->size.h,
+                                    ogl_tex->coords[0].s, ogl_tex->coords[0].t, ogl_tex->coords[0].p,
+                                    ogl_tex->coords[1].s, ogl_tex->coords[1].t, ogl_tex->coords[1].p,
+                                    ogl_tex->coords[2].s, ogl_tex->coords[2].t, ogl_tex->coords[2].p,
+                                    ogl_tex->coords[3].s, ogl_tex->coords[3].t, ogl_tex->coords[3].p);
+                }
+            }
+            remap_idx += count;
+        }
+        auto logged = 0u;
+        for (const auto& [key, val] : combos) {
+            if (logged++ >= 24u) { break; }
+            core::Log::info(core::Logger::opengl,
+                            "  diff part layer={} vdptype={} drawtype={} priority={} count={} first_key={:#x}",
+                            std::get<0>(key), std::get<1>(key), std::get<2>(key), std::get<3>(key),
+                            val.first, val.second);
+        }
+
+        // Dump the diff mask + ref/cmp crops around the bbox as images for visual inspection.
+        static const auto dump_frame = [] {
+            const auto e = std::getenv("SATURNIN_COMPUTE_DUMP_FRAME");
+            return e != nullptr ? std::atoi(e) : 0;
+        }();
+        static const auto dump_min_diff = [] {
+            const auto e = std::getenv("SATURNIN_COMPUTE_DUMP_MIN_DIFF");
+            return e != nullptr ? static_cast<u32>(std::atoi(e)) : 0u;
+        }();
+        if (std::getenv("SATURNIN_COMPUTE_DUMP_DIFF") != nullptr
+            && (dump_frame == 0 || frame_no == static_cast<u32>(dump_frame))
+            && (dump_min_diff == 0u || differing >= dump_min_diff)) {
+            const auto pad  = 32u;
+            const auto x0   = (bbox_min_x > pad) ? bbox_min_x - pad : 0u;
+            const auto y0   = (bbox_min_y > pad) ? bbox_min_y - pad : 0u;
+            const auto x1   = std::min(bbox_max_x + pad, sx + sw - 1u);
+            const auto y1   = std::min(bbox_max_y + pad, sy + sh - 1u);
+            const auto w    = x1 - x0 + 1u;
+            const auto h    = y1 - y0 + 1u;
+            auto       mask = std::vector<u8>(static_cast<size_t>(w) * h, 0);
+            for (auto y = y0; y <= y1; ++y) {
+                for (auto x = x0; x <= x1; ++x) {
+                    const auto i = (static_cast<size_t>(y) * fbo_texture_array_width + x) * 4u;
+                    auto       d = 0u;
+                    for (auto c = 0u; c < 3u; ++c) {
+                        d = std::max(d, static_cast<u32>(ref[i + c] > cmp[i + c] ? ref[i + c] - cmp[i + c] : cmp[i + c] - ref[i + c]));
+                    }
+                    mask[static_cast<size_t>(y - y0) * w + (x - x0)] = static_cast<u8>(d > 2u ? 255u : 0u);
+                }
+            }
+            auto write_pgm = [](const char* name, const std::vector<u8>& px, u32 ww, u32 hh) {
+                std::ofstream f(name, std::ios::binary);
+                f << "P5\n" << ww << " " << hh << "\n255\n";
+                f.write(reinterpret_cast<const char*>(px.data()), static_cast<std::streamsize>(px.size()));
+            };
+            auto write_ppm = [](const char* name, const std::vector<u8>& src, u32 fb_stride, u32 ox, u32 oy, u32 ww, u32 hh) {
+                std::ofstream f(name, std::ios::binary);
+                f << "P6\n" << ww << " " << hh << "\n255\n";
+                for (auto y = 0u; y < hh; ++y) {
+                    for (auto x = 0u; x < ww; ++x) {
+                        const auto i = (static_cast<size_t>(oy + y) * fb_stride + (ox + x)) * 4u;
+                        const char rgb[3] = {static_cast<char>(src[i]), static_cast<char>(src[i + 1]), static_cast<char>(src[i + 2])};
+                        f.write(rgb, 3);
+                    }
+                }
+            };
+            write_pgm("diff_mask.pgm", mask, w, h);
+            write_ppm("ref_crop.ppm", ref, fbo_texture_array_width, x0, y0, w, h);
+            write_ppm("cmp_crop.ppm", cmp, fbo_texture_array_width, x0, y0, w, h);
+            core::Log::info(core::Logger::opengl, "Dumped frame={} diff_mask.pgm ref_crop.ppm cmp_crop.ppm crop=({},{}) {}x{}", frame_no, x0, y0, w, h);
+        }
+    }
+
+    // Throttled per-layer part histogram: shows which planes are actually in the list each second or so.
+    if (frame_no % 60u == 1u) {
+        auto hist = std::map<std::pair<int, int>, u32>{};
+        for (const auto& p : parts) {
+            const auto t     = Texture::getTexture(p.texture_key);
+            const auto layer = (t && *t) ? static_cast<int>((*t)->layer()) : -1;
+            const auto vtype = (t && *t) ? static_cast<int>((*t)->vdpType()) : -1;
+            ++hist[{layer, vtype}];
+        }
+        auto ss = std::string{};
+        for (const auto& [k, v] : hist) { ss += util::format(" L{}/T{}={}", k.first, k.second, v); }
+        core::Log::info(core::Logger::opengl, "Live parity hist frame={} parts={}:{}", frame_no, parts.size(), ss);
+    }
+
+    if (frame_no < static_cast<u32>(max_frames)) { live_parity_pending_ = true; }
 }
 
 void OpenglComputeRender::renderPartsLists(MapOfPartsList& lists, const u32 texture_id) {
