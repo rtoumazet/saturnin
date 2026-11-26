@@ -9,7 +9,9 @@ Saturnin is a Sega Saturn emulator
 
   #### Configuration and build ####
 
-  Saturnin requires Windows, Visual Studio 2026 (18.10 or later), CMake 4.4 or later, and [vcpkg](https://github.com/Microsoft/vcpkg). Set `VCPKG_ROOT` to your vcpkg installation and make sure the Visual Studio C++ workload is installed.
+  Saturnin requires Windows 10 or Windows 11 (x64 only), Visual Studio 2026 (18.10 or later), CMake 4.4 or later, and [vcpkg](https://github.com/Microsoft/vcpkg). Set `VCPKG_ROOT` to your vcpkg installation and make sure the Visual Studio C++ workload is installed.
+
+  Visual Studio Code is also supported as an alternative IDE — install the [C++](https://marketplace.visualstudio.com/items?itemName=ms-vscode.cpptools) and [CMake Tools](https://marketplace.visualstudio.com/items?itemName=ms-vscode.cmake-tools) extensions, then use the provided CMake presets (`windows-x64-debug`, `windows-x64-relwithdebinfo`, `windows-x64-release`) to configure and build.
 
   From the repository root, configure the x64 static build with CMake:
 
