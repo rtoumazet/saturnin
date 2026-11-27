@@ -1894,11 +1894,11 @@ class Vdp2 {
     u16 timer_0_counter_{}; ///< Timer 0 counter.
     u16 timer_1_counter_{}; ///< Timer 1 counter.
 
-    TvScreenStatus tv_screen_status_; ///< The TV screen status.
-    RamStatus      ram_status_;       ///< The RAM status
+    TvScreenStatus tv_screen_status_{}; ///< The TV screen status.
+    RamStatus      ram_status_{};       ///< The RAM status
 
-    std::array<ScrollScreenStatus, 6> bg_;       ///< The backgrounds status.
-    std::array<ScrollScreenStatus, 6> saved_bg_; /// \brief  The backgrounds status from the previous frame.
+    std::array<ScrollScreenStatus, 6> bg_{};       ///< The backgrounds status.
+    std::array<ScrollScreenStatus, 6> saved_bg_{}; /// \brief  The backgrounds status from the previous frame.
 
     // Pre calculated modulo values used for character patterns positionning
     std::vector<u32> pre_calculated_modulo_64_{}; ///< The pre calculated modulo 64
@@ -1906,17 +1906,17 @@ class Vdp2 {
 
     std::array<std::vector<Vdp2Part>, 6> vdp2_parts_;           ///< Storage of rendering parts for each scroll cell.
     std::vector<CellData>                cell_data_to_process_; ///< Will store cell data before parallelized read for one scroll.
-    u32                                  current_plane_address_; ///< The current plane address.
+    u32                                  current_plane_address_{}; ///< The current plane address.
                                                                  ///< times in the same NBG / RBG.
     std::array<std::vector<PlaneDetail>, 6> plane_details_;      ///< Stores planes details for every scroll.
 
     ScrollScreen         screen_in_debug_{ScrollScreen::none}; ///< Scroll screen currently viewed in debug.
-    DisabledScrollScreen disabled_scroll_screens_;             ///< Disabling state of scroll screens.
+    DisabledScrollScreen disabled_scroll_screens_{};             ///< Disabling state of scroll screens.
 
     std::mutex  fps_mutex_; ///< Mutex protecting fps_.
     std::string fps_;       ///< The FPS
 
-    Vdp2Regs regs_; ///< VDP2 registers
+    Vdp2Regs regs_{}; ///< VDP2 registers
 };
 
 ///@{

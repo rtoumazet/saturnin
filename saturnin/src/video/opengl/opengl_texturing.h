@@ -131,16 +131,16 @@ class OpenglTexturing {
     // auto textureId
 
   private:
-    Opengl* opengl_;
+    Opengl* opengl_{nullptr};
 
-    u32          texture_array_id_;               // Identifier for the texture array.
+    u32          texture_array_id_{};               // Identifier for the texture array.
     TexturesLink textures_link_;                  // Link between the Texture key and the OpenglTexture.
     u32          texture_array_debug_layer_id_{}; // Identifier for the texture array debug layer.
 
-    u32                   fbo_texture_array_id_;      // Identifier for the FBO texture array.
+    u32                   fbo_texture_array_id_{};      // Identifier for the FBO texture array.
     GuiTextureTypeToId    gui_texture_type_to_id_;    // Links the texture to be used in the GUI to a type.
     FboTypeToId           fbo_type_to_id_;            // The framebuffer objects used in the app.
-    FboTextureTypeToLayer fbo_texture_type_to_layer_; // Links the used FBO texture layer to a texture type. Index of the array
+    FboTextureTypeToLayer fbo_texture_type_to_layer_{}; // Links the used FBO texture layer to a texture type. Index of the array
                                                       // is the layer, content is the type.
 
     LayerToCacheReloadState    layer_to_cache_reload_state_{};    // Stores if a layer needs its cache to be reloaded .

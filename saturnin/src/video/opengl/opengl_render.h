@@ -100,12 +100,12 @@ class OpenglRender : public RenderInterface {
     void               currentRenderedBuffer(const FboTextureType type) override { current_rendered_buffer_ = type; };
 
   protected:
-    Opengl* opengl_;
+    Opengl* opengl_{nullptr};
 
   private:
-    Vdp1Part part_to_highlight_; // Part that will be highlighted during debug.
+    Vdp1Part part_to_highlight_{}; // Part that will be highlighted during debug.
 
-    FboTextureType current_rendered_buffer_; // The current rendered buffer (front or back)
+    FboTextureType current_rendered_buffer_{}; // The current rendered buffer (front or back)
 
     // Following parts data will have to be moved to the platform agnostic renderer
     MapOfPartsList parts_lists_; // Map of parts_list, one entry by FboKey. When used with use_fbo = false, all parts are using
@@ -131,7 +131,7 @@ class OpenglRender : public RenderInterface {
     s32 uni_sampler_{-1};
     s32 uni_is_texture_used_{-1};
 
-    Shaders shaders_; // Shaders storage
+    Shaders shaders_{}; // Shaders storage
 };
 
 }; // namespace saturnin::video

@@ -648,12 +648,12 @@ class Smpc {
 
     EmulatorModules modules_;
 
-    SmpcRegs regs_; ///< Internal registers
+    SmpcRegs regs_{}; ///< Internal registers
 
     SystemClock clock_{SystemClock::not_set}; ///< The system clock.
 
-    SaturnPeripheralMapping saturn_mapping_; ///< Saturn paripheral mapping
-    StvPeripheralMapping    stv_mapping_;    ///< ST-V peripheral mapping
+    SaturnPeripheralMapping saturn_mapping_{}; ///< Saturn paripheral mapping
+    StvPeripheralMapping    stv_mapping_{};    ///< ST-V peripheral mapping
 
     s32 command_remaining_cycles_{}; ///< The command remaining cycles
 
@@ -672,7 +672,7 @@ class Smpc {
     bool is_service_switch_set_{false}; ///< True if the service switch is set.
     bool is_test_switch_set_{false};    ///< True if the test switch is set.
 
-    std::array<u8, 0x4> smem_; ///< SMPC battery backupable memory (4B).
+    std::array<u8, 0x4> smem_{}; ///< SMPC battery backupable memory (4B).
 
     AddressToNameMap address_to_name_; ///< Link between a register address and its name.
 };

@@ -249,14 +249,14 @@ class Vdp1 {
     EmulatorModules modules_;
 
     // VDP1 registers
-    Vdp1Regs regs_;
+    Vdp1Regs regs_{};
 
-    std::array<u32, 2> framebuffer_; ///< Framebuffers texture id.
+    std::array<u32, 2> framebuffer_{}; ///< Framebuffers texture id.
 
     std::vector<Vdp1Part> vdp1_parts_;               ///< Storage of vdp1 rendering parts .
-    u16                   color_ram_address_offset_; ///< The color ram address offset.
+    u16                   color_ram_address_offset_{}; ///< The color ram address offset.
 
-    ColorOffset color_offset_; ///< Current color offset configuration for the sprite layer.
+    ColorOffset color_offset_{}; ///< Current color offset configuration for the sprite layer.
 };
 
 } // namespace saturnin::video

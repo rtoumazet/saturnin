@@ -66,6 +66,7 @@ auto ListBox(const char* label, int* current_index, std::vector<std::string>& va
         }
         ImGui::EndListBox();
     }
+    return false;
 }
 
 } // namespace ImGui
