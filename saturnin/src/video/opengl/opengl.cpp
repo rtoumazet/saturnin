@@ -367,7 +367,8 @@ auto runOpengl(core::EmulatorContext& state) -> s32 {
 
         glfwSwapBuffers(window);
 
-        if (frame_timing && (++loop_index % 60u == 1u)) {
+        ++loop_index;
+        if (frame_timing && (loop_index % 60u == 1u)) {
             const auto total_ms
                 = std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - loop_start).count();
             core::Log::info(core::Logger::opengl, "Frame loop gui_ms={:.2f} total_ms={:.2f}", gui_ms, total_ms);

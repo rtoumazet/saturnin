@@ -244,7 +244,8 @@ void OpenglRender::renderByParts() {
 
     postRender();
 
-    if (frame_timing && (++frame_index % 60u == 1u)) {
+    ++frame_index;
+    if (frame_timing && (frame_index % 60u == 1u)) {
         const auto render_ms = std::chrono::duration<double, std::milli>(
             std::chrono::steady_clock::now() - frame_start).count();
         core::Log::info(core::Logger::opengl, "Frame render render_ms={:.2f}", render_ms);
@@ -699,7 +700,8 @@ void OpenglRender::displayFramebufferByParts(core::EmulatorContext& state) {
         data_condition_.notify_one();
     }
 
-    if (frame_timing && (++frame_index % 60u == 1u)) {
+    ++frame_index;
+    if (frame_timing && (frame_index % 60u == 1u)) {
         const auto total_ms = std::chrono::duration<double, std::milli>(
             std::chrono::steady_clock::now() - frame_start).count();
         core::Log::info(core::Logger::opengl,
